@@ -2,11 +2,21 @@
   <div id="app">
     <div id="nav">
       <router-link to="/">Home</router-link> |
+      <router-link to="/list-feeling">Mein Gefühlsverlauf</router-link> |
       <router-link to="/add-feeling">Fühlen</router-link>
     </div>
     <router-view/>
   </div>
 </template>
+
+<script>
+export default {
+  name: 'app',
+  created() {
+    this.$store.dispatch('loadFeelings');
+  },
+};
+</script>
 
 <style lang="scss">
 #app {

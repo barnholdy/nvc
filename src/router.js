@@ -12,6 +12,11 @@ export default new Router({
       component: Home,
     },
     {
+      path: '/list-feeling',
+      name: 'list-feeling',
+      component: () => import('./views/FeelingList.vue'),
+    },
+    {
       path: '/add-feeling',
       name: 'add-feeling',
       component: () => import('./views/FeelingAdd.vue'),

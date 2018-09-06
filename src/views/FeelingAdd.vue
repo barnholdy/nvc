@@ -28,16 +28,6 @@
       </div>
     </div>
     <button @click="saveFeelings" :disabled="!isFeelingSelected">speichern</button>
-
-    <br />
-    <br />
-    <br />
-    <br />
-    <br />
-    <br />
-    <div>
-      <code>{{ feltFeelings }}</code>
-    </div>
   </div>
 </template>
 
@@ -69,12 +59,6 @@ export default {
       return this.selectedFeelingsFullfilled.length > 0
         || this.selectedFeelingsUnfullfilled.length > 0;
     },
-    feltFeelings() {
-      return this.$store.getters.feltFeelings;
-    },
-  },
-  created() {
-    this.$store.dispatch('loadFeelings');
   },
   methods: {
     addFullfilledFeeling(feeling) {
