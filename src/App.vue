@@ -2,8 +2,8 @@
   <div id="app">
     <div id="nav">
       <router-link to="/">Home</router-link> |
-      <router-link to="/list-feeling">Mein Gefühlsverlauf</router-link> |
-      <router-link to="/add-feeling">Fühlen</router-link>
+      <router-link to="/check-ins">Meine Check-Ins</router-link> |
+      <router-link to="/add-check-in">Check-In</router-link>
     </div>
     <router-view/>
   </div>
@@ -13,7 +13,7 @@
 export default {
   name: 'app',
   created() {
-    this.$store.dispatch('loadFeelings');
+    this.$store.dispatch('loadCheckIns');
   },
 };
 </script>

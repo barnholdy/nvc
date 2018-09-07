@@ -1,0 +1,1244 @@
+{
+  "feelings": [
+    {
+      "name": "erstaunt",
+      "type": "positive"
+    },
+    {
+      "name": "abenteuerlustig",
+      "type": "positive"
+    },
+    {
+      "name": "angenehm",
+      "type": "positive"
+    },
+    {
+      "name": "angeregt",
+      "type": "positive"
+    },
+    {
+      "name": "aufgebracht",
+      "type": "positive"
+    },
+    {
+      "name": "aufgeblüht",
+      "type": "positive"
+    },
+    {
+      "name": "aufgedreht",
+      "type": "positive"
+    },
+    {
+      "name": "aufgemuntert",
+      "type": "positive"
+    },
+    {
+      "name": "aufgeschlossen",
+      "type": "positive"
+    },
+    {
+      "name": "aufgeweckt",
+      "type": "positive"
+    },
+    {
+      "name": "aufmerksam",
+      "type": "positive"
+    },
+    {
+      "name": "ausgeglichen",
+      "type": "positive"
+    },
+    {
+      "name": "ausgeruht",
+      "type": "positive"
+    },
+    {
+      "name": "befreit",
+      "type": "positive"
+    },
+    {
+      "name": "befriedigt",
+      "type": "positive"
+    },
+    {
+      "name": "begeistert",
+      "type": "positive"
+    },
+    {
+      "name": "behaglich",
+      "type": "positive"
+    },
+    {
+      "name": "belebt",
+      "type": "positive"
+    },
+    {
+      "name": "belustigt",
+      "type": "positive"
+    },
+    {
+      "name": "berauscht",
+      "type": "positive"
+    },
+    {
+      "name": "bereichert",
+      "type": "positive"
+    },
+    {
+      "name": "beruhigt",
+      "type": "positive"
+    },
+    {
+      "name": "berührt",
+      "type": "positive"
+    },
+    {
+      "name": "besänftigt",
+      "type": "positive"
+    },
+    {
+      "name": "beschaulich",
+      "type": "positive"
+    },
+    {
+      "name": "beschwingt",
+      "type": "positive"
+    },
+    {
+      "name": "beteiligt",
+      "type": "positive"
+    },
+    {
+      "name": "bewegt",
+      "type": "positive"
+    },
+    {
+      "name": "bezaubert",
+      "type": "positive"
+    },
+    {
+      "name": "dankbar",
+      "type": "positive"
+    },
+    {
+      "name": "ehrfürchtig",
+      "type": "positive"
+    },
+    {
+      "name": "eifrig",
+      "type": "positive"
+    },
+    {
+      "name": "einbezogen",
+      "type": "positive"
+    },
+    {
+      "name": "ekstatisch",
+      "type": "positive"
+    },
+    {
+      "name": "elektrisiert",
+      "type": "positive"
+    },
+    {
+      "name": "empfindend",
+      "type": "positive"
+    },
+    {
+      "name": "energiegeladen",
+      "type": "positive"
+    },
+    {
+      "name": "energisch",
+      "type": "positive"
+    },
+    {
+      "name": "enthusiastisch",
+      "type": "positive"
+    },
+    {
+      "name": "entlastet",
+      "type": "positive"
+    },
+    {
+      "name": "entschlossen",
+      "type": "positive"
+    },
+    {
+      "name": "entspannt",
+      "type": "positive"
+    },
+    {
+      "name": "entzückt",
+      "type": "positive"
+    },
+    {
+      "name": "erfreut",
+      "type": "positive"
+    },
+    {
+      "name": "erfrischt",
+      "type": "positive"
+    },
+    {
+      "name": "erfüllt",
+      "type": "positive"
+    },
+    {
+      "name": "ergriffen",
+      "type": "positive"
+    },
+    {
+      "name": "erleichtert",
+      "type": "positive"
+    },
+    {
+      "name": "ermutigt",
+      "type": "positive"
+    },
+    {
+      "name": "erquickt",
+      "type": "positive"
+    },
+    {
+      "name": "erwartungsvoll",
+      "type": "positive"
+    },
+    {
+      "name": "euporisch",
+      "type": "positive"
+    },
+    {
+      "name": "fasziniert",
+      "type": "positive"
+    },
+    {
+      "name": "frei",
+      "type": "positive"
+    },
+    {
+      "name": "freund(schaft)lich",
+      "type": "positive"
+    },
+    {
+      "name": "friedlich",
+      "type": "positive"
+    },
+    {
+      "name": "froh",
+      "type": "positive"
+    },
+    {
+      "name": "fröhlich",
+      "type": "positive"
+    },
+    {
+      "name": "gebannt",
+      "type": "positive"
+    },
+    {
+      "name": "gefasst",
+      "type": "positive"
+    },
+    {
+      "name": "gelassen",
+      "type": "positive"
+    },
+    {
+      "name": "gelöst",
+      "type": "positive"
+    },
+    {
+      "name": "gerührt",
+      "type": "positive"
+    },
+    {
+      "name": "gesammelt",
+      "type": "positive"
+    },
+    {
+      "name": "geschützt",
+      "type": "positive"
+    },
+    {
+      "name": "gespannt",
+      "type": "positive"
+    },
+    {
+      "name": "getröstet",
+      "type": "positive"
+    },
+    {
+      "name": "glücklich",
+      "type": "positive"
+    },
+    {
+      "name": "gutgelaunt",
+      "type": "positive"
+    },
+    {
+      "name": "harmonisch",
+      "type": "positive"
+    },
+    {
+      "name": "heiter",
+      "type": "positive"
+    },
+    {
+      "name": "hellwach",
+      "type": "positive"
+    },
+    {
+      "name": "herzlich",
+      "type": "positive"
+    },
+    {
+      "name": "hilfsbereit",
+      "type": "positive"
+    },
+    {
+      "name": "hingegeben",
+      "type": "positive"
+    },
+    {
+      "name": "hingerissen",
+      "type": "positive"
+    },
+    {
+      "name": "hocherfreut",
+      "type": "positive"
+    },
+    {
+      "name": "hoffnungsvoll",
+      "type": "positive"
+    },
+    {
+      "name": "humorvoll",
+      "type": "positive"
+    },
+    {
+      "name": "inspiriert",
+      "type": "positive"
+    },
+    {
+      "name": "interessiert",
+      "type": "positive"
+    },
+    {
+      "name": "jubelnd",
+      "type": "positive"
+    },
+    {
+      "name": "klar",
+      "type": "positive"
+    },
+    {
+      "name": "konzentriert",
+      "type": "positive"
+    },
+    {
+      "name": "kraftvoll",
+      "type": "positive"
+    },
+    {
+      "name": "kreativ",
+      "type": "positive"
+    },
+    {
+      "name": "lebendig",
+      "type": "positive"
+    },
+    {
+      "name": "leicht",
+      "type": "positive"
+    },
+    {
+      "name": "leidenschaftlich",
+      "type": "positive"
+    },
+    {
+      "name": "liebevoll",
+      "type": "positive"
+    },
+    {
+      "name": "locker",
+      "type": "positive"
+    },
+    {
+      "name": "lustig",
+      "type": "positive"
+    },
+    {
+      "name": "mitfühlend",
+      "type": "positive"
+    },
+    {
+      "name": "motiviert",
+      "type": "positive"
+    },
+    {
+      "name": "munter",
+      "type": "positive"
+    },
+    {
+      "name": "mutig",
+      "type": "positive"
+    },
+    {
+      "name": "nah",
+      "type": "positive"
+    },
+    {
+      "name": "neugierig",
+      "type": "positive"
+    },
+    {
+      "name": "nüchtern",
+      "type": "positive"
+    },
+    {
+      "name": "offen(-herzig)",
+      "type": "positive"
+    },
+    {
+      "name": "optimistisch",
+      "type": "positive"
+    },
+    {
+      "name": "ruhig",
+      "type": "positive"
+    },
+    {
+      "name": "sanft",
+      "type": "positive"
+    },
+    {
+      "name": "satt",
+      "type": "positive"
+    },
+    {
+      "name": "schwungvoll",
+      "type": "positive"
+    },
+    {
+      "name": "selbstsicher",
+      "type": "positive"
+    },
+    {
+      "name": "selig",
+      "type": "positive"
+    },
+    {
+      "name": "sicher",
+      "type": "positive"
+    },
+    {
+      "name": "souverän",
+      "type": "positive"
+    },
+    {
+      "name": "spritzig",
+      "type": "positive"
+    },
+    {
+      "name": "stark",
+      "type": "positive"
+    },
+    {
+      "name": "staunend",
+      "type": "positive"
+    },
+    {
+      "name": "stimuliert",
+      "type": "positive"
+    },
+    {
+      "name": "stolz",
+      "type": "positive"
+    },
+    {
+      "name": "strahlend",
+      "type": "positive"
+    },
+    {
+      "name": "tatkräftig",
+      "type": "positive"
+    },
+    {
+      "name": "teilnahmsvoll",
+      "type": "positive"
+    },
+    {
+      "name": "überglücklich",
+      "type": "positive"
+    },
+    {
+      "name": "unbekümmert",
+      "type": "positive"
+    },
+    {
+      "name": "unbeschwert",
+      "type": "positive"
+    },
+    {
+      "name": "unbesorgt",
+      "type": "positive"
+    },
+    {
+      "name": "verblüfft",
+      "type": "positive"
+    },
+    {
+      "name": "vergnügt",
+      "type": "positive"
+    },
+    {
+      "name": "verliebt",
+      "type": "positive"
+    },
+    {
+      "name": "versichert",
+      "type": "positive"
+    },
+    {
+      "name": "vertrauensvoll",
+      "type": "positive"
+    },
+    {
+      "name": "verzaubert",
+      "type": "positive"
+    },
+    {
+      "name": "wach(sam)",
+      "type": "positive"
+    },
+    {
+      "name": "warmherzig",
+      "type": "positive"
+    },
+    {
+      "name": "wohl(ig)",
+      "type": "positive"
+    },
+    {
+      "name": "wohlgemut",
+      "type": "positive"
+    },
+    {
+      "name": "wohlwollend",
+      "type": "positive"
+    },
+    {
+      "name": "zart",
+      "type": "positive"
+    },
+    {
+      "name": "zärtlich",
+      "type": "positive"
+    },
+    {
+      "name": "zentriert",
+      "type": "positive"
+    },
+    {
+      "name": "zufrieden",
+      "type": "positive"
+    },
+    {
+      "name": "zuneigend",
+      "type": "positive"
+    },
+    {
+      "name": "zutraulich",
+      "type": "positive"
+    },
+    {
+      "name": "zuversichtlich",
+      "type": "positive"
+    },
+    {
+      "name": "abgeneigt",
+      "type": "negative"
+    },
+    {
+      "name": "abgeschlagen",
+      "type": "negative"
+    },
+    {
+      "name": "abgespannt",
+      "type": "negative"
+    },
+    {
+      "name": "alarmiert",
+      "type": "negative"
+    },
+    {
+      "name": "allein",
+      "type": "negative"
+    },
+    {
+      "name": "angeekelt",
+      "type": "negative"
+    },
+    {
+      "name": "angeödet",
+      "type": "negative"
+    },
+    {
+      "name": "angespannt",
+      "type": "negative"
+    },
+    {
+      "name": "angewidert",
+      "type": "negative"
+    },
+    {
+      "name": "ängstlich",
+      "type": "negative"
+    },
+    {
+      "name": "apathisch",
+      "type": "negative"
+    },
+    {
+      "name": "ärgerlich",
+      "type": "negative"
+    },
+    {
+      "name": "argwöhnisch",
+      "type": "negative"
+    },
+    {
+      "name": "aufgeregt",
+      "type": "negative"
+    },
+    {
+      "name": "aufgewühlt",
+      "type": "negative"
+    },
+    {
+      "name": "ausgehungert",
+      "type": "negative"
+    },
+    {
+      "name": "ausgelaugt",
+      "type": "negative"
+    },
+    {
+      "name": "außer mir",
+      "type": "negative"
+    },
+    {
+      "name": "bedrückt",
+      "type": "negative"
+    },
+    {
+      "name": "beklommen",
+      "type": "negative"
+    },
+    {
+      "name": "bekümmert",
+      "type": "negative"
+    },
+    {
+      "name": "beleidigt",
+      "type": "negative"
+    },
+    {
+      "name": "beschämt",
+      "type": "negative"
+    },
+    {
+      "name": "besorgt",
+      "type": "negative"
+    },
+    {
+      "name": "bestürzt",
+      "type": "negative"
+    },
+    {
+      "name": "betroffen",
+      "type": "negative"
+    },
+    {
+      "name": "betrübt",
+      "type": "negative"
+    },
+    {
+      "name": "bitter",
+      "type": "negative"
+    },
+    {
+      "name": "blockiert",
+      "type": "negative"
+    },
+    {
+      "name": "depressiv",
+      "type": "negative"
+    },
+    {
+      "name": "deprimiert",
+      "type": "negative"
+    },
+    {
+      "name": "dumpf",
+      "type": "negative"
+    },
+    {
+      "name": "durcheinander",
+      "type": "negative"
+    },
+    {
+      "name": "dürstend",
+      "type": "negative"
+    },
+    {
+      "name": "eifersüchtig",
+      "type": "negative"
+    },
+    {
+      "name": "einsam",
+      "type": "negative"
+    },
+    {
+      "name": "elend",
+      "type": "negative"
+    },
+    {
+      "name": "empört",
+      "type": "negative"
+    },
+    {
+      "name": "energielos",
+      "type": "negative"
+    },
+    {
+      "name": "entmutigt",
+      "type": "negative"
+    },
+    {
+      "name": "entrüstet",
+      "type": "negative"
+    },
+    {
+      "name": "entsetzt",
+      "type": "negative"
+    },
+    {
+      "name": "enttäuscht",
+      "type": "negative"
+    },
+    {
+      "name": "entwaffnet",
+      "type": "negative"
+    },
+    {
+      "name": "erbost",
+      "type": "negative"
+    },
+    {
+      "name": "ermüdet",
+      "type": "negative"
+    },
+    {
+      "name": "ernüchtert",
+      "type": "negative"
+    },
+    {
+      "name": "erregt",
+      "type": "negative"
+    },
+    {
+      "name": "erschlagen",
+      "type": "negative"
+    },
+    {
+      "name": "erschöpft",
+      "type": "negative"
+    },
+    {
+      "name": "erschreckt",
+      "type": "negative"
+    },
+    {
+      "name": "erschüttert",
+      "type": "negative"
+    },
+    {
+      "name": "erstarrt",
+      "type": "negative"
+    },
+    {
+      "name": "fassungslos",
+      "type": "negative"
+    },
+    {
+      "name": "faul",
+      "type": "negative"
+    },
+    {
+      "name": "finster",
+      "type": "negative"
+    },
+    {
+      "name": "frustriert",
+      "type": "negative"
+    },
+    {
+      "name": "furchtsam",
+      "type": "negative"
+    },
+    {
+      "name": "geängstigt",
+      "type": "negative"
+    },
+    {
+      "name": "gefühllos",
+      "type": "negative"
+    },
+    {
+      "name": "gehemmt",
+      "type": "negative"
+    },
+    {
+      "name": "gekränkt",
+      "type": "negative"
+    },
+    {
+      "name": "geladen",
+      "type": "negative"
+    },
+    {
+      "name": "gelähmt",
+      "type": "negative"
+    },
+    {
+      "name": "gelangweilt",
+      "type": "negative"
+    },
+    {
+      "name": "genervt",
+      "type": "negative"
+    },
+    {
+      "name": "gequält",
+      "type": "negative"
+    },
+    {
+      "name": "gerädert",
+      "type": "negative"
+    },
+    {
+      "name": "gereizt",
+      "type": "negative"
+    },
+    {
+      "name": "gestresst",
+      "type": "negative"
+    },
+    {
+      "name": "getrennt",
+      "type": "negative"
+    },
+    {
+      "name": "gleichgültig",
+      "type": "negative"
+    },
+    {
+      "name": "grollend",
+      "type": "negative"
+    },
+    {
+      "name": "hasserfüllt",
+      "type": "negative"
+    },
+    {
+      "name": "hilflos",
+      "type": "negative"
+    },
+    {
+      "name": "hin- und hergerissen",
+      "type": "negative"
+    },
+    {
+      "name": "irritiert",
+      "type": "negative"
+    },
+    {
+      "name": "kalt",
+      "type": "negative"
+    },
+    {
+      "name": "kaputt",
+      "type": "negative"
+    },
+    {
+      "name": "kribbelig",
+      "type": "negative"
+    },
+    {
+      "name": "kummervoll",
+      "type": "negative"
+    },
+    {
+      "name": "lasch",
+      "type": "negative"
+    },
+    {
+      "name": "leblos",
+      "type": "negative"
+    },
+    {
+      "name": "leiderfüllt",
+      "type": "negative"
+    },
+    {
+      "name": "lethargisch",
+      "type": "negative"
+    },
+    {
+      "name": "lustlos",
+      "type": "negative"
+    },
+    {
+      "name": "melancholisch",
+      "type": "negative"
+    },
+    {
+      "name": "miserabel",
+      "type": "negative"
+    },
+    {
+      "name": "misstrauisch",
+      "type": "negative"
+    },
+    {
+      "name": "mittellos",
+      "type": "negative"
+    },
+    {
+      "name": "müde",
+      "type": "negative"
+    },
+    {
+      "name": "mürrisch",
+      "type": "negative"
+    },
+    {
+      "name": "mutlos",
+      "type": "negative"
+    },
+    {
+      "name": "nervös",
+      "type": "negative"
+    },
+    {
+      "name": "niedergeschlagen",
+      "type": "negative"
+    },
+    {
+      "name": "ohnmächtig",
+      "type": "negative"
+    },
+    {
+      "name": "panisch",
+      "type": "negative"
+    },
+    {
+      "name": "passiv",
+      "type": "negative"
+    },
+    {
+      "name": "peinlich berührt",
+      "type": "negative"
+    },
+    {
+      "name": "perplex",
+      "type": "negative"
+    },
+    {
+      "name": "pessimistisch",
+      "type": "negative"
+    },
+    {
+      "name": "rachsüchtig",
+      "type": "negative"
+    },
+    {
+      "name": "rasend",
+      "type": "negative"
+    },
+    {
+      "name": "ruhelos",
+      "type": "negative"
+    },
+    {
+      "name": "sauer",
+      "type": "negative"
+    },
+    {
+      "name": "scheu",
+      "type": "negative"
+    },
+    {
+      "name": "schläfrig",
+      "type": "negative"
+    },
+    {
+      "name": "schlapp",
+      "type": "negative"
+    },
+    {
+      "name": "schlecht",
+      "type": "negative"
+    },
+    {
+      "name": "schmerzhaft",
+      "type": "negative"
+    },
+    {
+      "name": "schockiert",
+      "type": "negative"
+    },
+    {
+      "name": "schüchtern",
+      "type": "negative"
+    },
+    {
+      "name": "schwach",
+      "type": "negative"
+    },
+    {
+      "name": "schwankend",
+      "type": "negative"
+    },
+    {
+      "name": "schwer",
+      "type": "negative"
+    },
+    {
+      "name": "schwerfällig",
+      "type": "negative"
+    },
+    {
+      "name": "seelenwund",
+      "type": "negative"
+    },
+    {
+      "name": "sehnsüchtig",
+      "type": "negative"
+    },
+    {
+      "name": "skeptisch",
+      "type": "negative"
+    },
+    {
+      "name": "sorgenvoll",
+      "type": "negative"
+    },
+    {
+      "name": "sprachlos",
+      "type": "negative"
+    },
+    {
+      "name": "starr",
+      "type": "negative"
+    },
+    {
+      "name": "still",
+      "type": "neutral"
+    },
+    {
+      "name": "streitlustig",
+      "type": "negative"
+    },
+    {
+      "name": "stutzig",
+      "type": "negative"
+    },
+    {
+      "name": "teilnahmslos",
+      "type": "negative"
+    },
+    {
+      "name": "träge",
+      "type": "negative"
+    },
+    {
+      "name": "traurig",
+      "type": "negative"
+    },
+    {
+      "name": "überdrüssig",
+      "type": "negative"
+    },
+    {
+      "name": "überlastet",
+      "type": "negative"
+    },
+    {
+      "name": "überrascht",
+      "type": "negative"
+    },
+    {
+      "name": "übersättigt",
+      "type": "negative"
+    },
+    {
+      "name": "überwältigt",
+      "type": "negative"
+    },
+    {
+      "name": "unbehaglich",
+      "type": "negative"
+    },
+    {
+      "name": "unentschlossen",
+      "type": "negative"
+    },
+    {
+      "name": "ungeduldig",
+      "type": "negative"
+    },
+    {
+      "name": "ungläubig",
+      "type": "negative"
+    },
+    {
+      "name": "unglücklich",
+      "type": "negative"
+    },
+    {
+      "name": "unruhig",
+      "type": "negative"
+    },
+    {
+      "name": "unsicher",
+      "type": "negative"
+    },
+    {
+      "name": "unwohl",
+      "type": "negative"
+    },
+    {
+      "name": "unzufrieden",
+      "type": "negative"
+    },
+    {
+      "name": "veraltet",
+      "type": "negative"
+    },
+    {
+      "name": "verängstigt",
+      "type": "negative"
+    },
+    {
+      "name": "verärgert",
+      "type": "negative"
+    },
+    {
+      "name": "verbittert",
+      "type": "negative"
+    },
+    {
+      "name": "verdrießlich",
+      "type": "negative"
+    },
+    {
+      "name": "verdrossen",
+      "type": "negative"
+    },
+    {
+      "name": "verlegen",
+      "type": "negative"
+    },
+    {
+      "name": "verletzlich",
+      "type": "negative"
+    },
+    {
+      "name": "verletzt",
+      "type": "negative"
+    },
+    {
+      "name": "verloren",
+      "type": "negative"
+    },
+    {
+      "name": "verschlossen",
+      "type": "negative"
+    },
+    {
+      "name": "verschwiegen",
+      "type": "negative"
+    },
+    {
+      "name": "verspannt",
+      "type": "negative"
+    },
+    {
+      "name": "verstimmt",
+      "type": "negative"
+    },
+    {
+      "name": "verstört",
+      "type": "negative"
+    },
+    {
+      "name": "verunsichert",
+      "type": "negative"
+    },
+    {
+      "name": "verwirrt",
+      "type": "negative"
+    },
+    {
+      "name": "verzweifelt",
+      "type": "negative"
+    },
+    {
+      "name": "widerwillig",
+      "type": "negative"
+    },
+    {
+      "name": "wütend",
+      "type": "negative"
+    },
+    {
+      "name": "zaghaft",
+      "type": "negative"
+    },
+    {
+      "name": "zappelig",
+      "type": "negative"
+    },
+    {
+      "name": "zerbrechlich",
+      "type": "negative"
+    },
+    {
+      "name": "zerrissen",
+      "type": "negative"
+    },
+    {
+      "name": "zerschlagen",
+      "type": "negative"
+    },
+    {
+      "name": "zitternd",
+      "type": "negative"
+    },
+    {
+      "name": "zögerlich",
+      "type": "negative"
+    },
+    {
+      "name": "zornig",
+      "type": "negative"
+    },
+    {
+      "name": "zwiespältig",
+      "type": "negative"
+    }
+  ]
+}

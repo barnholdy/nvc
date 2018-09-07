@@ -12,14 +12,17 @@ export default new Router({
       component: Home,
     },
     {
-      path: '/list-feeling',
-      name: 'list-feeling',
-      component: () => import('./views/FeelingList.vue'),
+      path: '/check-ins',
+      name: 'check-ins',
+      component: () => import('./views/CheckInList.vue'),
     },
     {
-      path: '/add-feeling',
-      name: 'add-feeling',
-      component: () => import('./views/FeelingAdd.vue'),
+      path: '/add-check-in',
+      name: 'add-check-in',
+      component: () => import('./views/CheckInAdd.vue'),
     },
   ],
+  scrollBehavior() {
+    return { x: 0, y: 0 };
+  },
 });

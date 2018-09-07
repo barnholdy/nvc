@@ -3,7 +3,8 @@ import Vuex from 'vuex';
 
 Vue.use(Vuex);
 
-const FELT_FEELINGS_STORAGE_KEY = 'feltFeelings';
+const NVC_STORAGE_KEY = 'nvc';
+const CHECK_INS_STORAGE_KEY = `${NVC_STORAGE_KEY}.checkIns`;
 
 function storageAvailable(type) {
   try {
@@ -30,41 +31,37 @@ function storageAvailable(type) {
 
 export default new Vuex.Store({
   state: {
-    feltFeelings: [],
+    checkIns: [],
   },
   getters: {
-    feltFeelings: state => state.feltFeelings,
+    checkIns: state => state.checkIns,
   },
   mutations: {
-    setFeltFeelings(state, feltFeelings) {
-      state.feltFeelings = feltFeelings; // eslint-disable-line no-param-reassign
+    setCheckIns(state, checkIns) {
+      state.checkIns = checkIns; // eslint-disable-line no-param-reassign
     },
-    addFeltFeelings(state, payload) {
-      const feltFeelings = {
-        fullfilled: payload.fullfilled,
-        unfullfilled: payload.unfullfilled,
-        time: +new Date(),
-      };
-      state.feltFeelings.push(feltFeelings);
+    addCheckIn(state, checkIn) {
+      checkIn.time = +new Date(); // eslint-disable-line no-param-reassign
+      state.checkIns.push(checkIn);
     },
   },
   actions: {
-    loadFeelings({ commit }) {
+    loadCheckIns({ commit }) {
       if (storageAvailable('localStorage')) {
-        const feltFeelingsJson = localStorage.getItem(FELT_FEELINGS_STORAGE_KEY);
-        if (feltFeelingsJson) {
-          commit('setFeltFeelings', JSON.parse(feltFeelingsJson));
+        const checkInsJson = localStorage.getItem(CHECK_INS_STORAGE_KEY);
+        if (checkInsJson) {
+          commit('setCheckIns', JSON.parse(checkInsJson));
         }
       } else {
-        throw new Error('Feelings were not loaded.');
+        throw new Error('Check-Ins were not loaded.');
       }
     },
-    saveFeelings({ commit, getters }, payload) {
-      commit('addFeltFeelings', payload);
+    saveCheckIn({ commit, getters }, checkIn) {
+      commit('addCheckIn', checkIn);
       if (storageAvailable('localStorage')) {
-        localStorage.setItem(FELT_FEELINGS_STORAGE_KEY, JSON.stringify(getters.feltFeelings));
+        localStorage.setItem(CHECK_INS_STORAGE_KEY, JSON.stringify(getters.checkIns));
       } else {
-        throw new Error('Feelings were not saved persistently');
+        throw new Error('Check-Ins were not saved persistently.');
       }
     },
   },
