@@ -1,20 +1,32 @@
 <template>
   <div class="check-in-add">
-    <h1>Beschreibe die Situation!</h1>
+    <h1>1. Beschreibe die Situation!</h1>
     Wenn <input v-model="situation" type="text" class="situation" />
-    <h1>Wie fühst du dich in der Situation?</h1>
+    <h1>2. Wie fühst du dich in der Situation?</h1>
     <tag-list :items="availableFeelings" :isInteractive="true"></tag-list>
-    <h1>Was brauchst du in der Situation?</h1>
+    <h1>3. Was brauchst du in der Situation?</h1>
     <tag-list :items="availableNeeds" :isInteractive="true"></tag-list>
     <div class="button-container">
-      <button class="button button--success" @click="saveFeelings" :disabled="!isCheckInComplete">speichern</button>
-      <button class="button button--error" @click="reset" :disabled="!isCheckInStarted">reset</button>
+      <button-progress
+        class="button button--success"
+        :progress="completedProgress"
+        @click="saveFeelings"
+        :disabled="!isCheckInComplete">
+      check-in
+      </button-progress>
+      <button
+        class="button button--error"
+        @click="reset"
+        :disabled="!isCheckInStarted">
+        reset
+      </button>
     </div>
   </div>
 </template>
 
 <script>
 import TagList from '@/components/TagList.vue';
+import ButtonProgress from '@/components/ButtonProgress.vue';
 import availableFeelings from '../assets/feelings.json';
 import availableNeeds from '../assets/needs.json';
 
@@ -22,6 +34,7 @@ export default {
   name: 'check-in-add',
   components: {
     TagList,
+    ButtonProgress,
   },
   data() {
     return {
@@ -40,6 +53,11 @@ export default {
       return this.situation
         || this.availableFeelings.some(feeling => feeling.isSelected)
         || this.availableNeeds.some(need => need.isSelected);
+    },
+    completedProgress() {
+      return ((!!this.situation
+        + this.availableFeelings.some(feeling => feeling.isSelected)
+        + this.availableNeeds.some(need => need.isSelected)) / 3) * 100;
     },
     selectedFeelings() {
       return this.availableFeelings.filter(feeling => feeling.isSelected);
@@ -110,7 +128,6 @@ input {
 .button {
   margin: .5rem .25rem 1rem .25rem;
   height: 2rem;
-  background-color: white;
   border-color: #2c3e50;
   color: #2c3e50;
   border: solid .05rem;
