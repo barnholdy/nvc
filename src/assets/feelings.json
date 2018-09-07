@@ -1681,8 +1681,7 @@
     {
       "name": "wütend",
       "type": "negative",
-      "rank": -80,
-      "similar": "ärgerlich"
+      "rank": 0
     },
     {
       "name": "zaghaft",
