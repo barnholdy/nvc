@@ -1,0 +1,692 @@
+{
+  "needs": [
+    {
+      "name": "Achtsamkeit",
+      "rank": 0
+    },
+    {
+      "name": "Aktualisierung",
+      "rank": 0
+    },
+    {
+      "name": "Akzeptanz",
+      "rank": 0
+    },
+    {
+      "name": "Alleinsein",
+      "rank": 0
+    },
+    {
+      "name": "Anerkennung",
+      "rank": 0
+    },
+    {
+      "name": "Annahme",
+      "rank": 0
+    },
+    {
+      "name": "Anregung",
+      "rank": 0
+    },
+    {
+      "name": "Ästhetik",
+      "rank": 0
+    },
+    {
+      "name": "Aufmerksamkeit",
+      "rank": 0
+    },
+    {
+      "name": "Aufrichtigkeit",
+      "rank": 0
+    },
+    {
+      "name": "Ausdruck",
+      "rank": 0
+    },
+    {
+      "name": "Ausgeglichenheit",
+      "rank": 0
+    },
+    {
+      "name": "Ausgewogenheit",
+      "rank": 0
+    },
+    {
+      "name": "Austausch",
+      "rank": 0
+    },
+    {
+      "name": "Authentizität",
+      "rank": 0
+    },
+    {
+      "name": "Autonomie",
+      "rank": 0
+    },
+    {
+      "name": "Beitragen",
+      "rank": 0
+    },
+    {
+      "name": "Berechenbarkeit",
+      "rank": 0
+    },
+    {
+      "name": "Berührung",
+      "rank": 0
+    },
+    {
+      "name": "Beständigkeit",
+      "rank": 0
+    },
+    {
+      "name": "Bestätigung",
+      "rank": 0
+    },
+    {
+      "name": "Bewegung",
+      "rank": 0
+    },
+    {
+      "name": "Bewusstsein",
+      "rank": 0
+    },
+    {
+      "name": "Dankbarkeit",
+      "rank": 0
+    },
+    {
+      "name": "Danksagung",
+      "rank": 0
+    },
+    {
+      "name": "Dauerhaftigkeit",
+      "rank": 0
+    },
+    {
+      "name": "Dienen",
+      "rank": -99
+    },
+    {
+      "name": "Diskretion",
+      "rank": 0
+    },
+    {
+      "name": "Durchführen",
+      "rank": -99
+    },
+    {
+      "name": "Effektivität",
+      "rank": 0
+    },
+    {
+      "name": "Ehrfurcht",
+      "rank": 0
+    },
+    {
+      "name": "Ehrlichkeit",
+      "rank": 0
+    },
+    {
+      "name": "Einbezogen sein",
+      "rank": 0
+    },
+    {
+      "name": "Einfachheit",
+      "rank": 0
+    },
+    {
+      "name": "Einfühlsamkeit",
+      "rank": 0
+    },
+    {
+      "name": "Einsicht",
+      "rank": 0
+    },
+    {
+      "name": "Empathie",
+      "rank": 0
+    },
+    {
+      "name": "Empfangen",
+      "rank": 0
+    },
+    {
+      "name": "Entdecken",
+      "rank": -99
+    },
+    {
+      "name": "Entfaltung",
+      "rank": 0
+    },
+    {
+      "name": "Entspannung",
+      "rank": 0
+    },
+    {
+      "name": "Entwicklung",
+      "rank": 0
+    },
+    {
+      "name": "Erfahrung",
+      "rank": 0
+    },
+    {
+      "name": "Erholung",
+      "rank": 0
+    },
+    {
+      "name": "Ernst  ",
+      "rank": 0
+    },
+    {
+      "name": "Erreichen",
+      "rank": 0
+    },
+    {
+      "name": "Feiern",
+      "rank": 0
+    },
+    {
+      "name": "Fitness",
+      "rank": 0
+    },
+    {
+      "name": "Freiheit",
+      "rank": 0
+    },
+    {
+      "name": "Freude",
+      "rank": 0
+    },
+    {
+      "name": "Freundschaft",
+      "rank": 0
+    },
+    {
+      "name": "Frieden",
+      "rank": 0
+    },
+    {
+      "name": "Ganzheit",
+      "rank": 0
+    },
+    {
+      "name": "Geben",
+      "rank": 0
+    },
+    {
+      "name": "Geborgenheit",
+      "rank": 0
+    },
+    {
+      "name": "Geburt",
+      "rank": 0
+    },
+    {
+      "name": "Gemeinsamkeit",
+      "rank": 0
+    },
+    {
+      "name": "Gemeinschaft",
+      "rank": 0
+    },
+    {
+      "name": "Genauigkeit",
+      "rank": 0
+    },
+    {
+      "name": "Gerechtigkeit",
+      "rank": 0
+    },
+    {
+      "name": "Gesellschaft",
+      "rank": 0
+    },
+    {
+      "name": "Gesundheit",
+      "rank": 0
+    },
+    {
+      "name": "Gewissen",
+      "rank": 0
+    },
+    {
+      "name": "Gleichgewicht",
+      "rank": 0
+    },
+    {
+      "name": "Gleichwertigkeit",
+      "rank": 0
+    },
+    {
+      "name": "Glück",
+      "rank": 0
+    },
+    {
+      "name": "Handeln",
+      "rank": -99
+    },
+    {
+      "name": "Harmonie",
+      "rank": 0
+    },
+    {
+      "name": "Heilung",
+      "rank": 0
+    },
+    {
+      "name": "Herausforderung",
+      "rank": 0
+    },
+    {
+      "name": "Hilfe",
+      "rank": 0
+    },
+    {
+      "name": "Hoffnung",
+      "rank": 0
+    },
+    {
+      "name": "Humor",
+      "rank": 0
+    },
+    {
+      "name": "Individualität",
+      "rank": 0
+    },
+    {
+      "name": "Information",
+      "rank": 0
+    },
+    {
+      "name": "Inspiration",
+      "rank": 0
+    },
+    {
+      "name": "Integrität",
+      "rank": 0
+    },
+    {
+      "name": "Intensität",
+      "rank": 0
+    },
+    {
+      "name": "Intimität",
+      "rank": 0
+    },
+    {
+      "name": "Klarheit",
+      "rank": 0
+    },
+    {
+      "name": "Komfort",
+      "rank": 0
+    },
+    {
+      "name": "Kommunikation",
+      "rank": 0
+    },
+    {
+      "name": "Kongruenz",
+      "rank": 0
+    },
+    {
+      "name": "Können",
+      "rank": -99
+    },
+    {
+      "name": "Kontakt",
+      "rank": 0
+    },
+    {
+      "name": "Kontinuität",
+      "rank": 0
+    },
+    {
+      "name": "Kreativität",
+      "rank": 0
+    },
+    {
+      "name": "Lernen",
+      "rank": 0
+    },
+    {
+      "name": "Liebe ",
+      "rank": 0
+    },
+    {
+      "name": "Loslassen",
+      "rank": 0
+    },
+    {
+      "name": "Meisterschaft",
+      "rank": 0
+    },
+    {
+      "name": "Menschlichkeit",
+      "rank": 0
+    },
+    {
+      "name": "Mitgefühl",
+      "rank": 0
+    },
+    {
+      "name": "Mitteilung",
+      "rank": 0
+    },
+    {
+      "name": "Nähe",
+      "rank": 0
+    },
+    {
+      "name": "Nahrung",
+      "rank": 0
+    },
+    {
+      "name": "Offenheit",
+      "rank": 0
+    },
+    {
+      "name": "Ordnung",
+      "rank": 0
+    },
+    {
+      "name": "Orientierung",
+      "rank": 0
+    },
+    {
+      "name": "Pflege",
+      "rank": 0
+    },
+    {
+      "name": "Platz finden",
+      "rank": 0
+    },
+    {
+      "name": "Präsenz",
+      "rank": 0
+    },
+    {
+      "name": "Privatsphäre",
+      "rank": 0
+    },
+    {
+      "name": "Respekt",
+      "rank": 0
+    },
+    {
+      "name": "Rhythmus",
+      "rank": 0
+    },
+    {
+      "name": "Rituale",
+      "rank": 0
+    },
+    {
+      "name": "Ruhe",
+      "rank": 0
+    },
+    {
+      "name": "Sättigung",
+      "rank": 0
+    },
+    {
+      "name": "Schaffen",
+      "rank": 0
+    },
+    {
+      "name": "Schönheit",
+      "rank": 0
+    },
+    {
+      "name": "Schutz",
+      "rank": 0
+    },
+    {
+      "name": "Sein",
+      "rank": 0
+    },
+    {
+      "name": "Selbstbestimmung",
+      "rank": 0
+    },
+    {
+      "name": "Selbstentfaltung",
+      "rank": 0
+    },
+    {
+      "name": "Selbsterkenntnis",
+      "rank": 0
+    },
+    {
+      "name": "Selbstrespekt",
+      "rank": 0
+    },
+    {
+      "name": "Selbstverantwortung",
+      "rank": 0
+    },
+    {
+      "name": "Selbstverwirklichung",
+      "rank": 0
+    },
+    {
+      "name": "Selbstwertgefühl",
+      "rank": 0
+    },
+    {
+      "name": "Selbstwertschätzung",
+      "rank": 0
+    },
+    {
+      "name": "Sexualität",
+      "rank": 0
+    },
+    {
+      "name": "Sicherheit",
+      "rank": 0
+    },
+    {
+      "name": "Sinn",
+      "rank": 0
+    },
+    {
+      "name": "Spaß",
+      "rank": 0
+    },
+    {
+      "name": "Spiel",
+      "rank": 0
+    },
+    {
+      "name": "Spiritualität",
+      "rank": 0
+    },
+    {
+      "name": "Stabilität",
+      "rank": 0
+    },
+    {
+      "name": "Stille ",
+      "rank": 0
+    },
+    {
+      "name": "Stimmigkeit",
+      "rank": 0
+    },
+    {
+      "name": "Stimulation",
+      "rank": 0
+    },
+    {
+      "name": "Struktur(en)",
+      "rank": 0
+    },
+    {
+      "name": "Teilnahme",
+      "rank": 0
+    },
+    {
+      "name": "Tiefe",
+      "rank": 0
+    },
+    {
+      "name": "Toleranz",
+      "rank": 0
+    },
+    {
+      "name": "Transparenz",
+      "rank": 0
+    },
+    {
+      "name": "Trauer (Verlust)",
+      "rank": 0
+    },
+    {
+      "name": "Treue",
+      "rank": 0
+    },
+    {
+      "name": "Trost",
+      "rank": 0
+    },
+    {
+      "name": "Unabhängigkeit",
+      "rank": 0
+    },
+    {
+      "name": "Unterkunft",
+      "rank": 0
+    },
+    {
+      "name": "Unterstützung",
+      "rank": 0
+    },
+    {
+      "name": "Ursache sein",
+      "rank": 0
+    },
+    {
+      "name": "Verantwortung",
+      "rank": 0
+    },
+    {
+      "name": "Verbindlichkeit",
+      "rank": 0
+    },
+    {
+      "name": "Verbindung",
+      "rank": 0
+    },
+    {
+      "name": "Verbundenheit",
+      "rank": 0
+    },
+    {
+      "name": "Verständigung",
+      "rank": 0
+    },
+    {
+      "name": "Verständnis",
+      "rank": 0
+    },
+    {
+      "name": "Verstehen ",
+      "rank": 0
+    },
+    {
+      "name": "Vertrauen",
+      "rank": 0
+    },
+    {
+      "name": "Vertraulichkeit",
+      "rank": 0
+    },
+    {
+      "name": "Vitalität",
+      "rank": 0
+    },
+    {
+      "name": "Wachstum",
+      "rank": 0
+    },
+    {
+      "name": "Wahlmöglichkeit",
+      "rank": 0
+    },
+    {
+      "name": "Wahrgenommen werden",
+      "rank": 0
+    },
+    {
+      "name": "Wahrhaftigkeit",
+      "rank": 0
+    },
+    {
+      "name": "Wärme",
+      "rank": 0
+    },
+    {
+      "name": "Wechselbeziehung",
+      "rank": 0
+    },
+    {
+      "name": "Weiterkommen",
+      "rank": 0
+    },
+    {
+      "name": "Wertschätzung",
+      "rank": 0
+    },
+    {
+      "name": "Wissen",
+      "rank": 0
+    },
+    {
+      "name": "Wissen um den Weg ",
+      "rank": 0
+    },
+    {
+      "name": "Würde",
+      "rank": 0
+    },
+    {
+      "name": "Würdigung",
+      "rank": 0
+    },
+    {
+      "name": "Zärtlichkeit",
+      "rank": 0
+    },
+    {
+      "name": "Zeit für Integration",
+      "rank": 0
+    },
+    {
+      "name": "Zugehörigkeit",
+      "rank": 0
+    },
+    {
+      "name": "Zuhören",
+      "rank": 0
+    },
+    {
+      "name": "Zuneigung",
+      "rank": 0
+    },
+    {
+      "name": "Zusammenarbeit",
+      "rank": 0
+    },
+    {
+      "name": "Zuspruch",
+      "rank": 0
+    },
+    {
+      "name": "Zweckbestimmung",
+      "rank": 0
+    }
+  ]
+}

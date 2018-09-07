@@ -46,10 +46,11 @@ export default {
         case 'negative':
           return COLORS.red;
         default:
-          return COLORS.yellow;
+          return COLORS.blue;
       }
     },
     sortFeelings(feelings) {
+      if(!feelings) return;
       feelings.sort((a, b) => {
         if (a.type !== b.type) { // sort by type
           if (a.type < b.type) return 1;

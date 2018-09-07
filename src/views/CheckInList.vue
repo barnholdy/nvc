@@ -4,8 +4,10 @@
     <div class="check-ins" v-for="checkIn in checkIns" v-bind:key="checkIn.time">
       <h2>{{ formatTime(checkIn.time) }}</h2>
       <p>
-        Wenn ..., fühle ich mich
-        <feelings :feelings="checkIn.feelings"></feelings>, weil ich ... brauche.
+        Wenn
+        <span class="situation">{{ checkIn.situation }}</span>, fühle ich mich
+        <feelings :feelings="checkIn.feelings"></feelings>, weil ich
+        <feelings :feelings="checkIn.needs"></feelings> brauche.
       </p>
     </div>
   </div>
@@ -35,6 +37,12 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.situation{
+  padding-bottom: 0.3rem;
+  border-bottom: solid .05rem;
+  border-color: #2c3e50;
+  color: #2c3e50;
+}
 .feelings {
   display: inline-block;
 }
