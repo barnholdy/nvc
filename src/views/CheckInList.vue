@@ -2,7 +2,7 @@
   <div class="check-in-list">
     <h1>Meine Check-Ins</h1>
     <div class="check-ins" v-for="checkIn in checkIns" v-bind:key="checkIn.time">
-      <h2>Am {{ formatTime(checkIn.time) }}</h2>
+      <h2>{{ formatTime(checkIn.time) }}</h2>
       <feelings :feelings="checkIn.feelings"></feelings>
     </div>
   </div>
@@ -25,7 +25,7 @@ export default {
   methods: {
     formatTime(time) {
       moment.locale('de');
-      return moment(time).format('LLLL');
+      return moment(time).format('llll');
     },
   },
 };

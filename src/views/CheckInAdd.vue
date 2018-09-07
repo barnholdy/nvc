@@ -18,7 +18,7 @@ export default {
   },
   data() {
     return {
-      availableFeelings: availableFeelings.feelings,
+      availableFeelings: availableFeelings.feelings.concat().filter(feeling => feeling.rank >= 0),
     };
   },
   computed: {
@@ -35,8 +35,8 @@ export default {
         this.$store.dispatch('saveCheckIn', {
           feelings: this.selectedFeelings,
         });
-        this.resetFeelings();
         this.$router.push('check-ins');
+        this.resetFeelings();
       }
     },
     resetFeelings() {
@@ -52,4 +52,11 @@ export default {
 </script>
 
 <style scoped lang="scss">
+button {
+  margin-top: 2rem;
+  width: 80%;
+  height: 2rem;
+  background-color: white;
+  font-size: 1rem;
+}
 </style>

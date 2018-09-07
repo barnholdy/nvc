@@ -41,12 +41,12 @@ $blue: #89e7df;
 .tag {
   color: white;
   cursor: pointer;
-  margin: .1rem;
-  padding: 0.5rem;
-  height: .6rem;
+  margin: .2rem;
+  padding: 0.6rem;
+  height: .5rem;
   display: inline-block;
   line-height: .6rem;
-  font-size: .9rem;
+  font-size: 1rem;
   border: solid .05rem;
   user-select: none;
 }
