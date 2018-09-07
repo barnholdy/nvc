@@ -1,6 +1,11 @@
 {
   "feelings": [
     {
+      "name": "unternehmungslustig",
+      "type": "positive",
+      "rank": 0
+    },
+    {
       "name": "erstaunt",
       "type": "positive",
       "rank": 0
@@ -32,7 +37,7 @@
       "name": "aufgedreht",
       "type": "positive",
       "rank": -80,
-      "similar": "euporisch"
+      "similar": "euphorisch"
     },
     {
       "name": "aufgemuntert",
@@ -82,7 +87,7 @@
       "name": "begeistert",
       "type": "positive",
       "rank": -80,
-      "similar": "euporisch"
+      "similar": "euphorisch"
     },
     {
       "name": "behaglich",
@@ -105,7 +110,7 @@
       "name": "berauscht",
       "type": "positive",
       "rank": -80,
-      "similar": "euporisch"
+      "similar": "euphorisch"
     },
     {
       "name": "bereichert",
@@ -171,7 +176,7 @@
       "name": "eifrig",
       "type": "positive",
       "rank": -80,
-      "similar": "euporisch"
+      "similar": "euphorisch"
     },
     {
       "name": "einbezogen",
@@ -182,7 +187,7 @@
       "name": "ekstatisch",
       "type": "positive",
       "rank": -80,
-      "similar": "euporisch"
+      "similar": "euphorisch"
     },
     {
       "name": "elektrisiert",
@@ -198,7 +203,7 @@
       "name": "energiegeladen",
       "type": "positive",
       "rank": -80,
-      "similar": "euporisch"
+      "similar": "euphorisch"
     },
     {
       "name": "energisch",
@@ -209,7 +214,7 @@
       "name": "enthusiastisch",
       "type": "positive",
       "rank": -80,
-      "similar": "euporisch"
+      "similar": "euphorisch"
     },
     {
       "name": "entlastet",
@@ -282,7 +287,7 @@
       "rank": 0
     },
     {
-      "name": "euporisch",
+      "name": "euphorisch",
       "type": "positive",
       "rank": 0
     },
@@ -379,7 +384,7 @@
       "name": "gutgelaunt",
       "type": "positive",
       "rank": -80,
-      "similar": "euporisch"
+      "similar": "euphorisch"
     },
     {
       "name": "harmonisch",
@@ -424,7 +429,7 @@
       "name": "hocherfreut",
       "type": "positive",
       "rank": -80,
-      "similar": "euporisch"
+      "similar": "euphorisch"
     },
     {
       "name": "hoffnungsvoll",
@@ -452,7 +457,7 @@
       "name": "jubelnd",
       "type": "positive",
       "rank": -80,
-      "similar": "euporisch"
+      "similar": "euphorisch"
     },
     {
       "name": "klar",
@@ -484,7 +489,7 @@
       "name": "leicht",
       "type": "positive",
       "rank": 0,
-      "similar": "erleichter"
+      "similar": "erleichtert"
     },
     {
       "name": "leidenschaftlich",
@@ -633,7 +638,7 @@
       "name": "strahlend",
       "type": "positive",
       "rank": -80,
-      "similar": "euporisch"
+      "similar": "euphorisch"
     },
     {
       "name": "tatkräftig",
@@ -650,7 +655,7 @@
       "name": "überglücklich",
       "type": "positive",
       "rank": -80,
-      "similar": "euporisch"
+      "similar": "euphorisch"
     },
     {
       "name": "unbekümmert",
@@ -1300,7 +1305,8 @@
     {
       "name": "nervös",
       "type": "negative",
-      "rank": 0
+      "rank": -80,
+      "similar": "ruhelos"
     },
     {
       "name": "niedergeschlagen",

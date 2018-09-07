@@ -26,6 +26,9 @@ export default {
       default: false,
     },
   },
+  mounted() {
+    this.sortFeelings(this.feelings);
+  },
   methods: {
     toggleSelection(index) {
       if (this.isInteractive) {
@@ -45,6 +48,19 @@ export default {
         default:
           return COLORS.yellow;
       }
+    },
+    sortFeelings(feelings) {
+      feelings.sort((a, b) => {
+        if (a.type !== b.type) { // sort by type
+          if (a.type < b.type) return 1;
+          if (a.type > b.type) return -1;
+          return 0;
+        }
+        // within same type sort by name
+        if (a.name.toUpperCase() < b.name.toUpperCase()) return -1;
+        if (a.name.toUpperCase() > b.name.toUpperCase()) return 1;
+        return 0;
+      });
     },
   },
 };

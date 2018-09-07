@@ -4,7 +4,8 @@
     <div class="check-ins" v-for="checkIn in checkIns" v-bind:key="checkIn.time">
       <h2>{{ formatTime(checkIn.time) }}</h2>
       <p>
-        Wenn ..., fühle ich mich <feelings :feelings="checkIn.feelings"></feelings>, weil ich ... brauche.
+        Wenn ..., fühle ich mich
+        <feelings :feelings="checkIn.feelings"></feelings>, weil ich ... brauche.
       </p>
     </div>
   </div>

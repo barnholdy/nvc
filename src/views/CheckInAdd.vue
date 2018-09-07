@@ -1,6 +1,8 @@
 <template>
   <div class="check-in-add">
-    <h1>Wie geht es dir gerade?</h1>
+    <h1>Beschreibe die Situation!</h1>
+    <input type="text" placeholder="Wenn..." />
+    <h1>Wie fühst du dich in der Situation?</h1>
     <feelings :feelings="availableFeelings" :isInteractive="true"></feelings>
     <button @click="saveFeelings" :disabled="!isFeelingSelected">speichern</button>
     <button @click="resetFeelings" :disabled="!isFeelingSelected">zurücksetzen</button>
@@ -52,11 +54,23 @@ export default {
 </script>
 
 <style scoped lang="scss">
+input {
+  padding: 0.6rem;
+  height: .5rem;
+  font-size: 1rem;
+  border: solid .05rem;
+  border-color: #2c3e50;
+  color: #2c3e50;
+  width: 80%;
+}
 button {
   margin-top: 2rem;
   width: 80%;
   height: 2rem;
   background-color: white;
+  border-color: #2c3e50;
+  color: #2c3e50;
+  border: solid .05rem;
   font-size: 1rem;
 }
 </style>
