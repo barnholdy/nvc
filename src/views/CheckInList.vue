@@ -3,7 +3,9 @@
     <h1>Meine Check-Ins</h1>
     <div class="check-ins" v-for="checkIn in checkIns" v-bind:key="checkIn.time">
       <h2>{{ formatTime(checkIn.time) }}</h2>
-      <feelings :feelings="checkIn.feelings"></feelings>
+      <p>
+        Wenn ..., fühle ich mich <feelings :feelings="checkIn.feelings"></feelings>, weil ich ... brauche.
+      </p>
     </div>
   </div>
 </template>
@@ -32,4 +34,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.feelings {
+  display: inline-block;
+}
 </style>
