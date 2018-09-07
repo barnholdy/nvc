@@ -3,36 +3,43 @@
     <h1>Beschreibe die Situation!</h1>
     Wenn <input v-model="situation" type="text" class="situation" />
     <h1>Wie fühst du dich in der Situation?</h1>
-    <feelings :feelings="availableFeelings" :isInteractive="true"></feelings>
+    <tag-list :items="availableFeelings" :isInteractive="true"></tag-list>
     <h1>Was brauchst du in der Situation?</h1>
-    <feelings :feelings="availableNeeds" :isInteractive="true"></feelings>
-    <button @click="saveFeelings" :disabled="!isCheckInComplete">speichern</button>
-    <button @click="reset">zurücksetzen</button>
+    <tag-list :items="availableNeeds" :isInteractive="true"></tag-list>
+    <div class="button-container">
+      <button class="button button--success" @click="saveFeelings" :disabled="!isCheckInComplete">speichern</button>
+      <button class="button button--error" @click="reset" :disabled="!isCheckInStarted">reset</button>
+    </div>
   </div>
 </template>
 
 <script>
-import Feelings from '@/components/Feelings.vue';
+import TagList from '@/components/TagList.vue';
 import availableFeelings from '../assets/feelings.json';
 import availableNeeds from '../assets/needs.json';
 
 export default {
   name: 'check-in-add',
   components: {
-    Feelings,
+    TagList,
   },
   data() {
     return {
       situation: '',
       availableFeelings: availableFeelings.feelings.filter(feeling => feeling.rank >= 0),
       availableNeeds: availableNeeds.needs.filter(feeling => feeling.rank >= 0),
-    }
+    };
   },
   computed: {
     isCheckInComplete() {
       return this.situation
         && this.availableFeelings.some(feeling => feeling.isSelected)
         && this.availableNeeds.some(need => need.isSelected);
+    },
+    isCheckInStarted() {
+      return this.situation
+        || this.availableFeelings.some(feeling => feeling.isSelected)
+        || this.availableNeeds.some(need => need.isSelected);
     },
     selectedFeelings() {
       return this.availableFeelings.filter(feeling => feeling.isSelected);
@@ -73,7 +80,13 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.situation{
+$green: #4ed58b;
+$red: #fc5e53;
+
+.check-in-add {
+  margin-bottom: 5rem;
+}
+.situation {
   border-top: none;
   border-left: none;
   border-right: none;
@@ -87,14 +100,34 @@ input {
   color: #2c3e50;
   width: 80%;
 }
-button {
-  margin-top: 2rem;
-  width: 80%;
+.button-container {
+  position: fixed;
+  bottom: 0;
+  text-align: center;
+  width: 100%;
+  background-color: white;
+}
+.button {
+  margin: .5rem .25rem 1rem .25rem;
   height: 2rem;
   background-color: white;
   border-color: #2c3e50;
   color: #2c3e50;
   border: solid .05rem;
   font-size: 1rem;
+  &--success {
+    border-color: $green;
+    color: $green;
+    width: 70%;
+  }
+  &--error {
+    border-color: $red;
+    color: $red;
+    width: 20%;
+  }
+}
+.button[disabled] {
+  border-color: #ccc;
+  color: #ccc;
 }
 </style>

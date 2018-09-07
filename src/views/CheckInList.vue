@@ -6,8 +6,8 @@
       <p>
         Wenn
         <span class="situation">{{ checkIn.situation }}</span>, fühle ich mich
-        <feelings :feelings="checkIn.feelings"></feelings>, weil ich
-        <feelings :feelings="checkIn.needs"></feelings> brauche.
+        <tag-list :items="checkIn.feelings"></tag-list>, weil ich
+        <tag-list :items="checkIn.needs"></tag-list> brauche.
       </p>
     </div>
   </div>
@@ -15,12 +15,12 @@
 
 <script>
 import moment from 'moment';
-import Feelings from '@/components/Feelings.vue';
+import TagList from '@/components/TagList.vue';
 
 export default {
   name: 'check-in-list',
   components: {
-    Feelings,
+    TagList,
   },
   computed: {
     checkIns() {
@@ -37,13 +37,13 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.situation{
+.situation {
   padding-bottom: 0.3rem;
   border-bottom: solid .05rem;
   border-color: #2c3e50;
   color: #2c3e50;
 }
-.feelings {
+.tag-list {
   display: inline-block;
 }
 </style>
