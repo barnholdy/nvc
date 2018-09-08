@@ -81,7 +81,7 @@
       "rank": 0
     },
     {
-      "name": "Beitragen",
+      "name": "Beitrag",
       "type": "neutral",
       "rank": 0
     },
@@ -123,7 +123,7 @@
     {
       "name": "Danksagung",
       "type": "neutral",
-      "rank": 0
+      "rank": -99
     },
     {
       "name": "Dauerhaftigkeit",
@@ -163,7 +163,7 @@
     {
       "name": "Einbezogen sein",
       "type": "neutral",
-      "rank": 0
+      "rank": -99
     },
     {
       "name": "Einfachheit",
@@ -188,7 +188,7 @@
     {
       "name": "Empfangen",
       "type": "neutral",
-      "rank": 0
+      "rank": -99
     },
     {
       "name": "Entdecken",
@@ -228,7 +228,7 @@
     {
       "name": "Erreichen",
       "type": "neutral",
-      "rank": 0
+      "rank": -99
     },
     {
       "name": "Feiern",
@@ -268,7 +268,7 @@
     {
       "name": "Geben",
       "type": "neutral",
-      "rank": 0
+      "rank": -99
     },
     {
       "name": "Geborgenheit",
@@ -438,7 +438,7 @@
     {
       "name": "Lernen",
       "type": "neutral",
-      "rank": 0
+      "rank": -99
     },
     {
       "name": "Liebe ",
@@ -543,7 +543,7 @@
     {
       "name": "Schaffen",
       "type": "neutral",
-      "rank": 0
+      "rank": -99
     },
     {
       "name": "Schönheit",
@@ -651,7 +651,7 @@
       "rank": 0
     },
     {
-      "name": "Struktur(en)",
+      "name": "Struktur",
       "type": "neutral",
       "rank": 0
     },
@@ -676,7 +676,7 @@
       "rank": 0
     },
     {
-      "name": "Trauer (Verlust)",
+      "name": "Trauer",
       "type": "neutral",
       "rank": 0
     },
@@ -708,7 +708,7 @@
     {
       "name": "Ursache sein",
       "type": "neutral",
-      "rank": 0
+      "rank": -99
     },
     {
       "name": "Verantwortung",
@@ -723,7 +723,7 @@
     {
       "name": "Verbindung",
       "type": "neutral",
-      "rank": 0
+      "rank": -99
     },
     {
       "name": "Verbundenheit",
@@ -743,7 +743,7 @@
     {
       "name": "Verstehen ",
       "type": "neutral",
-      "rank": 0
+      "rank": -99
     },
     {
       "name": "Vertrauen",
@@ -753,7 +753,7 @@
     {
       "name": "Vertraulichkeit",
       "type": "neutral",
-      "rank": 0
+      "rank": -99
     },
     {
       "name": "Vitalität",
@@ -793,7 +793,7 @@
     {
       "name": "Weiterkommen",
       "type": "neutral",
-      "rank": 0
+      "rank": -99
     },
     {
       "name": "Wertschätzung",
@@ -808,7 +808,7 @@
     {
       "name": "Wissen um den Weg ",
       "type": "neutral",
-      "rank": 0
+      "rank": -99
     },
     {
       "name": "Würde",
@@ -828,7 +828,7 @@
     {
       "name": "Zeit für Integration",
       "type": "neutral",
-      "rank": 0
+      "rank": -99
     },
     {
       "name": "Zugehörigkeit",
@@ -838,7 +838,7 @@
     {
       "name": "Zuhören",
       "type": "neutral",
-      "rank": 0
+      "rank": -99
     },
     {
       "name": "Zuneigung",
