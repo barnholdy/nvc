@@ -2,7 +2,7 @@
   <div class="check-in-add">
     <h1>1. Beschreibe die Situation!</h1>
     Wenn <input v-model="situation" type="text" class="situation" />
-    <h1>2. Wie fühst du dich in der Situation?</h1>
+    <h1>2. Wie fühlst du dich in der Situation?</h1>
     <tag-list :items="availableFeelings" :isInteractive="true"></tag-list>
     <h1>3. Was brauchst du in der Situation?</h1>
     <tag-list :items="availableNeeds" :isInteractive="true"></tag-list>
