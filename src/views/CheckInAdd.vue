@@ -1,5 +1,6 @@
 <template>
   <div class="check-in-add">
+    <router-button to="/check-ins">zurück</router-button>
     <h1>1. Beschreibe die Situation!</h1>
     Wenn <input v-model="situation" type="text" class="situation" />
     <h1>2. Wie fühlst du dich in der Situation?</h1>
@@ -25,6 +26,7 @@
 </template>
 
 <script>
+import RouterButton from '@/components/RouterButton.vue';
 import TagList from '@/components/TagList.vue';
 import ButtonProgress from '@/components/ButtonProgress.vue';
 import availableFeelings from '../assets/feelings.json';
@@ -33,6 +35,7 @@ import availableNeeds from '../assets/needs.json';
 export default {
   name: 'check-in-add',
   components: {
+    RouterButton,
     TagList,
     ButtonProgress,
   },

@@ -1,6 +1,7 @@
 <template>
   <div class="check-in-list">
     <h1>Meine Check-Ins</h1>
+    <router-button to="/add-check-in">add Check-In</router-button>
     <div class="check-ins" v-for="checkIn in checkIns" v-bind:key="checkIn.time">
       <h2>{{ formatTime(checkIn.time) }}</h2>
       <p>
@@ -15,11 +16,13 @@
 
 <script>
 import moment from 'moment';
+import RouterButton from '@/components/RouterButton.vue';
 import TagList from '@/components/TagList.vue';
 
 export default {
   name: 'check-in-list',
   components: {
+    RouterButton,
     TagList,
   },
   computed: {
