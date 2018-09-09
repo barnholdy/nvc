@@ -82,7 +82,7 @@ export default {
         case 'positive':
           return COLORS.green;
         case 'neutral':
-          return COLORS.blue;
+          return COLORS.yellow;
         case 'negative':
           return COLORS.red;
         default:

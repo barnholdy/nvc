@@ -100,23 +100,32 @@ export default {
 <style scoped lang="scss">
 $green: #4ed58b;
 $red: #fc5e53;
+$yellow: #D4D233;
+$orange:#fd9927;
+$blue: #67CFC6;
 
 .check-in-add {
   margin-bottom: 5rem;
 }
 .situation {
-  border-top: none;
-  border-left: none;
-  border-right: none;
+  color: $blue;
+  border-color: $blue;
+  border-radius: 0;
+  appearance: none;
+  height: 2rem;
+  line-height: 2rem;
+  padding: 0 .6rem 0 .6rem;
 }
 input {
   padding: 0.6rem;
   height: .5rem;
   font-size: 1rem;
   border: solid .05rem;
+  border-radius: 0;
   border-color: #2c3e50;
   color: #2c3e50;
   width: 80%;
+  appearance: none;
 }
 .button-container {
   position: fixed;

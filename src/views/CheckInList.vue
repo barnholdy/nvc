@@ -37,11 +37,18 @@ export default {
 </script>
 
 <style scoped lang="scss">
+$blue: #67CFC6;
+
 .situation {
-  padding-bottom: 0.3rem;
-  border-bottom: solid .05rem;
-  border-color: #2c3e50;
-  color: #2c3e50;
+  color: $blue;
+  display: inline-block;
+  border: solid .05rem;
+  border-color: $blue;
+  border-radius: 0;
+  appearance: none;
+  height: 2rem;
+  line-height: 2rem;
+  padding: 0 .6rem 0 .6rem;
 }
 .tag-list {
   display: inline-block;

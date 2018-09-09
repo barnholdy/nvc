@@ -34,9 +34,9 @@ export default {
 <style scoped lang="scss">
 $green: #4ed58b;
 $red: #fc5e53;
-$yellow:#fffd52;
+$yellow: #D4D233;
 $orange:#fd9927;
-$blue: #89e7df;
+$blue: #67CFC6;
 
 .tag {
   cursor: pointer;
