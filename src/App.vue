@@ -14,8 +14,17 @@ export default {
 </script>
 
 <style lang="scss">
+html,body{
+	-webkit-overflow-scrolling : touch !important;
+	overflow: auto !important;
+	height: 100% !important;
+}
 body {
+  font-size: 16px;
   margin: 0;
+}
+input[type="text"] {
+  font-size: inherit;
 }
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
