@@ -373,7 +373,7 @@
     {
       "name": "Information",
       "type": "neutral",
-      "rank": 0
+      "rank": -99
     },
     {
       "name": "Inspiration",
@@ -468,7 +468,8 @@
     {
       "name": "Mitteilung",
       "type": "neutral",
-      "rank": 0
+      "rank": -80,
+      "similar": "Kommunikation"
     },
     {
       "name": "Nähe",
@@ -733,7 +734,8 @@
     {
       "name": "Verständigung",
       "type": "neutral",
-      "rank": 0
+      "rank": -80,
+      "similar": "Kommunikation"
     },
     {
       "name": "Verständnis",
