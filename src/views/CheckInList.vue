@@ -1,27 +1,33 @@
 <template>
-  <div class="check-in-list">
-    <h1>Meine Check-Ins</h1>
-    <router-button to="/add-check-in">add Check-In</router-button>
-    <div class="check-ins" v-for="checkIn in checkIns" v-bind:key="checkIn.time">
-      <h2>{{ formatTime(checkIn.time) }}</h2>
-      <p>
-        Wenn
-        <span class="situation">{{ checkIn.situation }}</span>, fühle ich mich
-        <tag-list :items="checkIn.feelings"></tag-list>, weil ich
-        <tag-list :items="checkIn.needs"></tag-list> brauche.
-      </p>
+  <screen>
+    <button-add slot="right-action" to="/add-check-in" />
+    <template slot="title">Meine Check-Ins</template>
+    <div slot="content" class="check-in-list">
+      <div class="check-ins" v-for="checkIn in checkIns" v-bind:key="checkIn.time">
+        <h2>{{ formatTime(checkIn.time) }}</h2>
+        <p>
+          Wenn
+          <span class="situation">{{ checkIn.situation }}</span>, fühle ich mich
+          <tag-list :items="checkIn.feelings"></tag-list>, weil ich
+          <tag-list :items="checkIn.needs"></tag-list> brauche.
+        </p>
+      </div>
     </div>
-  </div>
+  </screen>
 </template>
 
 <script>
 import moment from 'moment';
+import Screen from '@/components/Screen.vue';
+import ButtonAdd from '@/components/ButtonAdd.vue';
 import RouterButton from '@/components/RouterButton.vue';
 import TagList from '@/components/TagList.vue';
 
 export default {
   name: 'check-in-list',
   components: {
+    Screen,
+    ButtonAdd,
     RouterButton,
     TagList,
   },

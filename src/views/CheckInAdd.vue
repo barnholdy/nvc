@@ -1,31 +1,36 @@
 <template>
-  <div class="check-in-add">
-    <router-button to="/check-ins">zurück</router-button>
-    <h1>1. Beschreibe die Situation!</h1>
-    Wenn <input v-model="situation" type="text" class="situation" />
-    <h1>2. Wie fühlst du dich in der Situation?</h1>
-    <tag-list :items="availableFeelings" :isInteractive="true"></tag-list>
-    <h1>3. Was brauchst du in der Situation?</h1>
-    <tag-list :items="availableNeeds" :isInteractive="true"></tag-list>
-    <div class="button-container">
-      <button-progress
-        class="button button--success"
-        :progress="completedProgress"
-        @click="saveFeelings"
-        :disabled="!isCheckInComplete">
-      check-in
-      </button-progress>
-      <button
-        class="button button--error"
-        @click="reset"
-        :disabled="!isCheckInStarted">
-        reset
-      </button>
+  <screen>
+    <button-back slot="left-action" to="/check-ins" />
+    <template slot="title">Add Check-In</template>
+    <div slot="content" class="check-in-add">
+      <h1>1. Beschreibe die Situation!</h1>
+      Wenn <input v-model="situation" type="text" class="situation" />
+      <h1>2. Wie fühlst du dich in der Situation?</h1>
+      <tag-list :items="availableFeelings" :isInteractive="true"></tag-list>
+      <h1>3. Was brauchst du in der Situation?</h1>
+      <tag-list :items="availableNeeds" :isInteractive="true"></tag-list>
+      <div class="button-container">
+        <button-progress
+          class="button button--success"
+          :progress="completedProgress"
+          @click="saveFeelings"
+          :disabled="!isCheckInComplete">
+        check-in
+        </button-progress>
+        <button
+          class="button button--error"
+          @click="reset"
+          :disabled="!isCheckInStarted">
+          reset
+        </button>
+      </div>
     </div>
-  </div>
+  </screen>
 </template>
 
 <script>
+import Screen from '@/components/Screen.vue';
+import ButtonBack from '@/components/ButtonBack.vue';
 import RouterButton from '@/components/RouterButton.vue';
 import TagList from '@/components/TagList.vue';
 import ButtonProgress from '@/components/ButtonProgress.vue';
@@ -35,6 +40,8 @@ import availableNeeds from '../assets/needs.json';
 export default {
   name: 'check-in-add',
   components: {
+    Screen,
+    ButtonBack,
     RouterButton,
     TagList,
     ButtonProgress,
