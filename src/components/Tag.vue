@@ -39,14 +39,14 @@ $orange:#fd9927;
 $blue: #89e7df;
 
 .tag {
-  color: white;
   cursor: pointer;
-  margin: .2rem;
-  padding: 0.6rem;
-  height: .5rem;
   display: inline-block;
-  line-height: .6rem;
+  margin: .2rem;
+  padding: 0 .6rem 0 .6rem;
+  height: 2rem;
+  line-height: 2rem;
   font-size: 1rem;
+  color: white;
   border: solid .05rem;
   user-select: none;
 }

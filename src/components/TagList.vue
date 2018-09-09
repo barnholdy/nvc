@@ -3,8 +3,8 @@
     <input
       v-show="isInteractive"
       v-model="filterText"
-      type="text"
-      placeholder="filter..."
+      type="search"
+      placeholder="suchen..."
       class="filter" />
     <br />
     <tag
@@ -52,14 +52,15 @@ export default {
         const item = this.items[index];
         item.isSelected = !item.isSelected;
         this.$set(this.items, index, item);
-        this.filterText = '';
       }
     },
     filterItems(filterText) {
       if (!this.items) return;
       this.items.forEach((item) => {
         // eslint-disable-next-line no-param-reassign
-        item.isFiltered = item.name.toLowerCase().indexOf(filterText.toLowerCase()) < 0;
+        item.isFiltered =
+          item.name.toLowerCase().indexOf(filterText.toLowerCase()) < 0
+          && !item.isSelected;
       });
     },
     sortItems() {
@@ -94,10 +95,11 @@ export default {
 
 <style scoped lang="scss">
 .filter {
-  width: 10rem;
+  vertical-align: top;
+  width: 100%;
   padding: 0.6rem;
   margin: .2rem;
-  height: .5rem;
+  height: 2rem;
   font-size: 1rem;
   border: solid .05rem;
   border-color: #2c3e50;
