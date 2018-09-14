@@ -11,20 +11,32 @@
 
   <meta name="HandheldFriendly" content="True">
   <meta name="MobileOptimized" content="320">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 
-  <meta name="apple-mobile-web-app-title" content="Check-In">
+  <link rel="icon" href="<%= BASE_URL %>favicons/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="<%= BASE_URL %>favicons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="<%= BASE_URL %>favicons/favicon-16x16.png">
 
-  <link rel="icon" href="<%= BASE_URL %>favicon.ico">
-  <link rel="icon" href="<%= BASE_URL %>favicon.ico" sizes="192x192">
-  <link rel="apple-touch-icon" href="<%= BASE_URL %>favicon.ico" sizes="152x152">
+  <!--[if IE]><link rel="shortcut icon" href="<%= BASE_URL %>favicons/favicon.ico"><![endif]-->
 
-  <meta name="mobile-web-app-capable" content="yes">
+  <!-- Add to home screen for Android and modern mobile browsers -->
+  <link rel="manifest" href="<%= BASE_URL %>manifest.json">
   <meta name="theme-color" content="#ffffff">
+
+  <!-- Add to home screen for Safari on iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="white">
+  <meta name="apple-mobile-web-app-title" content="Check-In">
+  <link rel="apple-touch-icon" href="<%= BASE_URL %>favicons/apple-touch-icon-152x152.png">
+  <link rel="mask-icon" href="<%= BASE_URL %>favicons/safari-pinned-tab.svg" color="#000000">
+
+  <!-- Add to home screen for Windows -->
+  <meta name="msapplication-TileImage" content="<%= BASE_URL %>favicons/msapplication-icon-144x144.png">
+  <meta name="msapplication-TileColor" content="#ffffff">
   <meta name="msapplication-navbutton-color" content="#ffffff">
 
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100:300,400,500,700,900|Material+Icons" rel="stylesheet">
 </head>
 
 <body>
