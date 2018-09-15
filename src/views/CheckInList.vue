@@ -1,8 +1,13 @@
 <template>
-  <screen>
-    <button-add slot="right-action" to="/add-check-in" />
-    <template slot="title">Meine Check-Ins</template>
-    <div slot="content" class="check-in-list">
+  <div class="check-in-list">
+    <v-toolbar color="white" app>
+      <v-toolbar-title>Meine Check-Ins</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn icon to="/add-check-in">
+        <v-icon>add</v-icon>
+      </v-btn>
+    </v-toolbar>
+    <v-content>
       <div class="check-ins" v-for="checkIn in checkIns" v-bind:key="checkIn.time">
         <h2>{{ formatTime(checkIn.time) }}</h2>
         <p>
@@ -12,8 +17,8 @@
           <tag-list :items="checkIn.needs"></tag-list> brauche.
         </p>
       </div>
-    </div>
-  </screen>
+    </v-content>
+  </div>
 </template>
 
 <script>

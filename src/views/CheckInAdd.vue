@@ -1,8 +1,12 @@
 <template>
-  <screen>
-    <button-back slot="left-action" to="/check-ins" />
-    <template slot="title">Add Check-In</template>
-    <div slot="content" class="check-in-add">
+  <div class="check-in-add">
+    <v-toolbar color="white" app>
+      <v-btn icon to="/check-ins">
+        <v-icon>close</v-icon>
+      </v-btn>
+      <v-toolbar-title>Add Check-In</v-toolbar-title>
+    </v-toolbar>
+    <v-content>
       <h1>1. Beschreibe die Situation!</h1>
       Wenn <input v-model="situation" type="text" class="situation" />
       <h1>2. Wie fühlst du dich in der Situation?</h1>
@@ -24,8 +28,8 @@
           reset
         </button>
       </div>
-    </div>
-  </screen>
+    </v-content>
+  </div>
 </template>
 
 <script>
