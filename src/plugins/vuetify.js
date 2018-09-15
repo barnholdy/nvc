@@ -9,10 +9,11 @@ import {
   VIcon,
   VGrid,
   VToolbar,
+  VTextField,
   transitions,
 } from 'vuetify';
 import 'vuetify/src/stylus/app.styl';
-import colors from 'vuetify/es5/util/colors'
+import colors from 'vuetify/es5/util/colors';
 
 Vue.use(Vuetify, {
   components: {
@@ -24,11 +25,12 @@ Vue.use(Vuetify, {
     VIcon,
     VGrid,
     VToolbar,
+    VTextField,
     transitions,
   },
   theme: {
-    primary: colors.grey.lighten5,
-    secondary: colors.grey.lighten5,
+    primary: colors.cyan.darken2,
+    secondary: colors.cyan.lighten2,
     accent: colors.cyan.darken2,
     error: colors.red.base,
     warning: colors.yellow.base,

@@ -10,11 +10,11 @@
 <script>
 
 export const COLORS = {
-  green: 'green',
-  red: 'red',
-  yellow: 'yellow',
-  orange: 'orange',
-  blue: 'blue',
+  green: 'my-green',
+  red: 'my-red',
+  yellow: 'my-yellow',
+  orange: 'my-orange',
+  blue: 'my-blue',
 };
 
 export default {
@@ -50,49 +50,49 @@ $blue: #67CFC6;
   border: solid .05rem;
   user-select: none;
 }
-.green {
+.my-green {
   border-color: $green;
 }
-.red {
+.my-red {
   border-color: $red;
 }
-.yellow {
+.my-yellow {
   border-color: $yellow;
 }
-.orange {
+.my-orange {
   border-color: $orange;
 }
-.blue {
+.my-blue {
   border-color: $blue;
 }
-.green.active {
+.my-green.active {
   background-color: $green;
 }
-.red.active {
+.my-red.active {
   background-color: $red;
 }
-.yellow.active {
+.my-yellow.active {
   background-color: $yellow;
 }
-.orange.active {
+.my-orange.active {
   background-color: $orange;
 }
-.blue.active {
+.my-blue.active {
   background-color: $blue;
 }
-.green.inactive {
+.my-green.inactive {
   color: $green;
 }
-.red.inactive {
+.my-red.inactive {
   color: $red;
 }
-.yellow.inactive {
+.my-yellow.inactive {
   color: $yellow;
 }
-.orange.inactive {
+.my-orange.inactive {
   color: $orange;
 }
-.blue.inactive {
+.my-blue.inactive {
   color: $blue;
 }
 </style>
