@@ -1,5 +1,11 @@
 # nvc
 
+## Vue CLI 3 setup
+```
+npm install -g @vue/cli
+npm install -g @vue/cli-service-global
+```
+
 ## Project setup
 ```
 npm install
