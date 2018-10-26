@@ -15,7 +15,9 @@
           v-show="isStepSituation"
           :isComplete="isSituationComplete"
           @reset="resetSituation"
-          @situationChanged="situationChanged">
+          @situationChanged="situationChanged"
+          @situationFocussed="situationFocussed"
+          @situationBlurred="situationBlurred">
         </check-in-add-situation>
         <check-in-add-feeling
           v-show="isStepFeeling"
@@ -30,7 +32,7 @@
           @reset="resetNeed">
         </check-in-add-need>
       </v-container>
-      <v-footer fixed color="white elevation-3" height="44">
+      <v-footer :fixed="isFooterFixed" color="white elevation-3" height="44">
         <v-btn
           v-if="!isLastStep"
           :disabled="!isStepComplete"
@@ -76,6 +78,7 @@ export default {
       situation: '',
       availableFeelings: availableFeelings.feelings.filter(feeling => feeling.rank >= 0),
       availableNeeds: availableNeeds.needs.filter(feeling => feeling.rank >= 0),
+      isFooterFixed: true,
     };
   },
   computed: {
@@ -165,6 +168,12 @@ export default {
     },
     situationChanged(situation) {
       this.situation = situation;
+    },
+    situationFocussed() {
+      this.isFooterFixed = false;
+    },
+    situationBlurred() {
+      this.isFooterFixed = true;
     },
   },
 };

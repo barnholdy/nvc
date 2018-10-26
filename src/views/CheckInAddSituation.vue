@@ -10,6 +10,8 @@
         class="situation"
         v-model="situation"
         single-line
+        @focus="onSituationFocus"
+        @blur="onSituationBlur"
       ></v-text-field>
     </v-flex>
     <!--
@@ -49,6 +51,12 @@ export default {
     reset() {
       this.$emit('reset');
       this.situation = this.situationInitial;
+    },
+    onSituationFocus() {
+      this.$emit('situationFocussed', this.situation);
+    },
+    onSituationBlur() {
+      this.$emit('situationBlurred', this.situation);
     },
   },
 };
