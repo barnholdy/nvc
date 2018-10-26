@@ -34,7 +34,7 @@ export default {
 <style scoped lang="scss">
 $green: #4ed58b;
 $red: #fc5e53;
-$yellow: #D4D233;
+$yellow: #ABA929;
 $orange:#fd9927;
 $blue: #67CFC6;
 
