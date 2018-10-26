@@ -34,8 +34,8 @@ export default {
   },
   data() {
     return {
-      situationInitial: 'Wenn ...',
-      situation: 'Wenn ...',
+      situationInitial: 'Wenn ',
+      situation: 'Wenn ',
     };
   },
   props: {
