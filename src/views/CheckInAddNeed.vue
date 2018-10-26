@@ -6,6 +6,7 @@
     <v-flex>
       <tag-list :items="availableNeeds" :isInteractive="true"></tag-list>
     </v-flex>
+    <!--
     <v-flex>
       <v-btn
         :disabled="!isComplete"
@@ -14,6 +15,7 @@
         zurücksetzen
       </v-btn>
     </v-flex>
+    -->
   </v-layout>
 </template>
 
