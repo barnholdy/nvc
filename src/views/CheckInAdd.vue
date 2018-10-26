@@ -30,7 +30,7 @@
           @reset="resetNeed">
         </check-in-add-need>
       </v-container>
-      <v-footer fixed color="white elevation-3">
+      <v-footer fixed color="white elevation-3" height="44">
         <v-btn
           v-if="!isLastStep"
           :disabled="!isStepComplete"
