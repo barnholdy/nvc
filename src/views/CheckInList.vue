@@ -8,14 +8,18 @@
       </v-btn>
     </v-toolbar>
     <v-content>
-      <div class="check-ins" v-for="checkIn in checkIns" v-bind:key="checkIn.time">
-        <h2>{{ formatTime(checkIn.time) }}</h2>
-        <p>
-          <span class="situation">{{ checkIn.situation }}</span>, fühle ich mich
-          <tag-list :items="checkIn.feelings"></tag-list>, weil ich
-          <tag-list :items="checkIn.needs"></tag-list> brauche.
-        </p>
-      </div>
+      <v-card class="check-in" v-for="checkIn in checkIns" v-bind:key="checkIn.time">
+        <v-card-title primary-title>
+          <h2 class="subheading">{{ formatTime(checkIn.time) }}</h2>
+        </v-card-title>
+        <v-card-text>
+          <p>
+            <span class="situation">{{ checkIn.situation }}</span>, fühle ich mich
+            <tag-list :items="checkIn.feelings"></tag-list>, weil ich
+            <tag-list :items="checkIn.needs"></tag-list> brauche.
+          </p>
+        </v-card-text>
+      </v-card>
     </v-content>
   </div>
 </template>
@@ -53,11 +57,14 @@ $blue: #67CFC6;
   border-color: $blue;
   border-radius: 0;
   appearance: none;
-  height: 2rem;
-  line-height: 2rem;
+  height: 2.8rem;
+  line-height: 2.8rem;
   padding: 0 .6rem 0 .6rem;
 }
 .tag-list {
   display: inline-block;
+}
+.check-in {
+  margin: 1rem;
 }
 </style>
