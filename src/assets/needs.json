@@ -436,6 +436,11 @@
       "rank": 0
     },
     {
+      "name": "Lebendigkeit",
+      "type": "neutral",
+      "rank": 0
+    },
+    {
       "name": "Lernen",
       "type": "neutral",
       "rank": -99
@@ -854,6 +859,11 @@
     },
     {
       "name": "Zuspruch",
+      "type": "neutral",
+      "rank": 0
+    },
+    {
+      "name": "Zuversicht",
       "type": "neutral",
       "rank": 0
     },
