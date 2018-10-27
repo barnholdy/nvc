@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-toolbar color="white" app>
-      <v-btn v-if="isFirstStep" icon to="/check-ins">
+      <v-btn v-if="isFirstStep" icon @click="close">
         <v-icon>close</v-icon>
       </v-btn>
       <v-btn v-else icon @click="prevStep">
@@ -141,6 +141,10 @@ export default {
         this.$router.push('check-ins');
         this.reset();
       }
+    },
+    close() {
+      this.$router.push('check-ins');
+      this.reset();
     },
     reset() {
       this.resetSituation();
