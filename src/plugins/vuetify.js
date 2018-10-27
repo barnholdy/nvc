@@ -11,6 +11,8 @@ import {
   VToolbar,
   VTextField,
   VCard,
+  VDivider,
+  VDialog,
   transitions,
 } from 'vuetify';
 import 'vuetify/src/stylus/app.styl';
@@ -28,6 +30,8 @@ Vue.use(Vuetify, {
     VToolbar,
     VTextField,
     VCard,
+    VDivider,
+    VDialog,
     transitions,
   },
   theme: {

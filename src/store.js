@@ -44,6 +44,12 @@ export default new Vuex.Store({
       checkIn.time = +new Date(); // eslint-disable-line no-param-reassign
       state.checkIns.push(checkIn);
     },
+    deleteCheckIn(state, checkIn) {
+      const index = state.checkIns.indexOf(checkIn);
+      if (index > -1) {
+        state.checkIns.splice(index, 1);
+      }
+    },
   },
   actions: {
     loadCheckIns({ commit }) {
@@ -58,6 +64,14 @@ export default new Vuex.Store({
     },
     saveCheckIn({ commit, getters }, checkIn) {
       commit('addCheckIn', checkIn);
+      if (storageAvailable('localStorage')) {
+        localStorage.setItem(CHECK_INS_STORAGE_KEY, JSON.stringify(getters.checkIns));
+      } else {
+        throw new Error('Check-Ins were not saved persistently.');
+      }
+    },
+    deleteCheckIn({ commit, getters }, checkIn) {
+      commit('deleteCheckIn', checkIn);
       if (storageAvailable('localStorage')) {
         localStorage.setItem(CHECK_INS_STORAGE_KEY, JSON.stringify(getters.checkIns));
       } else {
