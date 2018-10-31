@@ -4,7 +4,11 @@
       <h1 class="headline font-weight-regular">Was brauchst du in der Situation?</h1>
     </v-flex>
     <v-flex>
-      <tag-list :items="availableNeeds" :isInteractive="true"></tag-list>
+      <tag-list
+        :items="availableNeeds"
+        :isInteractive="true"
+        :isFilterNameEnabled="true"
+      ></tag-list>
     </v-flex>
     <!--
     <v-flex>

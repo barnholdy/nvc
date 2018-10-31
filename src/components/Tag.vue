@@ -36,7 +36,7 @@ $green: #4ed58b;
 $red: #fc5e53;
 $yellow: #ABA929;
 $orange:#fd9927;
-$blue: #67CFC6;
+$blue: #5EBDB4;
 
 .tag {
   cursor: pointer;

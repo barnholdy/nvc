@@ -1,12 +1,25 @@
 <template>
   <div class="tag-list">
     <input
-      v-show="isInteractive"
-      v-model="filterText"
+      v-show="isInteractive && isFilterNameEnabled"
+      v-model="filterName"
       type="search"
       placeholder="suchen..."
       class="filter" />
     <br />
+    <v-slider
+      v-show="isInteractive && isFilterValenceEnabled"
+      v-model="filterValence"
+      step="1"
+      ticks="always"
+      tick-size="2"
+      min="-2"
+      max="2"
+      append-icon="mood"
+      prepend-icon="mood_bad"
+      color="primary"
+      track-color="primary"
+    ></v-slider>
     <tag
       v-for="(item, index) in items"
       :key="index"
@@ -33,18 +46,28 @@ export default {
       type: Boolean,
       default: false,
     },
+    isFilterNameEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    isFilterValenceEnabled: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
-      filterText: '',
+      filterName: '',
+      filterValence: 0,
     };
   },
   watch: {
-    filterText: 'filterItems',
+    filterName: 'filterItems',
+    filterValence: 'filterItems',
   },
   mounted() {
     this.sortItems();
-    this.filterItems(this.filterText);
+    this.filterItems();
   },
   methods: {
     toggleSelection(index) {
@@ -54,21 +77,30 @@ export default {
         this.$set(this.items, index, item);
       }
     },
-    filterItems(filterText) {
+    filterItems() {
       if (!this.items) return;
       this.items.forEach((item) => {
         // eslint-disable-next-line no-param-reassign
         item.isFiltered =
-          item.name.toLowerCase().indexOf(filterText.toLowerCase()) < 0
+          (
+            (
+              item.name.toLowerCase().indexOf(this.filterName.toLowerCase()) < 0
+              && this.isFilterNameEnabled
+            )
+            || (
+              parseInt(item.valence, 10) !== this.filterValence
+                && this.isFilterValenceEnabled
+            )
+          )
           && !item.isSelected;
       });
     },
     sortItems() {
       if (!this.items) return;
       this.items.sort((a, b) => {
-        if (a.type !== b.type) { // sort by type
-          if (a.type < b.type) return 1;
-          if (a.type > b.type) return -1;
+        if (a.valence !== b.valence) { // sort by valence
+          if (a.valence < b.valence) return 1;
+          if (a.valence > b.valence) return -1;
           return 0;
         }
         // within same type sort by name
@@ -78,15 +110,19 @@ export default {
       });
     },
     getColorForItem(item) {
-      switch (item.type) {
-        case 'positive':
+      switch (parseInt(item.valence, 10)) {
+        case 2:
           return COLORS.green;
-        case 'neutral':
-          return COLORS.yellow;
-        case 'negative':
+        case 1:
+          return COLORS.green;
+        case 0:
+          return COLORS.blue;
+        case -1:
+          return COLORS.red;
+        case -2:
           return COLORS.red;
         default:
-          return COLORS.blue;
+          return COLORS.yellow;
       }
     },
   },

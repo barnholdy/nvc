@@ -1,1734 +1,1868 @@
 {
   "feelings": [
     {
-      "name": "unternehmungslustig",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "erstaunt",
-      "type": "positive",
-      "rank": 0
-    },
-    {
       "name": "abenteuerlustig",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "angenehm",
-      "type": "positive",
-      "rank": -80,
-      "similar": "ausgeglichen"
-    },
-    {
-      "name": "angeregt",
-      "type": "positive",
-      "rank": -80,
-      "similar": "lebendig"
-    },
-    {
-      "name": "aufgeblüht",
-      "type": "positive",
-      "rank": -99,
-      "similar": "aufgeschlossen"
-    },
-    {
-      "name": "aufgedreht",
-      "type": "positive",
-      "rank": -80,
-      "similar": "euphorisch"
-    },
-    {
-      "name": "aufgemuntert",
-      "type": "positive",
-      "rank": -80,
-      "similar": "ausgeruht"
-    },
-    {
-      "name": "aufgeschlossen",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "aufgeweckt",
-      "type": "positive",
-      "rank": -80,
-      "similar": "lebendig"
-    },
-    {
-      "name": "aufmerksam",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "ausgeglichen",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "ausgeruht",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "befreit",
-      "type": "positive",
-      "rank": -80,
-      "similar": "frei"
-    },
-    {
-      "name": "befriedigt",
-      "type": "positive",
-      "rank": -80,
-      "similar": "glücklich"
-    },
-    {
-      "name": "begeistert",
-      "type": "positive",
-      "rank": -80,
-      "similar": "euphorisch"
-    },
-    {
-      "name": "behaglich",
-      "type": "positive",
-      "rank": -99
-    },
-    {
-      "name": "belebt",
-      "type": "positive",
-      "rank": -80,
-      "similar": "lebendig"
-    },
-    {
-      "name": "belustigt",
-      "type": "positive",
-      "rank": -80,
-      "similar": "fröhlich"
-    },
-    {
-      "name": "berauscht",
-      "type": "positive",
-      "rank": -80,
-      "similar": "euphorisch"
-    },
-    {
-      "name": "bereichert",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "beruhigt",
-      "type": "positive",
-      "rank": -80,
-      "similar": "ruhig"
-    },
-    {
-      "name": "berührt",
-      "type": "positive",
-      "rank": -80,
-      "similar": "bewegt"
-    },
-    {
-      "name": "besänftigt",
-      "type": "positive",
-      "rank": -80,
-      "similar": "gelassen"
-    },
-    {
-      "name": "beschaulich",
-      "type": "positive",
-      "rank": -99
-    },
-    {
-      "name": "beschwingt",
-      "type": "positive",
-      "rank": -80,
-      "similar": "fröhlich"
-    },
-    {
-      "name": "beteiligt",
-      "type": "positive",
-      "rank": -99
-    },
-    {
-      "name": "bewegt",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "bezaubert",
-      "type": "positive",
-      "rank": -99
-    },
-    {
-      "name": "dankbar",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "ehrfürchtig",
-      "type": "positive",
-      "rank": -80,
-      "similar": "dankbar"
-    },
-    {
-      "name": "eifrig",
-      "type": "positive",
-      "rank": -80,
-      "similar": "euphorisch"
-    },
-    {
-      "name": "einbezogen",
-      "type": "positive",
-      "rank": -99
-    },
-    {
-      "name": "ekstatisch",
-      "type": "positive",
-      "rank": -80,
-      "similar": "euphorisch"
-    },
-    {
-      "name": "elektrisiert",
-      "type": "positive",
-      "rank": -99
-    },
-    {
-      "name": "empfindend",
-      "type": "positive",
-      "rank": -99
-    },
-    {
-      "name": "energiegeladen",
-      "type": "positive",
-      "rank": -80,
-      "similar": "euphorisch"
-    },
-    {
-      "name": "energisch",
-      "type": "positive",
-      "rank": -99
-    },
-    {
-      "name": "enthusiastisch",
-      "type": "positive",
-      "rank": -80,
-      "similar": "euphorisch"
-    },
-    {
-      "name": "entlastet",
-      "type": "positive",
-      "rank": -80,
-      "similar": "gelassen"
-    },
-    {
-      "name": "entschlossen",
-      "type": "positive",
-      "rank": -80,
-      "similar": "optimistisch"
-    },
-    {
-      "name": "entspannt",
-      "type": "positive",
-      "rank": -80,
-      "similar": "gelassen"
-    },
-    {
-      "name": "entzückt",
-      "type": "positive",
-      "rank": -80,
-      "similar": "fröhlich"
-    },
-    {
-      "name": "erfreut",
-      "type": "positive",
-      "rank": -80,
-      "similar": "fröhlich"
-    },
-    {
-      "name": "erfrischt",
-      "type": "positive",
-      "rank": -80,
-      "similar": "lebendig"
-    },
-    {
-      "name": "erfüllt",
-      "type": "positive",
-      "rank": -80,
-      "similar": "glücklich"
-    },
-    {
-      "name": "ergriffen",
-      "type": "positive",
-      "rank": -80,
-      "similar": "bewegt"
-    },
-    {
-      "name": "erleichtert",
-      "type": "positive",
-      "rank": -80,
-      "similar": "frei"
-    },
-    {
-      "name": "ermutigt",
-      "type": "positive",
-      "rank": -80,
-      "similar": "mutig"
-    },
-    {
-      "name": "erquickt",
-      "type": "positive",
-      "rank": -99
-    },
-    {
-      "name": "erwartungsvoll",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "euphorisch",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "fasziniert",
-      "type": "positive",
-      "rank": -80,
-      "similar": "erstaunt"
-    },
-    {
-      "name": "frei",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "freund(schaft)lich",
-      "type": "positive",
-      "rank": -80,
-      "similar": "fröhlich"
-    },
-    {
-      "name": "friedlich",
-      "type": "positive",
-      "rank": -80,
-      "similar": "glücklich"
-    },
-    {
-      "name": "froh",
-      "type": "positive",
-      "rank": -80,
-      "similar": "fröhlich"
-    },
-    {
-      "name": "fröhlich",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "gebannt",
-      "type": "positive",
-      "rank": -80,
-      "similar": "erstaunt"
-    },
-    {
-      "name": "gefasst",
-      "type": "positive",
-      "rank": -80,
-      "similar": "aufmerksam"
-    },
-    {
-      "name": "gelassen",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "gelöst",
-      "type": "positive",
-      "rank": -99
-    },
-    {
-      "name": "gerührt",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "gesammelt",
-      "type": "positive",
-      "rank": -80,
-      "similar": "aufmerksam"
-    },
-    {
-      "name": "geschützt",
-      "type": "positive",
-      "rank": -80,
-      "similar": "sicher"
-    },
-    {
-      "name": "gespannt",
-      "type": "positive",
-      "rank": -80,
-      "similar": "aufmerksam"
-    },
-    {
-      "name": "getröstet",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "glücklich",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "gutgelaunt",
-      "type": "positive",
-      "rank": -80,
-      "similar": "euphorisch"
-    },
-    {
-      "name": "harmonisch",
-      "type": "positive",
-      "rank": -80,
-      "similar": "ausgeglichen"
-    },
-    {
-      "name": "heiter",
-      "type": "positive",
-      "rank": -80,
-      "similar": "fröhlich"
-    },
-    {
-      "name": "hellwach",
-      "type": "positive",
-      "rank": -80,
-      "similar": "aufmerksam"
-    },
-    {
-      "name": "herzlich",
-      "type": "positive",
-      "rank": -80,
-      "similar": "warmherzig"
-    },
-    {
-      "name": "hilfsbereit",
-      "type": "positive",
-      "rank": -99
-    },
-    {
-      "name": "hingegeben",
-      "type": "positive",
-      "rank": -99
-    },
-    {
-      "name": "hingerissen",
-      "type": "positive",
-      "rank": -99
-    },
-    {
-      "name": "hocherfreut",
-      "type": "positive",
-      "rank": -80,
-      "similar": "euphorisch"
-    },
-    {
-      "name": "hoffnungsvoll",
-      "type": "positive",
-      "rank": -80,
-      "similar": "optimistisch"
-    },
-    {
-      "name": "humorvoll",
-      "type": "positive",
-      "rank": -80,
-      "similar": "fröhlich"
-    },
-    {
-      "name": "inspiriert",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "interessiert",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "jubelnd",
-      "type": "positive",
-      "rank": -80,
-      "similar": "euphorisch"
-    },
-    {
-      "name": "klar",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "konzentriert",
-      "type": "positive",
-      "rank": -80,
-      "similar": "aufmerksam"
-    },
-    {
-      "name": "kraftvoll",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "kreativ",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "lebendig",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "leicht",
-      "type": "positive",
+      "valence": 1,
       "rank": 0,
-      "similar": "erleichtert"
-    },
-    {
-      "name": "leidenschaftlich",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "liebevoll",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "locker",
-      "type": "positive",
-      "rank": -80,
-      "similar": "gelassen"
-    },
-    {
-      "name": "lustig",
-      "type": "positive",
-      "rank": -80,
-      "similar": "fröhlich"
-    },
-    {
-      "name": "mitfühlend",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "motiviert",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "munter",
-      "type": "positive",
-      "rank": -80,
-      "similar": "ausgeruht"
-    },
-    {
-      "name": "mutig",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "nah",
-      "type": "positive",
-      "rank": -80,
-      "similar": "zuneigend"
-    },
-    {
-      "name": "neugierig",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "offen(-herzig)",
-      "type": "positive",
-      "rank": -80,
-      "similar": "aufgeschlossen"
-    },
-    {
-      "name": "optimistisch",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "ruhig",
-      "type": "positive",
-      "rank": -80,
-      "similar": "ausgeglichen"
-    },
-    {
-      "name": "still",
-      "type": "neutral",
-      "rank": -80,
-      "similar": "ruhig"
-    },
-    {
-      "name": "sanft",
-      "type": "positive",
-      "rank": -80,
-      "similar": "gelassen"
-    },
-    {
-      "name": "satt",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "schwungvoll",
-      "type": "positive",
-      "rank": -80,
-      "similar": "fröhlich"
-    },
-    {
-      "name": "selbstsicher",
-      "type": "positive",
-      "rank": -80,
-      "similar": "sicher"
-    },
-    {
-      "name": "selig",
-      "type": "positive",
-      "rank": -99
-    },
-    {
-      "name": "sicher",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "souverän",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "spritzig",
-      "type": "positive",
-      "rank": -99
-    },
-    {
-      "name": "stark",
-      "type": "positive",
-      "rank": -80,
-      "similar": "kraftvoll"
-    },
-    {
-      "name": "staunend",
-      "type": "positive",
-      "rank": -80,
-      "similar": "erstaunt"
-    },
-    {
-      "name": "stimuliert",
-      "type": "positive",
-      "rank": -80,
-      "similar": "lebendig"
-    },
-    {
-      "name": "stolz",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "strahlend",
-      "type": "positive",
-      "rank": -80,
-      "similar": "euphorisch"
-    },
-    {
-      "name": "tatkräftig",
-      "type": "positive",
-      "rank": -80,
-      "similar": "lebendig"
-    },
-    {
-      "name": "teilnahmsvoll",
-      "type": "positive",
-      "rank": -99
-    },
-    {
-      "name": "überglücklich",
-      "type": "positive",
-      "rank": -80,
-      "similar": "euphorisch"
-    },
-    {
-      "name": "unbekümmert",
-      "type": "positive",
-      "rank": -80,
-      "similar": "glücklich"
-    },
-    {
-      "name": "unbeschwert",
-      "type": "positive",
-      "rank": -80,
-      "similar": "glücklich"
-    },
-    {
-      "name": "unbesorgt",
-      "type": "positive",
-      "rank": -80,
-      "similar": "glücklich"
-    },
-    {
-      "name": "verblüfft",
-      "type": "positive",
-      "rank": -80,
-      "similar": "erstaunt"
-    },
-    {
-      "name": "vergnügt",
-      "type": "positive",
-      "rank": -80,
-      "similar": "fröhlich"
-    },
-    {
-      "name": "verliebt",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "versichert",
-      "type": "positive",
-      "rank": -99
-    },
-    {
-      "name": "vertrauensvoll",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "verzaubert",
-      "type": "positive",
-      "rank": -99
-    },
-    {
-      "name": "wach(sam)",
-      "type": "positive",
-      "rank": -80,
-      "similar": "aufmerksam"
-    },
-    {
-      "name": "warmherzig",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "wohl(ig)",
-      "type": "positive",
-      "rank": -80,
-      "similar": "warmherzig"
-    },
-    {
-      "name": "wohlgemut",
-      "type": "positive",
-      "rank": -99
-    },
-    {
-      "name": "wohlwollend",
-      "type": "positive",
-      "rank": -80,
-      "similar": "liebevoll"
-    },
-    {
-      "name": "zart",
-      "type": "positive",
-      "rank": -99
-    },
-    {
-      "name": "zärtlich",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "zentriert",
-      "type": "positive",
-      "rank": -80,
-      "similar": "ausgeglichen"
-    },
-    {
-      "name": "zufrieden",
-      "type": "positive",
-      "rank": -80,
-      "similar": "glücklich"
-    },
-    {
-      "name": "zuneigend",
-      "type": "positive",
-      "rank": 0
-    },
-    {
-      "name": "zutraulich",
-      "type": "positive",
-      "rank": -80,
-      "similar": "zuneigend"
-    },
-    {
-      "name": "zuversichtlich",
-      "type": "positive",
-      "rank": -80,
-      "similar": "optimistisch"
-    },
-    {
-      "name": "nüchtern",
-      "type": "negative",
-      "rank": -99
-    },
-    {
-      "name": "aufgebracht",
-      "type": "negative",
-      "rank": -80,
-      "similar": "ärgerlich"
+      "similar": ""
     },
     {
       "name": "abgeneigt",
-      "type": "negative",
-      "rank": -99
+      "valence": -1,
+      "rank": -80,
+      "similar": ""
     },
     {
       "name": "abgeschlagen",
-      "type": "negative",
-      "rank": -99
+      "valence": "",
+      "rank": -99,
+      "similar": ""
     },
     {
       "name": "abgespannt",
-      "type": "negative",
-      "rank": -80,
+      "valence": -1,
+      "rank": -99,
       "similar": "angespannt"
     },
     {
       "name": "alarmiert",
-      "type": "negative",
-      "rank": -99
+      "valence": 0,
+      "rank": -80,
+      "similar": ""
     },
     {
       "name": "allein",
-      "type": "negative",
+      "valence": 0,
       "rank": -80,
       "similar": "einsam"
     },
     {
       "name": "angeekelt",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "angenehm",
+      "valence": "",
+      "rank": -99,
+      "similar": "ausgeglichen"
     },
     {
       "name": "angeödet",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "gelangweilt"
     },
     {
+      "name": "angeregt",
+      "valence": 1,
+      "rank": -80,
+      "similar": "lebendig"
+    },
+    {
       "name": "angespannt",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "angewidert",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "abgeneigt"
     },
     {
       "name": "ängstlich",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "apathisch",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "teilnahmslos"
     },
     {
       "name": "ärgerlich",
-      "type": "negative",
-      "rank": 0
+      "valence": -2,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "argwöhnisch",
-      "type": "negative",
+      "valence": "",
+      "rank": -99,
+      "similar": "ärgerlich"
+    },
+    {
+      "name": "aufgeblüht",
+      "valence": "",
+      "rank": -99,
+      "similar": "aufgeschlossen"
+    },
+    {
+      "name": "aufgebracht",
+      "valence": -2,
       "rank": -80,
       "similar": "ärgerlich"
+    },
+    {
+      "name": "aufgedreht",
+      "valence": 2,
+      "rank": -80,
+      "similar": "euphorisch"
+    },
+    {
+      "name": "aufgemuntert",
+      "valence": 1,
+      "rank": -80,
+      "similar": "ausgeruht"
     },
     {
       "name": "aufgeregt",
-      "type": "negative",
+      "valence": 0,
       "rank": -80,
       "similar": "ärgerlich"
     },
     {
+      "name": "aufgeschlossen",
+      "valence": 1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "aufgeweckt",
+      "valence": 1,
+      "rank": -80,
+      "similar": "lebendig"
+    },
+    {
       "name": "aufgewühlt",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "aufmerksam",
+      "valence": 0,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "ausgeglichen",
+      "valence": 0,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "ausgehungert",
-      "type": "negative",
-      "rank": -99
+      "valence": "",
+      "rank": -99,
+      "similar": ""
     },
     {
       "name": "ausgelaugt",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "erschöpft"
     },
     {
+      "name": "ausgeruht",
+      "valence": 0,
+      "rank": 0,
+      "similar": ""
+    },
+    {
       "name": "außer mir",
-      "type": "negative",
-      "rank": -80,
+      "valence": "",
+      "rank": -99,
       "similar": "getrennt"
     },
     {
       "name": "bedrückt",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "unwohl"
     },
     {
+      "name": "befreit",
+      "valence": 2,
+      "rank": -99,
+      "similar": "frei"
+    },
+    {
+      "name": "befriedigt",
+      "valence": 1,
+      "rank": -80,
+      "similar": "glücklich"
+    },
+    {
+      "name": "begeistert",
+      "valence": 2,
+      "rank": -80,
+      "similar": "euphorisch"
+    },
+    {
+      "name": "behaglich",
+      "valence": "",
+      "rank": -99,
+      "similar": ""
+    },
+    {
       "name": "beklommen",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "bedrückt"
     },
     {
       "name": "bekümmert",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "besorgt"
     },
     {
+      "name": "belebt",
+      "valence": 1,
+      "rank": -80,
+      "similar": "lebendig"
+    },
+    {
       "name": "beleidigt",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "belustigt",
+      "valence": 1,
+      "rank": -80,
+      "similar": "fröhlich"
+    },
+    {
+      "name": "berauscht",
+      "valence": "weiß nicht",
+      "rank": -80,
+      "similar": "euphorisch"
+    },
+    {
+      "name": "bereichert",
+      "valence": 1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "beruhigt",
+      "valence": "",
+      "rank": -99,
+      "similar": "ruhig"
+    },
+    {
+      "name": "berührt",
+      "valence": 1,
+      "rank": -80,
+      "similar": "bewegt"
+    },
+    {
+      "name": "besänftigt",
+      "valence": 1,
+      "rank": -80,
+      "similar": "gelassen"
     },
     {
       "name": "beschämt",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "beschaulich",
+      "valence": "",
+      "rank": -99,
+      "similar": ""
+    },
+    {
+      "name": "beschwingt",
+      "valence": 1,
+      "rank": -80,
+      "similar": "fröhlich"
     },
     {
       "name": "besorgt",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "bestürzt",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "betroffen"
     },
     {
+      "name": "beteiligt",
+      "valence": "",
+      "rank": -99,
+      "similar": ""
+    },
+    {
       "name": "betroffen",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "betrübt",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "bedrückt"
     },
     {
+      "name": "bewegt",
+      "valence": 1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "bezaubert",
+      "valence": "",
+      "rank": -99,
+      "similar": ""
+    },
+    {
       "name": "bitter",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "verbittert"
     },
     {
       "name": "blockiert",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "lethargisch"
     },
     {
+      "name": "dankbar",
+      "valence": 1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
       "name": "depressiv",
-      "type": "negative",
-      "rank": 0
+      "valence": -2,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "deprimiert",
-      "type": "negative",
-      "rank": 0
+      "valence": -2,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "dumpf",
-      "type": "negative",
-      "rank": -99
+      "valence": "",
+      "rank": -99,
+      "similar": ""
     },
     {
       "name": "durcheinander",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "dürstend",
-      "type": "negative",
-      "rank": -99
+      "valence": "",
+      "rank": -99,
+      "similar": ""
+    },
+    {
+      "name": "ehrfürchtig",
+      "valence": 1,
+      "rank": -80,
+      "similar": "dankbar"
     },
     {
       "name": "eifersüchtig",
-      "type": "negative",
-      "rank": 0
+      "valence": -2,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "eifrig",
+      "valence": 1,
+      "rank": -80,
+      "similar": "euphorisch"
+    },
+    {
+      "name": "einbezogen",
+      "valence": "",
+      "rank": -99,
+      "similar": ""
     },
     {
       "name": "einsam",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "ekstatisch",
+      "valence": "weiß nicht",
+      "rank": -80,
+      "similar": "euphorisch"
+    },
+    {
+      "name": "elektrisiert",
+      "valence": "",
+      "rank": -99,
+      "similar": ""
     },
     {
       "name": "elend",
-      "type": "negative",
-      "rank": 0
+      "valence": -2,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "empfindend",
+      "valence": "",
+      "rank": -99,
+      "similar": ""
     },
     {
       "name": "empört",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "ärgerlich"
     },
     {
+      "name": "energiegeladen",
+      "valence": 2,
+      "rank": -80,
+      "similar": "euphorisch"
+    },
+    {
       "name": "energielos",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "erschöpft"
     },
     {
+      "name": "energisch",
+      "valence": "",
+      "rank": -99,
+      "similar": ""
+    },
+    {
+      "name": "enthusiastisch",
+      "valence": 2,
+      "rank": -80,
+      "similar": "euphorisch"
+    },
+    {
+      "name": "entlastet",
+      "valence": 0,
+      "rank": -80,
+      "similar": "gelassen"
+    },
+    {
       "name": "entmutigt",
-      "type": "negative",
-      "rank": 0
+      "valence": -2,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "entrüstet",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "entsetzt"
     },
     {
+      "name": "entschlossen",
+      "valence": 1,
+      "rank": -80,
+      "similar": "optimistisch"
+    },
+    {
       "name": "entsetzt",
-      "type": "negative",
-      "rank": 0
+      "valence": -2,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "entspannt",
+      "valence": 2,
+      "rank": -80,
+      "similar": "gelassen"
     },
     {
       "name": "enttäuscht",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "entwaffnet",
-      "type": "negative",
-      "rank": -99
+      "valence": "",
+      "rank": -99,
+      "similar": ""
+    },
+    {
+      "name": "entzückt",
+      "valence": 2,
+      "rank": -80,
+      "similar": "fröhlich"
     },
     {
       "name": "erbost",
-      "type": "negative",
-      "rank": -80,
+      "valence": -2,
+      "rank": -99,
       "similar": "ärgerlich"
     },
     {
-      "name": "ermüdet",
-      "type": "negative",
+      "name": "erfreut",
+      "valence": 2,
       "rank": -80,
+      "similar": "fröhlich"
+    },
+    {
+      "name": "erfrischt",
+      "valence": 1,
+      "rank": -80,
+      "similar": "lebendig"
+    },
+    {
+      "name": "erfüllt",
+      "valence": 2,
+      "rank": -80,
+      "similar": "glücklich"
+    },
+    {
+      "name": "ergriffen",
+      "valence": 0,
+      "rank": -80,
+      "similar": "bewegt"
+    },
+    {
+      "name": "erleichtert",
+      "valence": 1,
+      "rank": -99,
+      "similar": "leicht"
+    },
+    {
+      "name": "ermüdet",
+      "valence": -2,
+      "rank": -99,
       "similar": "erschöpft"
     },
     {
+      "name": "ermutigt",
+      "valence": "",
+      "rank": -99,
+      "similar": "mutig"
+    },
+    {
       "name": "ernüchtert",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "erquickt",
+      "valence": "",
+      "rank": -99,
+      "similar": ""
     },
     {
       "name": "erregt",
-      "type": "negative",
+      "valence": 0,
       "rank": -80,
       "similar": "aufgeregt"
     },
     {
       "name": "erschlagen",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "erschöpft"
     },
     {
       "name": "erschöpft",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "erschreckt",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "ängstlich"
     },
     {
       "name": "erschüttert",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "entsetzt"
     },
     {
       "name": "erstarrt",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "entsetzt"
+    },
+    {
+      "name": "erstaunt",
+      "valence": 1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "erwartungsvoll",
+      "valence": 1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "euphorisch",
+      "valence": 2,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "fassungslos",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "entsetzt"
     },
     {
+      "name": "fasziniert",
+      "valence": 1,
+      "rank": -80,
+      "similar": "erstaunt"
+    },
+    {
       "name": "faul",
-      "type": "negative",
-      "rank": -99
+      "valence": "",
+      "rank": -99,
+      "similar": ""
     },
     {
       "name": "finster",
-      "type": "negative",
-      "rank": -80,
+      "valence": -2,
+      "rank": -99,
       "similar": "verbittert"
     },
     {
+      "name": "frei",
+      "valence": 2,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "freund(schaft)lich",
+      "valence": 1,
+      "rank": -80,
+      "similar": "fröhlich"
+    },
+    {
+      "name": "friedlich",
+      "valence": 0,
+      "rank": -80,
+      "similar": "glücklich"
+    },
+    {
+      "name": "froh",
+      "valence": 1,
+      "rank": -80,
+      "similar": "fröhlich"
+    },
+    {
+      "name": "fröhlich",
+      "valence": 2,
+      "rank": 0,
+      "similar": ""
+    },
+    {
       "name": "frustriert",
-      "type": "negative",
-      "rank": 0
+      "valence": -2,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "furchtsam",
-      "type": "negative",
-      "rank": -80,
+      "valence": "",
+      "rank": -99,
       "similar": "ängstlich"
     },
     {
       "name": "geängstigt",
-      "type": "negative",
-      "rank": -80,
+      "valence": "",
+      "rank": -99,
       "similar": "ängstlich"
     },
     {
+      "name": "gebannt",
+      "valence": 0,
+      "rank": -80,
+      "similar": "erstaunt"
+    },
+    {
+      "name": "gefasst",
+      "valence": 0,
+      "rank": -80,
+      "similar": "aufmerksam"
+    },
+    {
       "name": "gefühllos",
-      "type": "negative",
-      "rank": -99
+      "valence": "",
+      "rank": -99,
+      "similar": ""
     },
     {
       "name": "gehemmt",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "gekränkt",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "geladen",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "angespannt"
     },
     {
       "name": "gelähmt",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "teilnahmslos"
     },
     {
       "name": "gelangweilt",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "gelassen",
+      "valence": 2,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "gelöst",
+      "valence": "",
+      "rank": -99,
+      "similar": ""
     },
     {
       "name": "genervt",
-      "type": "negative",
-      "rank": 0
+      "valence": -2,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "gequält",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "elend"
     },
     {
       "name": "gerädert",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "erschöpft"
     },
     {
       "name": "gereizt",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "angespannt"
     },
     {
+      "name": "gerührt",
+      "valence": 1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "gesammelt",
+      "valence": 0,
+      "rank": -80,
+      "similar": "aufmerksam"
+    },
+    {
+      "name": "geschützt",
+      "valence": 0,
+      "rank": -80,
+      "similar": "sicher"
+    },
+    {
+      "name": "gespannt",
+      "valence": 0,
+      "rank": -80,
+      "similar": "aufmerksam"
+    },
+    {
       "name": "gestresst",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "angespannt"
     },
     {
       "name": "getrennt",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "getröstet",
+      "valence": 0,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "gleichgültig",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "teilnahmslos"
     },
     {
+      "name": "glücklich",
+      "valence": 2,
+      "rank": 0,
+      "similar": ""
+    },
+    {
       "name": "grollend",
-      "type": "negative",
-      "rank": -80,
+      "valence": -2,
+      "rank": -99,
       "similar": "verbittert"
     },
     {
+      "name": "gutgelaunt",
+      "valence": "",
+      "rank": -99,
+      "similar": "euphorisch"
+    },
+    {
+      "name": "harmonisch",
+      "valence": 1,
+      "rank": -80,
+      "similar": "ausgeglichen"
+    },
+    {
       "name": "hasserfüllt",
-      "type": "negative",
-      "rank": 0
+      "valence": -2,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "heiter",
+      "valence": 2,
+      "rank": -80,
+      "similar": "fröhlich"
+    },
+    {
+      "name": "hellwach",
+      "valence": 2,
+      "rank": -80,
+      "similar": "aufmerksam"
+    },
+    {
+      "name": "herzlich",
+      "valence": 2,
+      "rank": -80,
+      "similar": "warmherzig"
     },
     {
       "name": "hilflos",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "hilfsbereit",
+      "valence": "",
+      "rank": -99,
+      "similar": ""
     },
     {
       "name": "hin- und hergerissen",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "unentschlossen"
     },
     {
+      "name": "hingegeben",
+      "valence": "",
+      "rank": -99,
+      "similar": ""
+    },
+    {
+      "name": "hingerissen",
+      "valence": "",
+      "rank": -99,
+      "similar": ""
+    },
+    {
+      "name": "hocherfreut",
+      "valence": 2,
+      "rank": -80,
+      "similar": "euphorisch"
+    },
+    {
+      "name": "hoffnungsvoll",
+      "valence": 1,
+      "rank": -80,
+      "similar": "optimistisch"
+    },
+    {
+      "name": "humorvoll",
+      "valence": 2,
+      "rank": -80,
+      "similar": "fröhlich"
+    },
+    {
+      "name": "inspiriert",
+      "valence": 2,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "interessiert",
+      "valence": 1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
       "name": "irritiert",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "jubelnd",
+      "valence": 2,
+      "rank": -80,
+      "similar": "euphorisch"
     },
     {
       "name": "kalt",
-      "type": "negative",
-      "rank": -80,
+      "valence": "",
+      "rank": -99,
       "similar": "gefühllos"
     },
     {
       "name": "kaputt",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "erschöpft"
     },
     {
+      "name": "klar",
+      "valence": 1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "konzentriert",
+      "valence": 0,
+      "rank": -80,
+      "similar": "aufmerksam"
+    },
+    {
+      "name": "kraftvoll",
+      "valence": 2,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "kreativ",
+      "valence": 1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
       "name": "kribbelig",
-      "type": "negative",
-      "rank": -99
+      "valence": "",
+      "rank": -99,
+      "similar": ""
     },
     {
       "name": "kummervoll",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "besorgt"
     },
     {
       "name": "lasch",
-      "type": "negative",
-      "rank": -80,
+      "valence": "",
+      "rank": -99,
       "similar": "erschöpft"
     },
     {
+      "name": "lebendig",
+      "valence": 1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
       "name": "leblos",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "getrennt"
     },
     {
+      "name": "leicht",
+      "valence": 2,
+      "rank": 0,
+      "similar": "erleichtert"
+    },
+    {
+      "name": "leidenschaftlich",
+      "valence": 2,
+      "rank": 0,
+      "similar": ""
+    },
+    {
       "name": "leiderfüllt",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "unglücklich"
     },
     {
       "name": "lethargisch",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "lustlos"
     },
     {
+      "name": "liebevoll",
+      "valence": 2,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "locker",
+      "valence": 1,
+      "rank": -80,
+      "similar": "gelassen"
+    },
+    {
+      "name": "lustig",
+      "valence": 1,
+      "rank": -80,
+      "similar": "fröhlich"
+    },
+    {
       "name": "lustlos",
-      "type": "negative",
-      "rank": 0
+      "valence": -2,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "melancholisch",
-      "type": "negative",
+      "valence": 0,
       "rank": -80,
-      "similar": "v"
+      "similar": ""
     },
     {
       "name": "miserabel",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "elend"
     },
     {
       "name": "misstrauisch",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "mitfühlend",
+      "valence": 2,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "mittellos",
-      "type": "negative",
-      "rank": -99
+      "valence": "",
+      "rank": -99,
+      "similar": ""
+    },
+    {
+      "name": "motiviert",
+      "valence": 2,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "müde",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "munter",
+      "valence": 1,
+      "rank": -80,
+      "similar": "ausgeruht"
     },
     {
       "name": "mürrisch",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "verbittert"
     },
     {
+      "name": "mutig",
+      "valence": 1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
       "name": "mutlos",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "ängstlich"
     },
     {
+      "name": "nah",
+      "valence": 1,
+      "rank": -80,
+      "similar": "zuneigend"
+    },
+    {
       "name": "nervös",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "ruhelos"
     },
     {
+      "name": "neugierig",
+      "valence": 1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
       "name": "niedergeschlagen",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "deprimiert"
     },
     {
+      "name": "nüchtern",
+      "valence": "",
+      "rank": -99,
+      "similar": ""
+    },
+    {
+      "name": "offen(-herzig)",
+      "valence": 1,
+      "rank": -80,
+      "similar": "aufgeschlossen"
+    },
+    {
       "name": "ohnmächtig",
-      "type": "negative",
-      "rank": 0
+      "valence": -2,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "optimistisch",
+      "valence": 2,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "panisch",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "verzweifelt"
     },
     {
       "name": "passiv",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "teilnahmslos"
     },
     {
       "name": "peinlich berührt",
-      "type": "negative",
-      "rank": -80,
+      "valence": "",
+      "rank": -99,
       "similar": "beschämt"
     },
     {
       "name": "perplex",
-      "type": "negative",
+      "valence": 0,
       "rank": -80,
       "similar": "überrascht"
     },
     {
       "name": "pessimistisch",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "rachsüchtig",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "hasserfüllt"
     },
     {
       "name": "rasend",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "hasserfüllt"
     },
     {
       "name": "ruhelos",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "ruhig",
+      "valence": 0,
+      "rank": -80,
+      "similar": "ausgeglichen"
+    },
+    {
+      "name": "sanft",
+      "valence": 0,
+      "rank": -80,
+      "similar": "gelassen"
+    },
+    {
+      "name": "satt",
+      "valence": 0,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "sauer",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "ärgerlich"
     },
     {
       "name": "scheu",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "ängstlich"
     },
     {
       "name": "schläfrig",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "erschöpft"
     },
     {
       "name": "schlapp",
-      "type": "negative",
-      "rank": -80,
+      "valence": "",
+      "rank": -99,
       "similar": "erschöpft"
     },
     {
       "name": "schlecht",
-      "type": "negative",
-      "rank": -99
+      "valence": "",
+      "rank": -99,
+      "similar": ""
     },
     {
       "name": "schmerzhaft",
-      "type": "negative",
-      "rank": -99
+      "valence": "",
+      "rank": -99,
+      "similar": ""
     },
     {
       "name": "schockiert",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "entsetzt"
     },
     {
       "name": "schüchtern",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "gehemmt"
     },
     {
       "name": "schwach",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "erschöpft"
     },
     {
       "name": "schwankend",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "erschöpft"
     },
     {
       "name": "schwer",
-      "type": "negative",
-      "rank": -80,
+      "valence": -1,
+      "rank": -99,
       "similar": "schwerfällig"
     },
     {
       "name": "schwerfällig",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "lustlos"
     },
     {
+      "name": "schwungvoll",
+      "valence": 1,
+      "rank": -99,
+      "similar": "beschwingt"
+    },
+    {
       "name": "seelenwund",
-      "type": "negative",
-      "rank": -99
+      "valence": "",
+      "rank": -99,
+      "similar": ""
     },
     {
       "name": "sehnsüchtig",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "selbstsicher",
+      "valence": 2,
+      "rank": -80,
+      "similar": "sicher"
+    },
+    {
+      "name": "selig",
+      "valence": "",
+      "rank": -99,
+      "similar": ""
+    },
+    {
+      "name": "sicher",
+      "valence": 0,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "skeptisch",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "pessimistisch"
     },
     {
       "name": "sorgenvoll",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "besorgt"
     },
     {
+      "name": "souverän",
+      "valence": 2,
+      "rank": 0,
+      "similar": ""
+    },
+    {
       "name": "sprachlos",
-      "type": "negative",
+      "valence": 0,
       "rank": -80,
       "similar": "getrennt"
     },
     {
+      "name": "spritzig",
+      "valence": "",
+      "rank": -99,
+      "similar": ""
+    },
+    {
+      "name": "stark",
+      "valence": 2,
+      "rank": -80,
+      "similar": "kraftvoll"
+    },
+    {
       "name": "starr",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "teilnahmslos"
     },
     {
+      "name": "staunend",
+      "valence": "",
+      "rank": -99,
+      "similar": "erstaunt"
+    },
+    {
+      "name": "still",
+      "valence": 0,
+      "rank": -80,
+      "similar": "ruhig"
+    },
+    {
+      "name": "stimuliert",
+      "valence": 2,
+      "rank": -80,
+      "similar": "lebendig"
+    },
+    {
+      "name": "stolz",
+      "valence": 2,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "strahlend",
+      "valence": 2,
+      "rank": -80,
+      "similar": "euphorisch"
+    },
+    {
       "name": "streitlustig",
-      "type": "negative",
-      "rank": 0
+      "valence": -2,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "stutzig",
-      "type": "negative",
-      "rank": -99
+      "valence": "",
+      "rank": -99,
+      "similar": ""
+    },
+    {
+      "name": "tatkräftig",
+      "valence": 2,
+      "rank": -80,
+      "similar": "lebendig"
     },
     {
       "name": "teilnahmslos",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "teilnahmsvoll",
+      "valence": "",
+      "rank": -99,
+      "similar": ""
     },
     {
       "name": "träge",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "erschöpft"
     },
     {
       "name": "traurig",
-      "type": "negative",
-      "rank": 0
+      "valence": -2,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "überdrüssig",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "frustriert"
     },
     {
+      "name": "überglücklich",
+      "valence": 2,
+      "rank": -80,
+      "similar": "euphorisch"
+    },
+    {
       "name": "überlastet",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "erschöpft"
     },
     {
       "name": "überrascht",
-      "type": "negative",
-      "rank": 0
+      "valence": 0,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "übersättigt",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "überwältigt"
     },
     {
       "name": "überwältigt",
-      "type": "negative",
-      "rank": 0
+      "valence": -2,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "unbehaglich",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "unwohl"
     },
     {
+      "name": "unbekümmert",
+      "valence": 1,
+      "rank": -80,
+      "similar": "glücklich"
+    },
+    {
+      "name": "unbeschwert",
+      "valence": 1,
+      "rank": -80,
+      "similar": "glücklich"
+    },
+    {
+      "name": "unbesorgt",
+      "valence": 1,
+      "rank": -80,
+      "similar": "glücklich"
+    },
+    {
       "name": "unentschlossen",
-      "type": "negative",
-      "rank": 0
+      "valence": 0,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "ungeduldig",
-      "type": "negative",
-      "rank": 0
+      "valence": 0,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "ungläubig",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "misstrauisch"
     },
     {
       "name": "unglücklich",
-      "type": "negative",
-      "rank": 0
+      "valence": -2,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "unruhig",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "ruhelos"
     },
     {
       "name": "unsicher",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "unternehmungslustig",
+      "valence": 2,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "unwohl",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "unzufrieden",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "unglücklich"
     },
     {
       "name": "veraltet",
-      "type": "negative",
-      "rank": -99
+      "valence": "",
+      "rank": -99,
+      "similar": ""
     },
     {
       "name": "verängstigt",
-      "type": "negative",
-      "rank": -80,
+      "valence": "",
+      "rank": -99,
       "similar": "ängstlich"
     },
     {
       "name": "verärgert",
-      "type": "negative",
-      "rank": -80,
+      "valence": "",
+      "rank": -99,
       "similar": "ärgerlich"
     },
     {
       "name": "verbittert",
-      "type": "negative",
-      "rank": -80,
+      "valence": -2,
+      "rank": -99,
       "similar": "frustriert"
     },
     {
+      "name": "verblüfft",
+      "valence": 0,
+      "rank": -80,
+      "similar": "erstaunt"
+    },
+    {
       "name": "verdrießlich",
-      "type": "negative",
-      "rank": -99
+      "valence": "",
+      "rank": -99,
+      "similar": ""
     },
     {
       "name": "verdrossen",
-      "type": "negative",
-      "rank": -99
+      "valence": "",
+      "rank": -99,
+      "similar": ""
+    },
+    {
+      "name": "vergnügt",
+      "valence": 2,
+      "rank": -80,
+      "similar": "fröhlich"
     },
     {
       "name": "verlegen",
-      "type": "negative",
+      "valence": 0,
       "rank": -80,
       "similar": "schüchtern"
     },
     {
       "name": "verletzlich",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "verletzt",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "gekränkt"
     },
     {
+      "name": "verliebt",
+      "valence": 2,
+      "rank": 0,
+      "similar": ""
+    },
+    {
       "name": "verloren",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "einsam"
     },
     {
       "name": "verschlossen",
-      "type": "negative",
-      "rank": 0
+      "valence": -1,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "verschwiegen",
-      "type": "negative",
+      "valence": 0,
       "rank": -80,
       "similar": "verschlossen"
     },
     {
+      "name": "versichert",
+      "valence": "",
+      "rank": -99,
+      "similar": ""
+    },
+    {
       "name": "verspannt",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "angespannt"
     },
     {
       "name": "verstimmt",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "unwohl"
     },
     {
       "name": "verstört",
-      "type": "negative",
-      "rank": 0
+      "valence": -2,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "vertrauensvoll",
+      "valence": 1,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "verunsichert",
-      "type": "negative",
-      "rank": -80,
+      "valence": "",
+      "rank": -99,
       "similar": "unsicher"
     },
     {
       "name": "verwirrt",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "irritiert"
     },
     {
+      "name": "verzaubert",
+      "valence": 2,
+      "rank": -80,
+      "similar": ""
+    },
+    {
       "name": "verzweifelt",
-      "type": "negative",
-      "rank": 0
+      "valence": -2,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "wach(sam)",
+      "valence": 0,
+      "rank": -80,
+      "similar": "aufmerksam"
+    },
+    {
+      "name": "warmherzig",
+      "valence": 2,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "widerwillig",
-      "type": "negative",
-      "rank": -99
+      "valence": "",
+      "rank": -99,
+      "similar": ""
+    },
+    {
+      "name": "wohl(ig)",
+      "valence": 1,
+      "rank": -80,
+      "similar": "warmherzig"
+    },
+    {
+      "name": "wohlgemut",
+      "valence": "",
+      "rank": -99,
+      "similar": ""
+    },
+    {
+      "name": "wohlwollend",
+      "valence": 1,
+      "rank": -80,
+      "similar": "liebevoll"
     },
     {
       "name": "wütend",
-      "type": "negative",
-      "rank": 0
+      "valence": -2,
+      "rank": 0,
+      "similar": ""
     },
     {
       "name": "zaghaft",
-      "type": "negative",
-      "rank": -80,
+      "valence": "",
+      "rank": -99,
       "similar": "zögerlich"
     },
     {
       "name": "zappelig",
-      "type": "negative",
-      "rank": -80,
+      "valence": "",
+      "rank": -99,
       "similar": "unruhig"
     },
     {
+      "name": "zart",
+      "valence": "",
+      "rank": -99,
+      "similar": ""
+    },
+    {
+      "name": "zärtlich",
+      "valence": 1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "zentriert",
+      "valence": 0,
+      "rank": -80,
+      "similar": "ausgeglichen"
+    },
+    {
       "name": "zerbrechlich",
-      "type": "negative",
-      "rank": -99
+      "valence": "",
+      "rank": -99,
+      "similar": ""
     },
     {
       "name": "zerrissen",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "getrennt"
     },
     {
       "name": "zerschlagen",
-      "type": "negative",
-      "rank": -99
+      "valence": "",
+      "rank": -99,
+      "similar": ""
     },
     {
       "name": "zitternd",
-      "type": "negative",
-      "rank": -99
+      "valence": "",
+      "rank": -99,
+      "similar": ""
     },
     {
       "name": "zögerlich",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "unentschlossen"
     },
     {
       "name": "zornig",
-      "type": "negative",
+      "valence": -2,
       "rank": -80,
       "similar": "ärgerlich"
     },
     {
+      "name": "zufrieden",
+      "valence": 2,
+      "rank": -80,
+      "similar": "glücklich"
+    },
+    {
+      "name": "zuneigend",
+      "valence": 1,
+      "rank": 0,
+      "similar": ""
+    },
+    {
+      "name": "zutraulich",
+      "valence": 1,
+      "rank": -80,
+      "similar": "zuneigend"
+    },
+    {
+      "name": "zuversichtlich",
+      "valence": 1,
+      "rank": -80,
+      "similar": "optimistisch"
+    },
+    {
       "name": "zwiespältig",
-      "type": "negative",
+      "valence": -1,
       "rank": -80,
       "similar": "unentschlossen"
     }

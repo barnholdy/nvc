@@ -3,8 +3,14 @@
     <v-flex class="mt-2 mb-5">
       <h1 class="headline font-weight-regular">Wie fühlst du dich in der Situation?</h1>
     </v-flex>
+
     <v-flex>
-      <tag-list :items="availableFeelings" :isInteractive="true"></tag-list>
+      <tag-list
+        :items="availableFeelings"
+        :isInteractive="true"
+        :isFilterNameEnabled="true"
+        :isFilterValenceEnabled="true"
+      ></tag-list>
     </v-flex>
     <!--
     <v-flex>

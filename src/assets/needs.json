@@ -2,874 +2,700 @@
   "needs": [
     {
       "name": "Achtsamkeit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Aktualisierung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Akzeptanz",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Alleinsein",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Anerkennung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Annahme",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Anregung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Ästhetik",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Aufmerksamkeit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Aufrichtigkeit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Ausdruck",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Ausgeglichenheit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Ausgewogenheit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Austausch",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Authentizität",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Autonomie",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Beitrag",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Berechenbarkeit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Berührung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Beständigkeit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Bestätigung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Bewegung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Bewusstsein",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Dankbarkeit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Danksagung",
-      "type": "neutral",
       "rank": -99
     },
     {
       "name": "Dauerhaftigkeit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Dienen",
-      "type": "neutral",
       "rank": -99
     },
     {
       "name": "Diskretion",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Durchführen",
-      "type": "neutral",
       "rank": -99
     },
     {
       "name": "Effektivität",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Ehrfurcht",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Ehrlichkeit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Einbezogen sein",
-      "type": "neutral",
       "rank": -99
     },
     {
       "name": "Einfachheit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Einfühlsamkeit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Einsicht",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Empathie",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Empfangen",
-      "type": "neutral",
       "rank": -99
     },
     {
       "name": "Entdecken",
-      "type": "neutral",
       "rank": -99
     },
     {
       "name": "Entfaltung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Entspannung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Entwicklung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Erfahrung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Erholung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Ernst  ",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Erreichen",
-      "type": "neutral",
       "rank": -99
     },
     {
       "name": "Feiern",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Fitness",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Freiheit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Freude",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Freundschaft",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Frieden",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Ganzheit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Geben",
-      "type": "neutral",
       "rank": -99
     },
     {
       "name": "Geborgenheit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Geburt",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Gemeinsamkeit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Gemeinschaft",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Genauigkeit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Gerechtigkeit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Gesellschaft",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Gesundheit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Gewissen",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Gleichgewicht",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Gleichwertigkeit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Glück",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Handeln",
-      "type": "neutral",
       "rank": -99
     },
     {
       "name": "Harmonie",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Heilung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Herausforderung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Hilfe",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Hoffnung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Humor",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Individualität",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Information",
-      "type": "neutral",
       "rank": -99
     },
     {
       "name": "Inspiration",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Integrität",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Intensität",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Intimität",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Klarheit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Komfort",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Kommunikation",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Kongruenz",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Können",
-      "type": "neutral",
       "rank": -99
     },
     {
       "name": "Kontakt",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Kontinuität",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Kreativität",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Lebendigkeit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Lernen",
-      "type": "neutral",
       "rank": -99
     },
     {
       "name": "Liebe ",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Loslassen",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Meisterschaft",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Menschlichkeit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Mitgefühl",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Mitteilung",
-      "type": "neutral",
       "rank": -80,
       "similar": "Kommunikation"
     },
     {
       "name": "Nähe",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Nahrung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Offenheit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Ordnung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Orientierung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Pflege",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Platz finden",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Präsenz",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Privatsphäre",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Respekt",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Rhythmus",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Rituale",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Ruhe",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Sättigung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Schaffen",
-      "type": "neutral",
       "rank": -99
     },
     {
       "name": "Schönheit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Schutz",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Sein",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Selbstbestimmung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Selbstentfaltung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Selbsterkenntnis",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Selbstrespekt",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Selbstverantwortung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Selbstverwirklichung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Selbstwertgefühl",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Selbstwertschätzung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Sexualität",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Sicherheit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Sinn",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Spaß",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Spiel",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Spiritualität",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Stabilität",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Stille ",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Stimmigkeit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Stimulation",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Struktur",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Teilnahme",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Tiefe",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Toleranz",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Transparenz",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Trauer",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Treue",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Trost",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Unabhängigkeit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Unterkunft",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Unterstützung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Ursache sein",
-      "type": "neutral",
       "rank": -99
     },
     {
       "name": "Verantwortung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Verbindlichkeit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Verbindung",
-      "type": "neutral",
       "rank": -99
     },
     {
       "name": "Verbundenheit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Verständigung",
-      "type": "neutral",
       "rank": -80,
       "similar": "Kommunikation"
     },
     {
       "name": "Verständnis",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Verstehen ",
-      "type": "neutral",
       "rank": -99
     },
     {
       "name": "Vertrauen",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Vertraulichkeit",
-      "type": "neutral",
       "rank": -99
     },
     {
       "name": "Vitalität",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Wachstum",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Wahlmöglichkeit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Wahrgenommen werden",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Wahrhaftigkeit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Wärme",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Wechselbeziehung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Weiterkommen",
-      "type": "neutral",
       "rank": -99
     },
     {
       "name": "Wertschätzung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Wissen",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Wissen um den Weg ",
-      "type": "neutral",
       "rank": -99
     },
     {
       "name": "Würde",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Würdigung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Zärtlichkeit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Zeit für Integration",
-      "type": "neutral",
       "rank": -99
     },
     {
       "name": "Zugehörigkeit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Zuhören",
-      "type": "neutral",
       "rank": -99
     },
     {
       "name": "Zuneigung",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Zusammenarbeit",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Zuspruch",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Zuversicht",
-      "type": "neutral",
       "rank": 0
     },
     {
       "name": "Zweckbestimmung",
-      "type": "neutral",
       "rank": 0
     }
   ]

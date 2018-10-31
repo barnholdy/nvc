@@ -76,8 +76,8 @@ export default {
     return {
       step: STEPS.situation,
       situation: '',
-      availableFeelings: availableFeelings.feelings.filter(feeling => feeling.rank >= 0),
-      availableNeeds: availableNeeds.needs.filter(feeling => feeling.rank >= 0),
+      availableFeelings: availableFeelings.feelings.filter(feeling => feeling.rank >= -80),
+      availableNeeds: availableNeeds.needs.filter(feeling => feeling.rank >= -80),
       isFooterFixed: true,
     };
   },
