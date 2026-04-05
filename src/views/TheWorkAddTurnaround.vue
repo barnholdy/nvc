@@ -6,14 +6,15 @@
       <p class="body-1 grey--text mt-2">Kehre den Gedanken um. Finde mindestens drei echte Beispiele, wie die Umkehrung wahr ist.</p>
     </v-flex>
     <v-flex>
-      <v-textarea
+      <v-text-field
         label="Das Gegenteil ist wahr, weil..."
         placeholder="..."
         v-model="text"
+        multi-line
         rows="5"
         @focus="$emit('focussed')"
         @blur="$emit('blurred')"
-      ></v-textarea>
+      ></v-text-field>
     </v-flex>
   </v-layout>
 </template>

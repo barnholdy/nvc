@@ -6,14 +6,15 @@
       <p class="body-1 grey--text mt-2">Wie reagierst du, was passiert, wenn du diesen Gedanken glaubst?</p>
     </v-flex>
     <v-flex>
-      <v-textarea
+      <v-text-field
         label="Ich bin jemand, der..."
         placeholder="..."
         v-model="text"
+        multi-line
         rows="4"
         @focus="$emit('focussed')"
         @blur="$emit('blurred')"
-      ></v-textarea>
+      ></v-text-field>
     </v-flex>
   </v-layout>
 </template>

@@ -6,14 +6,15 @@
       <p class="body-1 grey--text mt-2">Stell dir vor, du könntest den Gedanken nicht denken. Wer wärst du?</p>
     </v-flex>
     <v-flex>
-      <v-textarea
+      <v-text-field
         label="Ohne diesen Glauben wäre ich..."
         placeholder="..."
         v-model="text"
+        multi-line
         rows="4"
         @focus="$emit('focussed')"
         @blur="$emit('blurred')"
-      ></v-textarea>
+      ></v-text-field>
     </v-flex>
   </v-layout>
 </template>
