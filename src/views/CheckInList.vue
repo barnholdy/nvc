@@ -44,6 +44,17 @@
           </v-card>
         </v-dialog>
     </v-content>
+
+    <v-bottom-nav :value="true" fixed color="white" class="elevation-3">
+      <v-btn flat color="primary" to="/check-ins">
+        <span>Check-Ins</span>
+        <v-icon>favorite_border</v-icon>
+      </v-btn>
+      <v-btn flat color="grey" to="/the-work">
+        <span>The Work</span>
+        <v-icon>lightbulb_outline</v-icon>
+      </v-btn>
+    </v-bottom-nav>
   </div>
 </template>
 

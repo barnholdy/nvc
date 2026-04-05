@@ -5,6 +5,7 @@ Vue.use(Vuex);
 
 const NVC_STORAGE_KEY = 'nvc';
 const CHECK_INS_STORAGE_KEY = `${NVC_STORAGE_KEY}.checkIns`;
+const THE_WORK_STORAGE_KEY = `${NVC_STORAGE_KEY}.theWork`;
 
 function storageAvailable(type) {
   try {
@@ -32,9 +33,11 @@ function storageAvailable(type) {
 export default new Vuex.Store({
   state: {
     checkIns: [],
+    theWork: [],
   },
   getters: {
     checkIns: state => state.checkIns,
+    theWork: state => state.theWork,
   },
   mutations: {
     setCheckIns(state, checkIns) {
@@ -48,6 +51,19 @@ export default new Vuex.Store({
       const index = state.checkIns.indexOf(checkIn);
       if (index > -1) {
         state.checkIns.splice(index, 1);
+      }
+    },
+    setTheWork(state, entries) {
+      state.theWork = entries; // eslint-disable-line no-param-reassign
+    },
+    addTheWork(state, entry) {
+      entry.time = +new Date(); // eslint-disable-line no-param-reassign
+      state.theWork.push(entry);
+    },
+    deleteTheWork(state, entry) {
+      const index = state.theWork.indexOf(entry);
+      if (index > -1) {
+        state.theWork.splice(index, 1);
       }
     },
   },
@@ -76,6 +92,32 @@ export default new Vuex.Store({
         localStorage.setItem(CHECK_INS_STORAGE_KEY, JSON.stringify(getters.checkIns));
       } else {
         throw new Error('Check-Ins were not saved persistently.');
+      }
+    },
+    loadTheWork({ commit }) {
+      if (storageAvailable('localStorage')) {
+        const json = localStorage.getItem(THE_WORK_STORAGE_KEY);
+        if (json) {
+          commit('setTheWork', JSON.parse(json));
+        }
+      } else {
+        throw new Error('The Work entries were not loaded.');
+      }
+    },
+    saveTheWork({ commit, getters }, entry) {
+      commit('addTheWork', entry);
+      if (storageAvailable('localStorage')) {
+        localStorage.setItem(THE_WORK_STORAGE_KEY, JSON.stringify(getters.theWork));
+      } else {
+        throw new Error('The Work entry was not saved persistently.');
+      }
+    },
+    deleteTheWork({ commit, getters }, entry) {
+      commit('deleteTheWork', entry);
+      if (storageAvailable('localStorage')) {
+        localStorage.setItem(THE_WORK_STORAGE_KEY, JSON.stringify(getters.theWork));
+      } else {
+        throw new Error('The Work entry was not deleted persistently.');
       }
     },
   },

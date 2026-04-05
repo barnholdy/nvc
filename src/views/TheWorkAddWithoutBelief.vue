@@ -1,0 +1,40 @@
+<template>
+  <v-layout column>
+    <v-flex class="mt-2 mb-3">
+      <h1 class="headline font-weight-regular">Wer wärst du ohne diesen Glauben?</h1>
+      <p class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
+      <p class="body-1 grey--text mt-2">Stell dir vor, du könntest den Gedanken nicht denken. Wer wärst du?</p>
+    </v-flex>
+    <v-flex>
+      <v-textarea
+        label="Ohne diesen Glauben wäre ich..."
+        placeholder="..."
+        v-model="text"
+        rows="4"
+        @focus="$emit('focussed')"
+        @blur="$emit('blurred')"
+      ></v-textarea>
+    </v-flex>
+  </v-layout>
+</template>
+
+<script>
+export default {
+  name: 'the-work-add-without-belief',
+  props: {
+    belief: String,
+  },
+  data() {
+    return { text: '' };
+  },
+  watch: {
+    text(val) { this.$emit('changed', val); },
+  },
+};
+</script>
+
+<style scoped lang="scss">
+.belief-quote {
+  font-style: italic;
+}
+</style>
