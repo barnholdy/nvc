@@ -10,10 +10,13 @@ import {
   VGrid,
   VToolbar,
   VTextField,
+  VTextarea,
   VCard,
   VDivider,
   VDialog,
   VSlider,
+  VChip,
+  VBottomNav,
   transitions,
 } from 'vuetify';
 import 'vuetify/src/stylus/app.styl';
@@ -30,10 +33,13 @@ Vue.use(Vuetify, {
     VGrid,
     VToolbar,
     VTextField,
+    VTextarea,
     VCard,
     VDivider,
     VDialog,
     VSlider,
+    VChip,
+    VBottomNav,
     transitions,
   },
   theme: {
