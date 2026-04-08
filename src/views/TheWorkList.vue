@@ -127,9 +127,8 @@ export default {
   padding-right: 0.5rem;
 }
 .belief-title {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
 }
 .expand-icon {
   transition: transform 0.2s ease;
