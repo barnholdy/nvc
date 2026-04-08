@@ -11,7 +11,15 @@
       <v-card class="entry" v-for="entry in theWork" v-bind:key="entry.time">
         <v-card-title class="header" @click="toggle(entry.time)">
           <div class="header-text">
-            <p class="subheading belief-title mb-0">{{ entry.belief }}</p>
+            <p class="subheading belief-title mb-1">{{ entry.belief }}</p>
+            <div class="status-bar mb-1">
+              <span
+                v-for="step in 3"
+                :key="step"
+                class="status-dot"
+                :class="step <= filledSteps(entry) ? 'status-dot--filled' : 'status-dot--empty'"
+              ></span>
+            </div>
             <p class="caption grey--text mb-0">{{ formatTime(entry.time) }}</p>
           </div>
           <v-spacer></v-spacer>
@@ -105,6 +113,9 @@ export default {
       this.isDeleteDialogShowing = false;
       this.entryToDelete = null;
     },
+    filledSteps(entry) {
+      return 1 + (entry.isTrue ? 1 : 0) + (entry.isReallyTrue ? 1 : 0);
+    },
     formatTime(time) {
       moment.locale('de');
       return moment(time).format('llll');
@@ -134,6 +145,22 @@ export default {
   transition: transform 0.2s ease;
   &.expanded {
     transform: rotate(90deg);
+  }
+}
+.status-bar {
+  display: flex;
+  gap: 4px;
+}
+.status-dot {
+  display: inline-block;
+  width: 16px;
+  height: 8px;
+  border-radius: 2px;
+  &--filled {
+    background-color: #00838f;
+  }
+  &--empty {
+    background-color: #ccc;
   }
 }
 .section-label {
