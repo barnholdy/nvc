@@ -9,31 +9,38 @@
     </v-toolbar>
     <v-content>
       <v-card class="entry" v-for="entry in theWork" v-bind:key="entry.time">
-        <v-card-title>
-          <h2 class="subheading">{{ formatTime(entry.time) }}</h2>
+        <v-card-title class="header" @click="toggle(entry.time)">
+          <div class="header-text">
+            <p class="subheading belief-title mb-0">{{ entry.belief }}</p>
+            <p class="caption grey--text mb-0">{{ formatTime(entry.time) }}</p>
+          </div>
           <v-spacer></v-spacer>
-          <v-btn icon small @click="preDelete(entry)">
+          <v-icon class="expand-icon" :class="{ expanded: openEntry === entry.time }">
+            chevron_right
+          </v-icon>
+          <v-btn icon small @click.stop="preDelete(entry)">
             <v-icon color="grey darken-2">delete</v-icon>
           </v-btn>
         </v-card-title>
-        <v-divider></v-divider>
-        <v-card-text>
-          <p class="belief mb-2">„{{ entry.belief }}"</p>
-          <v-layout row wrap class="mb-1">
-            <v-chip small :color="entry.isTrue ? 'primary' : 'grey'" text-color="white">
-              Wahr: {{ entry.isTrue ? 'Ja' : 'Nein' }}
-            </v-chip>
-            <v-chip small :color="entry.isReallyTrue ? 'primary' : 'grey'" text-color="white" class="ml-1">
-              Wirklich wahr: {{ entry.isReallyTrue ? 'Ja' : 'Nein' }}
-            </v-chip>
-          </v-layout>
-          <p class="section-label caption grey--text mt-2">Mit dem Glauben</p>
-          <p class="body-1">{{ entry.withBelief }}</p>
-          <p class="section-label caption grey--text mt-2">Ohne den Glauben</p>
-          <p class="body-1">{{ entry.withoutBelief }}</p>
-          <p class="section-label caption grey--text mt-2">Umkehrung</p>
-          <p class="body-1">{{ entry.turnaround }}</p>
-        </v-card-text>
+        <template v-if="openEntry === entry.time">
+          <v-divider></v-divider>
+          <v-card-text>
+            <v-layout row wrap class="mb-2">
+              <v-chip small :color="entry.isTrue ? 'primary' : 'grey'" text-color="white">
+                Wahr: {{ entry.isTrue ? 'Ja' : 'Nein' }}
+              </v-chip>
+              <v-chip small :color="entry.isReallyTrue ? 'primary' : 'grey'" text-color="white" class="ml-1">
+                Wirklich wahr: {{ entry.isReallyTrue ? 'Ja' : 'Nein' }}
+              </v-chip>
+            </v-layout>
+            <p class="section-label caption grey--text mt-2">Mit dem Glauben</p>
+            <p class="body-1">{{ entry.withBelief }}</p>
+            <p class="section-label caption grey--text mt-2">Ohne den Glauben</p>
+            <p class="body-1">{{ entry.withoutBelief }}</p>
+            <p class="section-label caption grey--text mt-2">Umkehrung</p>
+            <p class="body-1">{{ entry.turnaround }}</p>
+          </v-card-text>
+        </template>
       </v-card>
 
       <v-dialog v-model="isDeleteDialogShowing" width="500">
@@ -71,6 +78,7 @@ export default {
   name: 'the-work-list',
   data() {
     return {
+      openEntry: null,
       entryToDelete: null,
       isDeleteDialogShowing: false,
     };
@@ -81,6 +89,9 @@ export default {
     },
   },
   methods: {
+    toggle(time) {
+      this.openEntry = this.openEntry === time ? null : time;
+    },
     preDelete(entry) {
       this.entryToDelete = entry;
       this.isDeleteDialogShowing = true;
@@ -106,9 +117,25 @@ export default {
 .entry {
   margin: 1rem;
 }
-.belief {
-  font-style: italic;
-  font-size: 1.05rem;
+.header {
+  cursor: pointer;
+  user-select: none;
+}
+.header-text {
+  flex: 1;
+  min-width: 0;
+  padding-right: 0.5rem;
+}
+.belief-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.expand-icon {
+  transition: transform 0.2s ease;
+  &.expanded {
+    transform: rotate(90deg);
+  }
 }
 .section-label {
   text-transform: uppercase;
