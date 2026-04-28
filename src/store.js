@@ -74,12 +74,20 @@ export default new Vuex.Store({
     },
     addPattern(state, entry) {
       entry.time = +new Date(); // eslint-disable-line no-param-reassign
+      entry.count = 1; // eslint-disable-line no-param-reassign
       state.patterns.push(entry);
     },
     deletePattern(state, entry) {
       const index = state.patterns.indexOf(entry);
       if (index > -1) {
         state.patterns.splice(index, 1);
+      }
+    },
+    incrementPattern(state, entry) {
+      const index = state.patterns.indexOf(entry);
+      if (index > -1) {
+        const updated = { ...state.patterns[index], count: (state.patterns[index].count || 1) + 1 };
+        state.patterns.splice(index, 1, updated);
       }
     },
   },
@@ -160,6 +168,14 @@ export default new Vuex.Store({
         localStorage.setItem(PATTERNS_STORAGE_KEY, JSON.stringify(getters.patterns));
       } else {
         throw new Error('Pattern was not deleted persistently.');
+      }
+    },
+    incrementPatternCount({ commit, getters }, entry) {
+      commit('incrementPattern', entry);
+      if (storageAvailable('localStorage')) {
+        localStorage.setItem(PATTERNS_STORAGE_KEY, JSON.stringify(getters.patterns));
+      } else {
+        throw new Error('Pattern count was not saved persistently.');
       }
     },
   },

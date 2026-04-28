@@ -24,6 +24,12 @@
             <p class="caption grey--text mb-0">{{ formatTime(entry.time) }}</p>
           </div>
           <v-spacer></v-spacer>
+          <div class="counter-group" @click.stop>
+            <span class="count-badge">{{ entry.count || 1 }}</span>
+            <v-btn icon small @click.stop="increment(entry)">
+              <v-icon color="primary">add_circle_outline</v-icon>
+            </v-btn>
+          </div>
           <v-icon class="expand-icon" :class="{ expanded: openEntry === entry.time }">
             chevron_right
           </v-icon>
@@ -96,10 +102,15 @@ export default {
   },
   computed: {
     patterns() {
-      return this.$store.getters.patterns.concat().sort((a, b) => b.time - a.time);
+      return this.$store.getters.patterns
+        .concat()
+        .sort((a, b) => (b.count || 1) - (a.count || 1) || b.time - a.time);
     },
   },
   methods: {
+    increment(entry) {
+      this.$store.dispatch('incrementPatternCount', entry);
+    },
     toggle(time) {
       this.openEntry = this.openEntry === time ? null : time;
     },
@@ -156,6 +167,24 @@ export default {
     background: #f5f5f5;
     color: #9e9e9e;
   }
+}
+.counter-group {
+  display: flex;
+  align-items: center;
+  margin-right: 4px;
+}
+.count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #00838f;
+  color: #00838f;
+  font-size: 0.85rem;
+  font-weight: bold;
+  margin-right: 2px;
 }
 .expand-icon {
   transition: transform 0.2s ease;
