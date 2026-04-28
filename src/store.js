@@ -83,6 +83,12 @@ export default new Vuex.Store({
         state.patterns.splice(index, 1);
       }
     },
+    updatePattern(state, updated) {
+      const index = state.patterns.findIndex(p => p.time === updated.time);
+      if (index > -1) {
+        state.patterns.splice(index, 1, updated);
+      }
+    },
     incrementPattern(state, entry) {
       const index = state.patterns.indexOf(entry);
       if (index > -1) {
@@ -160,6 +166,14 @@ export default new Vuex.Store({
         localStorage.setItem(PATTERNS_STORAGE_KEY, JSON.stringify(getters.patterns));
       } else {
         throw new Error('Pattern was not saved persistently.');
+      }
+    },
+    updatePattern({ commit, getters }, entry) {
+      commit('updatePattern', entry);
+      if (storageAvailable('localStorage')) {
+        localStorage.setItem(PATTERNS_STORAGE_KEY, JSON.stringify(getters.patterns));
+      } else {
+        throw new Error('Pattern was not updated persistently.');
       }
     },
     deletePattern({ commit, getters }, entry) {

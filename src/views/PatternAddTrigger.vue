@@ -21,8 +21,11 @@
 <script>
 export default {
   name: 'pattern-add-trigger',
+  props: {
+    initialValue: { type: String, default: '' },
+  },
   data() {
-    return { text: '' };
+    return { text: this.initialValue };
   },
   watch: {
     text(val) { this.$emit('changed', val); },

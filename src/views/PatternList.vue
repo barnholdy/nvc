@@ -11,7 +11,7 @@
       <v-card class="entry" v-for="entry in patterns" v-bind:key="entry.time">
         <v-card-title class="header" @click="toggle(entry.time)">
           <div class="header-text">
-            <p class="subheading trigger-title mb-1">{{ entry.trigger }}</p>
+            <p class="subheading trigger-title mb-1">{{ entry.name || entry.trigger }}</p>
             <div class="feelings-preview mb-1">
               <span
                 v-for="(feeling, i) in entry.feelings.slice(0, 3)"
@@ -33,6 +33,9 @@
           <v-icon class="expand-icon" :class="{ expanded: openEntry === entry.time }">
             chevron_right
           </v-icon>
+          <v-btn icon small @click.stop="editEntry(entry)">
+            <v-icon color="grey darken-2">edit</v-icon>
+          </v-btn>
           <v-btn icon small @click.stop="preDelete(entry)">
             <v-icon color="grey darken-2">delete</v-icon>
           </v-btn>
@@ -113,6 +116,9 @@ export default {
     },
     toggle(time) {
       this.openEntry = this.openEntry === time ? null : time;
+    },
+    editEntry(entry) {
+      this.$router.push(`/edit-pattern/${entry.time}`);
     },
     preDelete(entry) {
       this.entryToDelete = entry;

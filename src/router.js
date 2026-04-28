@@ -35,6 +35,11 @@ export default new Router({
       name: 'add-pattern',
       component: () => import('./views/PatternAdd.vue'),
     },
+    {
+      path: '/edit-pattern/:time',
+      name: 'edit-pattern',
+      component: () => import('./views/PatternAdd.vue'),
+    },
     { path: '*', redirect: '/check-ins' },
   ],
   scrollBehavior() {

@@ -1,16 +1,14 @@
 <template>
   <v-layout column>
     <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">Ursprungshypothese</h1>
-      <p class="body-1 grey--text mt-1">Wann habe ich diese Reaktion zum ersten Mal gelernt?</p>
+      <h1 class="headline font-weight-regular">Name des Musters</h1>
+      <p class="body-1 grey--text mt-1">Wie möchtest du dieses Muster nennen?</p>
     </v-flex>
     <v-flex>
       <v-text-field
-        label="Ich habe das zuerst gelernt, als..."
+        label="z.B. „Ablehnung durch Kritik""
         placeholder="..."
         v-model="text"
-        multi-line
-        rows="4"
         @focus="$emit('focussed')"
         @blur="$emit('blurred')"
       ></v-text-field>
@@ -20,7 +18,7 @@
 
 <script>
 export default {
-  name: 'pattern-add-origin',
+  name: 'pattern-add-name',
   props: {
     initialValue: { type: String, default: '' },
   },
