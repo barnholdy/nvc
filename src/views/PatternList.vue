@@ -22,9 +22,6 @@
             <span class="count-badge">{{ entry.count || 1 }}</span>
             <span class="count-plus">+</span>
           </div>
-          <v-icon class="expand-icon" :class="{ expanded: openEntry === entry.time }">
-            chevron_right
-          </v-icon>
           <v-btn icon small @click.stop="editEntry(entry)">
             <v-icon color="grey darken-2">edit</v-icon>
           </v-btn>
@@ -191,12 +188,6 @@ export default {
   font-size: 0.8rem;
   font-weight: bold;
   line-height: 1;
-}
-.expand-icon {
-  transition: transform 0.2s ease;
-  &.expanded {
-    transform: rotate(90deg);
-  }
 }
 .section-label {
   text-transform: uppercase;

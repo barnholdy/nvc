@@ -23,9 +23,6 @@
             <p class="caption grey--text mb-0">{{ formatTime(entry.time) }}</p>
           </div>
           <v-spacer></v-spacer>
-          <v-icon class="expand-icon" :class="{ expanded: openEntry === entry.time }">
-            chevron_right
-          </v-icon>
           <v-btn icon small @click.stop="preDelete(entry)">
             <v-icon color="grey darken-2">delete</v-icon>
           </v-btn>
@@ -144,12 +141,6 @@ export default {
 .belief-title {
   white-space: normal;
   word-break: break-word;
-}
-.expand-icon {
-  transition: transform 0.2s ease;
-  &.expanded {
-    transform: rotate(90deg);
-  }
 }
 .status-bar {
   display: flex;
