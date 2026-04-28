@@ -22,6 +22,9 @@
             <span class="count-badge">{{ entry.count || 1 }}</span>
             <span class="count-plus">+</span>
           </div>
+          <v-btn icon small @click.stop="changeEntry(entry)">
+            <v-icon color="grey darken-2">autorenew</v-icon>
+          </v-btn>
           <v-btn icon small @click.stop="editEntry(entry)">
             <v-icon color="grey darken-2">edit</v-icon>
           </v-btn>
@@ -42,6 +45,25 @@
             <p class="body-1">{{ entry.narrative }}</p>
             <p class="section-label caption grey--text mt-2">Ursprungshypothese</p>
             <p class="body-1">{{ entry.origin }}</p>
+            <template v-if="entry.changeAnnounce || entry.changeApologize || entry.changeAsk || entry.changeAct">
+              <p class="section-label caption grey--text mt-2">Veränderungsprozess</p>
+              <template v-if="entry.changeAnnounce">
+                <p class="caption grey--text mt-1">Ankündigung</p>
+                <p class="body-1">{{ entry.changeAnnounce }}</p>
+              </template>
+              <template v-if="entry.changeApologize">
+                <p class="caption grey--text mt-1">Entschuldigung</p>
+                <p class="body-1">{{ entry.changeApologize }}</p>
+              </template>
+              <template v-if="entry.changeAsk">
+                <p class="caption grey--text mt-1">Um Hilfe bitten</p>
+                <p class="body-1">{{ entry.changeAsk }}</p>
+              </template>
+              <template v-if="entry.changeAct">
+                <p class="caption grey--text mt-1">Handlungen</p>
+                <p class="body-1">{{ entry.changeAct }}</p>
+              </template>
+            </template>
           </v-card-text>
         </template>
       </v-card>
@@ -120,6 +142,9 @@ export default {
     },
     toggle(time) {
       this.openEntry = this.openEntry === time ? null : time;
+    },
+    changeEntry(entry) {
+      this.$router.push(`/change-pattern/${entry.time}`);
     },
     editEntry(entry) {
       this.$router.push(`/edit-pattern/${entry.time}`);
