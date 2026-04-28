@@ -1,8 +1,8 @@
 <template>
   <v-layout column>
     <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">Was glaubst du?</h1>
-      <p class="subheading grey--text mt-1">Schreibe einen stressigen Gedanken auf.</p>
+      <h1 class="headline font-weight-regular">Was müsste ich über mich, andere oder die Welt glauben, damit dieses Gefühl Sinn ergibt?</h1>
+      <p class="subheading grey--text mt-1">Schreibe deinen Glaubenssatz auf.</p>
     </v-flex>
     <v-flex>
       <v-text-field
