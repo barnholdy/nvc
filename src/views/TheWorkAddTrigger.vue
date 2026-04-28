@@ -1,15 +1,16 @@
 <template>
   <v-layout column>
     <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">Was glaubst du?</h1>
-      <p class="subheading grey--text mt-1">Schreibe einen stressigen Gedanken auf.</p>
+      <h1 class="headline font-weight-regular">Trigger</h1>
+      <p class="body-1 grey--text mt-1">Was ist äußerlich passiert?</p>
     </v-flex>
     <v-flex>
       <v-text-field
-        label="Ich glaube, dass..."
+        label="Es ist folgendes passiert..."
         placeholder="..."
-        v-model="belief"
-        single-line
+        v-model="text"
+        multi-line
+        rows="4"
         @focus="$emit('focussed')"
         @blur="$emit('blurred')"
       ></v-text-field>
@@ -19,15 +20,15 @@
 
 <script>
 export default {
-  name: 'the-work-add-belief',
+  name: 'the-work-add-trigger',
   props: {
     initialValue: { type: String, default: '' },
   },
   data() {
-    return { belief: this.initialValue };
+    return { text: this.initialValue };
   },
   watch: {
-    belief(val) { this.$emit('beliefChanged', val); },
+    text(val) { this.$emit('changed', val); },
   },
 };
 </script>

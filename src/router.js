@@ -26,6 +26,11 @@ export default new Router({
       component: () => import('./views/TheWorkAdd.vue'),
     },
     {
+      path: '/edit-the-work/:time',
+      name: 'edit-the-work',
+      component: () => import('./views/TheWorkAdd.vue'),
+    },
+    {
       path: '/patterns',
       name: 'patterns',
       component: () => import('./views/PatternList.vue'),

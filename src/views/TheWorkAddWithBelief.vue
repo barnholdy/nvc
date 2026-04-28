@@ -24,9 +24,10 @@ export default {
   name: 'the-work-add-with-belief',
   props: {
     belief: String,
+    initialValue: { type: String, default: '' },
   },
   data() {
-    return { text: '' };
+    return { text: this.initialValue };
   },
   watch: {
     text(val) { this.$emit('changed', val); },

@@ -36,9 +36,10 @@ export default {
   name: 'the-work-add-is-really-true',
   props: {
     belief: String,
+    initialValue: { default: null },
   },
   data() {
-    return { answer: null };
+    return { answer: this.initialValue };
   },
   methods: {
     select(val) {

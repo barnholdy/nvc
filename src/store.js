@@ -61,12 +61,34 @@ export default new Vuex.Store({
     },
     addTheWork(state, entry) {
       entry.time = +new Date(); // eslint-disable-line no-param-reassign
+      entry.count = 1; // eslint-disable-line no-param-reassign
       state.theWork.push(entry);
     },
     deleteTheWork(state, entry) {
       const index = state.theWork.indexOf(entry);
       if (index > -1) {
         state.theWork.splice(index, 1);
+      }
+    },
+    updateTheWork(state, updated) {
+      const index = state.theWork.findIndex(p => p.time === updated.time);
+      if (index > -1) {
+        state.theWork.splice(index, 1, updated);
+      }
+    },
+    incrementTheWork(state, entry) {
+      const index = state.theWork.indexOf(entry);
+      if (index > -1) {
+        const updated = { ...state.theWork[index], count: (state.theWork[index].count || 1) + 1 };
+        state.theWork.splice(index, 1, updated);
+      }
+    },
+    decrementTheWork(state, entry) {
+      const index = state.theWork.indexOf(entry);
+      if (index > -1) {
+        const current = state.theWork[index].count || 1;
+        const updated = { ...state.theWork[index], count: Math.max(1, current - 1) };
+        state.theWork.splice(index, 1, updated);
       }
     },
     setPatterns(state, entries) {
@@ -156,6 +178,30 @@ export default new Vuex.Store({
         localStorage.setItem(THE_WORK_STORAGE_KEY, JSON.stringify(getters.theWork));
       } else {
         throw new Error('The Work entry was not deleted persistently.');
+      }
+    },
+    updateTheWork({ commit, getters }, entry) {
+      commit('updateTheWork', entry);
+      if (storageAvailable('localStorage')) {
+        localStorage.setItem(THE_WORK_STORAGE_KEY, JSON.stringify(getters.theWork));
+      } else {
+        throw new Error('The Work entry was not updated persistently.');
+      }
+    },
+    incrementTheWorkCount({ commit, getters }, entry) {
+      commit('incrementTheWork', entry);
+      if (storageAvailable('localStorage')) {
+        localStorage.setItem(THE_WORK_STORAGE_KEY, JSON.stringify(getters.theWork));
+      } else {
+        throw new Error('The Work count was not saved persistently.');
+      }
+    },
+    decrementTheWorkCount({ commit, getters }, entry) {
+      commit('decrementTheWork', entry);
+      if (storageAvailable('localStorage')) {
+        localStorage.setItem(THE_WORK_STORAGE_KEY, JSON.stringify(getters.theWork));
+      } else {
+        throw new Error('The Work count was not saved persistently.');
       }
     },
     loadPatterns({ commit }) {
