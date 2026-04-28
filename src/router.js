@@ -25,6 +25,16 @@ export default new Router({
       name: 'add-the-work',
       component: () => import('./views/TheWorkAdd.vue'),
     },
+    {
+      path: '/patterns',
+      name: 'patterns',
+      component: () => import('./views/PatternList.vue'),
+    },
+    {
+      path: '/add-pattern',
+      name: 'add-pattern',
+      component: () => import('./views/PatternAdd.vue'),
+    },
     { path: '*', redirect: '/check-ins' },
   ],
   scrollBehavior() {

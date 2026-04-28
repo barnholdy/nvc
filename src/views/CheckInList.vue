@@ -54,6 +54,10 @@
         <span>The Work</span>
         <v-icon>lightbulb_outline</v-icon>
       </v-btn>
+      <v-btn flat color="grey" to="/patterns">
+        <span>Muster</span>
+        <v-icon>repeat</v-icon>
+      </v-btn>
     </v-bottom-nav>
   </div>
 </template>

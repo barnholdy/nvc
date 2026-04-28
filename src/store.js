@@ -6,6 +6,7 @@ Vue.use(Vuex);
 const NVC_STORAGE_KEY = 'nvc';
 const CHECK_INS_STORAGE_KEY = `${NVC_STORAGE_KEY}.checkIns`;
 const THE_WORK_STORAGE_KEY = `${NVC_STORAGE_KEY}.theWork`;
+const PATTERNS_STORAGE_KEY = `${NVC_STORAGE_KEY}.patterns`;
 
 function storageAvailable(type) {
   try {
@@ -34,10 +35,12 @@ export default new Vuex.Store({
   state: {
     checkIns: [],
     theWork: [],
+    patterns: [],
   },
   getters: {
     checkIns: state => state.checkIns,
     theWork: state => state.theWork,
+    patterns: state => state.patterns,
   },
   mutations: {
     setCheckIns(state, checkIns) {
@@ -64,6 +67,19 @@ export default new Vuex.Store({
       const index = state.theWork.indexOf(entry);
       if (index > -1) {
         state.theWork.splice(index, 1);
+      }
+    },
+    setPatterns(state, entries) {
+      state.patterns = entries; // eslint-disable-line no-param-reassign
+    },
+    addPattern(state, entry) {
+      entry.time = +new Date(); // eslint-disable-line no-param-reassign
+      state.patterns.push(entry);
+    },
+    deletePattern(state, entry) {
+      const index = state.patterns.indexOf(entry);
+      if (index > -1) {
+        state.patterns.splice(index, 1);
       }
     },
   },
@@ -118,6 +134,32 @@ export default new Vuex.Store({
         localStorage.setItem(THE_WORK_STORAGE_KEY, JSON.stringify(getters.theWork));
       } else {
         throw new Error('The Work entry was not deleted persistently.');
+      }
+    },
+    loadPatterns({ commit }) {
+      if (storageAvailable('localStorage')) {
+        const json = localStorage.getItem(PATTERNS_STORAGE_KEY);
+        if (json) {
+          commit('setPatterns', JSON.parse(json));
+        }
+      } else {
+        throw new Error('Patterns were not loaded.');
+      }
+    },
+    savePattern({ commit, getters }, entry) {
+      commit('addPattern', entry);
+      if (storageAvailable('localStorage')) {
+        localStorage.setItem(PATTERNS_STORAGE_KEY, JSON.stringify(getters.patterns));
+      } else {
+        throw new Error('Pattern was not saved persistently.');
+      }
+    },
+    deletePattern({ commit, getters }, entry) {
+      commit('deletePattern', entry);
+      if (storageAvailable('localStorage')) {
+        localStorage.setItem(PATTERNS_STORAGE_KEY, JSON.stringify(getters.patterns));
+      } else {
+        throw new Error('Pattern was not deleted persistently.');
       }
     },
   },
