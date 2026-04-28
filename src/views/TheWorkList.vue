@@ -98,10 +98,6 @@
         <v-icon>favorite_border</v-icon>
       </v-btn>
       <v-btn flat color="primary" to="/the-work">
-        <span>The Work</span>
-        <v-icon>lightbulb_outline</v-icon>
-      </v-btn>
-      <v-btn flat color="grey" to="/patterns">
         <span>Muster</span>
         <v-icon>repeat</v-icon>
       </v-btn>
