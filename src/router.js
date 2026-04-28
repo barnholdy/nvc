@@ -35,26 +35,6 @@ export default new Router({
       name: 'change-the-work',
       component: () => import('./views/TheWorkChange.vue'),
     },
-    {
-      path: '/patterns',
-      name: 'patterns',
-      component: () => import('./views/PatternList.vue'),
-    },
-    {
-      path: '/add-pattern',
-      name: 'add-pattern',
-      component: () => import('./views/PatternAdd.vue'),
-    },
-    {
-      path: '/edit-pattern/:time',
-      name: 'edit-pattern',
-      component: () => import('./views/PatternAdd.vue'),
-    },
-    {
-      path: '/change-pattern/:time',
-      name: 'change-pattern',
-      component: () => import('./views/PatternChange.vue'),
-    },
     { path: '*', redirect: '/check-ins' },
   ],
   scrollBehavior() {

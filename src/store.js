@@ -6,7 +6,6 @@ Vue.use(Vuex);
 const NVC_STORAGE_KEY = 'nvc';
 const CHECK_INS_STORAGE_KEY = `${NVC_STORAGE_KEY}.checkIns`;
 const THE_WORK_STORAGE_KEY = `${NVC_STORAGE_KEY}.theWork`;
-const PATTERNS_STORAGE_KEY = `${NVC_STORAGE_KEY}.patterns`;
 
 function storageAvailable(type) {
   try {
@@ -17,16 +16,10 @@ function storageAvailable(type) {
     return true;
   } catch (e) {
     return e instanceof DOMException && (
-      // everything except Firefox
       e.code === 22 ||
-      // Firefox
       e.code === 1014 ||
-      // test name field too, because code might not be present
-      // everything except Firefox
       e.name === 'QuotaExceededError' ||
-      // Firefox
       e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
-      // acknowledge QuotaExceededError only if there's something already stored
       storage.length !== 0; // eslint-disable-line no-undef
   }
 }
@@ -35,12 +28,10 @@ export default new Vuex.Store({
   state: {
     checkIns: [],
     theWork: [],
-    patterns: [],
   },
   getters: {
     checkIns: state => state.checkIns,
     theWork: state => state.theWork,
-    patterns: state => state.patterns,
   },
   mutations: {
     setCheckIns(state, checkIns) {
@@ -89,41 +80,6 @@ export default new Vuex.Store({
         const current = state.theWork[index].count || 1;
         const updated = { ...state.theWork[index], count: Math.max(1, current - 1) };
         state.theWork.splice(index, 1, updated);
-      }
-    },
-    setPatterns(state, entries) {
-      state.patterns = entries; // eslint-disable-line no-param-reassign
-    },
-    addPattern(state, entry) {
-      entry.time = +new Date(); // eslint-disable-line no-param-reassign
-      entry.count = 1; // eslint-disable-line no-param-reassign
-      state.patterns.push(entry);
-    },
-    deletePattern(state, entry) {
-      const index = state.patterns.indexOf(entry);
-      if (index > -1) {
-        state.patterns.splice(index, 1);
-      }
-    },
-    updatePattern(state, updated) {
-      const index = state.patterns.findIndex(p => p.time === updated.time);
-      if (index > -1) {
-        state.patterns.splice(index, 1, updated);
-      }
-    },
-    incrementPattern(state, entry) {
-      const index = state.patterns.indexOf(entry);
-      if (index > -1) {
-        const updated = { ...state.patterns[index], count: (state.patterns[index].count || 1) + 1 };
-        state.patterns.splice(index, 1, updated);
-      }
-    },
-    decrementPattern(state, entry) {
-      const index = state.patterns.indexOf(entry);
-      if (index > -1) {
-        const current = state.patterns[index].count || 1;
-        const updated = { ...state.patterns[index], count: Math.max(1, current - 1) };
-        state.patterns.splice(index, 1, updated);
       }
     },
   },
@@ -202,56 +158,6 @@ export default new Vuex.Store({
         localStorage.setItem(THE_WORK_STORAGE_KEY, JSON.stringify(getters.theWork));
       } else {
         throw new Error('The Work count was not saved persistently.');
-      }
-    },
-    loadPatterns({ commit }) {
-      if (storageAvailable('localStorage')) {
-        const json = localStorage.getItem(PATTERNS_STORAGE_KEY);
-        if (json) {
-          commit('setPatterns', JSON.parse(json));
-        }
-      } else {
-        throw new Error('Patterns were not loaded.');
-      }
-    },
-    savePattern({ commit, getters }, entry) {
-      commit('addPattern', entry);
-      if (storageAvailable('localStorage')) {
-        localStorage.setItem(PATTERNS_STORAGE_KEY, JSON.stringify(getters.patterns));
-      } else {
-        throw new Error('Pattern was not saved persistently.');
-      }
-    },
-    updatePattern({ commit, getters }, entry) {
-      commit('updatePattern', entry);
-      if (storageAvailable('localStorage')) {
-        localStorage.setItem(PATTERNS_STORAGE_KEY, JSON.stringify(getters.patterns));
-      } else {
-        throw new Error('Pattern was not updated persistently.');
-      }
-    },
-    deletePattern({ commit, getters }, entry) {
-      commit('deletePattern', entry);
-      if (storageAvailable('localStorage')) {
-        localStorage.setItem(PATTERNS_STORAGE_KEY, JSON.stringify(getters.patterns));
-      } else {
-        throw new Error('Pattern was not deleted persistently.');
-      }
-    },
-    incrementPatternCount({ commit, getters }, entry) {
-      commit('incrementPattern', entry);
-      if (storageAvailable('localStorage')) {
-        localStorage.setItem(PATTERNS_STORAGE_KEY, JSON.stringify(getters.patterns));
-      } else {
-        throw new Error('Pattern count was not saved persistently.');
-      }
-    },
-    decrementPatternCount({ commit, getters }, entry) {
-      commit('decrementPattern', entry);
-      if (storageAvailable('localStorage')) {
-        localStorage.setItem(PATTERNS_STORAGE_KEY, JSON.stringify(getters.patterns));
-      } else {
-        throw new Error('Pattern count was not saved persistently.');
       }
     },
   },

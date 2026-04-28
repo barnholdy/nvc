@@ -7,7 +7,7 @@
       <v-btn v-else icon @click="prevStep">
         <v-icon>chevron_left</v-icon>
       </v-btn>
-      <v-toolbar-title>{{ isEditMode ? 'The Work bearbeiten' : 'The Work' }}</v-toolbar-title>
+      <v-toolbar-title>{{ isEditMode ? 'Muster bearbeiten' : 'Meine Muster' }}</v-toolbar-title>
       <v-spacer></v-spacer>
       <span class="grey--text body-1">{{ step }} / {{ totalSteps }}</span>
     </v-toolbar>
@@ -211,8 +211,7 @@ export default {
       };
       if (this.isEditMode) {
         this.$store.dispatch('updateTheWork', {
-          time: this.editEntry.time,
-          count: this.editEntry.count || 1,
+          ...this.editEntry,
           ...payload,
         });
       } else {

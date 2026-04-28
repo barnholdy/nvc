@@ -1,7 +1,7 @@
 <template>
   <div class="the-work-list">
     <v-toolbar color="white" app>
-      <v-toolbar-title>The Work</v-toolbar-title>
+      <v-toolbar-title>Meine Muster</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn icon to="/add-the-work">
         <v-icon>add</v-icon>
@@ -34,7 +34,7 @@
             <span class="count-plus">+</span>
           </div>
           <v-btn icon small @click.stop="changeEntry(entry)">
-            <v-icon color="grey darken-2">autorenew</v-icon>
+            <v-icon :color="hasChangeData(entry) ? '#00838f' : 'grey darken-2'">autorenew</v-icon>
           </v-btn>
           <v-btn icon small @click.stop="editEntry(entry)">
             <v-icon color="grey darken-2">edit</v-icon>
@@ -167,6 +167,9 @@ export default {
     },
     toggle(time) {
       this.openEntry = this.openEntry === time ? null : time;
+    },
+    hasChangeData(entry) {
+      return !!(entry.changeAnnounce || entry.changeApologize || entry.changeAsk || entry.changeAct);
     },
     changeEntry(entry) {
       this.$router.push(`/change-the-work/${entry.time}`);
