@@ -8,6 +8,9 @@
       </v-btn>
     </v-toolbar>
     <v-content>
+      <p class="intro-text body-1 grey--text">
+        <em>Deine Muster sind eingefrorene Überzeugungen aus einer Zeit, in der sie dich geschützt haben. Heute hindern sie dich womöglich. Wenn du sie aufschreibst, machst du das Unsichtbare sichtbar. Dann kannst du wählen, statt nur zu reagieren. Nimm dir zwei Minuten und schreib auf, was dich zuletzt mehr bewegt hat als vielleicht erwartet.</em>
+      </p>
       <v-card class="entry" v-for="entry in theWork" v-bind:key="entry.time">
         <v-card-title class="header" @click="toggle(entry.time)">
           <div class="header-text">
@@ -175,6 +178,10 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.intro-text {
+  margin: 1rem;
+  line-height: 1.6;
+}
 .entry {
   margin: 1rem;
 }
