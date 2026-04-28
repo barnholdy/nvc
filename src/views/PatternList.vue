@@ -11,24 +11,16 @@
       <v-card class="entry" v-for="entry in patterns" v-bind:key="entry.time">
         <v-card-title class="header" @click="toggle(entry.time)">
           <div class="header-text">
-            <p class="subheading trigger-title mb-1">{{ entry.name || entry.trigger }}</p>
-            <div class="feelings-preview mb-1">
-              <span
-                v-for="(feeling, i) in entry.feelings.slice(0, 3)"
-                :key="i"
-                class="feeling-chip">{{ feeling.name }}</span>
-              <span v-if="entry.feelings.length > 3" class="feeling-chip feeling-chip--more">
-                +{{ entry.feelings.length - 3 }}
-              </span>
-            </div>
+            <p class="subheading trigger-title mb-0">{{ entry.name || entry.trigger }}</p>
             <p class="caption grey--text mb-0">{{ formatTime(entry.time) }}</p>
           </div>
           <v-spacer></v-spacer>
-          <div class="counter-group" @click.stop>
+          <div
+            class="counter-tap"
+            @click.stop="handleTap(entry)"
+          >
             <span class="count-badge">{{ entry.count || 1 }}</span>
-            <v-btn icon small @click.stop="increment(entry)">
-              <v-icon color="primary">add_circle_outline</v-icon>
-            </v-btn>
+            <span class="count-plus">+</span>
           </div>
           <v-icon class="expand-icon" :class="{ expanded: openEntry === entry.time }">
             chevron_right
@@ -101,6 +93,7 @@ export default {
       openEntry: null,
       entryToDelete: null,
       isDeleteDialogShowing: false,
+      tapTimeouts: {},
     };
   },
   computed: {
@@ -111,8 +104,22 @@ export default {
     },
   },
   methods: {
-    increment(entry) {
-      this.$store.dispatch('incrementPatternCount', entry);
+    handleTap(entry) {
+      const { time } = entry;
+      if (this.tapTimeouts[time]) {
+        // Double tap — decrement (min 1)
+        clearTimeout(this.tapTimeouts[time]);
+        this.$delete(this.tapTimeouts, time);
+        if ((entry.count || 1) > 1) {
+          this.$store.dispatch('decrementPatternCount', entry);
+        }
+      } else {
+        // First tap — wait to distinguish from double tap
+        this.$set(this.tapTimeouts, time, setTimeout(() => {
+          this.$delete(this.tapTimeouts, time);
+          this.$store.dispatch('incrementPatternCount', entry);
+        }, 300));
+      }
     },
     toggle(time) {
       this.openEntry = this.openEntry === time ? null : time;
@@ -158,39 +165,32 @@ export default {
   white-space: normal;
   word-break: break-word;
 }
-.feelings-preview {
+.counter-tap {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-.feeling-chip {
-  font-size: 0.75rem;
-  background: #e0f7fa;
-  color: #00838f;
-  border-radius: 2px;
-  padding: 1px 6px;
-  &--more {
-    background: #f5f5f5;
-    color: #9e9e9e;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 6px;
+  border-radius: 20px;
+  border: 1.5px solid #00838f;
+  cursor: pointer;
+  margin-right: 4px;
+  -webkit-tap-highlight-color: transparent;
+  &:active {
+    background: #e0f7fa;
   }
 }
-.counter-group {
-  display: flex;
-  align-items: center;
-  margin-right: 4px;
-}
 .count-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 2px solid #00838f;
   color: #00838f;
   font-size: 0.85rem;
   font-weight: bold;
-  margin-right: 2px;
+  min-width: 14px;
+  text-align: center;
+}
+.count-plus {
+  color: #00838f;
+  font-size: 0.8rem;
+  font-weight: bold;
+  line-height: 1;
 }
 .expand-icon {
   transition: transform 0.2s ease;

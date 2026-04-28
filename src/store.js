@@ -96,6 +96,14 @@ export default new Vuex.Store({
         state.patterns.splice(index, 1, updated);
       }
     },
+    decrementPattern(state, entry) {
+      const index = state.patterns.indexOf(entry);
+      if (index > -1) {
+        const current = state.patterns[index].count || 1;
+        const updated = { ...state.patterns[index], count: Math.max(1, current - 1) };
+        state.patterns.splice(index, 1, updated);
+      }
+    },
   },
   actions: {
     loadCheckIns({ commit }) {
@@ -186,6 +194,14 @@ export default new Vuex.Store({
     },
     incrementPatternCount({ commit, getters }, entry) {
       commit('incrementPattern', entry);
+      if (storageAvailable('localStorage')) {
+        localStorage.setItem(PATTERNS_STORAGE_KEY, JSON.stringify(getters.patterns));
+      } else {
+        throw new Error('Pattern count was not saved persistently.');
+      }
+    },
+    decrementPatternCount({ commit, getters }, entry) {
+      commit('decrementPattern', entry);
       if (storageAvailable('localStorage')) {
         localStorage.setItem(PATTERNS_STORAGE_KEY, JSON.stringify(getters.patterns));
       } else {
