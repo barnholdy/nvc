@@ -19,7 +19,7 @@
 import TagList from '@/components/TagList.vue';
 
 export default {
-  name: 'the-work-add-reaction',
+  name: 'pattern-add-reaction',
   components: { TagList },
   props: {
     availableFeelings: Array,

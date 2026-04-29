@@ -77,7 +77,7 @@ import PatternChangeAsk from '@/views/PatternChangeAsk.vue';
 import PatternChangeAct from '@/views/PatternChangeAct.vue';
 
 export default {
-  name: 'the-work-change',
+  name: 'pattern-change',
   components: {
     PatternChangeAnnounce,
     PatternChangeApologize,
@@ -85,7 +85,7 @@ export default {
     PatternChangeAct,
   },
   data() {
-    const entry = this.$store.getters.theWork
+    const entry = this.$store.getters.patterns
       .find(p => p.time === parseInt(this.$route.params.time, 10));
     return {
       entry: entry || null,
@@ -117,17 +117,17 @@ export default {
       this.$vuetify.goTo(0, { duration: 0 });
     },
     save() {
-      this.$store.dispatch('updateTheWork', {
+      this.$store.dispatch('updatePattern', {
         ...this.entry,
         changeAnnounce: this.announce,
         changeApologize: this.apologize,
         changeAsk: this.ask,
         changeAct: this.act,
       });
-      this.$router.push('/the-work');
+      this.$router.push('/patterns');
     },
     close() {
-      this.$router.push('/the-work');
+      this.$router.push('/patterns');
     },
   },
 };

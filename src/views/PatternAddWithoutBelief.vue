@@ -1,17 +1,17 @@
 <template>
   <v-layout column>
     <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">Die Umkehrung</h1>
+      <h1 class="headline font-weight-regular">Wer wärst du ohne diesen Glauben?</h1>
       <p class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
-      <p class="body-1 grey--text mt-2">Kehre den Gedanken um. Finde mindestens drei echte Beispiele, wie die Umkehrung wahr ist.</p>
+      <p class="body-1 grey--text mt-2">Stell dir vor, du könntest den Gedanken nicht denken. Wer wärst du?</p>
     </v-flex>
     <v-flex>
       <v-text-field
-        label="Das Gegenteil ist wahr, weil..."
+        label="Ohne diesen Glauben wäre ich..."
         placeholder="..."
         v-model="text"
         multi-line
-        rows="5"
+        rows="4"
         @focus="$emit('focussed')"
         @blur="$emit('blurred')"
       ></v-text-field>
@@ -21,7 +21,7 @@
 
 <script>
 export default {
-  name: 'the-work-add-turnaround',
+  name: 'pattern-add-without-belief',
   props: {
     belief: String,
     initialValue: { type: String, default: '' },

@@ -1,7 +1,7 @@
 <template>
   <v-layout column>
     <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">Ist es wahr?</h1>
+      <h1 class="headline font-weight-regular">Kannst du absolut sicher sein, dass es wahr ist?</h1>
       <p class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
     </v-flex>
     <v-flex>
@@ -33,7 +33,7 @@
 
 <script>
 export default {
-  name: 'the-work-add-is-true',
+  name: 'pattern-add-is-really-true',
   props: {
     belief: String,
     initialValue: { default: null },

@@ -20,7 +20,7 @@
 
 <script>
 export default {
-  name: 'the-work-add-trigger',
+  name: 'pattern-add-trigger',
   props: {
     initialValue: { type: String, default: '' },
   },

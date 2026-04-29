@@ -19,7 +19,7 @@
 
 <script>
 export default {
-  name: 'the-work-add-belief',
+  name: 'pattern-add-belief',
   props: {
     initialValue: { type: String, default: '' },
   },

@@ -1,9 +1,9 @@
 <template>
-  <div class="the-work-list">
+  <div class="pattern-list">
     <v-toolbar color="white" app>
       <v-toolbar-title>Meine Muster</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn icon to="/add-the-work">
+      <v-btn icon to="/add-pattern">
         <v-icon>add</v-icon>
       </v-btn>
     </v-toolbar>
@@ -11,25 +11,18 @@
       <p class="intro-text body-1 grey--text">
         <em>Deine Muster sind eingefrorene Überzeugungen aus einer Zeit, in der sie dich geschützt haben. Heute hindern sie dich womöglich. Wenn du sie aufschreibst, machst du das Unsichtbare sichtbar. Dann kannst du wählen, statt nur zu reagieren. Nimm dir zwei Minuten und schreib auf, was dich zuletzt mehr bewegt hat als vielleicht erwartet.</em>
       </p>
-      <v-card class="entry" v-for="entry in theWork" v-bind:key="entry.time">
+      <v-card class="entry" v-for="entry in patterns" v-bind:key="entry.time">
         <v-card-title class="header" @click="toggle(entry.time)">
           <div class="header-text">
             <p class="subheading belief-title mb-1">{{ entry.name || entry.belief }}</p>
             <div class="status-bar mb-1">
-              <span
-                v-for="step in 3"
-                :key="step"
-                class="status-dot"
-                :class="step <= filledSteps(entry) ? 'status-dot--filled' : 'status-dot--empty'"
-              ></span>
+              <span class="status-dot" :class="entry.isTrue ? 'status-dot--filled' : 'status-dot--empty'"></span>
+              <span class="status-dot" :class="entry.isReallyTrue ? 'status-dot--filled' : 'status-dot--empty'"></span>
             </div>
             <p class="caption grey--text mb-0">{{ formatTime(entry.time) }}</p>
           </div>
           <v-spacer></v-spacer>
-          <div
-            class="counter-tap"
-            @click.stop="handleTap(entry)"
-          >
+          <div class="counter-tap" @click.stop="handleTap(entry)">
             <span class="count-badge">{{ entry.count || 1 }}</span>
             <span class="count-plus">+</span>
           </div>
@@ -119,7 +112,7 @@
         <span>Check-Ins</span>
         <v-icon>favorite_border</v-icon>
       </v-btn>
-      <v-btn flat color="primary" to="/the-work">
+      <v-btn flat color="primary" to="/patterns">
         <span>Muster</span>
         <v-icon>repeat</v-icon>
       </v-btn>
@@ -132,7 +125,7 @@ import moment from 'moment';
 import TagList from '@/components/TagList.vue';
 
 export default {
-  name: 'the-work-list',
+  name: 'pattern-list',
   components: { TagList },
   data() {
     return {
@@ -143,8 +136,8 @@ export default {
     };
   },
   computed: {
-    theWork() {
-      return this.$store.getters.theWork
+    patterns() {
+      return this.$store.getters.patterns
         .concat()
         .sort((a, b) => (b.count || 1) - (a.count || 1) || b.time - a.time);
     },
@@ -156,12 +149,12 @@ export default {
         clearTimeout(this.tapTimeouts[time]);
         this.$delete(this.tapTimeouts, time);
         if ((entry.count || 1) > 1) {
-          this.$store.dispatch('decrementTheWorkCount', entry);
+          this.$store.dispatch('decrementPatternCount', entry);
         }
       } else {
         this.$set(this.tapTimeouts, time, setTimeout(() => {
           this.$delete(this.tapTimeouts, time);
-          this.$store.dispatch('incrementTheWorkCount', entry);
+          this.$store.dispatch('incrementPatternCount', entry);
         }, 300));
       }
     },
@@ -172,10 +165,10 @@ export default {
       return !!(entry.changeAnnounce || entry.changeApologize || entry.changeAsk || entry.changeAct);
     },
     changeEntry(entry) {
-      this.$router.push(`/change-the-work/${entry.time}`);
+      this.$router.push(`/change-pattern/${entry.time}`);
     },
     editEntry(entry) {
-      this.$router.push(`/edit-the-work/${entry.time}`);
+      this.$router.push(`/edit-pattern/${entry.time}`);
     },
     preDelete(entry) {
       this.entryToDelete = entry;
@@ -183,15 +176,12 @@ export default {
     },
     confirmDelete() {
       this.isDeleteDialogShowing = false;
-      this.$store.dispatch('deleteTheWork', this.entryToDelete);
+      this.$store.dispatch('deletePattern', this.entryToDelete);
       this.entryToDelete = null;
     },
     cancelDelete() {
       this.isDeleteDialogShowing = false;
       this.entryToDelete = null;
-    },
-    filledSteps(entry) {
-      return 1 + (entry.isTrue ? 1 : 0) + (entry.isReallyTrue ? 1 : 0);
     },
     formatTime(time) {
       moment.locale('de');

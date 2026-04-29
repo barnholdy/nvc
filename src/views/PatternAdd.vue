@@ -13,83 +13,83 @@
     </v-toolbar>
     <v-content>
       <v-container class="mb-5">
-        <the-work-add-name
+        <pattern-add-name
           v-show="step === 1"
           :initialValue="name"
           @changed="name = $event"
           @focussed="isFooterFixed = false"
           @blurred="isFooterFixed = true">
-        </the-work-add-name>
+        </pattern-add-name>
 
-        <the-work-add-trigger
+        <pattern-add-trigger
           v-show="step === 2"
           :initialValue="trigger"
           @changed="trigger = $event"
           @focussed="isFooterFixed = false"
           @blurred="isFooterFixed = true">
-        </the-work-add-trigger>
+        </pattern-add-trigger>
 
-        <the-work-add-reaction
+        <pattern-add-reaction
           v-show="step === 3"
           :availableFeelings="availableFeelings">
-        </the-work-add-reaction>
+        </pattern-add-reaction>
 
-        <the-work-add-belief
+        <pattern-add-belief
           v-show="step === 4"
           :initialValue="belief"
           @beliefChanged="belief = $event"
           @focussed="isFooterFixed = false"
           @blurred="isFooterFixed = true">
-        </the-work-add-belief>
+        </pattern-add-belief>
 
-        <the-work-add-is-true
+        <pattern-add-is-true
           v-show="step === 5"
           :belief="belief"
           :initialValue="isTrue"
           @answered="isTrue = $event">
-        </the-work-add-is-true>
+        </pattern-add-is-true>
 
-        <the-work-add-is-really-true
+        <pattern-add-is-really-true
           v-show="step === 6"
           :belief="belief"
           :initialValue="isReallyTrue"
           @answered="isReallyTrue = $event">
-        </the-work-add-is-really-true>
+        </pattern-add-is-really-true>
 
-        <the-work-add-with-belief
+        <pattern-add-with-belief
           v-show="step === 7"
           :belief="belief"
           :initialValue="withBelief"
           @changed="withBelief = $event"
           @focussed="isFooterFixed = false"
           @blurred="isFooterFixed = true">
-        </the-work-add-with-belief>
+        </pattern-add-with-belief>
 
-        <the-work-add-origin
+        <pattern-add-origin
           v-show="step === 8"
           :initialValue="origin"
           @changed="origin = $event"
           @focussed="isFooterFixed = false"
           @blurred="isFooterFixed = true">
-        </the-work-add-origin>
+        </pattern-add-origin>
 
-        <the-work-add-without-belief
+        <pattern-add-without-belief
           v-show="step === 9"
           :belief="belief"
           :initialValue="withoutBelief"
           @changed="withoutBelief = $event"
           @focussed="isFooterFixed = false"
           @blurred="isFooterFixed = true">
-        </the-work-add-without-belief>
+        </pattern-add-without-belief>
 
-        <the-work-add-turnaround
+        <pattern-add-turnaround
           v-show="step === 10"
           :belief="belief"
           :initialValue="turnaround"
           @changed="turnaround = $event"
           @focussed="isFooterFixed = false"
           @blurred="isFooterFixed = true">
-        </the-work-add-turnaround>
+        </pattern-add-turnaround>
       </v-container>
 
       <v-footer :fixed="isFooterFixed" color="white elevation-3" height="44">
@@ -113,16 +113,16 @@
 </template>
 
 <script>
-import TheWorkAddName from '@/views/TheWorkAddName.vue';
-import TheWorkAddTrigger from '@/views/TheWorkAddTrigger.vue';
-import TheWorkAddReaction from '@/views/TheWorkAddReaction.vue';
-import TheWorkAddBelief from '@/views/TheWorkAddBelief.vue';
-import TheWorkAddIsTrue from '@/views/TheWorkAddIsTrue.vue';
-import TheWorkAddIsReallyTrue from '@/views/TheWorkAddIsReallyTrue.vue';
-import TheWorkAddWithBelief from '@/views/TheWorkAddWithBelief.vue';
-import TheWorkAddOrigin from '@/views/TheWorkAddOrigin.vue';
-import TheWorkAddWithoutBelief from '@/views/TheWorkAddWithoutBelief.vue';
-import TheWorkAddTurnaround from '@/views/TheWorkAddTurnaround.vue';
+import PatternAddName from '@/views/PatternAddName.vue';
+import PatternAddTrigger from '@/views/PatternAddTrigger.vue';
+import PatternAddReaction from '@/views/PatternAddReaction.vue';
+import PatternAddBelief from '@/views/PatternAddBelief.vue';
+import PatternAddIsTrue from '@/views/PatternAddIsTrue.vue';
+import PatternAddIsReallyTrue from '@/views/PatternAddIsReallyTrue.vue';
+import PatternAddWithBelief from '@/views/PatternAddWithBelief.vue';
+import PatternAddOrigin from '@/views/PatternAddOrigin.vue';
+import PatternAddWithoutBelief from '@/views/PatternAddWithoutBelief.vue';
+import PatternAddTurnaround from '@/views/PatternAddTurnaround.vue';
 import availableFeelingsSrc from '../assets/feelings.json';
 
 function buildFeelings(selectedFeelings) {
@@ -133,21 +133,21 @@ function buildFeelings(selectedFeelings) {
 }
 
 export default {
-  name: 'the-work-add',
+  name: 'pattern-add',
   components: {
-    TheWorkAddName,
-    TheWorkAddTrigger,
-    TheWorkAddReaction,
-    TheWorkAddBelief,
-    TheWorkAddIsTrue,
-    TheWorkAddIsReallyTrue,
-    TheWorkAddWithBelief,
-    TheWorkAddOrigin,
-    TheWorkAddWithoutBelief,
-    TheWorkAddTurnaround,
+    PatternAddName,
+    PatternAddTrigger,
+    PatternAddReaction,
+    PatternAddBelief,
+    PatternAddIsTrue,
+    PatternAddIsReallyTrue,
+    PatternAddWithBelief,
+    PatternAddOrigin,
+    PatternAddWithoutBelief,
+    PatternAddTurnaround,
   },
   data() {
-    const editEntry = this.$store.getters.theWork
+    const editEntry = this.$store.getters.patterns
       .find(p => p.time === parseInt(this.$route.params.time, 10));
     return {
       step: 1,
@@ -210,17 +210,14 @@ export default {
         turnaround: this.turnaround,
       };
       if (this.isEditMode) {
-        this.$store.dispatch('updateTheWork', {
-          ...this.editEntry,
-          ...payload,
-        });
+        this.$store.dispatch('updatePattern', { ...this.editEntry, ...payload });
       } else {
-        this.$store.dispatch('saveTheWork', payload);
+        this.$store.dispatch('savePattern', payload);
       }
-      this.$router.push('/the-work');
+      this.$router.push('/patterns');
     },
     close() {
-      this.$router.push('/the-work');
+      this.$router.push('/patterns');
     },
   },
 };

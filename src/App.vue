@@ -9,7 +9,7 @@ export default {
   name: 'app',
   created() {
     this.$store.dispatch('loadCheckIns');
-    this.$store.dispatch('loadTheWork');
+    this.$store.dispatch('loadPatterns');
   },
 };
 </script>

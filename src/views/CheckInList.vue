@@ -50,7 +50,7 @@
         <span>Check-Ins</span>
         <v-icon>favorite_border</v-icon>
       </v-btn>
-      <v-btn flat color="grey" to="/the-work">
+      <v-btn flat color="grey" to="/patterns">
         <span>Muster</span>
         <v-icon>repeat</v-icon>
       </v-btn>
