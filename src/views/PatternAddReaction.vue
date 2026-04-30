@@ -1,8 +1,8 @@
 <template>
   <v-layout column>
     <v-flex class="mt-2 mb-5">
-      <h1 class="headline font-weight-regular">Reaktion</h1>
-      <p class="body-1 grey--text mt-1">Wie fühlst du dich in der Situation?</p>
+      <h1 class="headline font-weight-regular">Gefühl</h1>
+      <p class="body-1 grey--text mt-1">Was fühlst du, wenn der Glaube wahr ist?</p>
     </v-flex>
     <v-flex>
       <tag-list

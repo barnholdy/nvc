@@ -1,7 +1,7 @@
 <template>
   <v-layout column>
     <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">Trigger</h1>
+      <h1 class="headline font-weight-regular">Situation</h1>
       <p class="body-1 grey--text mt-1">Was ist äußerlich passiert?</p>
     </v-flex>
     <v-flex>

@@ -1,8 +1,8 @@
 <template>
   <v-layout column>
     <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">Was müsste ich über mich, andere oder die Welt glauben, damit dieses Gefühl Sinn ergibt?</h1>
-      <p class="subheading grey--text mt-1">Schreibe deinen Glaubenssatz auf.</p>
+      <h1 class="headline font-weight-regular">Glaube / Urteil</h1>
+      <p class="body-1 grey--text mt-2">Jedes Urteil ist auch ein Spiegel: Es zeigt was in dir gerade unerfüllt, verletzt oder ungehört ist. Wenn du dem Urteil mit Neugier statt mit Rechtfertigung begegnest, öffnet sich ein Raum, in dem du das eigentliche Gefühl und das dahinterliegende Bedürfnis erkennen kannst.</p>
     </v-flex>
     <v-flex>
       <v-text-field

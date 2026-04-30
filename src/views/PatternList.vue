@@ -40,16 +40,10 @@
           <v-divider></v-divider>
           <v-card-text>
             <template v-if="entry.trigger">
-              <p class="section-label caption grey--text">Trigger</p>
+              <p class="section-label caption grey--text">Situation</p>
               <p class="body-1">{{ entry.trigger }}</p>
             </template>
-            <template v-if="entry.feelings && entry.feelings.length">
-              <p class="section-label caption grey--text mt-2">Reaktion</p>
-              <div class="mb-2">
-                <tag-list :items="entry.feelings"></tag-list>
-              </div>
-            </template>
-            <p class="section-label caption grey--text mt-2">Glaubenssatz</p>
+            <p class="section-label caption grey--text mt-2">Glaube / Urteil</p>
             <p class="body-1">{{ entry.belief }}</p>
             <v-layout row wrap class="mb-2 mt-2">
               <v-chip small :color="entry.isTrue ? 'primary' : 'grey'" text-color="white">
@@ -59,6 +53,12 @@
                 Wirklich wahr: {{ entry.isReallyTrue ? 'Ja' : 'Nein' }}
               </v-chip>
             </v-layout>
+            <template v-if="entry.feelings && entry.feelings.length">
+              <p class="section-label caption grey--text mt-2">Gefühl</p>
+              <div class="mb-2">
+                <tag-list :items="entry.feelings"></tag-list>
+              </div>
+            </template>
             <p class="section-label caption grey--text mt-2">Mit dem Glauben</p>
             <p class="body-1">{{ entry.withBelief }}</p>
             <template v-if="entry.origin">

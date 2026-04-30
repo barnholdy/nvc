@@ -29,13 +29,8 @@
           @blurred="isFooterFixed = true">
         </pattern-add-trigger>
 
-        <pattern-add-reaction
-          v-show="step === 3"
-          :availableFeelings="availableFeelings">
-        </pattern-add-reaction>
-
         <pattern-add-belief
-          v-show="step === 4"
+          v-show="step === 3"
           :initialValue="belief"
           @beliefChanged="belief = $event"
           @focussed="isFooterFixed = false"
@@ -43,18 +38,23 @@
         </pattern-add-belief>
 
         <pattern-add-is-true
-          v-show="step === 5"
+          v-show="step === 4"
           :belief="belief"
           :initialValue="isTrue"
           @answered="isTrue = $event">
         </pattern-add-is-true>
 
         <pattern-add-is-really-true
-          v-show="step === 6"
+          v-show="step === 5"
           :belief="belief"
           :initialValue="isReallyTrue"
           @answered="isReallyTrue = $event">
         </pattern-add-is-really-true>
+
+        <pattern-add-reaction
+          v-show="step === 6"
+          :availableFeelings="availableFeelings">
+        </pattern-add-reaction>
 
         <pattern-add-with-belief
           v-show="step === 7"
@@ -176,10 +176,10 @@ export default {
     isStepComplete() {
       if (this.step === 1) return this.name.trim() !== '';
       if (this.step === 2) return this.trigger.trim() !== '';
-      if (this.step === 3) return this.selectedFeelings.length > 0;
-      if (this.step === 4) return this.belief.trim() !== '';
-      if (this.step === 5) return this.isTrue !== null;
-      if (this.step === 6) return this.isReallyTrue !== null;
+      if (this.step === 3) return this.belief.trim() !== '';
+      if (this.step === 4) return this.isTrue !== null;
+      if (this.step === 5) return this.isReallyTrue !== null;
+      if (this.step === 6) return this.selectedFeelings.length > 0;
       if (this.step === 7) return this.withBelief.trim() !== '';
       if (this.step === 8) return this.origin.trim() !== '';
       if (this.step === 9) return this.withoutBelief.trim() !== '';
