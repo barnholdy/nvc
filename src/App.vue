@@ -19,4 +19,7 @@ export default {
 </script>
 
 <style lang="scss">
+html, body {
+  touch-action: manipulation;
+}
 </style>
