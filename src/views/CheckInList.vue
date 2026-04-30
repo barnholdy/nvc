@@ -45,7 +45,7 @@
         </v-dialog>
     </v-content>
 
-    <v-bottom-nav :value="true" fixed color="white" class="elevation-3">
+    <v-bottom-nav :value="true" fixed app color="white" class="elevation-3">
       <v-btn flat color="primary" to="/check-ins">
         <span>Check-Ins</span>
         <v-icon>favorite_border</v-icon>
