@@ -13,28 +13,31 @@
       </p>
       <v-card class="entry" v-for="entry in patterns" v-bind:key="entry.time">
         <v-card-title class="header" @click="toggle(entry.time)">
-          <div class="header-text">
-            <p class="subheading belief-title mb-1">{{ entry.name || entry.belief }}</p>
-            <div class="status-bar mb-1">
-              <span class="status-dot" :class="entry.isTrue ? 'status-dot--filled' : 'status-dot--empty'"></span>
-              <span class="status-dot" :class="entry.isReallyTrue ? 'status-dot--filled' : 'status-dot--empty'"></span>
+          <p class="subheading belief-title mb-1">{{ entry.name || entry.belief }}</p>
+          <div class="header-bottom">
+            <div class="header-meta">
+              <div class="status-bar mb-1">
+                <span class="status-dot" :class="entry.isTrue ? 'status-dot--filled' : 'status-dot--empty'"></span>
+                <span class="status-dot" :class="entry.isReallyTrue ? 'status-dot--filled' : 'status-dot--empty'"></span>
+              </div>
+              <p class="caption grey--text mb-0">{{ formatTime(entry.time) }}</p>
             </div>
-            <p class="caption grey--text mb-0">{{ formatTime(entry.time) }}</p>
+            <div class="header-actions">
+              <div class="counter-tap" @click.stop="handleTap(entry)">
+                <span class="count-badge">{{ entry.count || 1 }}</span>
+                <span class="count-plus">+</span>
+              </div>
+              <v-btn icon small @click.stop="changeEntry(entry)">
+                <v-icon :color="hasChangeData(entry) ? '#00838f' : 'grey darken-2'">autorenew</v-icon>
+              </v-btn>
+              <v-btn icon small @click.stop="editEntry(entry)">
+                <v-icon color="grey darken-2">edit</v-icon>
+              </v-btn>
+              <v-btn icon small @click.stop="preDelete(entry)">
+                <v-icon color="grey darken-2">delete</v-icon>
+              </v-btn>
+            </div>
           </div>
-          <v-spacer></v-spacer>
-          <div class="counter-tap" @click.stop="handleTap(entry)">
-            <span class="count-badge">{{ entry.count || 1 }}</span>
-            <span class="count-plus">+</span>
-          </div>
-          <v-btn icon small @click.stop="changeEntry(entry)">
-            <v-icon :color="hasChangeData(entry) ? '#00838f' : 'grey darken-2'">autorenew</v-icon>
-          </v-btn>
-          <v-btn icon small @click.stop="editEntry(entry)">
-            <v-icon color="grey darken-2">edit</v-icon>
-          </v-btn>
-          <v-btn icon small @click.stop="preDelete(entry)">
-            <v-icon color="grey darken-2">delete</v-icon>
-          </v-btn>
         </v-card-title>
         <template v-if="openEntry === entry.time">
           <v-divider></v-divider>
@@ -202,15 +205,27 @@ export default {
 .header {
   cursor: pointer;
   user-select: none;
-}
-.header-text {
-  flex: 1;
-  min-width: 0;
-  padding-right: 0.5rem;
+  flex-direction: column;
+  align-items: stretch;
+  padding-bottom: 8px;
 }
 .belief-title {
   white-space: normal;
   word-break: break-word;
+}
+.header-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header-meta {
+  flex: 1;
+  min-width: 0;
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 .counter-tap {
   display: flex;
