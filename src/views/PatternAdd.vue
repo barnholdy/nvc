@@ -13,16 +13,8 @@
     </v-toolbar>
     <v-content>
       <v-container class="mb-5">
-        <pattern-add-name
-          v-show="step === 1"
-          :initialValue="name"
-          @changed="name = $event"
-          @focussed="isFooterFixed = false"
-          @blurred="isFooterFixed = true">
-        </pattern-add-name>
-
         <pattern-add-trigger
-          v-show="step === 2"
+          v-show="step === 1"
           :initialValue="trigger"
           @changed="trigger = $event"
           @focussed="isFooterFixed = false"
@@ -30,7 +22,7 @@
         </pattern-add-trigger>
 
         <pattern-add-belief
-          v-show="step === 3"
+          v-show="step === 2"
           :initialValue="belief"
           @beliefChanged="belief = $event"
           @focussed="isFooterFixed = false"
@@ -38,26 +30,26 @@
         </pattern-add-belief>
 
         <pattern-add-is-true
-          v-show="step === 4"
+          v-show="step === 3"
           :belief="belief"
           :initialValue="isTrue"
           @answered="isTrue = $event">
         </pattern-add-is-true>
 
         <pattern-add-is-really-true
-          v-show="step === 5"
+          v-show="step === 4"
           :belief="belief"
           :initialValue="isReallyTrue"
           @answered="isReallyTrue = $event">
         </pattern-add-is-really-true>
 
         <pattern-add-reaction
-          v-show="step === 6"
+          v-show="step === 5"
           :availableFeelings="availableFeelings">
         </pattern-add-reaction>
 
         <pattern-add-with-belief
-          v-show="step === 7"
+          v-show="step === 6"
           :belief="belief"
           :initialValue="withBelief"
           @changed="withBelief = $event"
@@ -66,7 +58,7 @@
         </pattern-add-with-belief>
 
         <pattern-add-origin
-          v-show="step === 8"
+          v-show="step === 7"
           :initialValue="origin"
           @changed="origin = $event"
           @focussed="isFooterFixed = false"
@@ -74,7 +66,7 @@
         </pattern-add-origin>
 
         <pattern-add-without-belief
-          v-show="step === 9"
+          v-show="step === 8"
           :belief="belief"
           :initialValue="withoutBelief"
           @changed="withoutBelief = $event"
@@ -83,13 +75,21 @@
         </pattern-add-without-belief>
 
         <pattern-add-turnaround
-          v-show="step === 10"
+          v-show="step === 9"
           :belief="belief"
           :initialValue="turnaround"
           @changed="turnaround = $event"
           @focussed="isFooterFixed = false"
           @blurred="isFooterFixed = true">
         </pattern-add-turnaround>
+
+        <pattern-add-name
+          v-show="step === 10"
+          :initialValue="name"
+          @changed="name = $event"
+          @focussed="isFooterFixed = false"
+          @blurred="isFooterFixed = true">
+        </pattern-add-name>
       </v-container>
 
       <v-footer :fixed="isFooterFixed" color="white elevation-3" height="44">
@@ -174,16 +174,16 @@ export default {
       return this.availableFeelings.filter(f => f.isSelected);
     },
     isStepComplete() {
-      if (this.step === 1) return this.name.trim() !== '';
-      if (this.step === 2) return this.trigger.trim() !== '';
-      if (this.step === 3) return this.belief.trim() !== '';
-      if (this.step === 4) return this.isTrue !== null;
-      if (this.step === 5) return this.isReallyTrue !== null;
-      if (this.step === 6) return this.selectedFeelings.length > 0;
-      if (this.step === 7) return this.withBelief.trim() !== '';
-      if (this.step === 8) return this.origin.trim() !== '';
-      if (this.step === 9) return this.withoutBelief.trim() !== '';
-      if (this.step === 10) return this.turnaround.trim() !== '';
+      if (this.step === 1) return this.trigger.trim() !== '';
+      if (this.step === 2) return this.belief.trim() !== '';
+      if (this.step === 3) return this.isTrue !== null;
+      if (this.step === 4) return this.isReallyTrue !== null;
+      if (this.step === 5) return this.selectedFeelings.length > 0;
+      if (this.step === 6) return this.withBelief.trim() !== '';
+      if (this.step === 7) return this.origin.trim() !== '';
+      if (this.step === 8) return this.withoutBelief.trim() !== '';
+      if (this.step === 9) return this.turnaround.trim() !== '';
+      if (this.step === 10) return this.name.trim() !== '';
       return false;
     },
   },

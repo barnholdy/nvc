@@ -6,7 +6,7 @@
     </v-flex>
     <v-flex>
       <v-text-field
-        label="z.B. „Kritik von meinem Chef""
+        label="Name"
         placeholder="..."
         v-model="text"
         @focus="$emit('focussed')"
