@@ -45,6 +45,7 @@
 
         <pattern-add-reaction
           v-show="step === 5"
+          :belief="belief"
           :availableFeelings="availableFeelings">
         </pattern-add-reaction>
 
@@ -59,6 +60,7 @@
 
         <pattern-add-origin
           v-show="step === 7"
+          :belief="belief"
           :initialValue="origin"
           @changed="origin = $event"
           @focussed="isFooterFixed = false"
@@ -85,6 +87,7 @@
 
         <pattern-add-name
           v-show="step === 10"
+          :belief="belief"
           :initialValue="name"
           @changed="name = $event"
           @focussed="isFooterFixed = false"

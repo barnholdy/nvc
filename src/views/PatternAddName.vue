@@ -2,7 +2,8 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Name</h1>
-      <p class="body-1 grey--text mt-1">Wie möchtest du diesen Eintrag nennen?</p>
+      <p class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
+      <p class="body-1 grey--text mt-2">Wie möchtest du diesen Eintrag nennen?</p>
     </v-flex>
     <v-flex>
       <v-text-field
@@ -20,6 +21,7 @@
 export default {
   name: 'pattern-add-name',
   props: {
+    belief: String,
     initialValue: { type: String, default: '' },
   },
   data() {
@@ -32,4 +34,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.belief-quote {
+  font-style: italic;
+}
 </style>
