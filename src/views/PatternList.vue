@@ -59,13 +59,13 @@
                 <tag-list :items="entry.feelings"></tag-list>
               </div>
             </template>
-            <p class="section-label caption grey--text mt-2">Mit dem Glauben</p>
+            <p class="section-label caption grey--text mt-2">Reaktion</p>
             <p class="body-1">{{ entry.withBelief }}</p>
             <template v-if="entry.origin">
               <p class="section-label caption grey--text mt-2">Ursprungshypothese</p>
               <p class="body-1">{{ entry.origin }}</p>
             </template>
-            <p class="section-label caption grey--text mt-2">Ohne den Glauben</p>
+            <p class="section-label caption grey--text mt-2">Neue Perspektive</p>
             <p class="body-1">{{ entry.withoutBelief }}</p>
             <p class="section-label caption grey--text mt-2">Umkehrung</p>
             <p class="body-1">{{ entry.turnaround }}</p>

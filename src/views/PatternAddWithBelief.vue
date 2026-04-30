@@ -1,9 +1,9 @@
 <template>
   <v-layout column>
     <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">Wer bist du mit diesem Glauben?</h1>
+      <h1 class="headline font-weight-regular">Reaktion</h1>
       <p class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
-      <p class="body-1 grey--text mt-2">Wie reagierst du, was passiert, wenn du diesen Gedanken glaubst?</p>
+      <p class="body-1 grey--text mt-2">Wer bist du mit diesem Glauben? Wie reagierst du, was passiert, wenn du diesen Gedanken glaubst?</p>
     </v-flex>
     <v-flex>
       <v-text-field
