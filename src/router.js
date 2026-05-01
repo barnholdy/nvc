@@ -35,6 +35,11 @@ export default new Router({
       name: 'change-pattern',
       component: () => import('./views/PatternChange.vue'),
     },
+    {
+      path: '/affirmation-pattern/:time',
+      name: 'affirmation-pattern',
+      component: () => import('./views/PatternAffirmation.vue'),
+    },
     { path: '*', redirect: '/check-ins' },
   ],
   scrollBehavior() {

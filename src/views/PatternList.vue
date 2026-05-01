@@ -27,6 +27,9 @@
                 <span class="count-badge">{{ entry.count || 1 }}</span>
                 <span class="count-plus">+</span>
               </div>
+              <v-btn icon small @click.stop="affirmationEntry(entry)">
+                <v-icon :color="entry.affirmation ? '#00838f' : 'grey darken-2'">stars</v-icon>
+              </v-btn>
               <v-btn icon small @click.stop="changeEntry(entry)">
                 <v-icon :color="hasChangeData(entry) ? '#00838f' : 'grey darken-2'">autorenew</v-icon>
               </v-btn>
@@ -72,6 +75,10 @@
             <p class="body-1">{{ entry.withoutBelief }}</p>
             <p class="section-label caption grey--text mt-2">Umkehrung</p>
             <p class="body-1">{{ entry.turnaround }}</p>
+            <template v-if="entry.affirmation">
+              <p class="section-label caption grey--text mt-2">Affirmationen</p>
+              <p class="body-1" style="white-space: pre-line">{{ entry.affirmation }}</p>
+            </template>
             <template v-if="entry.changeAnnounce || entry.changeApologize || entry.changeAsk || entry.changeAct">
               <p class="section-label caption grey--text mt-2">Veränderungsprozess</p>
               <template v-if="entry.changeAnnounce">
@@ -166,6 +173,9 @@ export default {
     },
     hasChangeData(entry) {
       return !!(entry.changeAnnounce || entry.changeApologize || entry.changeAsk || entry.changeAct);
+    },
+    affirmationEntry(entry) {
+      this.$router.push(`/affirmation-pattern/${entry.time}`);
     },
     changeEntry(entry) {
       this.$router.push(`/change-pattern/${entry.time}`);
