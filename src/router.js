@@ -40,6 +40,11 @@ export default new Router({
       name: 'affirmation-pattern',
       component: () => import('./views/PatternAffirmation.vue'),
     },
+    {
+      path: '/affirmations',
+      name: 'affirmations',
+      component: () => import('./views/AffirmationList.vue'),
+    },
     { path: '*', redirect: '/check-ins' },
   ],
   scrollBehavior() {

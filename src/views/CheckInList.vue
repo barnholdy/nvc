@@ -54,6 +54,10 @@
         <span>Muster</span>
         <v-icon>repeat</v-icon>
       </v-btn>
+      <v-btn flat color="grey" to="/affirmations">
+        <span>Affirmationen</span>
+        <v-icon>stars</v-icon>
+      </v-btn>
     </v-bottom-nav>
   </div>
 </template>

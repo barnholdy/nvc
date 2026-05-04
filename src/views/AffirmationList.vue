@@ -1,0 +1,111 @@
+<template>
+  <div class="affirmation-list">
+    <v-toolbar color="white" app>
+      <v-toolbar-title>Affirmationen</v-toolbar-title>
+    </v-toolbar>
+    <v-content>
+      <template v-if="affirmations.length">
+        <v-card
+          class="affirmation-card"
+          v-for="(item, i) in affirmations"
+          :key="i"
+          @click="toggle(i)"
+        >
+          <v-card-title class="affirmation-header">
+            <p class="body-1 affirmation-text mb-0">{{ item.text }}</p>
+          </v-card-title>
+          <template v-if="openIndex === i">
+            <v-divider></v-divider>
+            <v-card-text>
+              <p class="caption grey--text mb-1 section-label">Glaube / Urteil</p>
+              <p class="body-1 belief-quote">„{{ item.belief }}"</p>
+              <p class="caption grey--text mt-1">{{ item.patternName }}</p>
+            </v-card-text>
+          </template>
+        </v-card>
+      </template>
+
+      <div v-else class="empty-state">
+        <v-icon large color="grey lighten-2">stars</v-icon>
+        <p class="body-1 grey--text mt-2">Noch keine Affirmationen vorhanden.</p>
+        <p class="caption grey--text">Füge Affirmationen zu deinen Mustern hinzu.</p>
+      </div>
+    </v-content>
+
+    <v-bottom-nav :value="true" fixed app color="white" class="elevation-3">
+      <v-btn flat color="grey" to="/check-ins">
+        <span>Check-Ins</span>
+        <v-icon>favorite_border</v-icon>
+      </v-btn>
+      <v-btn flat color="grey" to="/patterns">
+        <span>Muster</span>
+        <v-icon>repeat</v-icon>
+      </v-btn>
+      <v-btn flat color="primary" to="/affirmations">
+        <span>Affirmationen</span>
+        <v-icon>stars</v-icon>
+      </v-btn>
+    </v-bottom-nav>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'affirmation-list',
+  data() {
+    return { openIndex: null };
+  },
+  computed: {
+    affirmations() {
+      const result = [];
+      this.$store.getters.patterns.forEach(pattern => {
+        if (!pattern.affirmation) return;
+        const lines = pattern.affirmation.split('\n').map(s => s.trim()).filter(s => s);
+        lines.forEach(line => {
+          result.push({
+            text: line,
+            belief: pattern.belief,
+            patternName: pattern.name || pattern.belief,
+          });
+        });
+      });
+      return result;
+    },
+  },
+  methods: {
+    toggle(i) {
+      this.openIndex = this.openIndex === i ? null : i;
+    },
+  },
+};
+</script>
+
+<style scoped lang="scss">
+.affirmation-card {
+  margin: 1rem;
+  cursor: pointer;
+  user-select: none;
+}
+.affirmation-header {
+  padding: 12px 16px;
+}
+.affirmation-text {
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.5;
+}
+.belief-quote {
+  font-style: italic;
+}
+.section-label {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+</style>
