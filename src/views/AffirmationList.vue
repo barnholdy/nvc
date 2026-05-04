@@ -9,9 +9,8 @@
           class="affirmation-card"
           v-for="(item, i) in affirmations"
           :key="i"
-          @click="toggle(i)"
         >
-          <v-card-title class="affirmation-header">
+          <v-card-title class="affirmation-header" @click="toggle(i)">
             <p class="body-1 affirmation-text mb-0">{{ item.text }}</p>
           </v-card-title>
           <template v-if="openIndex === i">
