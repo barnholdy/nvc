@@ -15,19 +15,30 @@
             <p class="body-1 grey--text mt-2">Forme deinen Glaubenssatz in positive, kraftvolle Ich-Aussagen im Präsens um.</p>
           </v-flex>
 
-          <v-flex>
+          <v-flex v-for="(item, i) in affirmations" :key="i" class="affirmation-row">
             <v-text-field
-              v-model="text"
-              label="Meine Affirmationen..."
-              placeholder="..."
-              multi-line
-              rows="5"
+              v-model="item.text"
+              :label="`Affirmation ${i + 1}`"
+              placeholder="Ich bin..."
+              single-line
+              hide-details
+              class="affirmation-field"
               @focus="isFooterFixed = false"
               @blur="isFooterFixed = true"
             ></v-text-field>
+            <v-btn icon small class="remove-btn" @click="removeField(i)">
+              <v-icon color="grey">remove_circle_outline</v-icon>
+            </v-btn>
           </v-flex>
 
-          <v-flex class="mt-1">
+          <v-flex class="mt-2">
+            <v-btn flat small color="primary" @click="addField">
+              <v-icon left small>add</v-icon>
+              Neue Affirmation
+            </v-btn>
+          </v-flex>
+
+          <v-flex class="mt-3">
             <template v-if="showApiKeyInput">
               <p class="caption grey--text mb-1">Anthropic API Key eingeben, um Vorschläge zu generieren:</p>
               <v-text-field
@@ -84,9 +95,12 @@ export default {
   data() {
     const entry = this.$store.getters.patterns
       .find(p => p.time === parseInt(this.$route.params.time, 10));
+    const raw = entry && entry.affirmation ? entry.affirmation : '';
+    const lines = raw.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+    const affirmations = lines.length > 0 ? lines.map(t => ({ text: t })) : [{ text: '' }];
     return {
       entry: entry || null,
-      text: entry ? entry.affirmation || '' : '',
+      affirmations,
       suggestions: [],
       isLoading: false,
       errorMsg: '',
@@ -97,6 +111,23 @@ export default {
     };
   },
   methods: {
+    addField() {
+      this.affirmations.push({ text: '' });
+    },
+    removeField(i) {
+      this.affirmations.splice(i, 1);
+      if (this.affirmations.length === 0) {
+        this.affirmations.push({ text: '' });
+      }
+    },
+    acceptSuggestion(s) {
+      const last = this.affirmations[this.affirmations.length - 1];
+      if (last && last.text.trim() === '') {
+        this.$set(this.affirmations, this.affirmations.length - 1, { text: s });
+      } else {
+        this.affirmations.push({ text: s });
+      }
+    },
     saveApiKey() {
       this.apiKey = this.apiKeyInput;
       localStorage.setItem('nvc.apiKey', this.apiKey);
@@ -147,13 +178,11 @@ export default {
         this.isLoading = false;
       }
     },
-    acceptSuggestion(s) {
-      this.text = this.text ? `${this.text}\n${s}` : s;
-    },
     save() {
+      const text = this.affirmations.map(a => a.text.trim()).filter(s => s).join('\n');
       this.$store.dispatch('updatePattern', {
         ...this.entry,
-        affirmation: this.text,
+        affirmation: text,
       });
       this.$router.push('/patterns');
     },
@@ -167,6 +196,19 @@ export default {
 <style scoped lang="scss">
 .belief-quote {
   font-style: italic;
+}
+.affirmation-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+.affirmation-field {
+  flex: 1;
+}
+.remove-btn {
+  flex-shrink: 0;
+  margin-top: 8px;
 }
 .suggestions {
   display: flex;

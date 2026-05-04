@@ -77,7 +77,11 @@
             <p class="body-1">{{ entry.turnaround }}</p>
             <template v-if="entry.affirmation">
               <p class="section-label caption grey--text mt-2">Affirmationen</p>
-              <p class="body-1" style="white-space: pre-line">{{ entry.affirmation }}</p>
+              <p
+                v-for="(line, idx) in entry.affirmation.split('\n').filter(function(s){ return s.trim(); })"
+                :key="idx"
+                class="body-1 mb-1"
+              >{{ line }}</p>
             </template>
             <template v-if="entry.changeAnnounce || entry.changeApologize || entry.changeAsk || entry.changeAct">
               <p class="section-label caption grey--text mt-2">Veränderungsprozess</p>
