@@ -67,6 +67,12 @@
             </template>
             <p class="section-label caption grey--text mt-2">Reaktion</p>
             <p class="body-1">{{ entry.withBelief }}</p>
+            <template v-if="entry.needs && entry.needs.length">
+              <p class="section-label caption grey--text mt-2">Bedürfnis</p>
+              <div class="mb-2">
+                <tag-list :items="entry.needs"></tag-list>
+              </div>
+            </template>
             <template v-if="entry.origin">
               <p class="section-label caption grey--text mt-2">Ursprungshypothese</p>
               <p class="body-1">{{ entry.origin }}</p>
