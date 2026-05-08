@@ -12,7 +12,6 @@
         >
           <v-card-title class="affirmation-header" @click="toggle(i)">
             <p class="body-1 affirmation-text mb-0">{{ item.text }}</p>
-            <v-spacer></v-spacer>
             <div class="counter-tap" @click.stop="handleTap(item)">
               <span class="count-badge">{{ item.count }}</span>
               <span class="count-plus">+</span>
@@ -119,21 +118,21 @@ export default {
 .affirmation-header {
   cursor: pointer;
   user-select: none;
-  padding: 12px 16px;
+  position: relative;
+  align-items: flex-start !important;
+  padding: 12px 16px 12px 16px !important;
+  padding-right: 72px !important;
 }
 .affirmation-text {
   white-space: normal;
   word-break: break-word;
   line-height: 1.5;
-}
-.belief-quote {
-  font-style: italic;
-}
-.section-label {
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  width: 100%;
 }
 .counter-tap {
+  position: absolute;
+  top: 12px;
+  right: 16px;
   display: flex;
   align-items: center;
   gap: 2px;
@@ -146,6 +145,13 @@ export default {
   &:active {
     background: #e0f7fa;
   }
+}
+.belief-quote {
+  font-style: italic;
+}
+.section-label {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 .count-badge {
   color: #00838f;
