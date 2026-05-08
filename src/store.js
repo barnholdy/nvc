@@ -122,7 +122,18 @@ export default new Vuex.Store({
         }
         const json = localStorage.getItem(PATTERNS_STORAGE_KEY);
         if (json) {
-          commit('setPatterns', JSON.parse(json));
+          let patterns = JSON.parse(json);
+          // Migrate affirmation string → affirmations array
+          patterns = patterns.map(p => {
+            if (typeof p.affirmation === 'string') {
+              const lines = p.affirmation.split('\n').map(s => s.trim()).filter(s => s);
+              const migrated = Object.assign({}, p, { affirmations: lines.map(function(text) { return { text: text, count: 1 }; }) });
+              delete migrated.affirmation;
+              return migrated;
+            }
+            return p;
+          });
+          commit('setPatterns', patterns);
         }
       } else {
         throw new Error('Patterns were not loaded.');

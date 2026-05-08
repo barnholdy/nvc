@@ -28,7 +28,7 @@
                 <span class="count-plus">+</span>
               </div>
               <v-btn icon small @click.stop="affirmationEntry(entry)">
-                <v-icon :color="entry.affirmation ? '#00838f' : 'grey darken-2'">stars</v-icon>
+                <v-icon :color="entry.affirmations && entry.affirmations.length ? '#00838f' : 'grey darken-2'">stars</v-icon>
               </v-btn>
               <v-btn icon small @click.stop="changeEntry(entry)">
                 <v-icon :color="hasChangeData(entry) ? '#00838f' : 'grey darken-2'">autorenew</v-icon>
@@ -75,13 +75,9 @@
             <p class="body-1">{{ entry.withoutBelief }}</p>
             <p class="section-label caption grey--text mt-2">Umkehrung</p>
             <p class="body-1">{{ entry.turnaround }}</p>
-            <template v-if="entry.affirmation">
+            <template v-if="entry.affirmations && entry.affirmations.length">
               <p class="section-label caption grey--text mt-2">Affirmationen</p>
-              <p
-                v-for="(line, idx) in entry.affirmation.split('\n').filter(function(s){ return s.trim(); })"
-                :key="idx"
-                class="body-1 mb-1"
-              >{{ line }}</p>
+              <p v-for="(a, idx) in entry.affirmations" :key="idx" class="body-1 mb-1">{{ a.text }}</p>
             </template>
             <template v-if="entry.changeAnnounce || entry.changeApologize || entry.changeAsk || entry.changeAct">
               <p class="section-label caption grey--text mt-2">Veränderungsprozess</p>

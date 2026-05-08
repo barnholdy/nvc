@@ -95,9 +95,8 @@ export default {
   data() {
     const entry = this.$store.getters.patterns
       .find(p => p.time === parseInt(this.$route.params.time, 10));
-    const raw = entry && entry.affirmation ? entry.affirmation : '';
-    const lines = raw.split('\n').map(s => s.trim()).filter(s => s.length > 0);
-    const affirmations = lines.length > 0 ? lines.map(t => ({ text: t })) : [{ text: '' }];
+    const raw = entry && entry.affirmations ? entry.affirmations : [];
+    const affirmations = raw.length > 0 ? raw.map(a => ({ text: a.text })) : [{ text: '' }];
     return {
       entry: entry || null,
       affirmations,
@@ -179,11 +178,14 @@ export default {
       }
     },
     save() {
-      const text = this.affirmations.map(a => a.text.trim()).filter(s => s).join('\n');
-      this.$store.dispatch('updatePattern', {
-        ...this.entry,
-        affirmation: text,
-      });
+      const existing = this.entry.affirmations || [];
+      const affirmations = this.affirmations
+        .map((a, i) => ({
+          text: a.text.trim(),
+          count: (existing[i] && existing[i].text === a.text.trim() ? existing[i].count : 1) || 1,
+        }))
+        .filter(a => a.text);
+      this.$store.dispatch('updatePattern', { ...this.entry, affirmations });
       this.$router.push('/patterns');
     },
     close() {

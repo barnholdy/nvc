@@ -8,10 +8,15 @@
         <v-card
           class="affirmation-card"
           v-for="(item, i) in affirmations"
-          :key="i"
+          :key="item.patternTime + '-' + item.affirmationIndex"
         >
           <v-card-title class="affirmation-header" @click="toggle(i)">
             <p class="body-1 affirmation-text mb-0">{{ item.text }}</p>
+            <v-spacer></v-spacer>
+            <div class="counter-tap" @click.stop="handleTap(item)">
+              <span class="count-badge">{{ item.count }}</span>
+              <span class="count-plus">+</span>
+            </div>
           </v-card-title>
           <template v-if="openIndex === i">
             <v-divider></v-divider>
@@ -52,28 +57,56 @@
 export default {
   name: 'affirmation-list',
   data() {
-    return { openIndex: null };
+    return {
+      openIndex: null,
+      tapTimeouts: {},
+    };
   },
   computed: {
     affirmations() {
       const result = [];
       this.$store.getters.patterns.forEach(pattern => {
-        if (!pattern.affirmation) return;
-        const lines = pattern.affirmation.split('\n').map(s => s.trim()).filter(s => s);
-        lines.forEach(line => {
+        if (!pattern.affirmations || !pattern.affirmations.length) return;
+        pattern.affirmations.forEach((a, idx) => {
           result.push({
-            text: line,
+            text: a.text,
+            count: a.count || 1,
             belief: pattern.belief,
             patternName: pattern.name || pattern.belief,
+            patternTime: pattern.time,
+            affirmationIndex: idx,
           });
         });
       });
-      return result;
+      return result.sort((a, b) => (b.count || 1) - (a.count || 1));
     },
   },
   methods: {
     toggle(i) {
       this.openIndex = this.openIndex === i ? null : i;
+    },
+    handleTap(item) {
+      const key = item.patternTime + '-' + item.affirmationIndex;
+      if (this.tapTimeouts[key]) {
+        clearTimeout(this.tapTimeouts[key]);
+        this.$delete(this.tapTimeouts, key);
+        if (item.count > 1) this.updateCount(item, -1);
+      } else {
+        this.$set(this.tapTimeouts, key, setTimeout(() => {
+          this.$delete(this.tapTimeouts, key);
+          this.updateCount(item, 1);
+        }, 300));
+      }
+    },
+    updateCount(item, delta) {
+      const pattern = this.$store.getters.patterns.find(p => p.time === item.patternTime);
+      if (!pattern) return;
+      const affirmations = pattern.affirmations.map((a, i) =>
+        i === item.affirmationIndex
+          ? Object.assign({}, a, { count: Math.max(1, (a.count || 1) + delta) })
+          : a
+      );
+      this.$store.dispatch('updatePattern', Object.assign({}, pattern, { affirmations: affirmations }));
     },
   },
 };
@@ -82,10 +115,10 @@ export default {
 <style scoped lang="scss">
 .affirmation-card {
   margin: 1rem;
-  cursor: pointer;
-  user-select: none;
 }
 .affirmation-header {
+  cursor: pointer;
+  user-select: none;
   padding: 12px 16px;
 }
 .affirmation-text {
@@ -99,6 +132,33 @@ export default {
 .section-label {
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+.counter-tap {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 6px;
+  border-radius: 20px;
+  border: 1.5px solid #00838f;
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  &:active {
+    background: #e0f7fa;
+  }
+}
+.count-badge {
+  color: #00838f;
+  font-size: 0.85rem;
+  font-weight: bold;
+  min-width: 14px;
+  text-align: center;
+}
+.count-plus {
+  color: #00838f;
+  font-size: 0.8rem;
+  font-weight: bold;
+  line-height: 1;
 }
 .empty-state {
   display: flex;
