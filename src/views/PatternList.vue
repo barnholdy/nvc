@@ -27,9 +27,6 @@
                 <span class="count-badge">{{ entry.count || 1 }}</span>
                 <span class="count-plus">+</span>
               </div>
-              <v-btn icon small @click.stop="affirmationEntry(entry)">
-                <v-icon :color="entry.affirmations && entry.affirmations.length ? '#00838f' : 'grey darken-2'">stars</v-icon>
-              </v-btn>
               <v-btn icon small @click.stop="changeEntry(entry)">
                 <v-icon :color="hasChangeData(entry) ? '#00838f' : 'grey darken-2'">autorenew</v-icon>
               </v-btn>
@@ -187,9 +184,6 @@ export default {
     },
     hasChangeData(entry) {
       return !!(entry.changeAnnounce || entry.changeApologize || entry.changeAsk || entry.changeAct);
-    },
-    affirmationEntry(entry) {
-      this.$router.push(`/affirmation-pattern/${entry.time}`);
     },
     changeEntry(entry) {
       this.$router.push(`/change-pattern/${entry.time}`);

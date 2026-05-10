@@ -31,8 +31,17 @@
           @blurred="isFooterFixed = true">
         </pattern-add-turnaround>
 
-        <pattern-change-announce
+        <pattern-change-affirmation
           v-show="step === 3"
+          :belief="entry ? entry.belief : ''"
+          :initialAffirmations="affirmations"
+          @changed="affirmations = $event"
+          @focussed="isFooterFixed = false"
+          @blurred="isFooterFixed = true">
+        </pattern-change-affirmation>
+
+        <pattern-change-announce
+          v-show="step === 4"
           :belief="entry ? entry.belief : ''"
           :initialValue="announce"
           @changed="announce = $event"
@@ -41,7 +50,7 @@
         </pattern-change-announce>
 
         <pattern-change-apologize
-          v-show="step === 4"
+          v-show="step === 5"
           :belief="entry ? entry.belief : ''"
           :initialValue="apologize"
           @changed="apologize = $event"
@@ -50,7 +59,7 @@
         </pattern-change-apologize>
 
         <pattern-change-ask
-          v-show="step === 5"
+          v-show="step === 6"
           :belief="entry ? entry.belief : ''"
           :initialValue="ask"
           @changed="ask = $event"
@@ -59,7 +68,7 @@
         </pattern-change-ask>
 
         <pattern-change-act
-          v-show="step === 6"
+          v-show="step === 7"
           :belief="entry ? entry.belief : ''"
           :initialValue="act"
           @changed="act = $event"
@@ -91,6 +100,7 @@
 <script>
 import PatternAddWithoutBelief from '@/views/PatternAddWithoutBelief.vue';
 import PatternAddTurnaround from '@/views/PatternAddTurnaround.vue';
+import PatternChangeAffirmation from '@/views/PatternChangeAffirmation.vue';
 import PatternChangeAnnounce from '@/views/PatternChangeAnnounce.vue';
 import PatternChangeApologize from '@/views/PatternChangeApologize.vue';
 import PatternChangeAsk from '@/views/PatternChangeAsk.vue';
@@ -101,6 +111,7 @@ export default {
   components: {
     PatternAddWithoutBelief,
     PatternAddTurnaround,
+    PatternChangeAffirmation,
     PatternChangeAnnounce,
     PatternChangeApologize,
     PatternChangeAsk,
@@ -112,9 +123,10 @@ export default {
     return {
       entry: entry || null,
       step: 1,
-      totalSteps: 6,
+      totalSteps: 7,
       withoutBelief: entry ? entry.withoutBelief || '' : '',
       turnaround: entry ? entry.turnaround || '' : '',
+      affirmations: entry ? entry.affirmations || [] : [],
       announce: entry ? entry.changeAnnounce || '' : '',
       apologize: entry ? entry.changeApologize || '' : '',
       ask: entry ? entry.changeAsk || '' : '',
@@ -126,10 +138,11 @@ export default {
     isStepComplete() {
       if (this.step === 1) return this.withoutBelief.trim() !== '';
       if (this.step === 2) return this.turnaround.trim() !== '';
-      if (this.step === 3) return this.announce.trim() !== '';
-      if (this.step === 4) return this.apologize.trim() !== '';
-      if (this.step === 5) return this.ask.trim() !== '';
-      if (this.step === 6) return this.act.trim() !== '';
+      if (this.step === 3) return true;
+      if (this.step === 4) return this.announce.trim() !== '';
+      if (this.step === 5) return this.apologize.trim() !== '';
+      if (this.step === 6) return this.ask.trim() !== '';
+      if (this.step === 7) return this.act.trim() !== '';
       return false;
     },
   },
@@ -147,6 +160,7 @@ export default {
         ...this.entry,
         withoutBelief: this.withoutBelief,
         turnaround: this.turnaround,
+        affirmations: this.affirmations,
         changeAnnounce: this.announce,
         changeApologize: this.apologize,
         changeAsk: this.ask,
