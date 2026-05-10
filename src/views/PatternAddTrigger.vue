@@ -9,7 +9,7 @@
         placeholder="..."
         v-model="text"
         multi-line
-        rows="4"
+        rows="8"
         @focus="$emit('focussed')"
         @blur="$emit('blurred')"
       ></v-text-field>

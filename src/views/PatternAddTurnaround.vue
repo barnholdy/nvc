@@ -11,7 +11,7 @@
         placeholder="..."
         v-model="text"
         multi-line
-        rows="5"
+        rows="10"
         @focus="$emit('focussed')"
         @blur="$emit('blurred')"
       ></v-text-field>
