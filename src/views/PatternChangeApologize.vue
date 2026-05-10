@@ -1,8 +1,8 @@
 <template>
   <v-layout column>
     <v-flex class="mt-2 mb-3">
-      <p class="caption grey--text mb-1">{{ patternName }}</p>
       <h1 class="headline font-weight-regular">Entschuldigen</h1>
+      <p class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
       <p class="body-1 grey--text mt-2">Nicht aus Scham, sondern aufrecht. Eine aufrechte Entschuldigung erkennt die Auswirkung an, ohne in Selbstbestrafung zu verfallen — das macht sie wirksam.</p>
     </v-flex>
     <v-flex>
@@ -23,7 +23,7 @@
 export default {
   name: 'pattern-change-apologize',
   props: {
-    patternName: { type: String, default: '' },
+    belief: { type: String, default: '' },
     initialValue: { type: String, default: '' },
   },
   data() {
@@ -36,4 +36,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.belief-quote {
+  font-style: italic;
+}
 </style>

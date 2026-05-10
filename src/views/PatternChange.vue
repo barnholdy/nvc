@@ -33,7 +33,7 @@
 
         <pattern-change-announce
           v-show="step === 3"
-          :patternName="entry ? entry.name : ''"
+          :belief="entry ? entry.belief : ''"
           :initialValue="announce"
           @changed="announce = $event"
           @focussed="isFooterFixed = false"
@@ -42,7 +42,7 @@
 
         <pattern-change-apologize
           v-show="step === 4"
-          :patternName="entry ? entry.name : ''"
+          :belief="entry ? entry.belief : ''"
           :initialValue="apologize"
           @changed="apologize = $event"
           @focussed="isFooterFixed = false"
@@ -51,7 +51,7 @@
 
         <pattern-change-ask
           v-show="step === 5"
-          :patternName="entry ? entry.name : ''"
+          :belief="entry ? entry.belief : ''"
           :initialValue="ask"
           @changed="ask = $event"
           @focussed="isFooterFixed = false"
@@ -60,7 +60,7 @@
 
         <pattern-change-act
           v-show="step === 6"
-          :patternName="entry ? entry.name : ''"
+          :belief="entry ? entry.belief : ''"
           :initialValue="act"
           @changed="act = $event"
           @focussed="isFooterFixed = false"

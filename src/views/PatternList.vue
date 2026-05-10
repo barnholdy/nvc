@@ -77,16 +77,20 @@
               <p class="section-label caption grey--text mt-2">Ursprungshypothese</p>
               <p class="body-1">{{ entry.origin }}</p>
             </template>
-            <p class="section-label caption grey--text mt-2">Neue Perspektive</p>
-            <p class="body-1">{{ entry.withoutBelief }}</p>
-            <p class="section-label caption grey--text mt-2">Umkehrung</p>
-            <p class="body-1">{{ entry.turnaround }}</p>
             <template v-if="entry.affirmations && entry.affirmations.length">
               <p class="section-label caption grey--text mt-2">Affirmationen</p>
               <p v-for="(a, idx) in entry.affirmations" :key="idx" class="body-1 mb-1">{{ a.text }}</p>
             </template>
-            <template v-if="entry.changeAnnounce || entry.changeApologize || entry.changeAsk || entry.changeAct">
+            <template v-if="entry.withoutBelief || entry.turnaround || entry.changeAnnounce || entry.changeApologize || entry.changeAsk || entry.changeAct">
               <p class="section-label caption grey--text mt-2">Veränderungsprozess</p>
+              <template v-if="entry.withoutBelief">
+                <p class="caption grey--text mt-1">Neue Perspektive</p>
+                <p class="body-1">{{ entry.withoutBelief }}</p>
+              </template>
+              <template v-if="entry.turnaround">
+                <p class="caption grey--text mt-1">Umkehrung</p>
+                <p class="body-1">{{ entry.turnaround }}</p>
+              </template>
               <template v-if="entry.changeAnnounce">
                 <p class="caption grey--text mt-1">Ankündigung</p>
                 <p class="body-1">{{ entry.changeAnnounce }}</p>

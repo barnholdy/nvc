@@ -73,26 +73,8 @@
           @blurred="isFooterFixed = true">
         </pattern-add-origin>
 
-        <pattern-add-without-belief
-          v-show="step === 9"
-          :belief="belief"
-          :initialValue="withoutBelief"
-          @changed="withoutBelief = $event"
-          @focussed="isFooterFixed = false"
-          @blurred="isFooterFixed = true">
-        </pattern-add-without-belief>
-
-        <pattern-add-turnaround
-          v-show="step === 10"
-          :belief="belief"
-          :initialValue="turnaround"
-          @changed="turnaround = $event"
-          @focussed="isFooterFixed = false"
-          @blurred="isFooterFixed = true">
-        </pattern-add-turnaround>
-
         <pattern-add-name
-          v-show="step === 11"
+          v-show="step === 9"
           :belief="belief"
           :trigger="trigger"
           :withBelief="withBelief"
@@ -135,8 +117,6 @@ import PatternAddIsTrue from '@/views/PatternAddIsTrue.vue';
 import PatternAddIsReallyTrue from '@/views/PatternAddIsReallyTrue.vue';
 import PatternAddWithBelief from '@/views/PatternAddWithBelief.vue';
 import PatternAddOrigin from '@/views/PatternAddOrigin.vue';
-import PatternAddWithoutBelief from '@/views/PatternAddWithoutBelief.vue';
-import PatternAddTurnaround from '@/views/PatternAddTurnaround.vue';
 import PatternAddNeed from '@/views/PatternAddNeed.vue';
 import availableFeelingsSrc from '../assets/feelings.json';
 import availableNeedsSrc from '../assets/needs.json';
@@ -166,8 +146,6 @@ export default {
     PatternAddIsReallyTrue,
     PatternAddWithBelief,
     PatternAddOrigin,
-    PatternAddWithoutBelief,
-    PatternAddTurnaround,
     PatternAddNeed,
   },
   data() {
@@ -175,7 +153,7 @@ export default {
       .find(p => p.time === parseInt(this.$route.params.time, 10));
     return {
       step: 1,
-      totalSteps: 11,
+      totalSteps: 9,
       editEntry: editEntry || null,
       name: editEntry ? editEntry.name || '' : '',
       trigger: editEntry ? editEntry.trigger || '' : '',
@@ -186,8 +164,6 @@ export default {
       isReallyTrue: editEntry ? editEntry.isReallyTrue : null,
       withBelief: editEntry ? editEntry.withBelief : '',
       origin: editEntry ? editEntry.origin || '' : '',
-      withoutBelief: editEntry ? editEntry.withoutBelief : '',
-      turnaround: editEntry ? editEntry.turnaround : '',
       isFooterFixed: true,
     };
   },
@@ -210,9 +186,7 @@ export default {
       if (this.step === 6) return this.withBelief.trim() !== '';
       if (this.step === 7) return this.selectedNeeds.length > 0;
       if (this.step === 8) return this.origin.trim() !== '';
-      if (this.step === 9) return this.withoutBelief.trim() !== '';
-      if (this.step === 10) return this.turnaround.trim() !== '';
-      if (this.step === 11) return this.name.trim() !== '';
+      if (this.step === 9) return this.name.trim() !== '';
       return false;
     },
   },
@@ -236,8 +210,6 @@ export default {
         isReallyTrue: this.isReallyTrue,
         withBelief: this.withBelief,
         origin: this.origin,
-        withoutBelief: this.withoutBelief,
-        turnaround: this.turnaround,
       };
       if (this.isEditMode) {
         this.$store.dispatch('updatePattern', { ...this.editEntry, ...payload });
