@@ -13,8 +13,26 @@
     </v-toolbar>
     <v-content>
       <v-container class="mb-5">
-        <pattern-change-announce
+        <pattern-add-without-belief
           v-show="step === 1"
+          :belief="entry ? entry.belief : ''"
+          :initialValue="withoutBelief"
+          @changed="withoutBelief = $event"
+          @focussed="isFooterFixed = false"
+          @blurred="isFooterFixed = true">
+        </pattern-add-without-belief>
+
+        <pattern-add-turnaround
+          v-show="step === 2"
+          :belief="entry ? entry.belief : ''"
+          :initialValue="turnaround"
+          @changed="turnaround = $event"
+          @focussed="isFooterFixed = false"
+          @blurred="isFooterFixed = true">
+        </pattern-add-turnaround>
+
+        <pattern-change-announce
+          v-show="step === 3"
           :patternName="entry ? entry.name : ''"
           :initialValue="announce"
           @changed="announce = $event"
@@ -23,7 +41,7 @@
         </pattern-change-announce>
 
         <pattern-change-apologize
-          v-show="step === 2"
+          v-show="step === 4"
           :patternName="entry ? entry.name : ''"
           :initialValue="apologize"
           @changed="apologize = $event"
@@ -32,7 +50,7 @@
         </pattern-change-apologize>
 
         <pattern-change-ask
-          v-show="step === 3"
+          v-show="step === 5"
           :patternName="entry ? entry.name : ''"
           :initialValue="ask"
           @changed="ask = $event"
@@ -41,7 +59,7 @@
         </pattern-change-ask>
 
         <pattern-change-act
-          v-show="step === 4"
+          v-show="step === 6"
           :patternName="entry ? entry.name : ''"
           :initialValue="act"
           @changed="act = $event"
@@ -71,6 +89,8 @@
 </template>
 
 <script>
+import PatternAddWithoutBelief from '@/views/PatternAddWithoutBelief.vue';
+import PatternAddTurnaround from '@/views/PatternAddTurnaround.vue';
 import PatternChangeAnnounce from '@/views/PatternChangeAnnounce.vue';
 import PatternChangeApologize from '@/views/PatternChangeApologize.vue';
 import PatternChangeAsk from '@/views/PatternChangeAsk.vue';
@@ -79,6 +99,8 @@ import PatternChangeAct from '@/views/PatternChangeAct.vue';
 export default {
   name: 'pattern-change',
   components: {
+    PatternAddWithoutBelief,
+    PatternAddTurnaround,
     PatternChangeAnnounce,
     PatternChangeApologize,
     PatternChangeAsk,
@@ -90,7 +112,9 @@ export default {
     return {
       entry: entry || null,
       step: 1,
-      totalSteps: 4,
+      totalSteps: 6,
+      withoutBelief: entry ? entry.withoutBelief || '' : '',
+      turnaround: entry ? entry.turnaround || '' : '',
       announce: entry ? entry.changeAnnounce || '' : '',
       apologize: entry ? entry.changeApologize || '' : '',
       ask: entry ? entry.changeAsk || '' : '',
@@ -100,10 +124,12 @@ export default {
   },
   computed: {
     isStepComplete() {
-      if (this.step === 1) return this.announce.trim() !== '';
-      if (this.step === 2) return this.apologize.trim() !== '';
-      if (this.step === 3) return this.ask.trim() !== '';
-      if (this.step === 4) return this.act.trim() !== '';
+      if (this.step === 1) return this.withoutBelief.trim() !== '';
+      if (this.step === 2) return this.turnaround.trim() !== '';
+      if (this.step === 3) return this.announce.trim() !== '';
+      if (this.step === 4) return this.apologize.trim() !== '';
+      if (this.step === 5) return this.ask.trim() !== '';
+      if (this.step === 6) return this.act.trim() !== '';
       return false;
     },
   },
@@ -119,6 +145,8 @@ export default {
     save() {
       this.$store.dispatch('updatePattern', {
         ...this.entry,
+        withoutBelief: this.withoutBelief,
+        turnaround: this.turnaround,
         changeAnnounce: this.announce,
         changeApologize: this.apologize,
         changeAsk: this.ask,
