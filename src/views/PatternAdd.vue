@@ -94,6 +94,11 @@
         <pattern-add-name
           v-show="step === 11"
           :belief="belief"
+          :trigger="trigger"
+          :withBelief="withBelief"
+          :origin="origin"
+          :selectedFeelings="selectedFeelings"
+          :selectedNeeds="selectedNeeds"
           :initialValue="name"
           @changed="name = $event"
           @focussed="isFooterFixed = false"

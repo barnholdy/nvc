@@ -64,6 +64,11 @@ export default {
   name: 'pattern-add-name',
   props: {
     belief: String,
+    trigger: { type: String, default: '' },
+    withBelief: { type: String, default: '' },
+    origin: { type: String, default: '' },
+    selectedFeelings: { type: Array, default: () => [] },
+    selectedNeeds: { type: Array, default: () => [] },
     initialValue: { type: String, default: '' },
   },
   data() {
@@ -110,7 +115,17 @@ export default {
             max_tokens: 150,
             messages: [{
               role: 'user',
-              content: `Du hilfst beim Benennen von Mustern (Glaubenssätzen) in einem Selbstreflexions-Tool.\nGlaubenssatz: "${this.belief}"\nGeneriere genau 5 kurze, prägnante Namen für dieses Muster (je 2–5 Wörter, Substantiv oder kurze Phrase). Keine Sätze, kein „Ich".\nNur die 5 Namen, einer pro Zeile, ohne Nummerierung.`,
+              content: [
+                'Du hilfst beim Benennen von Mustern (Glaubenssätzen) in einem Selbstreflexions-Tool.',
+                `Glaubenssatz: "${this.belief}"`,
+                this.trigger ? `Situation: "${this.trigger}"` : '',
+                this.selectedFeelings.length ? `Gefühle: ${this.selectedFeelings.map(f => f.name).join(', ')}` : '',
+                this.withBelief ? `Reaktion: "${this.withBelief}"` : '',
+                this.selectedNeeds.length ? `Bedürfnisse: ${this.selectedNeeds.map(n => n.name).join(', ')}` : '',
+                this.origin ? `Ursprungshypothese: "${this.origin}"` : '',
+                'Generiere genau 5 kurze, prägnante Namen für dieses Muster (je 2–5 Wörter, Substantiv oder kurze Phrase). Keine Sätze, kein „Ich".',
+                'Nur die 5 Namen, einer pro Zeile, ohne Nummerierung.',
+              ].filter(Boolean).join('\n'),
             }],
           }),
         });
