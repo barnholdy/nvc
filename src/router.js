@@ -41,6 +41,11 @@ export default new Router({
       component: () => import('./views/PatternAffirmation.vue'),
     },
     {
+      path: '/empathy-pattern/:time',
+      name: 'empathy-pattern',
+      component: () => import('./views/PatternEmpathy.vue'),
+    },
+    {
       path: '/affirmations',
       name: 'affirmations',
       component: () => import('./views/AffirmationList.vue'),

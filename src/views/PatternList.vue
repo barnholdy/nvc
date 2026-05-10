@@ -27,6 +27,9 @@
                 <span class="count-badge">{{ entry.count || 1 }}</span>
                 <span class="count-plus">+</span>
               </div>
+              <v-btn icon small @click.stop="empathyEntry(entry)">
+                <v-icon :color="entry.empathy ? '#00838f' : 'grey darken-2'">favorite</v-icon>
+              </v-btn>
               <v-btn icon small @click.stop="changeEntry(entry)">
                 <v-icon :color="hasChangeData(entry) ? '#00838f' : 'grey darken-2'">autorenew</v-icon>
               </v-btn>
@@ -73,6 +76,10 @@
             <template v-if="entry.origin">
               <p class="section-label caption grey--text mt-2">Ursprungshypothese</p>
               <p class="body-1">{{ entry.origin }}</p>
+            </template>
+            <template v-if="entry.empathy">
+              <p class="section-label caption grey--text mt-2">Empathie</p>
+              <p class="body-1 empathy-text">{{ entry.empathy }}</p>
             </template>
             <template v-if="entry.affirmations && entry.affirmations.length">
               <p class="section-label caption grey--text mt-2">Affirmationen</p>
@@ -185,6 +192,9 @@ export default {
     hasChangeData(entry) {
       return !!(entry.changeAnnounce || entry.changeApologize || entry.changeAsk || entry.changeAct);
     },
+    empathyEntry(entry) {
+      this.$router.push(`/empathy-pattern/${entry.time}`);
+    },
     changeEntry(entry) {
       this.$router.push(`/change-pattern/${entry.time}`);
     },
@@ -291,5 +301,8 @@ export default {
 .section-label {
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+.empathy-text {
+  white-space: pre-wrap;
 }
 </style>
