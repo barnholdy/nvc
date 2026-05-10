@@ -7,7 +7,6 @@
     </v-flex>
     <v-flex>
       <v-text-field
-        label="Ich bin jemand, der..."
         placeholder="..."
         v-model="text"
         multi-line

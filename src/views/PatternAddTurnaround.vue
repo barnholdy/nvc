@@ -7,7 +7,7 @@
     </v-flex>
     <v-flex>
       <v-text-field
-        label="Das Gegenteil ist wahr, weil..."
+
         placeholder="..."
         v-model="text"
         multi-line

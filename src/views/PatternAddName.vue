@@ -7,7 +7,7 @@
     </v-flex>
     <v-flex>
       <v-text-field
-        label="Name"
+
         placeholder="..."
         v-model="text"
         @focus="$emit('focussed')"

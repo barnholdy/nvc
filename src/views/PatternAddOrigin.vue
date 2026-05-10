@@ -7,7 +7,6 @@
     </v-flex>
     <v-flex>
       <v-text-field
-        label="Ich habe das zuerst gelernt, als..."
         placeholder="..."
         v-model="text"
         multi-line

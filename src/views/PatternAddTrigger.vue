@@ -6,7 +6,6 @@
     </v-flex>
     <v-flex>
       <v-text-field
-        label="Es ist folgendes passiert..."
         placeholder="..."
         v-model="text"
         multi-line

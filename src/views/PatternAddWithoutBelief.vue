@@ -7,7 +7,6 @@
     </v-flex>
     <v-flex>
       <v-text-field
-        label="Ohne diesen Glauben wäre ich..."
         placeholder="..."
         v-model="text"
         multi-line
