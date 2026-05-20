@@ -8,9 +8,12 @@
       </v-btn>
     </v-toolbar>
     <v-content>
-      <p class="intro-text body-1 grey--text">
-        <em>Deine Muster sind eingefrorene Überzeugungen aus einer Zeit, in der sie dich geschützt haben. Heute hindern sie dich womöglich. Wenn du sie aufschreibst, machst du das Unsichtbare sichtbar. Dann kannst du wählen, statt nur zu reagieren. Nimm dir zwei Minuten und schreib auf, was dich zuletzt mehr bewegt hat als vielleicht erwartet.</em>
-      </p>
+      <div class="intro-text body-1 grey--text">
+        <p><em>Deine Überzeugungen sind das Betriebssystem hinter deinen Entscheidungen, Reaktionen und Urteilen. Sie formen deine Muster.</em></p>
+        <p><em>Viele davon wurden durch Familie, Kultur oder frühe Erfahrungen installiert — nicht von dir gewählt, sondern einfach übernommen.</em></p>
+        <p><em>Authentizität entsteht nicht dadurch, dass du entscheidest, wer du sein willst. Sie entsteht, wenn du klar siehst, was du bereits glaubst — und dann bewusst wählst, welche Überzeugungen bleiben dürfen.</em></p>
+        <p><em>Deine Muster aufzuschreiben macht das Unsichtbare sichtbar. Es gibt dir die Möglichkeit zu wählen, statt einfach zu reagieren.</em></p>
+      </div>
       <v-card class="entry" v-for="entry in patterns" v-bind:key="entry.time">
         <v-card-title class="header" @click="toggle(entry.time)">
           <p class="subheading belief-title mb-1">{{ entry.name || entry.belief }}</p>
