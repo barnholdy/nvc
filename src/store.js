@@ -6,6 +6,7 @@ Vue.use(Vuex);
 const NVC_STORAGE_KEY = 'nvc';
 const CHECK_INS_STORAGE_KEY = `${NVC_STORAGE_KEY}.checkIns`;
 const PATTERNS_STORAGE_KEY = `${NVC_STORAGE_KEY}.patterns`;
+const REFLECTIONS_STORAGE_KEY = `${NVC_STORAGE_KEY}.reflections`;
 
 function storageAvailable(type) {
   try {
@@ -28,10 +29,12 @@ export default new Vuex.Store({
   state: {
     checkIns: [],
     patterns: [],
+    reflections: [],
   },
   getters: {
     checkIns: state => state.checkIns,
     patterns: state => state.patterns,
+    reflections: state => state.reflections,
   },
   mutations: {
     setCheckIns(state, checkIns) {
@@ -80,6 +83,19 @@ export default new Vuex.Store({
         const current = state.patterns[index].count || 1;
         const updated = { ...state.patterns[index], count: Math.max(1, current - 1) };
         state.patterns.splice(index, 1, updated);
+      }
+    },
+    setReflections(state, reflections) {
+      state.reflections = reflections; // eslint-disable-line no-param-reassign
+    },
+    addReflection(state, reflection) {
+      reflection.time = +new Date(); // eslint-disable-line no-param-reassign
+      state.reflections.push(reflection);
+    },
+    deleteReflection(state, reflection) {
+      const index = state.reflections.indexOf(reflection);
+      if (index > -1) {
+        state.reflections.splice(index, 1);
       }
     },
   },
@@ -177,6 +193,26 @@ export default new Vuex.Store({
         localStorage.setItem(PATTERNS_STORAGE_KEY, JSON.stringify(getters.patterns));
       } else {
         throw new Error('Pattern count was not saved persistently.');
+      }
+    },
+    loadReflections({ commit }) {
+      if (storageAvailable('localStorage')) {
+        const json = localStorage.getItem(REFLECTIONS_STORAGE_KEY);
+        if (json) {
+          commit('setReflections', JSON.parse(json));
+        }
+      }
+    },
+    saveReflection({ commit, getters }, reflection) {
+      commit('addReflection', reflection);
+      if (storageAvailable('localStorage')) {
+        localStorage.setItem(REFLECTIONS_STORAGE_KEY, JSON.stringify(getters.reflections));
+      }
+    },
+    deleteReflection({ commit, getters }, reflection) {
+      commit('deleteReflection', reflection);
+      if (storageAvailable('localStorage')) {
+        localStorage.setItem(REFLECTIONS_STORAGE_KEY, JSON.stringify(getters.reflections));
       }
     },
   },

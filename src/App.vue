@@ -10,6 +10,7 @@ export default {
   created() {
     this.$store.dispatch('loadCheckIns');
     this.$store.dispatch('loadPatterns');
+    this.$store.dispatch('loadReflections');
   },
   mounted() {
     document.addEventListener('gesturestart', e => e.preventDefault(), { passive: false });

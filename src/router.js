@@ -50,6 +50,16 @@ export default new Router({
       name: 'affirmations',
       component: () => import('./views/AffirmationList.vue'),
     },
+    {
+      path: '/reflections',
+      name: 'reflections',
+      component: () => import('./views/ReflectionList.vue'),
+    },
+    {
+      path: '/add-reflection',
+      name: 'add-reflection',
+      component: () => import('./views/ReflectionAdd.vue'),
+    },
     { path: '*', redirect: '/check-ins' },
   ],
   scrollBehavior() {
