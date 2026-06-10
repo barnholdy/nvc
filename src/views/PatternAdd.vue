@@ -29,28 +29,14 @@
           @blurred="isFooterFixed = true">
         </pattern-add-belief>
 
-        <pattern-add-is-true
-          v-show="step === 3"
-          :belief="belief"
-          :initialValue="isTrue"
-          @answered="isTrue = $event">
-        </pattern-add-is-true>
-
-        <pattern-add-is-really-true
-          v-show="step === 4"
-          :belief="belief"
-          :initialValue="isReallyTrue"
-          @answered="isReallyTrue = $event">
-        </pattern-add-is-really-true>
-
         <pattern-add-reaction
-          v-show="step === 5"
+          v-show="step === 3"
           :belief="belief"
           :availableFeelings="availableFeelings">
         </pattern-add-reaction>
 
         <pattern-add-with-belief
-          v-show="step === 6"
+          v-show="step === 4"
           :belief="belief"
           :initialValue="withBelief"
           @changed="withBelief = $event"
@@ -59,13 +45,13 @@
         </pattern-add-with-belief>
 
         <pattern-add-need
-          v-show="step === 7"
+          v-show="step === 5"
           :belief="belief"
           :availableNeeds="availableNeeds">
         </pattern-add-need>
 
         <pattern-add-origin
-          v-show="step === 8"
+          v-show="step === 6"
           :belief="belief"
           :initialValue="origin"
           @changed="origin = $event"
@@ -74,7 +60,7 @@
         </pattern-add-origin>
 
         <pattern-add-name
-          v-show="step === 9"
+          v-show="step === 7"
           :belief="belief"
           :trigger="trigger"
           :withBelief="withBelief"
@@ -113,8 +99,6 @@ import PatternAddName from '@/views/PatternAddName.vue';
 import PatternAddTrigger from '@/views/PatternAddTrigger.vue';
 import PatternAddReaction from '@/views/PatternAddReaction.vue';
 import PatternAddBelief from '@/views/PatternAddBelief.vue';
-import PatternAddIsTrue from '@/views/PatternAddIsTrue.vue';
-import PatternAddIsReallyTrue from '@/views/PatternAddIsReallyTrue.vue';
 import PatternAddWithBelief from '@/views/PatternAddWithBelief.vue';
 import PatternAddOrigin from '@/views/PatternAddOrigin.vue';
 import PatternAddNeed from '@/views/PatternAddNeed.vue';
@@ -142,8 +126,6 @@ export default {
     PatternAddTrigger,
     PatternAddReaction,
     PatternAddBelief,
-    PatternAddIsTrue,
-    PatternAddIsReallyTrue,
     PatternAddWithBelief,
     PatternAddOrigin,
     PatternAddNeed,
@@ -153,15 +135,13 @@ export default {
       .find(p => p.time === parseInt(this.$route.params.time, 10));
     return {
       step: 1,
-      totalSteps: 9,
+      totalSteps: 7,
       editEntry: editEntry || null,
       name: editEntry ? editEntry.name || '' : '',
       trigger: editEntry ? editEntry.trigger || '' : '',
       availableFeelings: buildFeelings(editEntry ? editEntry.feelings || [] : []),
       availableNeeds: buildNeeds(editEntry ? editEntry.needs || [] : []),
       belief: editEntry ? editEntry.belief : '',
-      isTrue: editEntry ? editEntry.isTrue : null,
-      isReallyTrue: editEntry ? editEntry.isReallyTrue : null,
       withBelief: editEntry ? editEntry.withBelief : '',
       origin: editEntry ? editEntry.origin || '' : '',
       isFooterFixed: true,
@@ -180,13 +160,11 @@ export default {
     isStepComplete() {
       if (this.step === 1) return this.trigger.trim() !== '';
       if (this.step === 2) return this.belief.trim() !== '';
-      if (this.step === 3) return this.isTrue !== null;
-      if (this.step === 4) return this.isReallyTrue !== null;
-      if (this.step === 5) return this.selectedFeelings.length > 0;
-      if (this.step === 6) return this.withBelief.trim() !== '';
-      if (this.step === 7) return this.selectedNeeds.length > 0;
-      if (this.step === 8) return this.origin.trim() !== '';
-      if (this.step === 9) return this.name.trim() !== '';
+      if (this.step === 3) return this.selectedFeelings.length > 0;
+      if (this.step === 4) return this.withBelief.trim() !== '';
+      if (this.step === 5) return this.selectedNeeds.length > 0;
+      if (this.step === 6) return this.origin.trim() !== '';
+      if (this.step === 7) return this.name.trim() !== '';
       return false;
     },
   },
@@ -206,8 +184,6 @@ export default {
         feelings: this.selectedFeelings,
         needs: this.selectedNeeds,
         belief: this.belief,
-        isTrue: this.isTrue,
-        isReallyTrue: this.isReallyTrue,
         withBelief: this.withBelief,
         origin: this.origin,
       };

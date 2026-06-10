@@ -19,10 +19,6 @@
           <p class="subheading belief-title mb-1">{{ entry.name || entry.belief }}</p>
           <div class="header-bottom">
             <div class="header-meta">
-              <div class="status-bar mb-1">
-                <span class="status-dot" :class="entry.isTrue ? 'status-dot--filled' : 'status-dot--empty'"></span>
-                <span class="status-dot" :class="entry.isReallyTrue ? 'status-dot--filled' : 'status-dot--empty'"></span>
-              </div>
               <p class="caption grey--text mb-0">{{ formatTime(entry.time) }}</p>
             </div>
             <div class="header-actions">
@@ -54,14 +50,6 @@
             </template>
             <p class="section-label caption grey--text mt-2">Glaube / Urteil</p>
             <p class="body-1">{{ entry.belief }}</p>
-            <v-layout row wrap class="mb-2 mt-2">
-              <v-chip small :color="entry.isTrue ? 'primary' : 'grey'" text-color="white">
-                Wahr: {{ entry.isTrue ? 'Ja' : 'Nein' }}
-              </v-chip>
-              <v-chip small :color="entry.isReallyTrue ? 'primary' : 'grey'" text-color="white" class="ml-1">
-                Wirklich wahr: {{ entry.isReallyTrue ? 'Ja' : 'Nein' }}
-              </v-chip>
-            </v-layout>
             <template v-if="entry.feelings && entry.feelings.length">
               <p class="section-label caption grey--text mt-2">Gefühl</p>
               <div class="mb-2">
@@ -288,22 +276,6 @@ export default {
   font-size: 0.8rem;
   font-weight: bold;
   line-height: 1;
-}
-.status-bar {
-  display: flex;
-  gap: 4px;
-}
-.status-dot {
-  display: inline-block;
-  width: 16px;
-  height: 8px;
-  border-radius: 2px;
-  &--filled {
-    background-color: #00838f;
-  }
-  &--empty {
-    background-color: #ccc;
-  }
 }
 .section-label {
   text-transform: uppercase;
