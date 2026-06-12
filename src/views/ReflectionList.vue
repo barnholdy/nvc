@@ -60,6 +60,10 @@
         <span>Muster</span>
         <v-icon>repeat</v-icon>
       </v-btn>
+      <v-btn flat color="grey" to="/beliefs">
+        <span>Beliefs</span>
+        <v-icon>lightbulb_outline</v-icon>
+      </v-btn>
       <v-btn flat color="grey" to="/affirmations">
         <span>Affirmationen</span>
         <v-icon>stars</v-icon>

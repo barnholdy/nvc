@@ -21,19 +21,29 @@ export default new Router({
       component: () => import('./views/PatternAdd.vue'),
     },
     {
-      path: '/change-pattern/:time',
-      name: 'change-pattern',
-      component: () => import('./views/PatternChange.vue'),
+      path: '/beliefs',
+      name: 'beliefs',
+      component: () => import('./views/BeliefList.vue'),
     },
     {
-      path: '/affirmation-pattern/:time',
-      name: 'affirmation-pattern',
-      component: () => import('./views/PatternAffirmation.vue'),
+      path: '/add-belief',
+      name: 'add-belief',
+      component: () => import('./views/BeliefAdd.vue'),
     },
     {
-      path: '/empathy-pattern/:time',
-      name: 'empathy-pattern',
-      component: () => import('./views/PatternEmpathy.vue'),
+      path: '/edit-belief/:time',
+      name: 'edit-belief',
+      component: () => import('./views/BeliefAdd.vue'),
+    },
+    {
+      path: '/change-belief/:time',
+      name: 'change-belief',
+      component: () => import('./views/BeliefChange.vue'),
+    },
+    {
+      path: '/empathy-belief/:time',
+      name: 'empathy-belief',
+      component: () => import('./views/BeliefEmpathy.vue'),
     },
     {
       path: '/affirmations',

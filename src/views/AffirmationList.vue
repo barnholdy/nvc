@@ -8,7 +8,7 @@
         <v-card
           class="affirmation-card"
           v-for="(item, i) in affirmations"
-          :key="item.patternTime + '-' + item.affirmationIndex"
+          :key="item.beliefTime + '-' + item.affirmationIndex"
         >
           <v-card-title class="affirmation-header" @click="toggle(i)">
             <p class="body-1 affirmation-text mb-0">{{ item.text }}</p>
@@ -22,7 +22,6 @@
             <v-card-text>
               <p class="caption grey--text mb-1 section-label">Glaube / Urteil</p>
               <p class="body-1 belief-quote">„{{ item.belief }}"</p>
-              <p class="caption grey--text mt-1">{{ item.patternName }}</p>
             </v-card-text>
           </template>
         </v-card>
@@ -31,7 +30,7 @@
       <div v-else class="empty-state">
         <v-icon large color="grey lighten-2">stars</v-icon>
         <p class="body-1 grey--text mt-2">Noch keine Affirmationen vorhanden.</p>
-        <p class="caption grey--text">Füge Affirmationen zu deinen Mustern hinzu.</p>
+        <p class="caption grey--text">Füge Affirmationen zu deinen Beliefs hinzu.</p>
       </div>
     </v-content>
 
@@ -39,6 +38,10 @@
       <v-btn flat color="grey" to="/patterns">
         <span>Muster</span>
         <v-icon>repeat</v-icon>
+      </v-btn>
+      <v-btn flat color="grey" to="/beliefs">
+        <span>Beliefs</span>
+        <v-icon>lightbulb_outline</v-icon>
       </v-btn>
       <v-btn flat color="primary" to="/affirmations">
         <span>Affirmationen</span>
@@ -67,21 +70,20 @@ export default {
   },
   computed: {
     affirmations() {
-      const result = [];
-      this.$store.getters.patterns.forEach(pattern => {
-        if (!pattern.affirmations || !pattern.affirmations.length) return;
-        pattern.affirmations.forEach((a, idx) => {
+      var result = [];
+      this.$store.getters.beliefs.forEach(function(belief) {
+        if (!belief.affirmations || !belief.affirmations.length) return;
+        belief.affirmations.forEach(function(a, idx) {
           result.push({
             text: a.text,
             count: a.count || 1,
-            belief: pattern.belief,
-            patternName: pattern.name || pattern.belief,
-            patternTime: pattern.time,
+            belief: belief.belief,
+            beliefTime: belief.time,
             affirmationIndex: idx,
           });
         });
       });
-      return result.sort((a, b) => (b.count || 1) - (a.count || 1));
+      return result.sort(function(a, b) { return (b.count || 1) - (a.count || 1); });
     },
   },
   methods: {
@@ -89,27 +91,28 @@ export default {
       this.openIndex = this.openIndex === i ? null : i;
     },
     handleTap(item) {
-      const key = item.patternTime + '-' + item.affirmationIndex;
+      var key = item.beliefTime + '-' + item.affirmationIndex;
+      var self = this;
       if (this.tapTimeouts[key]) {
         clearTimeout(this.tapTimeouts[key]);
         this.$delete(this.tapTimeouts, key);
-        if (item.count > 1) this.updateCount(item, -1);
+        if (item.count > 1) self.updateCount(item, -1);
       } else {
-        this.$set(this.tapTimeouts, key, setTimeout(() => {
-          this.$delete(this.tapTimeouts, key);
-          this.updateCount(item, 1);
+        this.$set(this.tapTimeouts, key, setTimeout(function() {
+          self.$delete(self.tapTimeouts, key);
+          self.updateCount(item, 1);
         }, 300));
       }
     },
     updateCount(item, delta) {
-      const pattern = this.$store.getters.patterns.find(p => p.time === item.patternTime);
-      if (!pattern) return;
-      const affirmations = pattern.affirmations.map((a, i) =>
-        i === item.affirmationIndex
+      var belief = this.$store.getters.beliefs.find(function(b) { return b.time === item.beliefTime; });
+      if (!belief) return;
+      var affirmations = belief.affirmations.map(function(a, i) {
+        return i === item.affirmationIndex
           ? Object.assign({}, a, { count: Math.max(1, (a.count || 1) + delta) })
-          : a
-      );
-      this.$store.dispatch('updatePattern', Object.assign({}, pattern, { affirmations: affirmations }));
+          : a;
+      });
+      this.$store.dispatch('updateBelief', Object.assign({}, belief, { affirmations: affirmations }));
     },
   },
 };

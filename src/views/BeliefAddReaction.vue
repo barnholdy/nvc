@@ -1,17 +1,16 @@
 <template>
   <v-layout column>
     <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">Um Hilfe bitten</h1>
+      <h1 class="headline font-weight-regular">Reaktion</h1>
       <p class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
-      <p class="body-1 grey--text mt-2">Bitte andere um Hilfe. Das Fragen durchbricht die Isolation, die Muster aufrechthält. Die meisten Muster bestehen im Verborgenen — andere einzuladen verändert das relationale Feld.</p>
+      <p class="body-1 grey--text mt-2">Wer bist du mit diesem Glauben? Wie reagierst du, was passiert, wenn du diesen Gedanken glaubst?</p>
     </v-flex>
     <v-flex>
       <v-text-field
-        label="Ich bitte… um Unterstützung dabei, …"
         placeholder="..."
         v-model="text"
         multi-line
-        rows="4"
+        rows="8"
         @focus="$emit('focussed')"
         @blur="$emit('blurred')"
       ></v-text-field>
@@ -21,7 +20,7 @@
 
 <script>
 export default {
-  name: 'pattern-change-ask',
+  name: 'belief-add-reaction',
   props: {
     belief: { type: String, default: '' },
     initialValue: { type: String, default: '' },
