@@ -1,21 +1,21 @@
 <template>
-  <div class="reflection-list">
+  <div class="resentment-list">
     <v-toolbar color="white" app>
-      <v-toolbar-title>Reflektion</v-toolbar-title>
+      <v-toolbar-title>Mein Groll</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn icon to="/add-reflection">
+      <v-btn icon to="/add-resentment">
         <v-icon>add</v-icon>
       </v-btn>
     </v-toolbar>
     <v-content>
-      <template v-if="reflections.length">
+      <template v-if="resentments.length">
         <v-card
-          class="reflection-card"
-          v-for="entry in reflections"
+          class="resentment-card"
+          v-for="entry in resentments"
           :key="entry.time">
-          <v-card-title class="reflection-header" @click="toggle(entry.time)">
-            <div class="reflection-title-row">
-              <p class="subheading fear-title mb-0">{{ entry.fear }}</p>
+          <v-card-title class="resentment-header" @click="toggle(entry.time)">
+            <div class="resentment-title-row">
+              <p class="subheading resentment-title mb-0">{{ entry.name }}</p>
               <v-btn icon small @click.stop="preDelete(entry)" class="delete-btn">
                 <v-icon color="grey darken-2">delete</v-icon>
               </v-btn>
@@ -25,25 +25,25 @@
           <template v-if="openEntry === entry.time">
             <v-divider></v-divider>
             <v-card-text>
-              <p class="section-label caption grey--text">Zugrundeliegender Glaubenssatz</p>
-              <p class="body-1">{{ entry.belief }}</p>
-              <p class="section-label caption grey--text mt-2">Reflexion</p>
-              <p class="body-1 reflection-text">{{ entry.reflection }}</p>
+              <p class="section-label caption grey--text">Groll</p>
+              <p class="body-1">{{ entry.resentment }}</p>
+              <p class="section-label caption grey--text mt-2">Ursprung im Elternhaus</p>
+              <p class="body-1">{{ entry.parents }}</p>
             </v-card-text>
           </template>
         </v-card>
       </template>
 
       <div v-else class="empty-state">
-        <v-icon large color="grey lighten-2">spa</v-icon>
-        <p class="body-1 grey--text mt-2">Noch keine Reflektionen vorhanden.</p>
-        <p class="caption grey--text">Starte eine neue Reflektion über das + Symbol.</p>
+        <v-icon large color="grey lighten-2">whatshot</v-icon>
+        <p class="body-1 grey--text mt-2">Noch kein Groll eingetragen.</p>
+        <p class="caption grey--text">Starte einen neuen Eintrag über das + Symbol.</p>
       </div>
 
       <v-dialog v-model="isDeleteDialogShowing" width="500">
         <v-card>
           <v-card-title class="subheading" primary-title>
-            Reflektion wirklich löschen?
+            Eintrag wirklich löschen?
           </v-card-title>
           <v-divider></v-divider>
           <v-card-actions>
@@ -68,11 +68,11 @@
         <span>Affirmationen</span>
         <v-icon>stars</v-icon>
       </v-btn>
-      <v-btn flat color="primary" to="/reflections">
+      <v-btn flat color="grey" to="/reflections">
         <span>Reflektion</span>
         <v-icon>spa</v-icon>
       </v-btn>
-      <v-btn flat color="grey" to="/resentments">
+      <v-btn flat color="primary" to="/resentments">
         <span>Groll</span>
         <v-icon>whatshot</v-icon>
       </v-btn>
@@ -84,7 +84,7 @@
 import moment from 'moment';
 
 export default {
-  name: 'reflection-list',
+  name: 'resentment-list',
   data() {
     return {
       openEntry: null,
@@ -93,8 +93,8 @@ export default {
     };
   },
   computed: {
-    reflections() {
-      return this.$store.getters.reflections
+    resentments() {
+      return this.$store.getters.resentments
         .concat()
         .sort(function(a, b) { return b.time - a.time; });
     },
@@ -109,7 +109,7 @@ export default {
     },
     confirmDelete() {
       this.isDeleteDialogShowing = false;
-      this.$store.dispatch('deleteReflection', this.entryToDelete);
+      this.$store.dispatch('deleteResentment', this.entryToDelete);
       this.entryToDelete = null;
     },
     cancelDelete() {
@@ -125,23 +125,23 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.reflection-card {
+.resentment-card {
   margin: 1rem;
 }
-.reflection-header {
+.resentment-header {
   cursor: pointer;
   user-select: none;
   flex-direction: column;
   align-items: stretch;
   padding-bottom: 8px;
 }
-.reflection-title-row {
+.resentment-title-row {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   width: 100%;
 }
-.fear-title {
+.resentment-title {
   white-space: normal;
   word-break: break-word;
   flex: 1;
@@ -154,9 +154,6 @@ export default {
 .section-label {
   text-transform: uppercase;
   letter-spacing: 0.05em;
-}
-.reflection-text {
-  white-space: pre-wrap;
 }
 .empty-state {
   display: flex;

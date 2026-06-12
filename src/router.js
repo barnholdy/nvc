@@ -60,6 +60,16 @@ export default new Router({
       name: 'add-reflection',
       component: () => import('./views/ReflectionAdd.vue'),
     },
+    {
+      path: '/resentments',
+      name: 'resentments',
+      component: () => import('./views/ResentmentList.vue'),
+    },
+    {
+      path: '/add-resentment',
+      name: 'add-resentment',
+      component: () => import('./views/ResentmentAdd.vue'),
+    },
     { path: '*', redirect: '/check-ins' },
   ],
   scrollBehavior() {

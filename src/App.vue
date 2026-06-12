@@ -11,6 +11,7 @@ export default {
     this.$store.dispatch('loadCheckIns');
     this.$store.dispatch('loadPatterns');
     this.$store.dispatch('loadReflections');
+    this.$store.dispatch('loadResentments');
   },
   mounted() {
     document.addEventListener('gesturestart', e => e.preventDefault(), { passive: false });

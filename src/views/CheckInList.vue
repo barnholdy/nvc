@@ -62,6 +62,10 @@
         <span>Reflektion</span>
         <v-icon>spa</v-icon>
       </v-btn>
+      <v-btn flat color="grey" to="/resentments">
+        <span>Groll</span>
+        <v-icon>whatshot</v-icon>
+      </v-btn>
     </v-bottom-nav>
   </div>
 </template>
