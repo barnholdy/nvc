@@ -10,7 +10,6 @@ export default {
   created() {
     this.$store.dispatch('loadPatterns');
     this.$store.dispatch('loadBeliefs');
-    this.$store.dispatch('loadReflections');
     this.$store.dispatch('loadResentments');
   },
   mounted() {

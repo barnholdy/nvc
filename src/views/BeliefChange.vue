@@ -13,8 +13,17 @@
     </v-toolbar>
     <v-content>
       <v-container class="mb-5">
-        <pattern-add-without-belief
+        <belief-add-hypothese
           v-show="step === 1"
+          :belief="entry ? entry.belief : ''"
+          :initialValue="origin"
+          @changed="origin = $event"
+          @focussed="isFooterFixed = false"
+          @blurred="isFooterFixed = true">
+        </belief-add-hypothese>
+
+        <pattern-add-without-belief
+          v-show="step === 2"
           :belief="entry ? entry.belief : ''"
           :initialValue="withoutBelief"
           @changed="withoutBelief = $event"
@@ -23,7 +32,7 @@
         </pattern-add-without-belief>
 
         <belief-change-turnaround
-          v-show="step === 2"
+          v-show="step === 3"
           :belief="entry ? entry.belief : ''"
           :initialTurnarounds="turnarounds"
           @changed="turnarounds = $event"
@@ -32,7 +41,7 @@
         </belief-change-turnaround>
 
         <pattern-change-affirmation
-          v-show="step === 3"
+          v-show="step === 4"
           :belief="entry ? entry.belief : ''"
           :initialAffirmations="affirmations"
           @changed="affirmations = $event"
@@ -41,7 +50,7 @@
         </pattern-change-affirmation>
 
         <pattern-change-act
-          v-show="step === 4"
+          v-show="step === 5"
           :belief="entry ? entry.belief : ''"
           :initialValue="changeAct"
           @changed="changeAct = $event"
@@ -69,6 +78,7 @@
 </template>
 
 <script>
+import BeliefAddHypothese from '@/views/BeliefAddHypothese.vue';
 import PatternAddWithoutBelief from '@/views/PatternAddWithoutBelief.vue';
 import BeliefChangeTurnaround from '@/views/BeliefChangeTurnaround.vue';
 import PatternChangeAffirmation from '@/views/PatternChangeAffirmation.vue';
@@ -77,6 +87,7 @@ import PatternChangeAct from '@/views/PatternChangeAct.vue';
 export default {
   name: 'belief-change',
   components: {
+    BeliefAddHypothese,
     PatternAddWithoutBelief,
     BeliefChangeTurnaround,
     PatternChangeAffirmation,
@@ -85,14 +96,16 @@ export default {
   data() {
     const entry = this.$store.getters.beliefs
       .find(function(b) { return b.time === parseInt(this.$route.params.time, 10); }, this);
+    const r = entry && entry.reflection ? entry.reflection : {};
     return {
       entry: entry || null,
       step: 1,
-      totalSteps: 4,
-      withoutBelief: entry ? entry.withoutBelief || '' : '',
-      turnarounds: entry ? entry.turnarounds || [] : [],
+      totalSteps: 5,
+      origin: r.origin || '',
+      withoutBelief: r.withoutBelief || '',
+      turnarounds: r.turnarounds || [],
       affirmations: entry ? entry.affirmations || [] : [],
-      changeAct: entry ? entry.changeAct || '' : '',
+      changeAct: r.changeAct || '',
       isFooterFixed: true,
     };
   },
@@ -107,10 +120,13 @@ export default {
     },
     save() {
       this.$store.dispatch('updateBelief', Object.assign({}, this.entry, {
-        withoutBelief: this.withoutBelief,
-        turnarounds: this.turnarounds,
         affirmations: this.affirmations,
-        changeAct: this.changeAct,
+        reflection: {
+          origin: this.origin,
+          withoutBelief: this.withoutBelief,
+          turnarounds: this.turnarounds,
+          changeAct: this.changeAct,
+        },
       }));
       this.$router.push('/beliefs');
     },

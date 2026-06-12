@@ -6,7 +6,6 @@ Vue.use(Vuex);
 const NVC_STORAGE_KEY = 'nvc';
 const PATTERNS_STORAGE_KEY = `${NVC_STORAGE_KEY}.patterns`;
 const BELIEFS_STORAGE_KEY = `${NVC_STORAGE_KEY}.beliefs`;
-const REFLECTIONS_STORAGE_KEY = `${NVC_STORAGE_KEY}.reflections`;
 const RESENTMENTS_STORAGE_KEY = `${NVC_STORAGE_KEY}.resentments`;
 
 function storageAvailable(type) {
@@ -30,13 +29,11 @@ export default new Vuex.Store({
   state: {
     patterns: [],
     beliefs: [],
-    reflections: [],
     resentments: [],
   },
   getters: {
     patterns: state => state.patterns,
     beliefs: state => state.beliefs,
-    reflections: state => state.reflections,
     resentments: state => state.resentments,
   },
   mutations: {
@@ -94,19 +91,6 @@ export default new Vuex.Store({
         state.beliefs.splice(index, 1, updated);
       }
     },
-    setReflections(state, reflections) {
-      state.reflections = reflections; // eslint-disable-line no-param-reassign
-    },
-    addReflection(state, reflection) {
-      reflection.time = +new Date(); // eslint-disable-line no-param-reassign
-      state.reflections.push(reflection);
-    },
-    deleteReflection(state, reflection) {
-      const index = state.reflections.indexOf(reflection);
-      if (index > -1) {
-        state.reflections.splice(index, 1);
-      }
-    },
     setResentments(state, resentments) {
       state.resentments = resentments; // eslint-disable-line no-param-reassign
     },
@@ -155,14 +139,16 @@ export default new Vuex.Store({
                 feelings: p.feelings || [],
                 withBelief: p.withBelief || '',
                 needs: p.needs || [],
-                origin: p.origin || '',
                 affirmations: p.affirmations || [],
-                withoutBelief: p.withoutBelief || '',
-                turnarounds: p.turnaround
-                  ? p.turnaround.split('\n').filter(function(s) { return s.trim().length > 0; })
-                  : [],
-                changeAct: p.changeAct || '',
                 empathy: p.empathy || '',
+                reflection: {
+                  origin: p.origin || '',
+                  withoutBelief: p.withoutBelief || '',
+                  turnarounds: p.turnaround
+                    ? p.turnaround.split('\n').filter(function(s) { return s.trim().length > 0; })
+                    : [],
+                  changeAct: p.changeAct || '',
+                },
               };
               migratedBeliefs.push(belief);
               return { time: p.time, trigger: p.trigger || '', beliefs: [belief.time], name: p.name || '' };
@@ -210,7 +196,30 @@ export default new Vuex.Store({
       if (storageAvailable('localStorage')) {
         const json = localStorage.getItem(BELIEFS_STORAGE_KEY);
         if (json) {
-          commit('setBeliefs', JSON.parse(json));
+          let beliefs = JSON.parse(json);
+          let migrated = false;
+          beliefs = beliefs.map(function(b) {
+            if (!b.reflection) {
+              migrated = true;
+              const reflection = {
+                origin: b.origin || '',
+                withoutBelief: b.withoutBelief || '',
+                turnarounds: b.turnarounds || [],
+                changeAct: b.changeAct || '',
+              };
+              const updated = Object.assign({}, b, { reflection: reflection });
+              delete updated.origin;
+              delete updated.withoutBelief;
+              delete updated.turnarounds;
+              delete updated.changeAct;
+              return updated;
+            }
+            return b;
+          });
+          if (migrated) {
+            localStorage.setItem(BELIEFS_STORAGE_KEY, JSON.stringify(beliefs));
+          }
+          commit('setBeliefs', beliefs);
         }
       }
     },
@@ -242,26 +251,6 @@ export default new Vuex.Store({
       commit('decrementBelief', belief);
       if (storageAvailable('localStorage')) {
         localStorage.setItem(BELIEFS_STORAGE_KEY, JSON.stringify(getters.beliefs));
-      }
-    },
-    loadReflections({ commit }) {
-      if (storageAvailable('localStorage')) {
-        const json = localStorage.getItem(REFLECTIONS_STORAGE_KEY);
-        if (json) {
-          commit('setReflections', JSON.parse(json));
-        }
-      }
-    },
-    saveReflection({ commit, getters }, reflection) {
-      commit('addReflection', reflection);
-      if (storageAvailable('localStorage')) {
-        localStorage.setItem(REFLECTIONS_STORAGE_KEY, JSON.stringify(getters.reflections));
-      }
-    },
-    deleteReflection({ commit, getters }, reflection) {
-      commit('deleteReflection', reflection);
-      if (storageAvailable('localStorage')) {
-        localStorage.setItem(REFLECTIONS_STORAGE_KEY, JSON.stringify(getters.reflections));
       }
     },
     loadResentments({ commit }) {

@@ -51,16 +51,6 @@ export default new Router({
       component: () => import('./views/AffirmationList.vue'),
     },
     {
-      path: '/reflections',
-      name: 'reflections',
-      component: () => import('./views/ReflectionList.vue'),
-    },
-    {
-      path: '/add-reflection',
-      name: 'add-reflection',
-      component: () => import('./views/ReflectionAdd.vue'),
-    },
-    {
       path: '/resentments',
       name: 'resentments',
       component: () => import('./views/ResentmentList.vue'),

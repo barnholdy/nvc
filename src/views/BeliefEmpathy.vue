@@ -92,7 +92,8 @@ export default {
       if (e.withBelief) lines.push('Reaktion: ' + e.withBelief);
       var needs = e.needs && e.needs.length ? e.needs.map(function(n) { return n.name; }).join(', ') : '';
       if (needs) lines.push('Bedürfnis: ' + needs);
-      if (e.origin) lines.push('Ursprungshypothese: ' + e.origin);
+      var origin = e.reflection && e.reflection.origin ? e.reflection.origin : '';
+      if (origin) lines.push('Ursprungshypothese: ' + origin);
       return lines.join('\n');
     },
     saveApiKey() {

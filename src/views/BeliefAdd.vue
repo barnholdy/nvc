@@ -42,14 +42,6 @@
           :availableNeeds="availableNeeds">
         </belief-add-need>
 
-        <belief-add-hypothese
-          v-show="step === 5"
-          :belief="belief"
-          :initialValue="origin"
-          @changed="origin = $event"
-          @focussed="isFooterFixed = false"
-          @blurred="isFooterFixed = true">
-        </belief-add-hypothese>
       </v-container>
 
       <v-footer :fixed="isFooterFixed" color="white elevation-3" height="44">
@@ -77,7 +69,6 @@ import BeliefAddBelief from '@/views/BeliefAddBelief.vue';
 import BeliefAddFeeling from '@/views/BeliefAddFeeling.vue';
 import BeliefAddReaction from '@/views/BeliefAddReaction.vue';
 import BeliefAddNeed from '@/views/BeliefAddNeed.vue';
-import BeliefAddHypothese from '@/views/BeliefAddHypothese.vue';
 import availableFeelingsSrc from '../assets/feelings.json';
 import availableNeedsSrc from '../assets/needs.json';
 
@@ -100,20 +91,18 @@ export default {
     BeliefAddFeeling,
     BeliefAddReaction,
     BeliefAddNeed,
-    BeliefAddHypothese,
   },
   data() {
     const editEntry = this.$store.getters.beliefs
       .find(function(b) { return b.time === parseInt(this.$route.params.time, 10); }, this);
     return {
       step: 1,
-      totalSteps: 5,
+      totalSteps: 4,
       editEntry: editEntry || null,
       belief: editEntry ? editEntry.belief : '',
       availableFeelings: buildFeelings(editEntry ? editEntry.feelings || [] : []),
       availableNeeds: buildNeeds(editEntry ? editEntry.needs || [] : []),
       withBelief: editEntry ? editEntry.withBelief || '' : '',
-      origin: editEntry ? editEntry.origin || '' : '',
       isFooterFixed: true,
     };
   },
@@ -142,12 +131,13 @@ export default {
       this.$vuetify.goTo(0, { duration: 0 });
     },
     save() {
+      var existingReflection = this.editEntry ? (this.editEntry.reflection || {}) : {};
       const payload = {
         belief: this.belief,
         feelings: this.selectedFeelings,
         withBelief: this.withBelief,
         needs: this.selectedNeeds,
-        origin: this.origin,
+        reflection: Object.assign({ origin: '', withoutBelief: '', turnarounds: [], changeAct: '' }, existingReflection),
       };
       if (this.isEditMode) {
         this.$store.dispatch('updateBelief', Object.assign({}, this.editEntry, payload));

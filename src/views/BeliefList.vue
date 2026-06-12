@@ -66,9 +66,9 @@
                 <tag-list :items="entry.needs"></tag-list>
               </div>
             </template>
-            <template v-if="entry.origin">
+            <template v-if="entry.reflection && entry.reflection.origin">
               <p class="section-label caption grey--text mt-2">Ursprungshypothese</p>
-              <p class="body-1">{{ entry.origin }}</p>
+              <p class="body-1">{{ entry.reflection.origin }}</p>
             </template>
             <template v-if="entry.empathy">
               <p class="section-label caption grey--text mt-2">Empathie</p>
@@ -80,17 +80,17 @@
             </template>
             <template v-if="hasChangeData(entry)">
               <p class="section-label caption grey--text mt-2">Veränderungsprozess</p>
-              <template v-if="entry.withoutBelief">
+              <template v-if="entry.reflection && entry.reflection.withoutBelief">
                 <p class="caption grey--text mt-1">Neue Perspektive</p>
-                <p class="body-1">{{ entry.withoutBelief }}</p>
+                <p class="body-1">{{ entry.reflection.withoutBelief }}</p>
               </template>
-              <template v-if="entry.turnarounds && entry.turnarounds.length">
+              <template v-if="entry.reflection && entry.reflection.turnarounds && entry.reflection.turnarounds.length">
                 <p class="caption grey--text mt-1">Umkehrungen</p>
-                <p v-for="(t, idx) in entry.turnarounds" :key="idx" class="body-1 mb-1">{{ t }}</p>
+                <p v-for="(t, idx) in entry.reflection.turnarounds" :key="idx" class="body-1 mb-1">{{ t }}</p>
               </template>
-              <template v-if="entry.changeAct">
+              <template v-if="entry.reflection && entry.reflection.changeAct">
                 <p class="caption grey--text mt-1">Handlungen</p>
-                <p class="body-1">{{ entry.changeAct }}</p>
+                <p class="body-1">{{ entry.reflection.changeAct }}</p>
               </template>
             </template>
           </v-card-text>
@@ -124,10 +124,6 @@
       <v-btn flat color="grey" to="/affirmations">
         <span>Affirmationen</span>
         <v-icon>stars</v-icon>
-      </v-btn>
-      <v-btn flat color="grey" to="/reflections">
-        <span>Reflektion</span>
-        <v-icon>spa</v-icon>
       </v-btn>
       <v-btn flat color="grey" to="/resentments">
         <span>Groll</span>
@@ -199,7 +195,8 @@ export default {
       this.openEntry = this.openEntry === time ? null : time;
     },
     hasChangeData(entry) {
-      return !!(entry.withoutBelief || (entry.turnarounds && entry.turnarounds.length) || entry.changeAct);
+      var r = entry.reflection || {};
+      return !!(r.withoutBelief || (r.turnarounds && r.turnarounds.length) || r.changeAct);
     },
     empathyEntry(entry) {
       this.$router.push('/empathy-belief/' + entry.time);

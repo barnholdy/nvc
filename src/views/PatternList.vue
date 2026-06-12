@@ -74,10 +74,6 @@
         <span>Affirmationen</span>
         <v-icon>stars</v-icon>
       </v-btn>
-      <v-btn flat color="grey" to="/reflections">
-        <span>Reflektion</span>
-        <v-icon>spa</v-icon>
-      </v-btn>
       <v-btn flat color="grey" to="/resentments">
         <span>Groll</span>
         <v-icon>whatshot</v-icon>
