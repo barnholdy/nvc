@@ -17,19 +17,23 @@
       </div>
     </v-flex>
 
-    <v-flex>
-      <v-select
-        v-model="selectValue"
-        :items="allBeliefs"
-        item-text="belief"
-        item-value="time"
-        label="Glaubenssatz hinzufügen"
-        no-data-text="Noch keine Glaubenssätze vorhanden"
-        @change="addFromSelect"
-      ></v-select>
-    </v-flex>
-
     <v-flex class="mt-1">
+      <v-menu v-if="unselectedBeliefs.length" :close-on-content-click="true">
+        <v-btn slot="activator" flat color="primary">
+          <v-icon left small>arrow_drop_down</v-icon>
+          Bestehenden hinzufügen
+        </v-btn>
+        <v-list>
+          <v-list-tile
+            v-for="b in unselectedBeliefs"
+            :key="b.time"
+            @click="addBelief(b.time)"
+          >
+            <v-list-tile-title>{{ b.belief }}</v-list-tile-title>
+          </v-list-tile>
+        </v-list>
+      </v-menu>
+
       <template v-if="showNewInput">
         <v-text-field
           v-model="newBeliefText"
@@ -63,7 +67,6 @@ export default {
   data() {
     return {
       selectedIds: this.selectedBeliefIds.slice(),
-      selectValue: null,
       showNewInput: false,
       newBeliefText: '',
     };
@@ -88,13 +91,10 @@ export default {
     },
   },
   methods: {
-    addFromSelect(time) {
-      if (!time) return;
+    addBelief(time) {
       if (this.selectedIds.indexOf(time) === -1) {
         this.selectedIds = this.selectedIds.concat([time]);
       }
-      var self = this;
-      this.$nextTick(function() { self.selectValue = null; });
     },
     removeSelected(time) {
       this.selectedIds = this.selectedIds.filter(function(id) { return id !== time; });
