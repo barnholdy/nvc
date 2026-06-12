@@ -46,6 +46,10 @@
         <template v-if="openEntry === entry.time">
           <v-divider></v-divider>
           <v-card-text>
+            <template v-if="associatedPatterns(entry.time).length">
+              <p class="section-label caption grey--text">Muster</p>
+              <p v-for="(p, idx) in associatedPatterns(entry.time)" :key="idx" class="body-1 mb-1">{{ p.trigger || p.name }}</p>
+            </template>
             <template v-if="entry.feelings && entry.feelings.length">
               <p class="section-label caption grey--text mt-2">Gefühl</p>
               <div class="mb-2">
@@ -169,6 +173,11 @@ export default {
   methods: {
     patternCount(beliefTime) {
       return this.patternCountMap[beliefTime] || 0;
+    },
+    associatedPatterns(beliefTime) {
+      return this.$store.getters.patterns.filter(function(p) {
+        return (p.beliefs || []).indexOf(beliefTime) !== -1;
+      });
     },
     handleTap(entry) {
       var time = entry.time;
