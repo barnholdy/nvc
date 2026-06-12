@@ -26,7 +26,7 @@
               <v-btn small flat color="grey" @click="showApiKeyInput = false">Abbrechen</v-btn>
             </template>
             <template v-else>
-              <v-btn flat color="primary" :loading="isLoading" @click="generate">
+              <v-btn flat color="primary" :loading="isLoading" :disabled="isDataUnchanged" @click="generate">
                 <v-icon left>favorite_border</v-icon>
                 Empathie generieren
               </v-btn>
@@ -73,17 +73,41 @@
 </template>
 
 <script>
+var STORAGE_KEY = 'nvc.globalEmpathy';
+
+function hashString(str) {
+  var hash = 5381;
+  for (var i = 0; i < str.length; i++) {
+    hash = ((hash << 5) + hash) + str.charCodeAt(i);
+    hash = hash & hash;
+  }
+  return (hash >>> 0).toString(16);
+}
+
 export default {
   name: 'empathy-view',
   data() {
+    var saved = null;
+    try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch (e) {}
     return {
-      text: null,
+      text: saved ? saved.text : null,
+      savedHash: saved ? (saved.hash || null) : null,
       isLoading: false,
       errorMsg: '',
       showApiKeyInput: false,
       apiKeyInput: '',
       apiKey: localStorage.getItem('nvc.apiKey') || '',
     };
+  },
+  computed: {
+    currentHash() {
+      var patterns = this.$store.getters.patterns;
+      var beliefs = this.$store.getters.beliefs;
+      return hashString(JSON.stringify({ patterns: patterns, beliefs: beliefs }));
+    },
+    isDataUnchanged() {
+      return this.savedHash !== null && this.currentHash === this.savedHash;
+    },
   },
   methods: {
     buildPrompt() {
@@ -141,6 +165,7 @@ export default {
       this.isLoading = true;
       this.errorMsg = '';
       var self = this;
+      var hash = this.currentHash;
       fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
@@ -163,6 +188,8 @@ export default {
         return res.json();
       }).then(function(data) {
         self.text = data.content[0].text.trim();
+        self.savedHash = hash;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ text: self.text, hash: hash }));
       }).catch(function(e) {
         self.errorMsg = e.message || 'Empathie konnte nicht geladen werden.';
       }).then(function() {
