@@ -20,12 +20,11 @@
     <v-flex>
       <v-select
         v-model="selectValue"
-        :items="unselectedBeliefs"
+        :items="allBeliefs"
         item-text="belief"
         item-value="time"
         label="Glaubenssatz hinzufügen"
-        no-data-text="Keine weiteren Glaubenssätze vorhanden"
-        clearable
+        no-data-text="Noch keine Glaubenssätze vorhanden"
         @change="addFromSelect"
       ></v-select>
     </v-flex>

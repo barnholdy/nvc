@@ -18,9 +18,7 @@
         <v-card-title class="header" @click="toggle(entry.time)">
           <p class="subheading belief-title mb-1">{{ entry.belief }}</p>
           <div class="header-bottom">
-            <div class="header-meta">
-              <p class="caption grey--text mb-0">{{ formatTime(entry.time) }}</p>
-            </div>
+            <div class="header-meta"></div>
             <div class="header-actions">
               <div class="counter-tap" @click.stop="handleTap(entry)">
                 <span class="count-badge">{{ entry.count || 1 }}</span>
@@ -132,7 +130,6 @@
 </template>
 
 <script>
-import moment from 'moment';
 import TagList from '@/components/TagList.vue';
 
 export default {
@@ -199,10 +196,6 @@ export default {
     cancelDelete() {
       this.isDeleteDialogShowing = false;
       this.entryToDelete = null;
-    },
-    formatTime(time) {
-      moment.locale('de');
-      return moment(time).format('llll');
     },
   },
 };
