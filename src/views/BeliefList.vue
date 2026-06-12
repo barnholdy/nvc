@@ -18,7 +18,11 @@
         <v-card-title class="header" @click="toggle(entry.time)">
           <p class="subheading belief-title mb-1">{{ entry.belief }}</p>
           <div class="header-bottom">
-            <div class="header-meta"></div>
+            <div class="header-meta">
+              <span v-if="patternCount(entry.time) > 0" class="caption grey--text">
+                {{ patternCount(entry.time) }} {{ patternCount(entry.time) === 1 ? 'Muster' : 'Muster' }}
+              </span>
+            </div>
             <div class="header-actions">
               <div class="counter-tap" @click.stop="handleTap(entry)">
                 <span class="count-badge">{{ entry.count || 1 }}</span>
@@ -151,8 +155,21 @@ export default {
           return ((b.count || 1) - (a.count || 1)) || (b.time - a.time);
         });
     },
+    patternCountMap() {
+      var map = {};
+      this.$store.getters.patterns.forEach(function(p) {
+        var ids = p.beliefs || [];
+        ids.forEach(function(id) {
+          map[id] = (map[id] || 0) + 1;
+        });
+      });
+      return map;
+    },
   },
   methods: {
+    patternCount(beliefTime) {
+      return this.patternCountMap[beliefTime] || 0;
+    },
     handleTap(entry) {
       var time = entry.time;
       var self = this;
