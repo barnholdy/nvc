@@ -62,16 +62,16 @@
                 <tag-list :items="entry.needs"></tag-list>
               </div>
             </template>
+            <template v-if="entry.reflection && entry.reflection.origin">
+              <p class="section-label caption grey--text mt-2">Ursprungshypothese</p>
+              <p class="body-1">{{ entry.reflection.origin }}</p>
+            </template>
             <template v-if="entry.empathy">
               <p class="section-label caption grey--text mt-2">Empathie</p>
               <p class="body-1 empathy-text">{{ entry.empathy }}</p>
             </template>
-            <template v-if="hasChangeData(entry) || (entry.reflection && entry.reflection.origin) || (entry.affirmations && entry.affirmations.length)">
+            <template v-if="hasChangeData(entry) || (entry.affirmations && entry.affirmations.length)">
               <p class="section-label caption grey--text mt-2">Veränderungsprozess</p>
-              <template v-if="entry.reflection && entry.reflection.origin">
-                <p class="caption grey--text mt-1">Ursprungshypothese</p>
-                <p class="body-1">{{ entry.reflection.origin }}</p>
-              </template>
               <template v-if="entry.reflection && entry.reflection.withoutBelief">
                 <p class="caption grey--text mt-1">Neue Perspektive</p>
                 <p class="body-1">{{ entry.reflection.withoutBelief }}</p>
