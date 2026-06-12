@@ -2,7 +2,7 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Name</h1>
-      <p class="body-1 grey--text mt-2">Wie möchtest du dieses Muster nennen?</p>
+      <p class="body-1 grey--text mt-2">Wie möchtest du dieses Muster aus Situation und Glaubenssätzen nennen?</p>
     </v-flex>
     <v-flex>
       <v-text-field

@@ -2,7 +2,7 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Glaubenssätze</h1>
-      <p class="body-1 grey--text mt-2">Welche Glaubenssätze sind mit diesem Muster verbunden?</p>
+      <p class="body-1 grey--text mt-2">Welche tiefer liegenden Glaubenssätze sind damit verbunden?</p>
     </v-flex>
 
     <v-flex v-if="selectedBeliefObjects.length" class="mb-2">
