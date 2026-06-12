@@ -24,10 +24,6 @@
               </span>
             </div>
             <div class="header-actions">
-              <div class="counter-tap" @click.stop="handleTap(entry)">
-                <span class="count-badge">{{ entry.count || 1 }}</span>
-                <span class="count-plus">+</span>
-              </div>
               <v-btn icon small @click.stop="empathyEntry(entry)">
                 <v-icon :color="entry.empathy ? '#00838f' : 'grey darken-2'">favorite</v-icon>
               </v-btn>
@@ -125,9 +121,9 @@
         <span>Affirmationen</span>
         <v-icon>stars</v-icon>
       </v-btn>
-      <v-btn flat color="grey" to="/resentments">
-        <span>Groll</span>
-        <v-icon>whatshot</v-icon>
+      <v-btn flat color="grey" to="/empathy">
+        <span>Empathie</span>
+        <v-icon>favorite_border</v-icon>
       </v-btn>
     </v-bottom-nav>
   </div>
@@ -144,15 +140,15 @@ export default {
       openEntry: null,
       entryToDelete: null,
       isDeleteDialogShowing: false,
-      tapTimeouts: {},
     };
   },
   computed: {
     beliefs() {
+      var map = this.patternCountMap;
       return this.$store.getters.beliefs
         .concat()
         .sort(function(a, b) {
-          return ((b.count || 1) - (a.count || 1)) || (b.time - a.time);
+          return ((map[b.time] || 0) - (map[a.time] || 0)) || (b.time - a.time);
         });
     },
     patternCountMap() {
@@ -174,22 +170,6 @@ export default {
       return this.$store.getters.patterns.filter(function(p) {
         return (p.beliefs || []).indexOf(beliefTime) !== -1;
       });
-    },
-    handleTap(entry) {
-      var time = entry.time;
-      var self = this;
-      if (this.tapTimeouts[time]) {
-        clearTimeout(this.tapTimeouts[time]);
-        this.$delete(this.tapTimeouts, time);
-        if ((entry.count || 1) > 1) {
-          this.$store.dispatch('decrementBeliefCount', entry);
-        }
-      } else {
-        this.$set(this.tapTimeouts, time, setTimeout(function() {
-          self.$delete(self.tapTimeouts, time);
-          self.$store.dispatch('incrementBeliefCount', entry);
-        }, 300));
-      }
     },
     toggle(time) {
       this.openEntry = this.openEntry === time ? null : time;

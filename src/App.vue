@@ -10,7 +10,6 @@ export default {
   created() {
     this.$store.dispatch('loadPatterns');
     this.$store.dispatch('loadBeliefs');
-    this.$store.dispatch('loadResentments');
   },
   mounted() {
     document.addEventListener('gesturestart', e => e.preventDefault(), { passive: false });

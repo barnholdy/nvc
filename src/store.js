@@ -6,7 +6,6 @@ Vue.use(Vuex);
 const NVC_STORAGE_KEY = 'nvc';
 const PATTERNS_STORAGE_KEY = `${NVC_STORAGE_KEY}.patterns`;
 const BELIEFS_STORAGE_KEY = `${NVC_STORAGE_KEY}.beliefs`;
-const RESENTMENTS_STORAGE_KEY = `${NVC_STORAGE_KEY}.resentments`;
 
 function storageAvailable(type) {
   try {
@@ -29,12 +28,10 @@ export default new Vuex.Store({
   state: {
     patterns: [],
     beliefs: [],
-    resentments: [],
   },
   getters: {
     patterns: state => state.patterns,
     beliefs: state => state.beliefs,
-    resentments: state => state.resentments,
   },
   mutations: {
     setPatterns(state, entries) {
@@ -89,19 +86,6 @@ export default new Vuex.Store({
         const current = state.beliefs[index].count || 1;
         const updated = Object.assign({}, state.beliefs[index], { count: Math.max(1, current - 1) });
         state.beliefs.splice(index, 1, updated);
-      }
-    },
-    setResentments(state, resentments) {
-      state.resentments = resentments; // eslint-disable-line no-param-reassign
-    },
-    addResentment(state, resentment) {
-      resentment.time = +new Date(); // eslint-disable-line no-param-reassign
-      state.resentments.push(resentment);
-    },
-    deleteResentment(state, resentment) {
-      const index = state.resentments.indexOf(resentment);
-      if (index > -1) {
-        state.resentments.splice(index, 1);
       }
     },
   },
@@ -251,26 +235,6 @@ export default new Vuex.Store({
       commit('decrementBelief', belief);
       if (storageAvailable('localStorage')) {
         localStorage.setItem(BELIEFS_STORAGE_KEY, JSON.stringify(getters.beliefs));
-      }
-    },
-    loadResentments({ commit }) {
-      if (storageAvailable('localStorage')) {
-        const json = localStorage.getItem(RESENTMENTS_STORAGE_KEY);
-        if (json) {
-          commit('setResentments', JSON.parse(json));
-        }
-      }
-    },
-    saveResentment({ commit, getters }, resentment) {
-      commit('addResentment', resentment);
-      if (storageAvailable('localStorage')) {
-        localStorage.setItem(RESENTMENTS_STORAGE_KEY, JSON.stringify(getters.resentments));
-      }
-    },
-    deleteResentment({ commit, getters }, resentment) {
-      commit('deleteResentment', resentment);
-      if (storageAvailable('localStorage')) {
-        localStorage.setItem(RESENTMENTS_STORAGE_KEY, JSON.stringify(getters.resentments));
       }
     },
   },

@@ -47,9 +47,9 @@
         <span>Affirmationen</span>
         <v-icon>stars</v-icon>
       </v-btn>
-      <v-btn flat color="grey" to="/resentments">
-        <span>Groll</span>
-        <v-icon>whatshot</v-icon>
+      <v-btn flat color="grey" to="/empathy">
+        <span>Empathie</span>
+        <v-icon>favorite_border</v-icon>
       </v-btn>
     </v-bottom-nav>
   </div>

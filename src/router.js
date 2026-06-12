@@ -51,14 +51,9 @@ export default new Router({
       component: () => import('./views/AffirmationList.vue'),
     },
     {
-      path: '/resentments',
-      name: 'resentments',
-      component: () => import('./views/ResentmentList.vue'),
-    },
-    {
-      path: '/add-resentment',
-      name: 'add-resentment',
-      component: () => import('./views/ResentmentAdd.vue'),
+      path: '/empathy',
+      name: 'empathy',
+      component: () => import('./views/EmpathyView.vue'),
     },
     { path: '*', redirect: '/patterns' },
   ],
