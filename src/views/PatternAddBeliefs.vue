@@ -5,21 +5,32 @@
       <p class="body-1 grey--text mt-2">Welche Glaubenssätze sind mit diesem Muster verbunden?</p>
     </v-flex>
 
+    <v-flex v-if="selectedBeliefObjects.length" class="mb-2">
+      <div class="selected-chips">
+        <v-chip
+          v-for="b in selectedBeliefObjects"
+          :key="b.time"
+          close
+          class="selected-chip"
+          @input="removeSelected(b.time)"
+        >{{ b.belief }}</v-chip>
+      </div>
+    </v-flex>
+
     <v-flex>
       <v-select
-        v-model="selectedIds"
-        :items="allBeliefs"
+        v-model="selectValue"
+        :items="unselectedBeliefs"
         item-text="belief"
         item-value="time"
-        multiple
-        chips
-        deletable-chips
-        label="Glaubenssätze auswählen"
-        no-data-text="Noch keine Glaubenssätze vorhanden"
+        label="Glaubenssatz hinzufügen"
+        no-data-text="Keine weiteren Glaubenssätze vorhanden"
+        clearable
+        @change="addFromSelect"
       ></v-select>
     </v-flex>
 
-    <v-flex class="mt-2">
+    <v-flex class="mt-1">
       <template v-if="showNewInput">
         <v-text-field
           v-model="newBeliefText"
@@ -53,9 +64,24 @@ export default {
   data() {
     return {
       selectedIds: this.selectedBeliefIds.slice(),
+      selectValue: null,
       showNewInput: false,
       newBeliefText: '',
     };
+  },
+  computed: {
+    selectedBeliefObjects() {
+      var beliefs = this.allBeliefs;
+      return this.selectedIds.map(function(id) {
+        return beliefs.find(function(b) { return b.time === id; });
+      }).filter(Boolean);
+    },
+    unselectedBeliefs() {
+      var selectedIds = this.selectedIds;
+      return this.allBeliefs.filter(function(b) {
+        return selectedIds.indexOf(b.time) === -1;
+      });
+    },
   },
   watch: {
     selectedIds: function(val) {
@@ -63,6 +89,17 @@ export default {
     },
   },
   methods: {
+    addFromSelect(time) {
+      if (!time) return;
+      if (this.selectedIds.indexOf(time) === -1) {
+        this.selectedIds = this.selectedIds.concat([time]);
+      }
+      var self = this;
+      this.$nextTick(function() { self.selectValue = null; });
+    },
+    removeSelected(time) {
+      this.selectedIds = this.selectedIds.filter(function(id) { return id !== time; });
+    },
     cancelNew() {
       this.showNewInput = false;
       this.newBeliefText = '';
@@ -80,4 +117,14 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.selected-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.selected-chip {
+  white-space: normal;
+  height: auto !important;
+  padding: 4px 10px !important;
+}
 </style>
