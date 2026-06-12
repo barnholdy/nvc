@@ -6,16 +6,6 @@ Vue.use(Router);
 export default new Router({
   routes: [
     {
-      path: '/check-ins',
-      name: 'check-ins',
-      component: () => import('./views/CheckInList.vue'),
-    },
-    {
-      path: '/add-check-in',
-      name: 'add-check-in',
-      component: () => import('./views/CheckInAdd.vue'),
-    },
-    {
       path: '/patterns',
       name: 'patterns',
       component: () => import('./views/PatternList.vue'),
@@ -70,7 +60,7 @@ export default new Router({
       name: 'add-resentment',
       component: () => import('./views/ResentmentAdd.vue'),
     },
-    { path: '*', redirect: '/check-ins' },
+    { path: '*', redirect: '/patterns' },
   ],
   scrollBehavior() {
     return { x: 0, y: 0 };

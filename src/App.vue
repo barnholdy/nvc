@@ -8,7 +8,6 @@
 export default {
   name: 'app',
   created() {
-    this.$store.dispatch('loadCheckIns');
     this.$store.dispatch('loadPatterns');
     this.$store.dispatch('loadReflections');
     this.$store.dispatch('loadResentments');

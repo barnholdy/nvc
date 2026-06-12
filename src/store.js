@@ -4,7 +4,6 @@ import Vuex from 'vuex';
 Vue.use(Vuex);
 
 const NVC_STORAGE_KEY = 'nvc';
-const CHECK_INS_STORAGE_KEY = `${NVC_STORAGE_KEY}.checkIns`;
 const PATTERNS_STORAGE_KEY = `${NVC_STORAGE_KEY}.patterns`;
 const REFLECTIONS_STORAGE_KEY = `${NVC_STORAGE_KEY}.reflections`;
 const RESENTMENTS_STORAGE_KEY = `${NVC_STORAGE_KEY}.resentments`;
@@ -28,31 +27,16 @@ function storageAvailable(type) {
 
 export default new Vuex.Store({
   state: {
-    checkIns: [],
     patterns: [],
     reflections: [],
     resentments: [],
   },
   getters: {
-    checkIns: state => state.checkIns,
     patterns: state => state.patterns,
     reflections: state => state.reflections,
     resentments: state => state.resentments,
   },
   mutations: {
-    setCheckIns(state, checkIns) {
-      state.checkIns = checkIns; // eslint-disable-line no-param-reassign
-    },
-    addCheckIn(state, checkIn) {
-      checkIn.time = +new Date(); // eslint-disable-line no-param-reassign
-      state.checkIns.push(checkIn);
-    },
-    deleteCheckIn(state, checkIn) {
-      const index = state.checkIns.indexOf(checkIn);
-      if (index > -1) {
-        state.checkIns.splice(index, 1);
-      }
-    },
     setPatterns(state, entries) {
       state.patterns = entries; // eslint-disable-line no-param-reassign
     },
@@ -116,32 +100,6 @@ export default new Vuex.Store({
     },
   },
   actions: {
-    loadCheckIns({ commit }) {
-      if (storageAvailable('localStorage')) {
-        const checkInsJson = localStorage.getItem(CHECK_INS_STORAGE_KEY);
-        if (checkInsJson) {
-          commit('setCheckIns', JSON.parse(checkInsJson));
-        }
-      } else {
-        throw new Error('Check-Ins were not loaded.');
-      }
-    },
-    saveCheckIn({ commit, getters }, checkIn) {
-      commit('addCheckIn', checkIn);
-      if (storageAvailable('localStorage')) {
-        localStorage.setItem(CHECK_INS_STORAGE_KEY, JSON.stringify(getters.checkIns));
-      } else {
-        throw new Error('Check-Ins were not saved persistently.');
-      }
-    },
-    deleteCheckIn({ commit, getters }, checkIn) {
-      commit('deleteCheckIn', checkIn);
-      if (storageAvailable('localStorage')) {
-        localStorage.setItem(CHECK_INS_STORAGE_KEY, JSON.stringify(getters.checkIns));
-      } else {
-        throw new Error('Check-Ins were not saved persistently.');
-      }
-    },
     loadPatterns({ commit }) {
       if (storageAvailable('localStorage')) {
         // Migrate data from the old 'nvc.theWork' key if present

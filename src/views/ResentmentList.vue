@@ -56,10 +56,6 @@
     </v-content>
 
     <v-bottom-nav :value="true" fixed app color="white" class="elevation-3">
-      <v-btn flat color="grey" to="/check-ins">
-        <span>Check-Ins</span>
-        <v-icon>favorite_border</v-icon>
-      </v-btn>
       <v-btn flat color="grey" to="/patterns">
         <span>Muster</span>
         <v-icon>repeat</v-icon>
