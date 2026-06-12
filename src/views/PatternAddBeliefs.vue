@@ -5,6 +5,10 @@
       <p class="body-1 grey--text mt-2">Welche tiefer liegenden Glaubenssätze sind damit verbunden?</p>
     </v-flex>
 
+    <v-flex v-if="trigger" class="mb-3">
+      <p class="subheading grey--text situation-quote">„{{ trigger }}"</p>
+    </v-flex>
+
     <v-flex v-if="selectedBeliefObjects.length" class="mb-2">
       <div class="selected-chips">
         <v-chip
@@ -63,6 +67,7 @@ export default {
   props: {
     allBeliefs: { type: Array, default: function() { return []; } },
     selectedBeliefIds: { type: Array, default: function() { return []; } },
+    trigger: { type: String, default: '' },
   },
   data() {
     return {
@@ -116,6 +121,10 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.situation-quote {
+  font-style: italic;
+  white-space: pre-wrap;
+}
 .selected-chips {
   display: flex;
   flex-wrap: wrap;

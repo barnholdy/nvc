@@ -25,6 +25,7 @@
           v-show="step === 2"
           :allBeliefs="allBeliefs"
           :selectedBeliefIds="selectedBeliefIds"
+          :trigger="trigger"
           @changed="selectedBeliefIds = $event">
         </pattern-add-beliefs>
 
