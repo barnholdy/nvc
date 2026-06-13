@@ -3,7 +3,7 @@
     <v-flex class="mt-2 mb-5">
       <h1 class="headline font-weight-regular">Bedürfnis</h1>
       <p class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
-      <p class="body-1 grey--text mt-2">Was brauchst du in dieser Situation?</p>
+      <p class="body-1 grey--text mt-2">Was will dir diese Überzeugung über deine Bedürfnisse sagen? Was brauchst du eigentlich?</p>
     </v-flex>
     <v-flex>
       <tag-list
