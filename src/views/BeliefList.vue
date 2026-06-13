@@ -76,10 +76,6 @@
                 <p class="caption grey--text mt-1">Neue Perspektive</p>
                 <p class="body-1">{{ entry.reflection.withoutBelief }}</p>
               </template>
-              <template v-if="entry.reflection && entry.reflection.turnarounds && entry.reflection.turnarounds.length">
-                <p class="caption grey--text mt-1">Umkehrungen</p>
-                <p v-for="(t, idx) in entry.reflection.turnarounds" :key="idx" class="body-1 mb-1">{{ t }}</p>
-              </template>
               <template v-if="entry.affirmations && entry.affirmations.length">
                 <p class="caption grey--text mt-1">Affirmationen</p>
                 <p v-for="(a, idx) in entry.affirmations" :key="idx" class="body-1 mb-1">{{ a.text }}</p>
@@ -176,7 +172,7 @@ export default {
     },
     hasChangeData(entry) {
       var r = entry.reflection || {};
-      return !!(r.withoutBelief || (r.turnarounds && r.turnarounds.length) || r.changeAct);
+      return !!(r.withoutBelief || r.changeAct);
     },
     empathyEntry(entry) {
       this.$router.push('/empathy-belief/' + entry.time);

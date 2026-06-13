@@ -17,22 +17,15 @@
           v-show="step === 1"
           :belief="entry ? entry.belief : ''"
           :initialValue="withoutBelief"
+          :needs="entry ? entry.needs || [] : []"
+          :availableFeelings="availableWithoutBeliefFeelings"
           @changed="withoutBelief = $event"
           @focussed="isFooterFixed = false"
           @blurred="isFooterFixed = true">
         </pattern-add-without-belief>
 
-        <belief-change-turnaround
-          v-show="step === 2"
-          :belief="entry ? entry.belief : ''"
-          :initialTurnarounds="turnarounds"
-          @changed="turnarounds = $event"
-          @focussed="isFooterFixed = false"
-          @blurred="isFooterFixed = true">
-        </belief-change-turnaround>
-
         <pattern-change-affirmation
-          v-show="step === 3"
+          v-show="step === 2"
           :belief="entry ? entry.belief : ''"
           :initialAffirmations="affirmations"
           @changed="affirmations = $event"
@@ -41,7 +34,7 @@
         </pattern-change-affirmation>
 
         <pattern-change-act
-          v-show="step === 4"
+          v-show="step === 3"
           :belief="entry ? entry.belief : ''"
           :initialValue="changeAct"
           @changed="changeAct = $event"
@@ -70,15 +63,20 @@
 
 <script>
 import PatternAddWithoutBelief from '@/views/PatternAddWithoutBelief.vue';
-import BeliefChangeTurnaround from '@/views/BeliefChangeTurnaround.vue';
 import PatternChangeAffirmation from '@/views/PatternChangeAffirmation.vue';
 import PatternChangeAct from '@/views/PatternChangeAct.vue';
+import availableFeelingsSrc from '../assets/feelings.json';
+
+function buildFeelings(selectedFeelings) {
+  return availableFeelingsSrc.feelings.filter(function(f) { return f.rank >= -80; }).map(function(f) {
+    return Object.assign({}, f, { isSelected: selectedFeelings.some(function(sf) { return sf.name === f.name; }) });
+  });
+}
 
 export default {
   name: 'belief-change',
   components: {
     PatternAddWithoutBelief,
-    BeliefChangeTurnaround,
     PatternChangeAffirmation,
     PatternChangeAct,
   },
@@ -89,13 +87,18 @@ export default {
     return {
       entry: entry || null,
       step: 1,
-      totalSteps: 4,
+      totalSteps: 3,
       withoutBelief: r.withoutBelief || '',
-      turnarounds: r.turnarounds || [],
+      availableWithoutBeliefFeelings: buildFeelings(r.withoutBeliefFeelings || []),
       affirmations: entry ? entry.affirmations || [] : [],
       changeAct: r.changeAct || '',
       isFooterFixed: true,
     };
+  },
+  computed: {
+    selectedWithoutBeliefFeelings() {
+      return this.availableWithoutBeliefFeelings.filter(function(f) { return f.isSelected; });
+    },
   },
   methods: {
     nextStep() {
@@ -112,7 +115,8 @@ export default {
         reflection: {
           origin: this.entry && this.entry.reflection ? (this.entry.reflection.origin || '') : '',
           withoutBelief: this.withoutBelief,
-          turnarounds: this.turnarounds,
+          withoutBeliefFeelings: this.selectedWithoutBeliefFeelings,
+          turnarounds: [],
           changeAct: this.changeAct,
         },
       }));
