@@ -27,6 +27,8 @@
         <pattern-change-affirmation
           v-show="step === 2"
           :belief="entry ? entry.belief : ''"
+          :withoutBelief="withoutBelief"
+          :withoutBeliefFeelings="selectedWithoutBeliefFeelings"
           :initialAffirmations="affirmations"
           @changed="affirmations = $event"
           @focussed="isFooterFixed = false"

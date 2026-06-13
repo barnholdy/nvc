@@ -2,8 +2,13 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Affirmationen</h1>
-      <p class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
-      <p class="body-1 grey--text mt-2">Forme deinen Glaubenssatz in positive, kraftvolle Ich-Aussagen im Präsens um.</p>
+      <template v-if="withoutBelief">
+        <p class="body-1 belief-quote mt-1">„{{ withoutBelief }}"</p>
+        <div v-if="withoutBeliefFeelings && withoutBeliefFeelings.length" class="mb-2">
+          <tag-list :items="withoutBeliefFeelings"></tag-list>
+        </div>
+      </template>
+      <p class="body-1 grey--text mt-2">Manifestiere deine neue Perspektive und Gefühle in positive, kraftvolle Affirmationen.</p>
     </v-flex>
 
     <v-flex v-for="(item, i) in affirmations" :key="i" class="affirmation-row">
@@ -73,11 +78,16 @@
 </template>
 
 <script>
+import TagList from '@/components/TagList.vue';
+
 export default {
   name: 'pattern-change-affirmation',
+  components: { TagList },
   props: {
     belief: { type: String, default: '' },
-    initialAffirmations: { type: Array, default: () => [] },
+    withoutBelief: { type: String, default: '' },
+    withoutBeliefFeelings: { type: Array, default: function() { return []; } },
+    initialAffirmations: { type: Array, default: function() { return []; } },
   },
   data() {
     const raw = this.initialAffirmations;
@@ -104,6 +114,18 @@ export default {
     },
   },
   methods: {
+    buildSuggestionsPrompt() {
+      var lines = ['Du hilfst dabei, positive Affirmationen zu formulieren.'];
+      if (this.withoutBelief) {
+        lines.push('Neue Perspektive: "' + this.withoutBelief + '"');
+      } else {
+        lines.push('Glaubenssatz: "' + this.belief + '"');
+      }
+      var feelingNames = (this.withoutBeliefFeelings || []).map(function(f) { return f.name; }).join(', ');
+      if (feelingNames) lines.push('Gefühle dabei: ' + feelingNames);
+      lines.push('Generiere genau 5 kurze positive Affirmationen (je max. 12 Wörter) als Ich-Aussagen im Präsens. Inspirierend, konkret, auf die neue Perspektive bezogen.\nNur die 5 Sätze, einer pro Zeile, ohne Nummerierung.');
+      return lines.join('\n');
+    },
     addField() {
       this.affirmations.push({ text: '', count: 1 });
     },
@@ -150,7 +172,7 @@ export default {
             max_tokens: 300,
             messages: [{
               role: 'user',
-              content: `Du hilfst bei der Umformung negativer Glaubenssätze in positive Affirmationen.\nGlaubenssatz: "${this.belief}"\nGeneriere genau 5 kurze positive Affirmationen (je max. 12 Wörter) als Ich-Aussagen im Präsens. Inspirierend, konkret, auf den Glaubenssatz bezogen.\nNur die 5 Sätze, einer pro Zeile, ohne Nummerierung.`,
+              content: this.buildSuggestionsPrompt(),
             }],
           }),
         });
