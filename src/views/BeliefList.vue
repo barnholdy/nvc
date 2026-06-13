@@ -76,6 +76,12 @@
                 <p class="caption grey--text mt-1">Neue Perspektive</p>
                 <p class="body-1">{{ entry.reflection.withoutBelief }}</p>
               </template>
+              <template v-if="entry.reflection && entry.reflection.withoutBeliefFeelings && entry.reflection.withoutBeliefFeelings.length">
+                <p class="caption grey--text mt-1">Gefühle dabei</p>
+                <div class="mb-2">
+                  <tag-list :items="entry.reflection.withoutBeliefFeelings"></tag-list>
+                </div>
+              </template>
               <template v-if="entry.affirmations && entry.affirmations.length">
                 <p class="caption grey--text mt-1">Affirmationen</p>
                 <p v-for="(a, idx) in entry.affirmations" :key="idx" class="body-1 mb-1">{{ a.text }}</p>
