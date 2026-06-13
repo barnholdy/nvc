@@ -39,10 +39,10 @@
         <pattern-change-act
           v-show="step === 3"
           :belief="entry ? entry.belief : ''"
-          :withoutBelief="withoutBelief"
           :withoutBeliefFeelings="selectedWithoutBeliefFeelings"
-          :initialValue="changeAct"
-          @changed="changeAct = $event"
+          :affirmations="affirmations"
+          :initialActs="changeActs"
+          @changed="changeActs = $event"
           @focussed="isFooterFixed = false"
           @blurred="isFooterFixed = true">
         </pattern-change-act>
@@ -96,7 +96,7 @@ export default {
       withoutBelief: r.withoutBelief || '',
       availableWithoutBeliefFeelings: buildFeelings(r.withoutBeliefFeelings || []),
       affirmations: entry ? entry.affirmations || [] : [],
-      changeAct: r.changeAct || '',
+      changeActs: r.changeActs || (r.changeAct ? r.changeAct.split('\n').filter(Boolean) : []),
       isFooterFixed: true,
     };
   },
@@ -135,7 +135,8 @@ export default {
           withoutBelief: this.withoutBelief,
           withoutBeliefFeelings: this.selectedWithoutBeliefFeelings,
           turnarounds: [],
-          changeAct: this.changeAct,
+          changeAct: '',
+          changeActs: this.changeActs,
         },
       }));
       this.$router.push('/beliefs');

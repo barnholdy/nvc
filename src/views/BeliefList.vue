@@ -86,9 +86,12 @@
                 <p class="caption grey--text mt-1">Affirmationen</p>
                 <p v-for="(a, idx) in entry.affirmations" :key="idx" class="body-1 mb-1">{{ a.text }}</p>
               </template>
-              <template v-if="entry.reflection && entry.reflection.changeAct">
+              <template v-if="entry.reflection && ((entry.reflection.changeActs && entry.reflection.changeActs.length) || entry.reflection.changeAct)">
                 <p class="caption grey--text mt-1">Handlungen</p>
-                <p class="body-1">{{ entry.reflection.changeAct }}</p>
+                <template v-if="entry.reflection.changeActs && entry.reflection.changeActs.length">
+                  <p v-for="(a, idx) in entry.reflection.changeActs" :key="idx" class="body-1 mb-1">{{ a }}</p>
+                </template>
+                <p v-else class="body-1">{{ entry.reflection.changeAct }}</p>
               </template>
             </template>
           </v-card-text>
@@ -178,7 +181,7 @@ export default {
     },
     hasChangeData(entry) {
       var r = entry.reflection || {};
-      return !!(r.withoutBelief || r.changeAct);
+      return !!(r.withoutBelief || r.changeAct || (r.changeActs && r.changeActs.length));
     },
     empathyEntry(entry) {
       this.$router.push('/empathy-belief/' + entry.time);
