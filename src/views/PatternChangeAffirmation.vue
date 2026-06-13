@@ -118,12 +118,24 @@ export default {
     withoutBelief: { type: String, default: '' },
     withoutBeliefFeelings: { type: Array, default: function() { return []; } },
     initialAffirmations: { type: Array, default: function() { return []; } },
+    allAffirmations: { type: Array, default: function() { return []; } },
   },
   data() {
     var initial = this.initialAffirmations.map(function(a) { return { text: a.text, count: a.count || 1 }; });
+    var selectedTexts = initial.map(function(a) { return a.text; });
+    // merge allAffirmations with initial, deduplicating by text
+    var seen = {};
+    var merged = initial.slice();
+    selectedTexts.forEach(function(t) { seen[t] = true; });
+    this.allAffirmations.forEach(function(a) {
+      if (!seen[a.text]) {
+        seen[a.text] = true;
+        merged.push({ text: a.text, count: a.count || 1 });
+      }
+    });
     return {
-      allAffirmations: initial.slice(),
-      selectedTexts: initial.map(function(a) { return a.text; }),
+      pool: merged,
+      selectedTexts: selectedTexts,
       showNewInput: false,
       newAffirmationText: '',
       suggestions: [],
@@ -137,11 +149,11 @@ export default {
   computed: {
     selectedAffirmations() {
       var selectedTexts = this.selectedTexts;
-      return this.allAffirmations.filter(function(a) { return selectedTexts.indexOf(a.text) !== -1; });
+      return this.pool.filter(function(a) { return selectedTexts.indexOf(a.text) !== -1; });
     },
     unselectedAffirmations() {
       var selectedTexts = this.selectedTexts;
-      return this.allAffirmations.filter(function(a) { return selectedTexts.indexOf(a.text) === -1; });
+      return this.pool.filter(function(a) { return selectedTexts.indexOf(a.text) === -1; });
     },
   },
   watch: {
@@ -165,16 +177,16 @@ export default {
     createAffirmation() {
       var text = this.newAffirmationText.trim();
       if (!text) return;
-      if (this.allAffirmations.every(function(a) { return a.text !== text; })) {
-        this.allAffirmations = this.allAffirmations.concat([{ text: text, count: 1 }]);
+      if (this.pool.every(function(a) { return a.text !== text; })) {
+        this.pool = this.pool.concat([{ text: text, count: 1 }]);
       }
       this.selectedTexts = this.selectedTexts.concat([text]);
       this.newAffirmationText = '';
       this.showNewInput = false;
     },
     acceptSuggestion(s) {
-      if (this.allAffirmations.every(function(a) { return a.text !== s; })) {
-        this.allAffirmations = this.allAffirmations.concat([{ text: s, count: 1 }]);
+      if (this.pool.every(function(a) { return a.text !== s; })) {
+        this.pool = this.pool.concat([{ text: s, count: 1 }]);
       }
       if (this.selectedTexts.indexOf(s) === -1) {
         this.selectedTexts = this.selectedTexts.concat([s]);

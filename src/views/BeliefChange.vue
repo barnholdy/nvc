@@ -30,6 +30,7 @@
           :withoutBelief="withoutBelief"
           :withoutBeliefFeelings="selectedWithoutBeliefFeelings"
           :initialAffirmations="affirmations"
+          :allAffirmations="allAffirmations"
           @changed="affirmations = $event"
           @focussed="isFooterFixed = false"
           @blurred="isFooterFixed = true">
@@ -100,6 +101,19 @@ export default {
   computed: {
     selectedWithoutBeliefFeelings() {
       return this.availableWithoutBeliefFeelings.filter(function(f) { return f.isSelected; });
+    },
+    allAffirmations() {
+      var seen = {};
+      var result = [];
+      this.$store.getters.beliefs.forEach(function(b) {
+        (b.affirmations || []).forEach(function(a) {
+          if (a.text && !seen[a.text]) {
+            seen[a.text] = true;
+            result.push({ text: a.text, count: a.count || 1 });
+          }
+        });
+      });
+      return result;
     },
   },
   methods: {
