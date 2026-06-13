@@ -8,20 +8,22 @@
         <v-card
           class="affirmation-card"
           v-for="(item, i) in affirmations"
-          :key="item.beliefTime + '-' + item.affirmationIndex"
+          :key="item.text"
         >
           <v-card-title class="affirmation-header" @click="toggle(i)">
             <p class="body-1 affirmation-text mb-0">{{ item.text }}</p>
-            <div class="counter-tap" @click.stop="handleTap(item)">
-              <span class="count-badge">{{ item.count }}</span>
-              <span class="count-plus">+</span>
+            <div class="header-actions">
+              <span class="count-badge">{{ item.beliefCount }}</span>
+              <v-btn icon small @click.stop="preDelete(item)">
+                <v-icon color="grey darken-2">delete</v-icon>
+              </v-btn>
             </div>
           </v-card-title>
           <template v-if="openIndex === i">
             <v-divider></v-divider>
             <v-card-text>
-              <p class="caption grey--text mb-1 section-label">Glaube / Urteil</p>
-              <p class="body-1 belief-quote">„{{ item.belief }}"</p>
+              <p class="caption grey--text mb-1 section-label">Beliefs</p>
+              <p v-for="(s, j) in item.sources" :key="j" class="body-1 belief-quote mb-1">„{{ s.beliefText }}"</p>
             </v-card-text>
           </template>
         </v-card>
@@ -32,6 +34,20 @@
         <p class="body-1 grey--text mt-2">Noch keine Affirmationen vorhanden.</p>
         <p class="caption grey--text">Füge Affirmationen zu deinen Beliefs hinzu.</p>
       </div>
+
+      <v-dialog v-model="isDeleteDialogShowing" width="500">
+        <v-card>
+          <v-card-title class="subheading" primary-title>
+            Affirmation wirklich löschen?
+          </v-card-title>
+          <v-divider></v-divider>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="secondary" flat @click="cancelDelete">abbrechen</v-btn>
+            <v-btn color="red" flat @click="confirmDelete">löschen</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </v-content>
 
     <v-bottom-nav :value="true" fixed app color="white" class="elevation-3">
@@ -61,54 +77,55 @@ export default {
   data() {
     return {
       openIndex: null,
-      tapTimeouts: {},
+      itemToDelete: null,
+      isDeleteDialogShowing: false,
     };
   },
   computed: {
     affirmations() {
-      var result = [];
+      var map = {};
       this.$store.getters.beliefs.forEach(function(belief) {
         if (!belief.affirmations || !belief.affirmations.length) return;
         belief.affirmations.forEach(function(a, idx) {
-          result.push({
-            text: a.text,
-            count: a.count || 1,
-            belief: belief.belief,
-            beliefTime: belief.time,
-            affirmationIndex: idx,
-          });
+          if (!a.text) return;
+          if (!map[a.text]) {
+            map[a.text] = { text: a.text, beliefCount: 0, sources: [] };
+          }
+          map[a.text].beliefCount += 1;
+          map[a.text].sources.push({ beliefTime: belief.time, affirmationIndex: idx, beliefText: belief.belief });
         });
       });
-      return result.sort(function(a, b) { return (b.count || 1) - (a.count || 1); });
+      var result = [];
+      Object.keys(map).forEach(function(key) { result.push(map[key]); });
+      return result.sort(function(a, b) { return b.beliefCount - a.beliefCount; });
     },
   },
   methods: {
     toggle(i) {
       this.openIndex = this.openIndex === i ? null : i;
     },
-    handleTap(item) {
-      var key = item.beliefTime + '-' + item.affirmationIndex;
-      var self = this;
-      if (this.tapTimeouts[key]) {
-        clearTimeout(this.tapTimeouts[key]);
-        this.$delete(this.tapTimeouts, key);
-        if (item.count > 1) self.updateCount(item, -1);
-      } else {
-        this.$set(this.tapTimeouts, key, setTimeout(function() {
-          self.$delete(self.tapTimeouts, key);
-          self.updateCount(item, 1);
-        }, 300));
-      }
+    preDelete(item) {
+      this.itemToDelete = item;
+      this.isDeleteDialogShowing = true;
     },
-    updateCount(item, delta) {
-      var belief = this.$store.getters.beliefs.find(function(b) { return b.time === item.beliefTime; });
-      if (!belief) return;
-      var affirmations = belief.affirmations.map(function(a, i) {
-        return i === item.affirmationIndex
-          ? Object.assign({}, a, { count: Math.max(1, (a.count || 1) + delta) })
-          : a;
+    cancelDelete() {
+      this.isDeleteDialogShowing = false;
+      this.itemToDelete = null;
+    },
+    confirmDelete() {
+      this.isDeleteDialogShowing = false;
+      var text = this.itemToDelete ? this.itemToDelete.text : null;
+      this.itemToDelete = null;
+      if (!text) return;
+      var self = this;
+      this.$store.getters.beliefs.forEach(function(belief) {
+        if (!belief.affirmations || !belief.affirmations.length) return;
+        if (belief.affirmations.some(function(a) { return a.text === text; })) {
+          var updated = belief.affirmations.filter(function(a) { return a.text !== text; });
+          self.$store.dispatch('updateBelief', Object.assign({}, belief, { affirmations: updated }));
+        }
       });
-      this.$store.dispatch('updateBelief', Object.assign({}, belief, { affirmations: affirmations }));
+      self.openIndex = null;
     },
   },
 };
@@ -121,33 +138,33 @@ export default {
 .affirmation-header {
   cursor: pointer;
   user-select: none;
-  position: relative;
   align-items: flex-start !important;
-  padding: 12px 16px 12px 16px !important;
-  padding-right: 72px !important;
+  padding: 12px 16px !important;
+  display: flex;
+  justify-content: space-between;
 }
 .affirmation-text {
   white-space: normal;
   word-break: break-word;
   line-height: 1.5;
-  width: 100%;
+  flex: 1;
+  margin-right: 8px;
 }
-.counter-tap {
-  position: absolute;
-  top: 12px;
-  right: 16px;
+.header-actions {
   display: flex;
   align-items: center;
-  gap: 2px;
-  padding: 4px 6px;
-  border-radius: 20px;
-  border: 1.5px solid #00838f;
-  cursor: pointer;
   flex-shrink: 0;
-  -webkit-tap-highlight-color: transparent;
-  &:active {
-    background: #e0f7fa;
-  }
+  gap: 4px;
+}
+.count-badge {
+  color: #00838f;
+  font-size: 0.85rem;
+  font-weight: bold;
+  min-width: 18px;
+  text-align: center;
+  border: 1.5px solid #00838f;
+  border-radius: 20px;
+  padding: 2px 6px;
 }
 .belief-quote {
   font-style: italic;
@@ -155,19 +172,6 @@ export default {
 .section-label {
   text-transform: uppercase;
   letter-spacing: 0.05em;
-}
-.count-badge {
-  color: #00838f;
-  font-size: 0.85rem;
-  font-weight: bold;
-  min-width: 14px;
-  text-align: center;
-}
-.count-plus {
-  color: #00838f;
-  font-size: 0.8rem;
-  font-weight: bold;
-  line-height: 1;
 }
 .empty-state {
   display: flex;
