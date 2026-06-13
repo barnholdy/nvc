@@ -11,26 +11,56 @@
       <p class="body-1 grey--text mt-2">Manifestiere deine neue Perspektive und Gefühle in positive, kraftvolle Affirmationen.</p>
     </v-flex>
 
-    <v-flex v-for="(item, i) in affirmations" :key="i" class="affirmation-row">
-      <v-text-field
-        v-model="item.text"
-        placeholder="Ich bin..."
-        single-line
-        hide-details
-        class="affirmation-field"
-        @focus="$emit('focussed')"
-        @blur="$emit('blurred')"
-      ></v-text-field>
-      <v-btn icon small class="remove-btn" @click="removeField(i)">
-        <v-icon color="grey">remove_circle_outline</v-icon>
-      </v-btn>
+    <v-flex v-if="selectedAffirmations.length" class="mb-2">
+      <div class="selected-chips">
+        <v-chip
+          v-for="a in selectedAffirmations"
+          :key="a.text"
+          close
+          class="selected-chip"
+          @input="removeSelected(a.text)"
+        >{{ a.text }}</v-chip>
+      </div>
     </v-flex>
 
-    <v-flex class="mt-2">
-      <v-btn flat small color="primary" @click="addField">
-        <v-icon left small>add</v-icon>
-        Neue Affirmation
-      </v-btn>
+    <v-flex class="mt-1">
+      <v-menu v-if="unselectedAffirmations.length" :close-on-content-click="true">
+        <v-btn slot="activator" flat color="primary">
+          <v-icon left small>arrow_drop_down</v-icon>
+          Bestehende hinzufügen
+        </v-btn>
+        <v-list>
+          <v-list-tile
+            v-for="a in unselectedAffirmations"
+            :key="a.text"
+            @click="addAffirmation(a.text)"
+          >
+            <v-list-tile-title>{{ a.text }}</v-list-tile-title>
+          </v-list-tile>
+        </v-list>
+      </v-menu>
+
+      <template v-if="showNewInput">
+        <v-text-field
+          v-model="newAffirmationText"
+          label="Neue Affirmation"
+          placeholder="Ich bin..."
+          single-line
+          hide-details
+          class="mb-2"
+          @keyup.enter="createAffirmation"
+          @focus="$emit('focussed')"
+          @blur="$emit('blurred')"
+        ></v-text-field>
+        <v-btn small flat color="primary" :disabled="!newAffirmationText.trim()" @click="createAffirmation">Hinzufügen</v-btn>
+        <v-btn small flat color="grey" @click="cancelNew">Abbrechen</v-btn>
+      </template>
+      <template v-else>
+        <v-btn small flat color="primary" @click="showNewInput = true">
+          <v-icon small left>add</v-icon>
+          Neue Affirmation
+        </v-btn>
+      </template>
     </v-flex>
 
     <v-flex class="mt-3">
@@ -90,11 +120,12 @@ export default {
     initialAffirmations: { type: Array, default: function() { return []; } },
   },
   data() {
-    const raw = this.initialAffirmations;
+    var initial = this.initialAffirmations.map(function(a) { return { text: a.text, count: a.count || 1 }; });
     return {
-      affirmations: raw.length > 0
-        ? raw.map(a => ({ text: a.text, count: a.count || 1 }))
-        : [{ text: '', count: 1 }],
+      allAffirmations: initial.slice(),
+      selectedTexts: initial.map(function(a) { return a.text; }),
+      showNewInput: false,
+      newAffirmationText: '',
       suggestions: [],
       isLoading: false,
       errorMsg: '',
@@ -103,17 +134,59 @@ export default {
       apiKey: localStorage.getItem('nvc.apiKey') || '',
     };
   },
+  computed: {
+    selectedAffirmations() {
+      var selectedTexts = this.selectedTexts;
+      return this.allAffirmations.filter(function(a) { return selectedTexts.indexOf(a.text) !== -1; });
+    },
+    unselectedAffirmations() {
+      var selectedTexts = this.selectedTexts;
+      return this.allAffirmations.filter(function(a) { return selectedTexts.indexOf(a.text) === -1; });
+    },
+  },
   watch: {
-    affirmations: {
-      deep: true,
-      handler(val) {
-        this.$emit('changed', val
-          .filter(a => a.text.trim())
-          .map(a => ({ text: a.text.trim(), count: a.count || 1 })));
-      },
+    selectedTexts: function() {
+      this.$emit('changed', this.selectedAffirmations.slice());
     },
   },
   methods: {
+    addAffirmation(text) {
+      if (this.selectedTexts.indexOf(text) === -1) {
+        this.selectedTexts = this.selectedTexts.concat([text]);
+      }
+    },
+    removeSelected(text) {
+      this.selectedTexts = this.selectedTexts.filter(function(t) { return t !== text; });
+    },
+    cancelNew() {
+      this.showNewInput = false;
+      this.newAffirmationText = '';
+    },
+    createAffirmation() {
+      var text = this.newAffirmationText.trim();
+      if (!text) return;
+      if (this.allAffirmations.every(function(a) { return a.text !== text; })) {
+        this.allAffirmations = this.allAffirmations.concat([{ text: text, count: 1 }]);
+      }
+      this.selectedTexts = this.selectedTexts.concat([text]);
+      this.newAffirmationText = '';
+      this.showNewInput = false;
+    },
+    acceptSuggestion(s) {
+      if (this.allAffirmations.every(function(a) { return a.text !== s; })) {
+        this.allAffirmations = this.allAffirmations.concat([{ text: s, count: 1 }]);
+      }
+      if (this.selectedTexts.indexOf(s) === -1) {
+        this.selectedTexts = this.selectedTexts.concat([s]);
+      }
+    },
+    saveApiKey() {
+      this.apiKey = this.apiKeyInput;
+      localStorage.setItem('nvc.apiKey', this.apiKey);
+      this.apiKeyInput = '';
+      this.showApiKeyInput = false;
+      this.generateSuggestions();
+    },
     buildSuggestionsPrompt() {
       var lines = ['Du hilfst dabei, positive Affirmationen zu formulieren.'];
       if (this.withoutBelief) {
@@ -125,30 +198,6 @@ export default {
       if (feelingNames) lines.push('Gefühle dabei: ' + feelingNames);
       lines.push('Generiere genau 5 kurze positive Affirmationen (je max. 12 Wörter) als Ich-Aussagen im Präsens. Inspirierend, konkret, auf die neue Perspektive bezogen.\nNur die 5 Sätze, einer pro Zeile, ohne Nummerierung.');
       return lines.join('\n');
-    },
-    addField() {
-      this.affirmations.push({ text: '', count: 1 });
-    },
-    removeField(i) {
-      this.affirmations.splice(i, 1);
-      if (this.affirmations.length === 0) {
-        this.affirmations.push({ text: '', count: 1 });
-      }
-    },
-    acceptSuggestion(s) {
-      const last = this.affirmations[this.affirmations.length - 1];
-      if (last && last.text.trim() === '') {
-        this.$set(this.affirmations, this.affirmations.length - 1, { text: s, count: 1 });
-      } else {
-        this.affirmations.push({ text: s, count: 1 });
-      }
-    },
-    saveApiKey() {
-      this.apiKey = this.apiKeyInput;
-      localStorage.setItem('nvc.apiKey', this.apiKey);
-      this.apiKeyInput = '';
-      this.showApiKeyInput = false;
-      this.generateSuggestions();
     },
     async generateSuggestions() {
       if (!this.apiKey) {
@@ -170,10 +219,7 @@ export default {
           body: JSON.stringify({
             model: 'claude-haiku-4-5-20251001',
             max_tokens: 300,
-            messages: [{
-              role: 'user',
-              content: this.buildSuggestionsPrompt(),
-            }],
+            messages: [{ role: 'user', content: this.buildSuggestionsPrompt() }],
           }),
         });
         if (!res.ok) {
@@ -200,18 +246,15 @@ export default {
 .belief-quote {
   font-style: italic;
 }
-.affirmation-row {
+.selected-chips {
   display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-bottom: 4px;
+  flex-wrap: wrap;
+  gap: 6px;
 }
-.affirmation-field {
-  flex: 1;
-}
-.remove-btn {
-  flex-shrink: 0;
-  margin-top: 8px;
+.selected-chip {
+  white-space: normal;
+  height: auto !important;
+  padding: 4px 10px !important;
 }
 .suggestions {
   display: flex;
