@@ -8,7 +8,7 @@
         <v-layout column>
           <v-flex class="mt-2 mb-3">
             <h1 class="headline font-weight-regular">Empathie bekommen</h1>
-            <p class="body-1 grey--text mt-2">Lass dir einfühlsam spiegeln, was dich gerade bewegt — auf Basis aller deiner Muster und Glaubenssätze.</p>
+            <p class="body-1 grey--text mt-2">Lass dir einfühlsam spiegeln, was dich gerade bewegt — auf Basis aller deiner Muster und Überzeugungen.</p>
           </v-flex>
 
           <v-flex class="mt-1">
@@ -57,7 +57,7 @@
         <v-icon>repeat</v-icon>
       </v-btn>
       <v-btn flat color="grey" to="/beliefs">
-        <span>Beliefs</span>
+        <span>Überzeugungen</span>
         <v-icon>lightbulb_outline</v-icon>
       </v-btn>
       <v-btn flat color="grey" to="/affirmations">
@@ -114,7 +114,7 @@ export default {
       var patterns = this.$store.getters.patterns;
       var beliefs = this.$store.getters.beliefs;
 
-      var system = 'Du bist ein einfühlsamer Gesprächsbegleiter. Eine Person teilt dir ihre persönlichen Muster und Glaubenssätze mit – in strukturierter Form. Jedes Muster beschreibt eine Situation und die damit verbundenen Glaubenssätze. Jeder Glaubenssatz enthält die Überzeugung, damit verbundene Gefühle, Reaktionen und Bedürfnisse.\n\nDeine Aufgabe ist es, empathisch zu antworten. Halte dich dabei an folgende Prinzipien:\n\n1. Erst spiegeln, dann würdigen – Fasse zusammen, was du gehört hast, ohne zu interpretieren oder zu bewerten. Zeige, dass du wirklich zugehört hast.\n2. Den Kern berühren – Benenne die wiederkehrenden Gefühle und Bedürfnisse direkt und warmherzig. Die Person soll sich gesehen fühlen, nicht analysiert.\n3. Muster erkennen – Wenn sich Themen über mehrere Einträge wiederholen, würdige das behutsam.\n4. Keine Ratschläge, keine Lösungen – Außer die Person fragt explizit danach.\n5. Offene Einladung zum Ende – Schließe mit einer offenen Frage oder einem Raumangebot, kein Druck.\n\nTon: warm, ruhig, präsent. Antworte auf Deutsch.';
+      var system = 'Du bist ein einfühlsamer Gesprächsbegleiter. Eine Person teilt dir ihre persönlichen Muster und Überzeugungen mit – in strukturierter Form. Jedes Muster beschreibt eine Situation und die damit verbundenen Überzeugungen. Jede Überzeugung enthält die Überzeugung selbst, damit verbundene Gefühle, Reaktionen und Bedürfnisse.\n\nDeine Aufgabe ist es, empathisch zu antworten. Halte dich dabei an folgende Prinzipien:\n\n1. Erst spiegeln, dann würdigen – Fasse zusammen, was du gehört hast, ohne zu interpretieren oder zu bewerten. Zeige, dass du wirklich zugehört hast.\n2. Den Kern berühren – Benenne die wiederkehrenden Gefühle und Bedürfnisse direkt und warmherzig. Die Person soll sich gesehen fühlen, nicht analysiert.\n3. Muster erkennen – Wenn sich Themen über mehrere Einträge wiederholen, würdige das behutsam.\n4. Keine Ratschläge, keine Lösungen – Außer die Person fragt explizit danach.\n5. Offene Einladung zum Ende – Schließe mit einer offenen Frage oder einem Raumangebot, kein Druck.\n\nTon: warm, ruhig, präsent. Antworte auf Deutsch.';
 
       var lines = [system, ''];
 
@@ -135,10 +135,10 @@ export default {
 
       if (beliefs.length > 0) {
         lines.push('');
-        lines.push('GLAUBENSSÄTZE:');
+        lines.push('ÜBERZEUGUNGEN:');
         beliefs.forEach(function(b, i) {
           lines.push('');
-          lines.push('Glaubenssatz ' + (i + 1) + ':');
+          lines.push('Überzeugung ' + (i + 1) + ':');
           lines.push('  Glaube: ' + b.belief);
           var feelings = b.feelings && b.feelings.length ? b.feelings.map(function(f) { return f.name; }).join(', ') : '';
           if (feelings) lines.push('  Gefühl: ' + feelings);

@@ -4,7 +4,7 @@
       <h1 class="headline font-weight-regular">Gefühl</h1>
       <p class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
       <p class="body-1 grey--text mt-1">Jedes Urteil ist auch ein Spiegel: Es zeigt was in dir gerade unerfüllt, verletzt oder ungehört ist. Wenn du dem Urteil mit Neugier statt mit Rechtfertigung begegnest, öffnet sich ein Raum, in dem du das eigentliche Gefühl und das dahinterliegende Bedürfnis erkennen kannst.</p>
-      <p class="body-1 grey--text mt-2">Was fühlst du, wenn der Glaube wahr ist? Was müsstest du fühlen, wenn du den Glauben nicht glauben könntest?</p>
+      <p class="body-1 grey--text mt-2">Was fühlst du, wenn die Überzeugung wahr ist? Was müsstest du fühlen, wenn du die Überzeugung nicht für wahr halten könntest?</p>
     </v-flex>
     <v-flex>
       <tag-list

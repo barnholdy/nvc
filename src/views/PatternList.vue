@@ -39,7 +39,7 @@
               <p class="body-1">{{ entry.trigger }}</p>
             </template>
             <template v-if="getBeliefs(entry).length">
-              <p class="section-label caption grey--text mt-2">Glaubenssätze</p>
+              <p class="section-label caption grey--text mt-2">Überzeugungen</p>
               <p v-for="(b, idx) in getBeliefs(entry)" :key="idx" class="body-1 mb-1">{{ b.belief }}</p>
             </template>
           </v-card-text>
@@ -67,7 +67,7 @@
         <v-icon>repeat</v-icon>
       </v-btn>
       <v-btn flat color="grey" to="/beliefs">
-        <span>Beliefs</span>
+        <span>Überzeugungen</span>
         <v-icon>lightbulb_outline</v-icon>
       </v-btn>
       <v-btn flat color="grey" to="/affirmations">

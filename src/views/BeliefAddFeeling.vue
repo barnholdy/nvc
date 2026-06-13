@@ -3,7 +3,7 @@
     <v-flex class="mt-2 mb-5">
       <h1 class="headline font-weight-regular">Gefühl</h1>
       <p class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
-      <p class="body-1 grey--text mt-2">Was fühlst du, wenn der Glaube wahr ist?</p>
+      <p class="body-1 grey--text mt-2">Was fühlst du, wenn die Überzeugung wahr ist?</p>
     </v-flex>
     <v-flex>
       <tag-list

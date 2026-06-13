@@ -1,7 +1,7 @@
 <template>
   <div class="belief-list">
     <v-toolbar color="white" app>
-      <v-toolbar-title>Meine Beliefs</v-toolbar-title>
+      <v-toolbar-title>Meine Überzeugungen</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn icon to="/add-belief">
         <v-icon>add</v-icon>
@@ -10,8 +10,8 @@
     <v-content>
       <div v-if="beliefs.length === 0" class="empty-state grey--text">
         <v-icon large color="grey lighten-1">lightbulb_outline</v-icon>
-        <p class="body-1 mt-2">Noch keine Beliefs eingetragen.</p>
-        <p class="caption">Tippe auf + um einen neuen Belief hinzuzufügen.</p>
+        <p class="body-1 mt-2">Noch keine Überzeugungen eingetragen.</p>
+        <p class="caption">Tippe auf + um eine neue Überzeugung hinzuzufügen.</p>
       </div>
 
       <v-card class="entry" v-for="entry in beliefs" :key="entry.time">
@@ -116,7 +116,7 @@
         <v-icon>repeat</v-icon>
       </v-btn>
       <v-btn flat color="primary" to="/beliefs">
-        <span>Beliefs</span>
+        <span>Überzeugungen</span>
         <v-icon>lightbulb_outline</v-icon>
       </v-btn>
       <v-btn flat color="grey" to="/affirmations">

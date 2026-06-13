@@ -50,9 +50,9 @@ export default {
     },
     descriptionText() {
       if (this.needsText) {
-        return 'Stell dir vor, deine Bedürfnisse nach ' + this.needsText + ' wären erfüllt und du könntest den Gedanken nicht denken. Wer wärst du ohne diesen Glauben?';
+        return 'Stell dir vor, deine Bedürfnisse nach ' + this.needsText + ' wären erfüllt und du könntest den Gedanken nicht denken. Wer wärst du ohne diese Überzeugung?';
       }
-      return 'Stell dir vor, du könntest den Gedanken nicht denken. Wer wärst du ohne diesen Glauben?';
+      return 'Stell dir vor, du könntest den Gedanken nicht denken. Wer wärst du ohne diese Überzeugung?';
     },
   },
   data() {

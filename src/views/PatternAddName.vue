@@ -2,7 +2,7 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Name</h1>
-      <p class="body-1 grey--text mt-2">Wie möchtest du dieses Muster aus Situation und Glaubenssätzen nennen?</p>
+      <p class="body-1 grey--text mt-2">Wie möchtest du dieses Muster aus Situation und Überzeugungen nennen?</p>
     </v-flex>
     <v-flex>
       <v-text-field
@@ -98,9 +98,9 @@ export default {
       this.suggestions = [];
       var self = this;
       var beliefTexts = this.beliefs.map(function(b) { return b.belief; }).filter(Boolean);
-      var lines = ['Du hilfst beim Benennen von Mustern (Glaubenssätzen) in einem Selbstreflexions-Tool.'];
+      var lines = ['Du hilfst beim Benennen von Mustern (Überzeugungen) in einem Selbstreflexions-Tool.'];
       if (this.trigger) lines.push('Situation: "' + this.trigger + '"');
-      if (beliefTexts.length) lines.push('Glaubenssätze: ' + beliefTexts.map(function(t) { return '"' + t + '"'; }).join(', '));
+      if (beliefTexts.length) lines.push('Überzeugungen: ' + beliefTexts.map(function(t) { return '"' + t + '"'; }).join(', '));
       lines.push('Generiere genau 5 kurze, prägnante Namen für dieses Muster (je 2–5 Wörter, Substantiv oder kurze Phrase). Keine Sätze, kein „Ich".');
       lines.push('Nur die 5 Namen, einer pro Zeile, ohne Nummerierung.');
       fetch('https://api.anthropic.com/v1/messages', {

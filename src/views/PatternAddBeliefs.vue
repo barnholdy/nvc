@@ -1,8 +1,8 @@
 <template>
   <v-layout column>
     <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">Glaubenssätze</h1>
-      <p class="body-1 grey--text mt-2">Welche tiefer liegenden Glaubenssätze sind damit verbunden?</p>
+      <h1 class="headline font-weight-regular">Überzeugungen</h1>
+      <p class="body-1 grey--text mt-2">Welche tiefer liegenden Überzeugungen sind damit verbunden?</p>
     </v-flex>
 
     <v-flex v-if="trigger" class="mb-3">
@@ -41,7 +41,7 @@
       <template v-if="showNewInput">
         <v-text-field
           v-model="newBeliefText"
-          label="Neuer Glaubenssatz"
+          label="Neue Überzeugung"
           placeholder="Ich bin nicht gut genug..."
           single-line
           hide-details
@@ -54,7 +54,7 @@
       <template v-else>
         <v-btn small flat color="primary" @click="showNewInput = true">
           <v-icon small left>add</v-icon>
-          Neuen Glaubenssatz
+          Neue Überzeugung
         </v-btn>
       </template>
     </v-flex>

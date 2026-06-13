@@ -22,7 +22,7 @@
           <template v-if="openIndex === i">
             <v-divider></v-divider>
             <v-card-text>
-              <p class="caption grey--text mb-1 section-label">Beliefs</p>
+              <p class="caption grey--text mb-1 section-label">Überzeugungen</p>
               <p v-for="(s, j) in item.sources" :key="j" class="body-1 belief-quote mb-1">„{{ s.beliefText }}"</p>
             </v-card-text>
           </template>
@@ -32,7 +32,7 @@
       <div v-else class="empty-state">
         <v-icon large color="grey lighten-2">stars</v-icon>
         <p class="body-1 grey--text mt-2">Noch keine Affirmationen vorhanden.</p>
-        <p class="caption grey--text">Füge Affirmationen zu deinen Beliefs hinzu.</p>
+        <p class="caption grey--text">Füge Affirmationen zu deinen Überzeugungen hinzu.</p>
       </div>
 
       <v-dialog v-model="isDeleteDialogShowing" width="500">
@@ -56,7 +56,7 @@
         <v-icon>repeat</v-icon>
       </v-btn>
       <v-btn flat color="grey" to="/beliefs">
-        <span>Beliefs</span>
+        <span>Überzeugungen</span>
         <v-icon>lightbulb_outline</v-icon>
       </v-btn>
       <v-btn flat color="primary" to="/affirmations">
