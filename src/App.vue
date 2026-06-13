@@ -21,5 +21,20 @@ export default {
 <style lang="scss">
 html, body {
   touch-action: manipulation;
+  overflow-x: hidden;
+}
+
+.v-chip {
+  height: auto !important;
+  white-space: normal !important;
+  max-width: 100% !important;
+}
+.v-chip .v-chip__content {
+  white-space: normal !important;
+  word-break: break-word;
+  height: auto !important;
+  min-height: 28px;
+  padding-top: 4px;
+  padding-bottom: 4px;
 }
 </style>
