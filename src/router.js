@@ -51,6 +51,11 @@ export default new Router({
       component: () => import('./views/AffirmationList.vue'),
     },
     {
+      path: '/actions',
+      name: 'actions',
+      component: () => import('./views/ActionList.vue'),
+    },
+    {
       path: '/empathy',
       name: 'empathy',
       component: () => import('./views/EmpathyView.vue'),

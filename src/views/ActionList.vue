@@ -1,17 +1,17 @@
 <template>
-  <div class="affirmation-list">
+  <div class="action-list">
     <v-toolbar color="white" app>
-      <v-toolbar-title>Affirmationen</v-toolbar-title>
+      <v-toolbar-title>Handlungen</v-toolbar-title>
     </v-toolbar>
     <v-content>
-      <template v-if="affirmations.length">
+      <template v-if="actions.length">
         <v-card
-          class="affirmation-card"
-          v-for="(item, i) in affirmations"
+          class="action-card"
+          v-for="(item, i) in actions"
           :key="item.text"
         >
-          <v-card-title class="affirmation-header" @click="toggle(i)">
-            <p class="body-1 affirmation-text mb-0">{{ item.text }}</p>
+          <v-card-title class="action-header" @click="toggle(i)">
+            <p class="body-1 action-text mb-0">{{ item.text }}</p>
             <div class="header-actions">
               <span class="count-badge">{{ item.beliefCount }}</span>
               <v-btn icon small @click.stop="preDelete(item)">
@@ -30,15 +30,15 @@
       </template>
 
       <div v-else class="empty-state">
-        <v-icon large color="grey lighten-2">stars</v-icon>
-        <p class="body-1 grey--text mt-2">Noch keine Affirmationen vorhanden.</p>
-        <p class="caption grey--text">Füge Affirmationen zu deinen Überzeugungen hinzu.</p>
+        <v-icon large color="grey lighten-2">directions_run</v-icon>
+        <p class="body-1 grey--text mt-2">Noch keine Handlungen vorhanden.</p>
+        <p class="caption grey--text">Füge Handlungen im Änderungsprozess einer Überzeugung hinzu.</p>
       </div>
 
       <v-dialog v-model="isDeleteDialogShowing" width="500">
         <v-card>
           <v-card-title class="subheading" primary-title>
-            Affirmation wirklich löschen?
+            Handlung wirklich löschen?
           </v-card-title>
           <v-divider></v-divider>
           <v-card-actions>
@@ -59,11 +59,11 @@
         <span>Überzeugungen</span>
         <v-icon>lightbulb_outline</v-icon>
       </v-btn>
-      <v-btn flat color="primary" to="/affirmations">
+      <v-btn flat color="grey" to="/affirmations">
         <span>Affirmationen</span>
         <v-icon>stars</v-icon>
       </v-btn>
-      <v-btn flat color="grey" to="/actions">
+      <v-btn flat color="primary" to="/actions">
         <span>Handlungen</span>
         <v-icon>directions_run</v-icon>
       </v-btn>
@@ -77,7 +77,7 @@
 
 <script>
 export default {
-  name: 'affirmation-list',
+  name: 'action-list',
   data() {
     return {
       openIndex: null,
@@ -86,17 +86,17 @@ export default {
     };
   },
   computed: {
-    affirmations() {
+    actions() {
       var map = {};
       this.$store.getters.beliefs.forEach(function(belief) {
-        if (!belief.affirmations || !belief.affirmations.length) return;
-        belief.affirmations.forEach(function(a, idx) {
-          if (!a.text) return;
-          if (!map[a.text]) {
-            map[a.text] = { text: a.text, beliefCount: 0, sources: [] };
+        var acts = belief.reflection && belief.reflection.changeActs ? belief.reflection.changeActs : [];
+        acts.forEach(function(text) {
+          if (!text) return;
+          if (!map[text]) {
+            map[text] = { text: text, beliefCount: 0, sources: [] };
           }
-          map[a.text].beliefCount += 1;
-          map[a.text].sources.push({ beliefTime: belief.time, affirmationIndex: idx, beliefText: belief.belief });
+          map[text].beliefCount += 1;
+          map[text].sources.push({ beliefText: belief.belief });
         });
       });
       var result = [];
@@ -123,10 +123,14 @@ export default {
       if (!text) return;
       var self = this;
       this.$store.getters.beliefs.forEach(function(belief) {
-        if (!belief.affirmations || !belief.affirmations.length) return;
-        if (belief.affirmations.some(function(a) { return a.text === text; })) {
-          var updated = belief.affirmations.filter(function(a) { return a.text !== text; });
-          self.$store.dispatch('updateBelief', Object.assign({}, belief, { affirmations: updated }));
+        var acts = belief.reflection && belief.reflection.changeActs ? belief.reflection.changeActs : [];
+        if (acts.indexOf(text) !== -1) {
+          var updated = Object.assign({}, belief, {
+            reflection: Object.assign({}, belief.reflection, {
+              changeActs: acts.filter(function(a) { return a !== text; }),
+            }),
+          });
+          self.$store.dispatch('updateBelief', updated);
         }
       });
       self.openIndex = null;
@@ -136,10 +140,10 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.affirmation-card {
+.action-card {
   margin: 1rem;
 }
-.affirmation-header {
+.action-header {
   cursor: pointer;
   user-select: none;
   align-items: flex-start !important;
@@ -147,7 +151,7 @@ export default {
   display: flex;
   justify-content: space-between;
 }
-.affirmation-text {
+.action-text {
   white-space: normal;
   word-break: break-word;
   line-height: 1.5;

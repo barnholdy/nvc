@@ -74,6 +74,10 @@
         <span>Affirmationen</span>
         <v-icon>stars</v-icon>
       </v-btn>
+      <v-btn flat color="grey" to="/actions">
+        <span>Handlungen</span>
+        <v-icon>directions_run</v-icon>
+      </v-btn>
       <v-btn flat color="grey" to="/empathy">
         <span>Empathie</span>
         <v-icon>favorite_border</v-icon>
