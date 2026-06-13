@@ -39,6 +39,8 @@
         <pattern-change-act
           v-show="step === 3"
           :belief="entry ? entry.belief : ''"
+          :withoutBelief="withoutBelief"
+          :withoutBeliefFeelings="selectedWithoutBeliefFeelings"
           :initialValue="changeAct"
           @changed="changeAct = $event"
           @focussed="isFooterFixed = false"
