@@ -30,14 +30,14 @@
               </span>
             </div>
             <div class="header-actions">
+              <v-btn icon small @click.stop="editEntry(entry)">
+                <v-icon :color="isComplete(entry) ? '#00838f' : 'grey darken-2'">edit</v-icon>
+              </v-btn>
               <v-btn icon small @click.stop="empathyEntry(entry)">
                 <v-icon :color="entry.empathy ? '#00838f' : 'grey darken-2'">favorite</v-icon>
               </v-btn>
               <v-btn icon small @click.stop="changeEntry(entry)">
                 <v-icon :color="hasChangeData(entry) ? '#00838f' : 'grey darken-2'">autorenew</v-icon>
-              </v-btn>
-              <v-btn icon small @click.stop="editEntry(entry)">
-                <v-icon color="grey darken-2">edit</v-icon>
               </v-btn>
               <v-btn icon small @click.stop="preDelete(entry)">
                 <v-icon color="grey darken-2">delete</v-icon>
@@ -188,6 +188,14 @@ export default {
     },
     toggle(time) {
       this.openEntry = this.openEntry === time ? null : time;
+    },
+    isComplete(entry) {
+      return !!(
+        entry.feelings && entry.feelings.length &&
+        entry.withBelief &&
+        entry.needs && entry.needs.length &&
+        entry.reflection && entry.reflection.origin
+      );
     },
     hasChangeData(entry) {
       var r = entry.reflection || {};
