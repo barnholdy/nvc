@@ -43,7 +43,7 @@
           <v-divider></v-divider>
           <v-card-text>
             <template v-if="associatedPatterns(entry.time).length">
-              <p class="section-label caption grey--text">Muster</p>
+              <p class="section-label caption grey--text">Trigger</p>
               <p v-for="(p, idx) in associatedPatterns(entry.time)" :key="idx" class="body-1 mb-1">{{ p.trigger || p.name }}</p>
             </template>
             <template v-if="entry.feelings && entry.feelings.length">
@@ -115,8 +115,8 @@
 
     <v-bottom-nav :value="true" fixed app color="white" class="elevation-3">
       <v-btn flat color="grey" to="/patterns">
-        <span>Muster</span>
-        <v-icon>repeat</v-icon>
+        <span>Trigger</span>
+        <v-icon>bolt</v-icon>
       </v-btn>
       <v-btn flat color="primary" to="/beliefs">
         <span>Überzeugungen</span>

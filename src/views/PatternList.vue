@@ -1,7 +1,7 @@
 <template>
   <div class="pattern-list">
     <v-toolbar color="white" app>
-      <v-toolbar-title>Meine Muster</v-toolbar-title>
+      <v-toolbar-title>Meine Trigger</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn icon to="/add-pattern">
         <v-icon>add</v-icon>
@@ -9,10 +9,10 @@
     </v-toolbar>
     <v-content>
       <div class="intro-text body-1 grey--text">
-        <p><em>Deine Überzeugungen sind das Betriebssystem hinter deinen Entscheidungen, Reaktionen und Urteilen. Sie formen deine Muster.</em></p>
+        <p><em>Deine Überzeugungen sind das Betriebssystem hinter deinen Entscheidungen, Reaktionen und Urteilen. Sie formen deine Trigger.</em></p>
         <p><em>Viele davon wurden durch Familie, Kultur oder frühe Erfahrungen installiert — nicht von dir gewählt, sondern einfach übernommen.</em></p>
         <p><em>Authentizität entsteht nicht dadurch, dass du entscheidest, wer du sein willst. Sie entsteht, wenn du klar siehst, was du bereits glaubst — und dann bewusst wählst, welche Überzeugungen bleiben dürfen.</em></p>
-        <p><em>Deine Muster aufzuschreiben macht das Unsichtbare sichtbar. Es gibt dir die Möglichkeit zu wählen, statt einfach zu reagieren.</em></p>
+        <p><em>Deine Trigger aufzuschreiben macht das Unsichtbare sichtbar. Es gibt dir die Möglichkeit zu wählen, statt einfach zu reagieren.</em></p>
       </div>
       <v-card class="entry" v-for="entry in patterns" v-bind:key="entry.time">
         <v-card-title class="header" @click="toggle(entry.time)">
@@ -63,8 +63,8 @@
 
     <v-bottom-nav :value="true" fixed app color="white" class="elevation-3">
       <v-btn flat color="primary" to="/patterns">
-        <span>Muster</span>
-        <v-icon>repeat</v-icon>
+        <span>Trigger</span>
+        <v-icon>bolt</v-icon>
       </v-btn>
       <v-btn flat color="grey" to="/beliefs">
         <span>Überzeugungen</span>

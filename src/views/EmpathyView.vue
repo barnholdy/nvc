@@ -53,8 +53,8 @@
 
     <v-bottom-nav :value="true" fixed app color="white" class="elevation-3">
       <v-btn flat color="grey" to="/patterns">
-        <span>Muster</span>
-        <v-icon>repeat</v-icon>
+        <span>Trigger</span>
+        <v-icon>bolt</v-icon>
       </v-btn>
       <v-btn flat color="grey" to="/beliefs">
         <span>Überzeugungen</span>
