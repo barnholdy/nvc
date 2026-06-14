@@ -2,6 +2,10 @@
   <div class="affirmation-list">
     <v-toolbar color="white" app>
       <v-toolbar-title>Affirmationen</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn icon to="/settings">
+        <v-icon>settings</v-icon>
+      </v-btn>
     </v-toolbar>
     <v-content>
       <template v-if="affirmations.length">

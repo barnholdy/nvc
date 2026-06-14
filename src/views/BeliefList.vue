@@ -6,6 +6,9 @@
       <v-btn icon to="/add-belief">
         <v-icon>add</v-icon>
       </v-btn>
+      <v-btn icon to="/settings">
+        <v-icon>settings</v-icon>
+      </v-btn>
     </v-toolbar>
     <v-content>
       <div class="intro-text body-1 grey--text">

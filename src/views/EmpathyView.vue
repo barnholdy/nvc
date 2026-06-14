@@ -2,6 +2,10 @@
   <div>
     <v-toolbar color="white" app>
       <v-toolbar-title>Empathie</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn icon to="/settings">
+        <v-icon>settings</v-icon>
+      </v-btn>
     </v-toolbar>
     <v-content>
       <v-container class="mb-5">

@@ -60,6 +60,11 @@ export default new Router({
       name: 'empathy',
       component: () => import('./views/EmpathyView.vue'),
     },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: () => import('./views/SettingsView.vue'),
+    },
     { path: '*', redirect: '/patterns' },
   ],
   scrollBehavior() {

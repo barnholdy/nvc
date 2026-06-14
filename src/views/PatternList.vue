@@ -6,6 +6,9 @@
       <v-btn icon to="/add-pattern">
         <v-icon>add</v-icon>
       </v-btn>
+      <v-btn icon to="/settings">
+        <v-icon>settings</v-icon>
+      </v-btn>
     </v-toolbar>
     <v-content>
 
