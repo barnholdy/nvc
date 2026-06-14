@@ -117,7 +117,7 @@ export default {
       var a = document.createElement('a');
       var date = new Date().toISOString().slice(0, 10);
       a.href = url;
-      a.download = 'checkin-export-' + date + '.json';
+      a.download = 'beliefs-export-' + date + '.json';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
