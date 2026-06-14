@@ -9,7 +9,6 @@
     </v-toolbar>
     <v-content>
       <div class="intro-text body-1 grey--text">
-        <p><em>Was ist äußerlich passiert? Welche Gedanken denkst du? Was fürchtest du, wie andere dich sehen oder erleben? Welchen Groll hegst du?</em></p>
         <p><em>Welche Widerstände hast du?</em></p>
       </div>
       <v-card class="entry" v-for="entry in patterns" v-bind:key="entry.time">
