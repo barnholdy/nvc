@@ -8,9 +8,7 @@
       </v-btn>
     </v-toolbar>
     <v-content>
-      <div class="intro-text body-1 grey--text">
-        <p><em>Welche Widerstände hast du?</em></p>
-      </div>
+
       <v-card class="entry" v-for="entry in patterns" v-bind:key="entry.time">
         <v-card-title class="header" @click="toggle(entry.time)">
           <p class="subheading belief-title mb-1">{{ entry.name }}</p>
