@@ -11,6 +11,9 @@
       </v-btn>
     </v-toolbar>
     <v-content>
+      <div class="intro-text body-1 grey--text">
+        <p><em>Zwischen Reiz und Reaktion liegt ein Raum. In diesem Raum liegt unsere Macht, unsere Reaktion zu wählen. In unserer Reaktion liegen unser Wachstum und unsere Freiheit.</em></p>
+      </div>
 
       <v-card class="entry" v-for="entry in patterns" v-bind:key="entry.time">
         <v-card-title class="header" @click="toggle(entry.time)">
