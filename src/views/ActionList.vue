@@ -8,6 +8,9 @@
       </v-btn>
     </v-toolbar>
     <v-content>
+      <div class="intro-text body-1 grey--text">
+        <p><em>Handeln überbrückt die Lücke zwischen Absicht und Wirklichkeit und verwandelt abstrakte Ideen in greifbare Ergebnisse. Während Denken Klarheit und Strategie schafft, erzeugt Handeln Dynamik, liefert echtes Feedback, stärkt das Vertrauen in sich selbst und ermöglicht es dir, durch praktische Erfahrung zu lernen — nicht nur durch Theorie.</em></p>
+      </div>
       <template v-if="actions.length">
         <v-card
           class="action-card"
@@ -144,6 +147,10 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.intro-text {
+  margin: 1rem;
+  line-height: 1.6;
+}
 .action-card {
   margin: 1rem;
 }

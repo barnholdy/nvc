@@ -15,7 +15,6 @@
         <p><em>Deine Überzeugungen sind das Betriebssystem hinter deinem Denken, Fühlen und Handeln. Sie formen dich.</em></p>
         <p><em>Viele davon wurden durch Familie, Kultur oder frühe Erfahrungen installiert — nicht bewusst von dir gewählt.</em></p>
         <p><em>Authentizität entsteht, wenn du klar siehst, was du bereits glaubst und dann bewusst wählst, welche Überzeugungen bleiben dürfen. Diese Art von Selbstermächtigung kann dir niemand nehmen.</em></p>
-        <p><em>Deine Überzeugungen aufzuschreiben macht das Unsichtbare sichtbar. Es gibt dir die Möglichkeit bewusst zu wählen, statt zu reagieren.</em></p>
       </div>
       <div v-if="beliefs.length === 0" class="empty-state grey--text">
         <v-icon large color="grey lighten-1">lightbulb_outline</v-icon>
