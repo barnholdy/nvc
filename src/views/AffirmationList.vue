@@ -8,6 +8,9 @@
       </v-btn>
     </v-toolbar>
     <v-content>
+      <div class="intro-text body-1 grey--text">
+        <p><em>Die Kraft von Affirmationen liegt in der Neuroplastizität — der Fähigkeit des Gehirns, sich durch wiederholte Denkmuster neu zu vernetzen. Wenn du positive Aussagen bewusst wiederholst, stärkst du neuronale Bahnen, die mit Selbstvertrauen verbunden sind, reduzierst Stress und trainierst deinen Geist, sich auf Lösungen statt auf Einschränkungen zu fokussieren.</em></p>
+      </div>
       <template v-if="affirmations.length">
         <v-card
           class="affirmation-card"
@@ -140,6 +143,10 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.intro-text {
+  margin: 1rem;
+  line-height: 1.6;
+}
 .affirmation-card {
   margin: 1rem;
 }
