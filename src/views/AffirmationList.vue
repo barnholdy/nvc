@@ -17,36 +17,17 @@
           v-for="(item, i) in affirmations"
           :key="item.text"
         >
-          <v-card-title class="affirmation-header" @click="editIndex !== i && toggle(i)">
-            <template v-if="editIndex === i">
-              <v-text-field
-                v-model="editText"
-                single-line
-                hide-details
-                class="edit-field"
-                @click.stop
-              ></v-text-field>
-              <div class="header-actions">
-                <v-btn icon small @click.stop="saveEdit(item)">
-                  <v-icon color="primary">check</v-icon>
-                </v-btn>
-                <v-btn icon small @click.stop="cancelEdit()">
-                  <v-icon color="grey darken-2">close</v-icon>
-                </v-btn>
-              </div>
-            </template>
-            <template v-else>
-              <p class="body-1 affirmation-text mb-0">{{ item.text }}</p>
-              <div class="header-actions">
-                <span class="count-badge">{{ item.beliefCount }}</span>
-                <v-btn icon small @click.stop="startEdit(i, item)">
-                  <v-icon color="grey darken-2">edit</v-icon>
-                </v-btn>
-                <v-btn icon small @click.stop="preDelete(item)">
-                  <v-icon color="grey darken-2">delete</v-icon>
-                </v-btn>
-              </div>
-            </template>
+          <v-card-title class="affirmation-header" @click="toggle(i)">
+            <p class="body-1 affirmation-text mb-0">{{ item.text }}</p>
+            <div class="header-actions">
+              <span class="count-badge">{{ item.beliefCount }}</span>
+              <v-btn icon small @click.stop="startEdit(item)">
+                <v-icon color="grey darken-2">edit</v-icon>
+              </v-btn>
+              <v-btn icon small @click.stop="preDelete(item)">
+                <v-icon color="grey darken-2">delete</v-icon>
+              </v-btn>
+            </div>
           </v-card-title>
           <template v-if="openIndex === i">
             <v-divider></v-divider>
@@ -86,6 +67,36 @@
         <p class="body-1 grey--text mt-2">Noch keine Affirmationen vorhanden.</p>
         <p class="caption grey--text">Füge Affirmationen zu deinen Überzeugungen hinzu.</p>
       </div>
+
+      <v-dialog v-model="isEditDialogShowing" fullscreen>
+        <v-card>
+          <v-toolbar color="white" app>
+            <v-btn icon @click="cancelEdit">
+              <v-icon>close</v-icon>
+            </v-btn>
+            <v-toolbar-title>Affirmation bearbeiten</v-toolbar-title>
+            <v-spacer></v-spacer>
+            <v-btn flat color="primary" :disabled="!editText.trim()" @click="saveEdit">Speichern</v-btn>
+          </v-toolbar>
+          <v-container class="mt-4">
+            <v-layout column>
+              <v-flex class="mt-2 mb-3">
+                <h1 class="headline font-weight-regular">Affirmation</h1>
+                <p class="body-1 grey--text mt-2">Formuliere eine positive, kraftvolle Aussage im Präsens.</p>
+              </v-flex>
+              <v-flex>
+                <v-textarea
+                  v-model="editText"
+                  placeholder="..."
+                  auto-grow
+                  rows="4"
+                  hide-details
+                ></v-textarea>
+              </v-flex>
+            </v-layout>
+          </v-container>
+        </v-card>
+      </v-dialog>
 
       <v-dialog v-model="isDeleteDialogShowing" width="500">
         <v-card>
@@ -133,7 +144,8 @@ export default {
   data() {
     return {
       openIndex: null,
-      editIndex: null,
+      isEditDialogShowing: false,
+      editItem: null,
       editText: '',
       itemToDelete: null,
       isDeleteDialogShowing: false,
@@ -162,19 +174,21 @@ export default {
     toggle(i) {
       this.openIndex = this.openIndex === i ? null : i;
     },
-    startEdit(i, item) {
-      this.editIndex = i;
+    startEdit(item) {
+      this.editItem = item;
       this.editText = item.text;
-      if (this.openIndex !== i) this.openIndex = i;
+      this.isEditDialogShowing = true;
     },
     cancelEdit() {
-      this.editIndex = null;
+      this.isEditDialogShowing = false;
+      this.editItem = null;
       this.editText = '';
     },
-    saveEdit(item) {
-      var oldText = item.text;
+    saveEdit() {
+      var oldText = this.editItem ? this.editItem.text : null;
       var newText = this.editText.trim();
-      this.editIndex = null;
+      this.isEditDialogShowing = false;
+      this.editItem = null;
       this.editText = '';
       if (!newText || newText === oldText) return;
       var self = this;
@@ -254,11 +268,6 @@ export default {
   line-height: 1.5;
   flex: 1;
   margin-right: 8px;
-}
-.edit-field {
-  flex: 1;
-  margin-right: 8px;
-  padding-top: 0;
 }
 .header-actions {
   display: flex;
