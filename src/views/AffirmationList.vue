@@ -32,31 +32,8 @@
           <template v-if="openIndex === i">
             <v-divider></v-divider>
             <v-card-text>
-              <p class="caption grey--text mb-2 section-label">Überzeugungen</p>
-              <div class="belief-chips mb-2">
-                <v-chip
-                  v-for="(s, j) in item.sources"
-                  :key="j"
-                  close
-                  class="mb-1 mr-1"
-                  @input="removeBeliefFromAffirmation(item.text, s.beliefTime)"
-                >{{ s.beliefText }}</v-chip>
-              </div>
-              <v-menu v-if="unlinkedBeliefs(item).length" bottom>
-                <v-btn slot="activator" flat small color="primary" class="mt-1 ml-0">
-                  <v-icon left small>add</v-icon>
-                  Überzeugung hinzufügen
-                </v-btn>
-                <v-list>
-                  <v-list-tile
-                    v-for="b in unlinkedBeliefs(item)"
-                    :key="b.time"
-                    @click="addBeliefToAffirmation(item.text, b)"
-                  >
-                    <v-list-tile-title>{{ b.belief }}</v-list-tile-title>
-                  </v-list-tile>
-                </v-list>
-              </v-menu>
+              <p class="caption grey--text mb-1 section-label">Überzeugungen</p>
+              <p v-for="(s, j) in item.sources" :key="j" class="body-1 belief-quote mb-1">„{{ s.beliefText }}"</p>
             </v-card-text>
           </template>
         </v-card>
@@ -68,18 +45,23 @@
         <p class="caption grey--text">Füge Affirmationen zu deinen Überzeugungen hinzu.</p>
       </div>
 
+      <!-- Edit wizard (fullscreen, 2 steps) -->
       <v-dialog v-model="isEditDialogShowing" fullscreen>
         <v-card>
           <v-toolbar color="white" app>
-            <v-btn icon @click="cancelEdit">
-              <v-icon>close</v-icon>
+            <v-btn icon @click="editStep === 1 ? cancelEdit() : prevEditStep()">
+              <v-icon>{{ editStep === 1 ? 'close' : 'chevron_left' }}</v-icon>
             </v-btn>
             <v-toolbar-title>Affirmation bearbeiten</v-toolbar-title>
             <v-spacer></v-spacer>
-            <v-btn flat color="primary" :disabled="!editText.trim()" @click="saveEdit">Speichern</v-btn>
+            <span class="grey--text body-1 mr-2">{{ editStep }} / 2</span>
+            <v-btn v-if="editStep === 1" flat color="primary" :disabled="!editText.trim()" @click="nextEditStep">Weiter</v-btn>
+            <v-btn v-else flat color="primary" @click="saveEdit">Speichern</v-btn>
           </v-toolbar>
           <v-container class="mt-4">
-            <v-layout column>
+
+            <!-- Step 1: Text -->
+            <v-layout v-show="editStep === 1" column>
               <v-flex class="mt-2 mb-3">
                 <h1 class="headline font-weight-regular">Affirmation</h1>
                 <p class="body-1 grey--text mt-2">Formuliere eine positive, kraftvolle Aussage im Präsens.</p>
@@ -94,6 +76,41 @@
                 ></v-textarea>
               </v-flex>
             </v-layout>
+
+            <!-- Step 2: Beliefs -->
+            <v-layout v-show="editStep === 2" column>
+              <v-flex class="mt-2 mb-3">
+                <h1 class="headline font-weight-regular">Überzeugungen</h1>
+                <p class="body-1 grey--text mt-2">Verknüpfe diese Affirmation mit deinen Überzeugungen.</p>
+              </v-flex>
+              <v-flex v-if="currentEditAffirmation">
+                <div class="belief-chips mb-2">
+                  <v-chip
+                    v-for="(s, j) in currentEditAffirmation.sources"
+                    :key="j"
+                    close
+                    class="mb-1 mr-1"
+                    @input="removeBeliefFromAffirmation(editOriginalText, s.beliefTime)"
+                  >{{ s.beliefText }}</v-chip>
+                </div>
+                <v-menu v-if="unlinkedBeliefsForEdit.length" bottom>
+                  <v-btn slot="activator" flat small color="primary" class="mt-2 ml-0">
+                    <v-icon left small>add</v-icon>
+                    Überzeugung hinzufügen
+                  </v-btn>
+                  <v-list>
+                    <v-list-tile
+                      v-for="b in unlinkedBeliefsForEdit"
+                      :key="b.time"
+                      @click="addBeliefToAffirmation(editOriginalText, b)"
+                    >
+                      <v-list-tile-title>{{ b.belief }}</v-list-tile-title>
+                    </v-list-tile>
+                  </v-list>
+                </v-menu>
+              </v-flex>
+            </v-layout>
+
           </v-container>
         </v-card>
       </v-dialog>
@@ -145,7 +162,8 @@ export default {
     return {
       openIndex: null,
       isEditDialogShowing: false,
-      editItem: null,
+      editStep: 1,
+      editOriginalText: '',
       editText: '',
       itemToDelete: null,
       isDeleteDialogShowing: false,
@@ -169,27 +187,50 @@ export default {
       Object.keys(map).forEach(function(key) { result.push(map[key]); });
       return result.sort(function(a, b) { return b.beliefCount - a.beliefCount; });
     },
+    currentEditAffirmation() {
+      var key = this.editOriginalText;
+      if (!key) return null;
+      var found = null;
+      this.affirmations.forEach(function(a) { if (a.text === key) found = a; });
+      return found;
+    },
+    unlinkedBeliefsForEdit() {
+      if (!this.currentEditAffirmation) return [];
+      var linkedTimes = this.currentEditAffirmation.sources.map(function(s) { return s.beliefTime; });
+      return this.$store.getters.beliefs.filter(function(b) {
+        return linkedTimes.indexOf(b.time) === -1;
+      });
+    },
   },
   methods: {
     toggle(i) {
       this.openIndex = this.openIndex === i ? null : i;
     },
     startEdit(item) {
-      this.editItem = item;
+      this.editOriginalText = item.text;
       this.editText = item.text;
+      this.editStep = 1;
       this.isEditDialogShowing = true;
+    },
+    nextEditStep() {
+      this.editStep = 2;
+    },
+    prevEditStep() {
+      this.editStep = 1;
     },
     cancelEdit() {
       this.isEditDialogShowing = false;
-      this.editItem = null;
+      this.editOriginalText = '';
       this.editText = '';
+      this.editStep = 1;
     },
     saveEdit() {
-      var oldText = this.editItem ? this.editItem.text : null;
+      var oldText = this.editOriginalText;
       var newText = this.editText.trim();
       this.isEditDialogShowing = false;
-      this.editItem = null;
+      this.editOriginalText = '';
       this.editText = '';
+      this.editStep = 1;
       if (!newText || newText === oldText) return;
       var self = this;
       this.$store.getters.beliefs.forEach(function(belief) {
@@ -200,12 +241,6 @@ export default {
           });
           self.$store.dispatch('updateBelief', Object.assign({}, belief, { affirmations: updated }));
         }
-      });
-    },
-    unlinkedBeliefs(item) {
-      var linkedTimes = item.sources.map(function(s) { return s.beliefTime; });
-      return this.$store.getters.beliefs.filter(function(b) {
-        return linkedTimes.indexOf(b.time) === -1;
       });
     },
     addBeliefToAffirmation(text, belief) {
@@ -288,6 +323,9 @@ export default {
 .belief-chips {
   display: flex;
   flex-wrap: wrap;
+}
+.belief-quote {
+  font-style: italic;
 }
 .section-label {
   text-transform: uppercase;
