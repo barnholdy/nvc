@@ -54,9 +54,7 @@
             </v-btn>
             <v-toolbar-title>Affirmation bearbeiten</v-toolbar-title>
             <v-spacer></v-spacer>
-            <span class="grey--text body-1 mr-2">{{ editStep }} / 2</span>
-            <v-btn v-if="editStep === 1" flat color="primary" :disabled="!editText.trim()" @click="nextEditStep">Weiter</v-btn>
-            <v-btn v-else flat color="primary" @click="saveEdit">Speichern</v-btn>
+            <span class="grey--text body-1">{{ editStep }} / 2</span>
           </v-toolbar>
           <v-container class="mt-4">
 
@@ -112,6 +110,10 @@
             </v-layout>
 
           </v-container>
+          <v-footer fixed color="white elevation-3" height="44">
+            <v-btn v-if="editStep === 1" :disabled="!editText.trim()" @click="nextEditStep" block large color="primary">weiter</v-btn>
+            <v-btn v-else @click="saveEdit" block large color="primary">speichern</v-btn>
+          </v-footer>
         </v-card>
       </v-dialog>
 
