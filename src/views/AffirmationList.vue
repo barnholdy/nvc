@@ -50,7 +50,7 @@
                   <span class="reminder-meta">{{ amenLabel(item.text) }}</span>
                 </div>
               </div>
-              <button class="amen-btn" @click.stop="sayAho(item.text)">Aho</button>
+              <button class="amen-btn" @click.stop="sayAho(item.text, $event)">Aho</button>
             </div>
           </div>
           <div :key="item.text + '-expand'" v-if="openIndex === i" class="row-expand">
@@ -158,6 +158,7 @@
 
 <script>
 import moment from 'moment';
+import { triggerConfetti } from '../utils/confetti';
 
 const AMEN_KEY = 'nvc.amen';
 function loadAhoMap() {
@@ -209,10 +210,11 @@ export default {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.openIndex = this.openIndex === i ? null : i;
     },
-    sayAho(text) {
+    sayAho(text, evt) {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.amenMap = Object.assign({}, this.amenMap, { [text]: Date.now() });
       localStorage.setItem(AMEN_KEY, JSON.stringify(this.amenMap));
+      triggerConfetti(evt && evt.currentTarget);
     },
     amenLabel(text) {
       const ts = this.amenMap[text];

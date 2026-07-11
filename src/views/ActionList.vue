@@ -50,7 +50,7 @@
                   <span class="check-meta">{{ checkLabel(item.text) }}</span>
                 </div>
               </div>
-              <button class="check-btn" @click.stop="doCheck(item.text)">Check</button>
+              <button class="check-btn" @click.stop="doCheck(item.text, $event)">Check</button>
             </div>
           </div>
           <div :key="item.text + '-expand'" v-if="openIndex === i" class="row-expand">
@@ -123,6 +123,7 @@
 
 <script>
 import moment from 'moment';
+import { triggerConfetti } from '../utils/confetti';
 
 const CHECK_KEY = 'nvc.check';
 function loadCheckMap() {
@@ -163,10 +164,11 @@ export default {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.openIndex = this.openIndex === i ? null : i;
     },
-    doCheck(text) {
+    doCheck(text, evt) {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.checkMap = Object.assign({}, this.checkMap, { [text]: Date.now() });
       localStorage.setItem(CHECK_KEY, JSON.stringify(this.checkMap));
+      triggerConfetti(evt && evt.currentTarget);
     },
     checkLabel(text) {
       const ts = this.checkMap[text];
