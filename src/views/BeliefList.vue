@@ -20,7 +20,7 @@
 
       <div class="segment-row">
         <button class="seg-tab" :class="{ active: tab === 'open' }" @click="tab = 'open'">Offen</button>
-        <button class="seg-tab" :class="{ active: tab === 'working' }" @click="tab = 'working'">In Arbeit</button>
+        <button class="seg-tab" :class="{ active: tab === 'working' }" @click="tab = 'working'">Ausgefüllt</button>
         <button class="seg-tab" :class="{ active: tab === 'done' }" @click="tab = 'done'">Verändert</button>
       </div>
 
