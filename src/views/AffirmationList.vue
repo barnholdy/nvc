@@ -100,28 +100,10 @@
                 </v-flex>
                 <v-flex v-if="editSlider < 50" class="mt-4">
                   <p class="body-1 grey--text">Klingt das noch weit weg? Probiere eine Brücken-Version.</p>
-                  <template v-if="showBridgeKeyInput">
-                    <p class="caption grey--text mb-1">Anthropic API Key eingeben:</p>
-                    <v-text-field
-                      v-model="bridgeKeyInput"
-                      label="API Key"
-                      type="password"
-                      single-line
-                      hide-details
-                      class="mb-2"
-                    ></v-text-field>
-                    <v-btn small flat color="primary" :disabled="!bridgeKeyInput" @click="saveBridgeKey">Speichern &amp; generieren</v-btn>
-                    <v-btn small flat color="grey" @click="showBridgeKeyInput = false">Abbrechen</v-btn>
-                  </template>
-                  <template v-else>
-                    <v-btn small flat color="primary" :loading="isBridgeLoading" @click="generateBridgeVersions">
-                      <v-icon small left>auto_awesome</v-icon>
-                      Brücken-Version generieren
-                    </v-btn>
-                    <v-btn v-if="apiKey" small flat icon @click="showBridgeKeyInput = true" title="API Key ändern">
-                      <v-icon small color="grey lighten-1">settings</v-icon>
-                    </v-btn>
-                  </template>
+                  <v-btn small flat color="primary" :loading="isBridgeLoading" @click="generateBridgeVersions">
+                    <v-icon small left>auto_awesome</v-icon>
+                    Brücken-Version generieren
+                  </v-btn>
                   <p v-if="bridgeError" class="caption red--text mt-1">{{ bridgeError }}</p>
                   <div v-if="bridgeVersions.length" class="mt-3">
                     <p class="caption grey--text mb-1">Wähle eine Version, um sie zu übernehmen:</p>
@@ -263,8 +245,6 @@ export default {
       bridgeVersions: [],
       isBridgeLoading: false,
       bridgeError: '',
-      showBridgeKeyInput: false,
-      bridgeKeyInput: '',
       itemToDelete: null,
       isDeleteDialogShowing: false,
       amenMap: loadAhoMap(),
@@ -327,8 +307,6 @@ export default {
       this.editSlider = savedResonance !== null ? savedResonance : 70;
       this.bridgeVersions = [];
       this.bridgeError = '';
-      this.showBridgeKeyInput = false;
-      this.bridgeKeyInput = '';
       this.isEditDialogShowing = true;
     },
     nextEditStep() { this.editStep = Math.min(this.editStep + 1, 3); },
@@ -338,15 +316,12 @@ export default {
       this.editOriginalText = ''; this.editText = ''; this.editStep = 1;
       this.editSlider = 70; this.bridgeVersions = []; this.bridgeError = '';
     },
-    saveBridgeKey() {
-      this.apiKey = this.bridgeKeyInput;
-      localStorage.setItem('nvc.apiKey', this.apiKey);
-      this.bridgeKeyInput = '';
-      this.showBridgeKeyInput = false;
-      this.generateBridgeVersions();
-    },
     generateBridgeVersions() {
-      if (!this.apiKey) { this.showBridgeKeyInput = true; return; }
+      var apiKey = localStorage.getItem('nvc.apiKey') || '';
+      if (!apiKey) {
+        this.bridgeError = 'Kein API Key gefunden. Bitte in den Einstellungen hinterlegen.';
+        return;
+      }
       this.isBridgeLoading = true;
       this.bridgeError = '';
       this.bridgeVersions = [];
@@ -355,7 +330,7 @@ export default {
       fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
-          'x-api-key': this.apiKey,
+          'x-api-key': apiKey,
           'anthropic-version': '2023-06-01',
           'content-type': 'application/json',
           'anthropic-dangerous-direct-browser-access': 'true',
