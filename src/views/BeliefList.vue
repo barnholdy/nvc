@@ -57,9 +57,6 @@
                 <span v-if="patternCount(entry.time) > 0" class="badge-pill">
                   {{ patternCount(entry.time) }} {{ patternCount(entry.time) === 1 ? 'Trigger' : 'Trigger' }}
                 </span>
-                <span v-if="isComplete(entry)" class="badge-dot green"></span>
-                <span v-if="entry.empathy" class="badge-dot teal"></span>
-                <span v-if="hasChangeData(entry)" class="badge-dot blue"></span>
               </div>
             </div>
             <div class="row-actions">
@@ -341,15 +338,6 @@ export default {
   background: #2c2c2e;
   border-radius: 20px;
   padding: 1px 6px;
-}
-.badge-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  display: inline-block;
-  &.green { background: #34c759; }
-  &.teal { background: #5ac8fa; }
-  &.blue { background: #0a84ff; }
 }
 .row-actions {
   display: flex;
