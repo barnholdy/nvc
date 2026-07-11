@@ -221,6 +221,7 @@ export default {
       return moment(ts).fromNow();
     },
     startEdit(item) {
+      this.sw.openIdx = null; this.sw.openDir = null;
       this.editOriginalText = item.text;
       this.editText = item.text;
       this.editStep = 1;
@@ -256,7 +257,7 @@ export default {
       const updated = (belief.affirmations || []).filter(a => a.text !== text);
       this.$store.dispatch('updateBelief', Object.assign({}, belief, { affirmations: updated }));
     },
-    preDelete(item) { this.itemToDelete = item; this.isDeleteDialogShowing = true; },
+    preDelete(item) { this.sw.openIdx = null; this.sw.openDir = null; this.itemToDelete = item; this.isDeleteDialogShowing = true; },
     cancelDelete() { this.isDeleteDialogShowing = false; this.itemToDelete = null; },
     confirmDelete() {
       this.isDeleteDialogShowing = false;
@@ -273,7 +274,7 @@ export default {
       this.openIndex = null;
     },
     tsStart(e, i) {
-      if (e.target && e.target.closest && e.target.closest('.amen-btn')) return;
+      if (e.target && e.target.closest && (e.target.closest('.amen-btn') || e.target.closest('.swipe-btn'))) return;
       const t = e.touches[0];
       this.sw.touchIdx = i; this.sw.startX = t.clientX; this.sw.startY = t.clientY;
       this.sw.dx = 0; this.sw.isH = null; this.sw.drag = false;

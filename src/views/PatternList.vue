@@ -130,8 +130,8 @@ export default {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.openEntry = this.openEntry === time ? null : time;
     },
-    editEntry(entry) { this.$router.push(`/edit-pattern/${entry.time}`); },
-    preDelete(entry) { this.entryToDelete = entry; this.isDeleteDialogShowing = true; },
+    editEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/edit-pattern/${entry.time}`); },
+    preDelete(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.entryToDelete = entry; this.isDeleteDialogShowing = true; },
     confirmDelete() {
       this.isDeleteDialogShowing = false;
       this.$store.dispatch('deletePattern', this.entryToDelete);
@@ -140,6 +140,7 @@ export default {
     cancelDelete() { this.isDeleteDialogShowing = false; this.entryToDelete = null; },
     formatTime(time) { moment.locale('de'); return moment(time).fromNow(); },
     tsStart(e, i) {
+      if (e.target && e.target.closest && e.target.closest('.swipe-btn')) return;
       const t = e.touches[0];
       this.sw.touchIdx = i; this.sw.startX = t.clientX; this.sw.startY = t.clientY;
       this.sw.dx = 0; this.sw.isH = null; this.sw.drag = false;

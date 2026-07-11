@@ -223,10 +223,10 @@ export default {
       const r = entry.reflection || {};
       return !!(r.withoutBelief || r.changeAct || (r.changeActs && r.changeActs.length));
     },
-    empathyEntry(entry) { this.$router.push(`/empathy-belief/${entry.time}`); },
-    changeEntry(entry) { this.$router.push(`/change-belief/${entry.time}`); },
-    editEntry(entry) { this.$router.push(`/edit-belief/${entry.time}`); },
-    preDelete(entry) { this.entryToDelete = entry; this.isDeleteDialogShowing = true; },
+    empathyEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/empathy-belief/${entry.time}`); },
+    changeEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/change-belief/${entry.time}`); },
+    editEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/edit-belief/${entry.time}`); },
+    preDelete(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.entryToDelete = entry; this.isDeleteDialogShowing = true; },
     confirmDelete() {
       this.isDeleteDialogShowing = false;
       this.$store.dispatch('deleteBelief', this.entryToDelete);
@@ -234,6 +234,7 @@ export default {
     },
     cancelDelete() { this.isDeleteDialogShowing = false; this.entryToDelete = null; },
     tsStart(e, i) {
+      if (e.target && e.target.closest && e.target.closest('.swipe-btn')) return;
       const t = e.touches[0];
       this.sw.touchIdx = i; this.sw.startX = t.clientX; this.sw.startY = t.clientY;
       this.sw.dx = 0; this.sw.isH = null; this.sw.drag = false;

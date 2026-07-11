@@ -117,7 +117,7 @@ export default {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.openIndex = this.openIndex === i ? null : i;
     },
-    preDelete(item) { this.itemToDelete = item; this.isDeleteDialogShowing = true; },
+    preDelete(item) { this.sw.openIdx = null; this.sw.openDir = null; this.itemToDelete = item; this.isDeleteDialogShowing = true; },
     cancelDelete() { this.isDeleteDialogShowing = false; this.itemToDelete = null; },
     confirmDelete() {
       this.isDeleteDialogShowing = false;
@@ -136,6 +136,7 @@ export default {
       this.openIndex = null;
     },
     tsStart(e, i) {
+      if (e.target && e.target.closest && e.target.closest('.swipe-btn')) return;
       const t = e.touches[0];
       this.sw.touchIdx = i; this.sw.startX = t.clientX; this.sw.startY = t.clientY;
       this.sw.dx = 0; this.sw.isH = null; this.sw.drag = false;
