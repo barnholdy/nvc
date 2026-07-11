@@ -50,7 +50,7 @@
                   <span class="reminder-meta">{{ amenLabel(item.text) }}</span>
                 </div>
               </div>
-              <button class="amen-btn" @click.stop="sayAmen(item.text)">Amen</button>
+              <button class="amen-btn" @click.stop="sayAho(item.text)">Aho</button>
             </div>
           </div>
           <div :key="item.text + '-expand'" v-if="openIndex === i" class="row-expand">
@@ -160,7 +160,7 @@
 import moment from 'moment';
 
 const AMEN_KEY = 'nvc.amen';
-function loadAmenMap() {
+function loadAhoMap() {
   try { return JSON.parse(localStorage.getItem(AMEN_KEY)) || {}; } catch (e) { return {}; }
 }
 
@@ -175,7 +175,7 @@ export default {
       editText: '',
       itemToDelete: null,
       isDeleteDialogShowing: false,
-      amenMap: loadAmenMap(),
+      amenMap: loadAhoMap(),
       sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
   },
@@ -209,7 +209,7 @@ export default {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.openIndex = this.openIndex === i ? null : i;
     },
-    sayAmen(text) {
+    sayAho(text) {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.amenMap = Object.assign({}, this.amenMap, { [text]: Date.now() });
       localStorage.setItem(AMEN_KEY, JSON.stringify(this.amenMap));
