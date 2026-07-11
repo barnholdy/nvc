@@ -53,7 +53,7 @@
         <p v-if="errorMsg" class="error-text mt-2">{{ errorMsg }}</p>
 
         <div v-if="text !== null" class="empathy-result mt-4">
-          <p class="empathy-text">{{ text }}</p>
+          <div class="empathy-text md-content" v-html="renderMd(text)"></div>
         </div>
       </div>
     </v-content>
@@ -153,6 +153,38 @@ export default {
       this.apiKeyInput = '';
       this.showApiKeyInput = false;
       this.generate();
+    },
+    renderMd(raw) {
+      if (!raw) return '';
+      const esc = raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const inline = s => s
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*([^*\n]+?)\*/g, '<em>$1</em>');
+      const lines = esc.split('\n');
+      let html = '', inUl = false;
+      lines.forEach(line => {
+        if (/^### /.test(line)) {
+          if (inUl) { html += '</ul>'; inUl = false; }
+          html += `<h3>${inline(line.slice(4))}</h3>`;
+        } else if (/^## /.test(line)) {
+          if (inUl) { html += '</ul>'; inUl = false; }
+          html += `<h2>${inline(line.slice(3))}</h2>`;
+        } else if (/^# /.test(line)) {
+          if (inUl) { html += '</ul>'; inUl = false; }
+          html += `<h1>${inline(line.slice(2))}</h1>`;
+        } else if (/^[*-] /.test(line)) {
+          if (!inUl) { html += '<ul>'; inUl = true; }
+          html += `<li>${inline(line.slice(2))}</li>`;
+        } else if (line.trim() === '') {
+          if (inUl) { html += '</ul>'; inUl = false; }
+          html += '<div class="md-gap"></div>';
+        } else {
+          if (inUl) { html += '</ul>'; inUl = false; }
+          html += `<p>${inline(line)}</p>`;
+        }
+      });
+      if (inUl) html += '</ul>';
+      return html;
     },
     generate() {
       if (!this.apiKey) { this.showApiKeyInput = true; return; }
@@ -285,7 +317,19 @@ export default {
   color: #ebebf5;
   line-height: 1.7;
   margin: 0;
-  white-space: pre-wrap;
+}
+.md-content {
+  h1, h2, h3 { color: #fff; font-weight: 700; margin: 0 0 6px; line-height: 1.3; }
+  h1 { font-size: 1.1rem; }
+  h2 { font-size: 1rem; }
+  h3 { font-size: 0.95rem; color: #4ade80; }
+  p { margin: 0 0 8px; }
+  p:last-child { margin-bottom: 0; }
+  ul { margin: 0 0 8px; padding-left: 18px; }
+  li { margin-bottom: 4px; }
+  strong { color: #fff; font-weight: 700; }
+  em { color: #c9c9d3; font-style: italic; }
+  .md-gap { height: 10px; }
 }
 .mt-2 { margin-top: 8px !important; }
 .mt-3 { margin-top: 12px !important; }
