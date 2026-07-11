@@ -11,7 +11,8 @@
     <v-content>
       <div class="intro-card">
         <span class="intro-icon">❤️</span>
-        <p class="intro-text">Lass dir einfühlsam spiegeln, was dich gerade bewegt — auf Basis all deiner Muster und Überzeugungen.</p>
+        <p class="intro-title">Einfühlsam begegnen</p>
+        <p class="intro-text">Lass dir spiegeln, was dich gerade bewegt — auf Basis all deiner Muster und Überzeugungen.</p>
       </div>
 
       <div class="ios-section">

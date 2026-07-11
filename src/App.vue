@@ -46,7 +46,7 @@ html, body {
 .v-toolbar__title {
   color: #fff !important;
   font-weight: 700 !important;
-  font-size: 1.1rem !important;
+  font-size: 1.25rem !important;
   letter-spacing: -0.3px;
 }
 
@@ -54,23 +54,29 @@ html, body {
 .intro-card {
   background: #1c1c1e;
   border-radius: 16px;
-  margin: 0 16px 16px;
-  padding: 18px 18px;
+  margin: 16px 16px 16px;
+  padding: 24px 20px;
   display: flex;
-  gap: 14px;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 .intro-icon {
-  font-size: 1.6rem;
-  flex-shrink: 0;
+  font-size: 2.4rem;
   line-height: 1.3;
+  margin-bottom: 10px;
+}
+.intro-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 8px;
 }
 .intro-text {
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   color: #8e8e93;
   line-height: 1.65;
   margin: 0;
-  font-style: italic;
 }
 .v-toolbar .v-btn .v-icon {
   color: #4ade80 !important;

@@ -14,7 +14,8 @@
     <v-content>
       <div class="intro-card">
         <span class="intro-icon">⚡</span>
-        <p class="intro-text">Zwischen Reiz und Reaktion liegt ein Raum. In diesem Raum liegt unsere Macht, unsere Reaktion zu wählen. In unserer Reaktion liegen unser Wachstum und unsere Freiheit.</p>
+        <p class="intro-title">Zwischen Reiz und Reaktion</p>
+        <p class="intro-text">In diesem Raum liegt unsere Macht, unsere Reaktion zu wählen. In unserer Reaktion liegen unser Wachstum und unsere Freiheit.</p>
       </div>
 
       <div v-if="patterns.length === 0" class="empty-state">
@@ -27,20 +28,28 @@
         <template v-for="(entry, idx) in patterns">
           <div
             :key="entry.time + '-row'"
-            class="ios-row"
-            @click="toggle(entry.time)"
+            class="swipe-outer"
+            @touchstart="tsStart($event, idx)"
+            @touchmove="tsMove($event, idx)"
+            @touchend="tsEnd($event, idx)"
           >
-            <div class="row-body">
-              <p class="row-title">{{ entry.name }}</p>
-              <p class="row-meta">{{ formatTime(entry.time) }}</p>
+            <div class="swipe-right-panel">
+              <button class="swipe-btn swipe-btn-edit" @click.stop="editEntry(entry)">
+                <v-icon small color="#fff">edit</v-icon>
+                <span>Bearb.</span>
+              </button>
             </div>
-            <div class="row-actions">
-              <v-btn icon small @click.stop="editEntry(entry)" class="row-action-btn">
-                <v-icon small color="#636366">edit</v-icon>
-              </v-btn>
-              <v-btn icon small @click.stop="preDelete(entry)" class="row-action-btn">
-                <v-icon small color="#636366">delete</v-icon>
-              </v-btn>
+            <div class="swipe-left-panel">
+              <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">
+                <v-icon small color="#fff">delete</v-icon>
+                <span>Löschen</span>
+              </button>
+            </div>
+            <div class="ios-row" :style="rowSt(idx, 65)" @click="deskClick(idx)">
+              <div class="row-body">
+                <p class="row-title">{{ entry.name }}</p>
+                <p class="row-meta">{{ formatTime(entry.time) }}</p>
+              </div>
               <v-icon class="row-chevron" :class="{ rotated: openEntry === entry.time }">chevron_right</v-icon>
             </div>
           </div>
@@ -104,64 +113,85 @@ export default {
       openEntry: null,
       entryToDelete: null,
       isDeleteDialogShowing: false,
+      sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
   },
   computed: {
     patterns() {
-      return this.$store.getters.patterns
-        .concat()
-        .sort((a, b) => b.time - a.time);
+      return this.$store.getters.patterns.concat().sort((a, b) => b.time - a.time);
     },
   },
   methods: {
     getBeliefs(entry) {
       const beliefs = this.$store.getters.beliefs;
-      const ids = entry.beliefs || [];
-      return ids.map(id => beliefs.find(b => b.time === id)).filter(Boolean);
+      return (entry.beliefs || []).map(id => beliefs.find(b => b.time === id)).filter(Boolean);
     },
     toggle(time) {
+      this.sw.openIdx = null; this.sw.openDir = null;
       this.openEntry = this.openEntry === time ? null : time;
     },
-    editEntry(entry) {
-      this.$router.push(`/edit-pattern/${entry.time}`);
-    },
-    preDelete(entry) {
-      this.entryToDelete = entry;
-      this.isDeleteDialogShowing = true;
-    },
+    editEntry(entry) { this.$router.push(`/edit-pattern/${entry.time}`); },
+    preDelete(entry) { this.entryToDelete = entry; this.isDeleteDialogShowing = true; },
     confirmDelete() {
       this.isDeleteDialogShowing = false;
       this.$store.dispatch('deletePattern', this.entryToDelete);
       this.entryToDelete = null;
     },
-    cancelDelete() {
-      this.isDeleteDialogShowing = false;
-      this.entryToDelete = null;
+    cancelDelete() { this.isDeleteDialogShowing = false; this.entryToDelete = null; },
+    formatTime(time) { moment.locale('de'); return moment(time).fromNow(); },
+    tsStart(e, i) {
+      const t = e.touches[0];
+      this.sw.touchIdx = i; this.sw.startX = t.clientX; this.sw.startY = t.clientY;
+      this.sw.dx = 0; this.sw.isH = null; this.sw.drag = false;
     },
-    formatTime(time) {
-      moment.locale('de');
-      return moment(time).fromNow();
+    tsMove(e, i) {
+      if (this.sw.touchIdx !== i) return;
+      const t = e.touches[0];
+      const dx = t.clientX - this.sw.startX, dy = t.clientY - this.sw.startY;
+      if (this.sw.isH === null && (Math.abs(dx) > 4 || Math.abs(dy) > 4))
+        this.sw.isH = Math.abs(dx) >= Math.abs(dy);
+      if (!this.sw.isH) return;
+      e.preventDefault();
+      this.sw.dx = Math.max(-80, Math.min(dx, 65));
+      this.sw.drag = true;
+    },
+    tsEnd(e, i) {
+      if (this.sw.touchIdx !== i) return;
+      const wasVert = this.sw.isH === false;
+      if (!wasVert) e.preventDefault();
+      if (!this.sw.drag && !wasVert) {
+        if (this.sw.openIdx !== null) { this.sw.openIdx = null; this.sw.openDir = null; }
+        else { this.onRowTap(i); }
+      } else if (this.sw.drag) {
+        if (this.sw.dx < -40) { this.sw.openIdx = i; this.sw.openDir = 'left'; }
+        else if (this.sw.dx > 40) { this.sw.openIdx = i; this.sw.openDir = 'right'; }
+        else { this.sw.openIdx = null; this.sw.openDir = null; }
+        this.openEntry = null;
+      }
+      this.sw.touchIdx = null; this.sw.dx = 0; this.sw.drag = false; this.sw.isH = null;
+    },
+    rowSt(i, rw) {
+      const s = this.sw;
+      const live = s.touchIdx === i && s.drag && s.isH;
+      let x = 0;
+      if (live) x = s.dx;
+      else if (s.openIdx === i) x = s.openDir === 'left' ? -80 : rw;
+      return { transform: `translateX(${x}px)`, transition: live ? 'none' : 'transform 0.2s ease' };
+    },
+    onRowTap(i) {
+      const entry = this.patterns[i];
+      if (entry) this.toggle(entry.time);
+    },
+    deskClick(i) {
+      if (this.sw.openIdx !== null) { this.sw.openIdx = null; this.sw.openDir = null; return; }
+      this.onRowTap(i);
     },
   },
 };
 </script>
 
 <style scoped lang="scss">
-.dark-page {
-  background: #000;
-  min-height: 100vh;
-}
-
-.page-title-area {
-  padding: 8px 20px 16px;
-}
-.page-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: -0.5px;
-  margin: 0;
-}
+.dark-page { background: #000; min-height: 100vh; }
 
 .ios-list {
   background: #1c1c1e;
@@ -170,7 +200,47 @@ export default {
   overflow: hidden;
 }
 
+/* ─── Swipe rows ─── */
+.swipe-outer {
+  position: relative;
+  overflow: hidden;
+  background: #1c1c1e;
+}
+.swipe-right-panel {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  display: flex;
+  align-items: stretch;
+}
+.swipe-left-panel {
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  display: flex;
+  align-items: stretch;
+}
+.swipe-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  font-size: 0.62rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: #fff;
+  width: 65px;
+  padding: 0;
+  gap: 3px;
+  -webkit-tap-highlight-color: transparent;
+  &:active { opacity: 0.85; }
+}
+.swipe-btn-delete { background: #ff453a; width: 80px; }
+.swipe-btn-edit { background: #636366; }
+
 .ios-row {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   padding: 13px 16px 13px 20px;
@@ -178,15 +248,10 @@ export default {
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-
-  &:active {
-    background: #2c2c2e;
-  }
+  will-change: transform;
+  &:active { background: #2c2c2e; }
 }
-.row-body {
-  flex: 1;
-  min-width: 0;
-}
+.row-body { flex: 1; min-width: 0; }
 .row-title {
   font-size: 1rem;
   color: #fff;
@@ -195,34 +260,17 @@ export default {
   word-break: break-word;
   line-height: 1.4;
 }
-.row-meta {
-  font-size: 0.78rem;
-  color: #8e8e93;
-  margin: 2px 0 0;
-}
-.row-actions {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-  gap: 0px;
-}
-.row-action-btn {
-  margin: 0 !important;
-  padding: 0 !important;
-}
+.row-meta { font-size: 0.78rem; color: #8e8e93; margin: 2px 0 0; }
 .row-chevron {
   color: #636366 !important;
   font-size: 1.2rem !important;
   transition: transform 0.2s ease;
   margin-left: 4px;
+  flex-shrink: 0;
   &.rotated { transform: rotate(90deg); }
 }
 
-.ios-sep {
-  height: 1px;
-  background: #2c2c2e;
-  margin-left: 20px;
-}
+.ios-sep { height: 1px; background: #2c2c2e; margin-left: 20px; }
 
 .row-expand {
   background: #141416;
@@ -248,57 +296,21 @@ export default {
 .mb-1 { margin-bottom: 4px !important; }
 
 .empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 5rem 2rem;
-  text-align: center;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 5rem 2rem; text-align: center;
 }
-.empty-icon {
-  font-size: 3rem;
-  opacity: 0.3;
-  display: block;
-  margin-bottom: 16px;
-}
-.empty-title {
-  font-size: 1.1rem;
-  color: #fff;
-  font-weight: 600;
-  margin: 0 0 6px;
-}
-.empty-sub {
-  font-size: 0.875rem;
-  color: #8e8e93;
-  margin: 0;
-}
+.empty-icon { font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 16px; }
+.empty-title { font-size: 1.1rem; color: #fff; font-weight: 600; margin: 0 0 6px; }
+.empty-sub { font-size: 0.875rem; color: #8e8e93; margin: 0; }
 
-.confirm-dialog {
-  border-radius: 14px !important;
-  overflow: hidden;
-}
+.confirm-dialog { border-radius: 14px !important; overflow: hidden; }
 .confirm-title {
-  font-size: 1rem !important;
-  font-weight: 600 !important;
-  color: #fff !important;
-  justify-content: center !important;
-  padding: 16px !important;
+  font-size: 1rem !important; font-weight: 600 !important; color: #fff !important;
+  justify-content: center !important; padding: 16px !important;
 }
-.confirm-actions {
-  padding: 0 !important;
-  display: flex;
-}
-.confirm-cancel {
-  flex: 1;
-  color: #4ade80 !important;
-  border-right: 1px solid #3a3a3c;
-}
-.confirm-delete {
-  flex: 1;
-  color: #ff453a !important;
-  font-weight: 600 !important;
-}
+.confirm-actions { padding: 0 !important; display: flex; }
+.confirm-cancel { flex: 1; color: #4ade80 !important; border-right: 1px solid #3a3a3c; }
+.confirm-delete { flex: 1; color: #ff453a !important; font-weight: 600 !important; }
 
-.dark-nav {
-  border-top: 1px solid #2c2c2e !important;
-}
+.dark-nav { border-top: 1px solid #2c2c2e !important; }
 </style>

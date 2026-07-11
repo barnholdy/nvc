@@ -11,7 +11,8 @@
     <v-content>
       <div class="intro-card">
         <span class="intro-icon">🎯</span>
-        <p class="intro-text">Handeln überbrückt die Lücke zwischen Absicht und Wirklichkeit. Während Denken Klarheit schafft, erzeugt Handeln Dynamik, liefert echtes Feedback und stärkt das Vertrauen in dich selbst — nicht nur durch Theorie.</p>
+        <p class="intro-title">Vom Denken zum Handeln</p>
+        <p class="intro-text">Handeln überbrückt die Lücke zwischen Absicht und Wirklichkeit. Es erzeugt echtes Feedback und stärkt das Vertrauen in dich selbst.</p>
       </div>
 
       <div v-if="actions.length === 0" class="empty-state">
@@ -22,17 +23,26 @@
 
       <div v-else class="ios-list">
         <template v-for="(item, i) in actions">
-          <div :key="item.text + '-row'" class="ios-row" @click="toggle(i)">
-            <div class="row-body">
-              <p class="row-title">{{ item.text }}</p>
-              <div class="row-badges">
-                <span class="badge-pill">{{ item.beliefCount }} {{ item.beliefCount === 1 ? 'Überzeugung' : 'Überzeugungen' }}</span>
-              </div>
+          <div
+            :key="item.text + '-row'"
+            class="swipe-outer"
+            @touchstart="tsStart($event, i)"
+            @touchmove="tsMove($event, i)"
+            @touchend="tsEnd($event, i)"
+          >
+            <div class="swipe-left-panel">
+              <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(item)">
+                <v-icon small color="#fff">delete</v-icon>
+                <span>Löschen</span>
+              </button>
             </div>
-            <div class="row-actions">
-              <v-btn icon small @click.stop="preDelete(item)" class="row-action-btn">
-                <v-icon small color="#636366">delete</v-icon>
-              </v-btn>
+            <div class="ios-row" :style="rowSt(i)" @click="deskClick(i)">
+              <div class="row-body">
+                <p class="row-title">{{ item.text }}</p>
+                <div class="row-badges">
+                  <span class="badge-pill">{{ item.beliefCount }} {{ item.beliefCount === 1 ? 'Überzeugung' : 'Überzeugungen' }}</span>
+                </div>
+              </div>
               <v-icon class="row-chevron" :class="{ rotated: openIndex === i }">chevron_right</v-icon>
             </div>
           </div>
@@ -84,6 +94,7 @@ export default {
       openIndex: null,
       itemToDelete: null,
       isDeleteDialogShowing: false,
+      sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
   },
   computed: {
@@ -103,16 +114,11 @@ export default {
   },
   methods: {
     toggle(i) {
+      this.sw.openIdx = null; this.sw.openDir = null;
       this.openIndex = this.openIndex === i ? null : i;
     },
-    preDelete(item) {
-      this.itemToDelete = item;
-      this.isDeleteDialogShowing = true;
-    },
-    cancelDelete() {
-      this.isDeleteDialogShowing = false;
-      this.itemToDelete = null;
-    },
+    preDelete(item) { this.itemToDelete = item; this.isDeleteDialogShowing = true; },
+    cancelDelete() { this.isDeleteDialogShowing = false; this.itemToDelete = null; },
     confirmDelete() {
       this.isDeleteDialogShowing = false;
       const text = this.itemToDelete ? this.itemToDelete.text : null;
@@ -122,35 +128,61 @@ export default {
         const acts = belief.reflection && belief.reflection.changeActs ? belief.reflection.changeActs : [];
         if (acts.indexOf(text) !== -1) {
           const updated = Object.assign({}, belief, {
-            reflection: Object.assign({}, belief.reflection, {
-              changeActs: acts.filter(a => a !== text),
-            }),
+            reflection: Object.assign({}, belief.reflection, { changeActs: acts.filter(a => a !== text) }),
           });
           this.$store.dispatch('updateBelief', updated);
         }
       });
       this.openIndex = null;
     },
+    tsStart(e, i) {
+      const t = e.touches[0];
+      this.sw.touchIdx = i; this.sw.startX = t.clientX; this.sw.startY = t.clientY;
+      this.sw.dx = 0; this.sw.isH = null; this.sw.drag = false;
+    },
+    tsMove(e, i) {
+      if (this.sw.touchIdx !== i) return;
+      const t = e.touches[0];
+      const dx = t.clientX - this.sw.startX, dy = t.clientY - this.sw.startY;
+      if (this.sw.isH === null && (Math.abs(dx) > 4 || Math.abs(dy) > 4))
+        this.sw.isH = Math.abs(dx) >= Math.abs(dy);
+      if (!this.sw.isH) return;
+      e.preventDefault();
+      this.sw.dx = Math.max(-80, Math.min(dx, 0)); // left-only
+      this.sw.drag = true;
+    },
+    tsEnd(e, i) {
+      if (this.sw.touchIdx !== i) return;
+      const wasVert = this.sw.isH === false;
+      if (!wasVert) e.preventDefault();
+      if (!this.sw.drag && !wasVert) {
+        if (this.sw.openIdx !== null) { this.sw.openIdx = null; this.sw.openDir = null; }
+        else { this.toggle(i); }
+      } else if (this.sw.drag) {
+        if (this.sw.dx < -40) { this.sw.openIdx = i; this.sw.openDir = 'left'; }
+        else { this.sw.openIdx = null; this.sw.openDir = null; }
+        this.openIndex = null;
+      }
+      this.sw.touchIdx = null; this.sw.dx = 0; this.sw.drag = false; this.sw.isH = null;
+    },
+    rowSt(i) {
+      const s = this.sw;
+      const live = s.touchIdx === i && s.drag && s.isH;
+      let x = 0;
+      if (live) x = s.dx;
+      else if (s.openIdx === i && s.openDir === 'left') x = -80;
+      return { transform: `translateX(${x}px)`, transition: live ? 'none' : 'transform 0.2s ease' };
+    },
+    deskClick(i) {
+      if (this.sw.openIdx !== null) { this.sw.openIdx = null; this.sw.openDir = null; return; }
+      this.toggle(i);
+    },
   },
 };
 </script>
 
 <style scoped lang="scss">
-.dark-page {
-  background: #000;
-  min-height: 100vh;
-}
-
-.page-title-area {
-  padding: 8px 20px 16px;
-}
-.page-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: -0.5px;
-  margin: 0;
-}
+.dark-page { background: #000; min-height: 100vh; }
 
 .ios-list {
   background: #1c1c1e;
@@ -158,7 +190,41 @@ export default {
   margin: 0 16px 24px;
   overflow: hidden;
 }
+
+/* ─── Swipe rows ─── */
+.swipe-outer {
+  position: relative;
+  overflow: hidden;
+  background: #1c1c1e;
+}
+.swipe-left-panel {
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  display: flex;
+  align-items: stretch;
+}
+.swipe-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  font-size: 0.62rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: #fff;
+  width: 65px;
+  padding: 0;
+  gap: 3px;
+  -webkit-tap-highlight-color: transparent;
+  &:active { opacity: 0.85; }
+}
+.swipe-btn-delete { background: #ff453a; width: 80px; }
+
 .ios-row {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   padding: 13px 12px 13px 20px;
@@ -166,12 +232,10 @@ export default {
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  will-change: transform;
   &:active { background: #2c2c2e; }
 }
-.row-body {
-  flex: 1;
-  min-width: 0;
-}
+.row-body { flex: 1; min-width: 0; }
 .row-title {
   font-size: 0.95rem;
   color: #fff;
@@ -180,18 +244,7 @@ export default {
   word-break: break-word;
   line-height: 1.4;
 }
-.row-meta {
-  font-size: 0.78rem;
-  color: #8e8e93;
-  margin: 0;
-}
-.row-badges {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-top: 2px;
-}
+.row-badges { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
 .badge-pill {
   font-size: 0.7rem;
   color: #8e8e93;
@@ -199,34 +252,14 @@ export default {
   border-radius: 20px;
   padding: 1px 6px;
 }
-.row-actions {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-  gap: 4px;
-}
-.row-action-btn { margin: 0 !important; }
-.count-badge {
-  color: #4ade80;
-  font-size: 0.8rem;
-  font-weight: 700;
-  border: 1.5px solid #4ade80;
-  border-radius: 20px;
-  padding: 1px 7px;
-  min-width: 22px;
-  text-align: center;
-}
 .row-chevron {
   color: #636366 !important;
   font-size: 1.2rem !important;
   transition: transform 0.2s ease;
+  flex-shrink: 0;
   &.rotated { transform: rotate(90deg); }
 }
-.ios-sep {
-  height: 1px;
-  background: #2c2c2e;
-  margin-left: 20px;
-}
+.ios-sep { height: 1px; background: #2c2c2e; margin-left: 20px; }
 .row-expand {
   background: #141416;
   padding: 14px 20px 16px;
@@ -240,21 +273,12 @@ export default {
   margin: 0 0 6px;
   font-weight: 600;
 }
-.expand-text {
-  font-size: 0.93rem;
-  color: #ebebf5;
-  margin: 0;
-  line-height: 1.5;
-  font-style: italic;
-}
+.expand-text { font-size: 0.93rem; color: #ebebf5; margin: 0; line-height: 1.5; font-style: italic; }
 .mb-1 { margin-bottom: 4px !important; }
 
 .empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 5rem 2rem;
-  text-align: center;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 5rem 2rem; text-align: center;
 }
 .empty-icon { font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 16px; }
 .empty-title { font-size: 1.1rem; color: #fff; font-weight: 600; margin: 0 0 6px; }
@@ -262,11 +286,8 @@ export default {
 
 .confirm-dialog { border-radius: 14px !important; overflow: hidden; }
 .confirm-title {
-  font-size: 1rem !important;
-  font-weight: 600 !important;
-  color: #fff !important;
-  justify-content: center !important;
-  padding: 16px !important;
+  font-size: 1rem !important; font-weight: 600 !important; color: #fff !important;
+  justify-content: center !important; padding: 16px !important;
 }
 .confirm-actions { padding: 0 !important; display: flex; }
 .confirm-cancel { flex: 1; color: #4ade80 !important; border-right: 1px solid #3a3a3c; }

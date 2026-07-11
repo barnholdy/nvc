@@ -11,14 +11,8 @@
     <v-content>
       <div class="intro-card">
         <span class="intro-icon">✨</span>
-        <p class="intro-text">Die Kraft von Affirmationen liegt in der Neuroplastizität — der Fähigkeit des Gehirns, sich durch wiederholte Denkmuster neu zu vernetzen. Wenn du positive Aussagen bewusst wiederholst, stärkst du neuronale Bahnen, die mit Selbstvertrauen verbunden sind.</p>
-      </div>
-
-      <!-- Header card — like "Time to pray" -->
-      <div v-if="affirmations.length" class="reminder-card">
-        <span class="reminder-icon">✨</span>
-        <p class="reminder-title">Zeit für Affirmationen</p>
-        <p class="reminder-sub">Deine Affirmationen warten auf dich</p>
+        <p class="intro-title">Zeit für Affirmationen</p>
+        <p class="intro-text">Wiederholte positive Aussagen stärken neuronale Bahnen. Dein Gehirn kann sich durch bewusste Gedankenmuster neu vernetzen.</p>
       </div>
 
       <div v-if="affirmations.length === 0" class="empty-state">
@@ -29,27 +23,39 @@
 
       <div v-else class="reminder-list">
         <template v-for="(item, i) in affirmations">
-          <div :key="item.text + '-row'" class="reminder-row" @click="toggle(i)">
-            <div class="reminder-row-body">
-              <p class="reminder-text">{{ item.text }}</p>
-              <div class="row-badges">
-                <span class="badge-pill">{{ item.beliefCount }} {{ item.beliefCount === 1 ? 'Überzeugung' : 'Überzeugungen' }}</span>
-                <span class="reminder-meta">{{ amenLabel(item.text) }}</span>
-              </div>
+          <div
+            :key="item.text + '-row'"
+            class="swipe-outer"
+            @touchstart="tsStart($event, i)"
+            @touchmove="tsMove($event, i)"
+            @touchend="tsEnd($event, i)"
+          >
+            <div class="swipe-right-panel">
+              <button class="swipe-btn swipe-btn-edit" @click.stop="startEdit(item)">
+                <v-icon small color="#fff">edit</v-icon>
+                <span>Bearb.</span>
+              </button>
             </div>
-            <button class="amen-btn" @click.stop="sayAmen(item.text)">Amen</button>
+            <div class="swipe-left-panel">
+              <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(item)">
+                <v-icon small color="#fff">delete</v-icon>
+                <span>Löschen</span>
+              </button>
+            </div>
+            <div class="reminder-row" :style="rowSt(i, 65)" @click="deskClick(i)">
+              <div class="reminder-row-body">
+                <p class="reminder-text">{{ item.text }}</p>
+                <div class="row-badges">
+                  <span class="badge-pill">{{ item.beliefCount }} {{ item.beliefCount === 1 ? 'Überzeugung' : 'Überzeugungen' }}</span>
+                  <span class="reminder-meta">{{ amenLabel(item.text) }}</span>
+                </div>
+              </div>
+              <button class="amen-btn" @click.stop="sayAmen(item.text)">Amen</button>
+            </div>
           </div>
           <div :key="item.text + '-expand'" v-if="openIndex === i" class="row-expand">
             <p class="expand-label">Überzeugungen</p>
             <p v-for="(s, j) in item.sources" :key="j" class="expand-text mb-1">„{{ s.beliefText }}"</p>
-            <div class="expand-actions">
-              <v-btn icon small @click.stop="startEdit(item)" class="row-action-btn">
-                <v-icon small color="#636366">edit</v-icon>
-              </v-btn>
-              <v-btn icon small @click.stop="preDelete(item)" class="row-action-btn">
-                <v-icon small color="#636366">delete</v-icon>
-              </v-btn>
-            </div>
           </div>
           <div :key="item.text + '-sep'" class="ios-sep" v-if="i < affirmations.length - 1 && openIndex !== i"></div>
         </template>
@@ -154,7 +160,6 @@
 import moment from 'moment';
 
 const AMEN_KEY = 'nvc.amen';
-
 function loadAmenMap() {
   try { return JSON.parse(localStorage.getItem(AMEN_KEY)) || {}; } catch (e) { return {}; }
 }
@@ -171,6 +176,7 @@ export default {
       itemToDelete: null,
       isDeleteDialogShowing: false,
       amenMap: loadAmenMap(),
+      sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
   },
   computed: {
@@ -200,9 +206,11 @@ export default {
   },
   methods: {
     toggle(i) {
+      this.sw.openIdx = null; this.sw.openDir = null;
       this.openIndex = this.openIndex === i ? null : i;
     },
     sayAmen(text) {
+      this.sw.openIdx = null; this.sw.openDir = null;
       this.amenMap = Object.assign({}, this.amenMap, { [text]: Date.now() });
       localStorage.setItem(AMEN_KEY, JSON.stringify(this.amenMap));
     },
@@ -222,17 +230,13 @@ export default {
     prevEditStep() { this.editStep = 1; },
     cancelEdit() {
       this.isEditDialogShowing = false;
-      this.editOriginalText = '';
-      this.editText = '';
-      this.editStep = 1;
+      this.editOriginalText = ''; this.editText = ''; this.editStep = 1;
     },
     saveEdit() {
       const oldText = this.editOriginalText;
       const newText = this.editText.trim();
       this.isEditDialogShowing = false;
-      this.editOriginalText = '';
-      this.editText = '';
-      this.editStep = 1;
+      this.editOriginalText = ''; this.editText = ''; this.editStep = 1;
       if (!newText || newText === oldText) return;
       this.$store.getters.beliefs.forEach((belief) => {
         if (!belief.affirmations || !belief.affirmations.length) return;
@@ -252,14 +256,8 @@ export default {
       const updated = (belief.affirmations || []).filter(a => a.text !== text);
       this.$store.dispatch('updateBelief', Object.assign({}, belief, { affirmations: updated }));
     },
-    preDelete(item) {
-      this.itemToDelete = item;
-      this.isDeleteDialogShowing = true;
-    },
-    cancelDelete() {
-      this.isDeleteDialogShowing = false;
-      this.itemToDelete = null;
-    },
+    preDelete(item) { this.itemToDelete = item; this.isDeleteDialogShowing = true; },
+    cancelDelete() { this.isDeleteDialogShowing = false; this.itemToDelete = null; },
     confirmDelete() {
       this.isDeleteDialogShowing = false;
       const text = this.itemToDelete ? this.itemToDelete.text : null;
@@ -274,63 +272,105 @@ export default {
       });
       this.openIndex = null;
     },
+    tsStart(e, i) {
+      if (e.target && e.target.closest && e.target.closest('.amen-btn')) return;
+      const t = e.touches[0];
+      this.sw.touchIdx = i; this.sw.startX = t.clientX; this.sw.startY = t.clientY;
+      this.sw.dx = 0; this.sw.isH = null; this.sw.drag = false;
+    },
+    tsMove(e, i) {
+      if (this.sw.touchIdx !== i) return;
+      const t = e.touches[0];
+      const dx = t.clientX - this.sw.startX, dy = t.clientY - this.sw.startY;
+      if (this.sw.isH === null && (Math.abs(dx) > 4 || Math.abs(dy) > 4))
+        this.sw.isH = Math.abs(dx) >= Math.abs(dy);
+      if (!this.sw.isH) return;
+      e.preventDefault();
+      this.sw.dx = Math.max(-80, Math.min(dx, 65));
+      this.sw.drag = true;
+    },
+    tsEnd(e, i) {
+      if (this.sw.touchIdx !== i) return;
+      const wasVert = this.sw.isH === false;
+      if (!wasVert) e.preventDefault();
+      if (!this.sw.drag && !wasVert) {
+        if (this.sw.openIdx !== null) { this.sw.openIdx = null; this.sw.openDir = null; }
+        else { this.toggle(i); }
+      } else if (this.sw.drag) {
+        if (this.sw.dx < -40) { this.sw.openIdx = i; this.sw.openDir = 'left'; }
+        else if (this.sw.dx > 40) { this.sw.openIdx = i; this.sw.openDir = 'right'; }
+        else { this.sw.openIdx = null; this.sw.openDir = null; }
+        this.openIndex = null;
+      }
+      this.sw.touchIdx = null; this.sw.dx = 0; this.sw.drag = false; this.sw.isH = null;
+    },
+    rowSt(i, rw) {
+      const s = this.sw;
+      const live = s.touchIdx === i && s.drag && s.isH;
+      let x = 0;
+      if (live) x = s.dx;
+      else if (s.openIdx === i) x = s.openDir === 'left' ? -80 : rw;
+      return { transform: `translateX(${x}px)`, transition: live ? 'none' : 'transform 0.2s ease' };
+    },
+    deskClick(i) {
+      if (this.sw.openIdx !== null) { this.sw.openIdx = null; this.sw.openDir = null; return; }
+      this.toggle(i);
+    },
   },
 };
 </script>
 
 <style scoped lang="scss">
-.dark-page {
-  background: #000;
-  min-height: 100vh;
-}
+.dark-page { background: #000; min-height: 100vh; }
 
-.page-title-area {
-  padding: 8px 20px 16px;
-}
-.page-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: -0.5px;
-  margin: 0;
-}
-
-/* ─── "Time to pray" card ─── */
-.reminder-card {
-  background: #1c1c1e;
-  border-radius: 16px;
-  margin: 0 16px 20px;
-  padding: 28px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-.reminder-icon {
-  font-size: 2.4rem;
-  display: block;
-  margin-bottom: 12px;
-}
-.reminder-title {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: #fff;
-  margin: 0 0 4px;
-}
-.reminder-sub {
-  font-size: 0.875rem;
-  color: #8e8e93;
-  margin: 0;
-}
-
-/* ─── Reminder list ─── */
 .reminder-list {
   background: #1c1c1e;
   border-radius: 12px;
   margin: 0 16px 24px;
   overflow: hidden;
 }
+
+/* ─── Swipe rows ─── */
+.swipe-outer {
+  position: relative;
+  overflow: hidden;
+  background: #1c1c1e;
+}
+.swipe-right-panel {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  display: flex;
+  align-items: stretch;
+}
+.swipe-left-panel {
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  display: flex;
+  align-items: stretch;
+}
+.swipe-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  font-size: 0.62rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: #fff;
+  width: 65px;
+  padding: 0;
+  gap: 3px;
+  -webkit-tap-highlight-color: transparent;
+  &:active { opacity: 0.85; }
+}
+.swipe-btn-delete { background: #ff453a; width: 80px; }
+.swipe-btn-edit { background: #636366; }
+
 .reminder-row {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   padding: 14px 16px 14px 20px;
@@ -338,6 +378,7 @@ export default {
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  will-change: transform;
   &:active { background: #2c2c2e; }
 }
 .reminder-row-body {
@@ -348,16 +389,20 @@ export default {
 .reminder-text {
   font-size: 0.95rem;
   color: #fff;
-  margin: 0 0 3px;
+  margin: 0 0 4px;
   white-space: normal;
   word-break: break-word;
   line-height: 1.4;
 }
-.reminder-meta {
-  font-size: 0.78rem;
+.row-badges { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.badge-pill {
+  font-size: 0.7rem;
   color: #8e8e93;
-  margin: 0;
+  background: #2c2c2e;
+  border-radius: 20px;
+  padding: 1px 6px;
 }
+.reminder-meta { font-size: 0.75rem; color: #8e8e93; }
 
 .amen-btn {
   background: #4ade80;
@@ -374,11 +419,7 @@ export default {
   &:active { background: #3dcc70; transform: scale(0.97); }
 }
 
-.ios-sep {
-  height: 1px;
-  background: #2c2c2e;
-  margin-left: 20px;
-}
+.ios-sep { height: 1px; background: #2c2c2e; margin-left: 20px; }
 
 .row-expand {
   background: #141416;
@@ -393,27 +434,13 @@ export default {
   margin: 0 0 6px;
   font-weight: 600;
 }
-.expand-text {
-  font-size: 0.93rem;
-  color: #ebebf5;
-  margin: 0;
-  line-height: 1.5;
-  font-style: italic;
-}
-.expand-actions {
-  display: flex;
-  margin-top: 8px;
-}
-.row-action-btn { margin: 0 !important; }
+.expand-text { font-size: 0.93rem; color: #ebebf5; margin: 0; line-height: 1.5; font-style: italic; }
 .mb-1 { margin-bottom: 4px !important; }
 .belief-chips { display: flex; flex-wrap: wrap; }
 
 .empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 5rem 2rem;
-  text-align: center;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 5rem 2rem; text-align: center;
 }
 .empty-icon { font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 16px; }
 .empty-title { font-size: 1.1rem; color: #fff; font-weight: 600; margin: 0 0 6px; }
@@ -429,11 +456,8 @@ export default {
 
 .confirm-dialog { border-radius: 14px !important; overflow: hidden; }
 .confirm-title {
-  font-size: 1rem !important;
-  font-weight: 600 !important;
-  color: #fff !important;
-  justify-content: center !important;
-  padding: 16px !important;
+  font-size: 1rem !important; font-weight: 600 !important; color: #fff !important;
+  justify-content: center !important; padding: 16px !important;
 }
 .confirm-actions { padding: 0 !important; display: flex; }
 .confirm-cancel { flex: 1; color: #4ade80 !important; border-right: 1px solid #3a3a3c; }
