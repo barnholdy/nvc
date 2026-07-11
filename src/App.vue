@@ -97,7 +97,7 @@ html, body {
 }
 .v-bottom-nav .v-btn .v-icon {
   color: inherit !important;
-  font-size: 26px !important;
+  font-size: 28px !important;
 }
 .v-bottom-nav .v-btn span {
   color: inherit !important;

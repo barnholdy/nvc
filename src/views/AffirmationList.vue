@@ -144,10 +144,10 @@
         <v-icon>lightbulb_outline</v-icon>
       </v-btn>
       <v-btn flat color="primary" to="/affirmations">
-        <v-icon>stars</v-icon>
+        <v-icon>flare</v-icon>
       </v-btn>
       <v-btn flat color="grey" to="/actions">
-        <v-icon>directions_run</v-icon>
+        <v-icon>gps_fixed</v-icon>
       </v-btn>
       <v-btn flat color="grey" to="/empathy">
         <v-icon>favorite_border</v-icon>
