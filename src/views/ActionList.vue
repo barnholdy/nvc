@@ -47,9 +47,10 @@
                 <p class="row-title">{{ item.text }}</p>
                 <div class="row-badges">
                   <span class="badge-pill">{{ item.beliefCount }} {{ item.beliefCount === 1 ? 'Überzeugung' : 'Überzeugungen' }}</span>
+                  <span class="check-meta">{{ checkLabel(item.text) }}</span>
                 </div>
               </div>
-              <v-icon class="row-chevron" :class="{ rotated: openIndex === i }">chevron_right</v-icon>
+              <button class="check-btn" @click.stop="doCheck(item.text)">Check</button>
             </div>
           </div>
           <div :key="item.text + '-expand'" v-if="openIndex === i" class="row-expand">
@@ -121,6 +122,13 @@
 </template>
 
 <script>
+import moment from 'moment';
+
+const CHECK_KEY = 'nvc.check';
+function loadCheckMap() {
+  try { return JSON.parse(localStorage.getItem(CHECK_KEY)) || {}; } catch (e) { return {}; }
+}
+
 export default {
   name: 'action-list',
   data() {
@@ -131,6 +139,7 @@ export default {
       isEditDialogShowing: false,
       editOriginalText: '',
       editText: '',
+      checkMap: loadCheckMap(),
       sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
   },
@@ -153,6 +162,17 @@ export default {
     toggle(i) {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.openIndex = this.openIndex === i ? null : i;
+    },
+    doCheck(text) {
+      this.sw.openIdx = null; this.sw.openDir = null;
+      this.checkMap = Object.assign({}, this.checkMap, { [text]: Date.now() });
+      localStorage.setItem(CHECK_KEY, JSON.stringify(this.checkMap));
+    },
+    checkLabel(text) {
+      const ts = this.checkMap[text];
+      if (!ts) return 'Noch nicht ausgeführt';
+      moment.locale('de');
+      return moment(ts).fromNow();
     },
     startEdit(item) {
       this.sw.openIdx = null; this.sw.openDir = null;
@@ -203,7 +223,7 @@ export default {
       this.openIndex = null;
     },
     tsStart(e, i) {
-      if (e.target && e.target.closest && e.target.closest('.swipe-btn')) return;
+      if (e.target && e.target.closest && (e.target.closest('.swipe-btn') || e.target.closest('.check-btn'))) return;
       const t = e.touches[0];
       this.sw.touchIdx = i; this.sw.startX = t.clientX; this.sw.startY = t.clientY;
       this.sw.dx = 0; this.sw.isH = null; this.sw.drag = false;
@@ -311,16 +331,16 @@ export default {
   will-change: transform;
   &:active { background: #2c2c2e; }
 }
-.row-body { flex: 1; min-width: 0; }
+.row-body { flex: 1; min-width: 0; margin-right: 12px; }
 .row-title {
   font-size: 0.95rem;
   color: #fff;
-  margin: 0 0 2px;
+  margin: 0 0 3px;
   white-space: normal;
   word-break: break-word;
   line-height: 1.4;
 }
-.row-badges { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
+.row-badges { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .badge-pill {
   font-size: 0.7rem;
   color: #8e8e93;
@@ -328,6 +348,23 @@ export default {
   border-radius: 20px;
   padding: 1px 6px;
 }
+.check-meta { font-size: 0.75rem; color: #8e8e93; }
+
+.check-btn {
+  background: #4ade80;
+  color: #000;
+  border: none;
+  border-radius: 20px;
+  padding: 7px 16px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  &:active { background: #3dcc70; transform: scale(0.97); }
+}
+
 .row-chevron {
   color: #636366 !important;
   font-size: 1.2rem !important;
