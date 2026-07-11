@@ -52,63 +52,65 @@
 
       <!-- Edit dialog -->
       <v-dialog v-model="isEditDialogShowing" fullscreen>
-        <v-card>
+        <div class="wizard-page">
           <v-toolbar color="#000" dark flat app>
             <v-btn icon @click="editStep === 1 ? cancelEdit() : prevEditStep()">
               <v-icon>{{ editStep === 1 ? 'close' : 'chevron_left' }}</v-icon>
             </v-btn>
             <v-toolbar-title>Affirmation bearbeiten</v-toolbar-title>
             <v-spacer></v-spacer>
-            <span class="step-count">{{ editStep }} / 2</span>
+            <span class="grey--text body-1">{{ editStep }} / 2</span>
           </v-toolbar>
-          <v-container class="mt-4">
-            <v-layout v-show="editStep === 1" column>
-              <v-flex class="mt-2 mb-3">
-                <h1 class="headline font-weight-regular">Affirmation</h1>
-                <p class="body-1 grey--text mt-2">Formuliere eine positive, kraftvolle Aussage im Präsens.</p>
-              </v-flex>
-              <v-flex>
-                <v-textarea v-model="editText" placeholder="..." auto-grow rows="4" hide-details></v-textarea>
-              </v-flex>
-            </v-layout>
-            <v-layout v-show="editStep === 2" column>
-              <v-flex class="mt-2 mb-3">
-                <h1 class="headline font-weight-regular">Überzeugungen</h1>
-                <p class="body-1 grey--text mt-2">Verknüpfe diese Affirmation mit deinen Überzeugungen.</p>
-              </v-flex>
-              <v-flex v-if="currentEditAffirmation">
-                <div class="belief-chips mb-2">
-                  <v-chip
-                    v-for="(s, j) in currentEditAffirmation.sources"
-                    :key="j"
-                    close
-                    class="mb-1 mr-1"
-                    @input="removeBeliefFromAffirmation(editOriginalText, s.beliefTime)"
-                  >{{ s.beliefText }}</v-chip>
-                </div>
-                <v-menu v-if="unlinkedBeliefsForEdit.length" bottom>
-                  <v-btn slot="activator" flat small color="primary" class="mt-2 ml-0">
-                    <v-icon left small>add</v-icon>
-                    Überzeugung hinzufügen
-                  </v-btn>
-                  <v-list>
-                    <v-list-tile
-                      v-for="b in unlinkedBeliefsForEdit"
-                      :key="b.time"
-                      @click="addBeliefToAffirmation(editOriginalText, b)"
-                    >
-                      <v-list-tile-title>{{ b.belief }}</v-list-tile-title>
-                    </v-list-tile>
-                  </v-list>
-                </v-menu>
-              </v-flex>
-            </v-layout>
-          </v-container>
-          <v-footer fixed color="#1c1c1e" height="56">
-            <v-btn v-if="editStep === 1" :disabled="!editText.trim()" @click="nextEditStep" block large color="primary">weiter</v-btn>
-            <v-btn v-else @click="saveEdit" block large color="primary">speichern</v-btn>
-          </v-footer>
-        </v-card>
+          <v-content>
+            <v-container class="mb-5">
+              <v-layout v-show="editStep === 1" column>
+                <v-flex class="mt-2 mb-3">
+                  <h1 class="headline font-weight-regular">Affirmation</h1>
+                  <p class="body-1 grey--text mt-2">Formuliere eine positive, kraftvolle Aussage im Präsens.</p>
+                </v-flex>
+                <v-flex>
+                  <v-textarea v-model="editText" placeholder="..." auto-grow rows="4" hide-details></v-textarea>
+                </v-flex>
+              </v-layout>
+              <v-layout v-show="editStep === 2" column>
+                <v-flex class="mt-2 mb-3">
+                  <h1 class="headline font-weight-regular">Überzeugungen</h1>
+                  <p class="body-1 grey--text mt-2">Verknüpfe diese Affirmation mit deinen Überzeugungen.</p>
+                </v-flex>
+                <v-flex v-if="currentEditAffirmation">
+                  <div class="belief-chips mb-2">
+                    <v-chip
+                      v-for="(s, j) in currentEditAffirmation.sources"
+                      :key="j"
+                      close
+                      class="mb-1 mr-1"
+                      @input="removeBeliefFromAffirmation(editOriginalText, s.beliefTime)"
+                    >{{ s.beliefText }}</v-chip>
+                  </div>
+                  <v-menu v-if="unlinkedBeliefsForEdit.length" bottom>
+                    <v-btn slot="activator" flat small color="primary" class="mt-2 ml-0">
+                      <v-icon left small>add</v-icon>
+                      Überzeugung hinzufügen
+                    </v-btn>
+                    <v-list>
+                      <v-list-tile
+                        v-for="b in unlinkedBeliefsForEdit"
+                        :key="b.time"
+                        @click="addBeliefToAffirmation(editOriginalText, b)"
+                      >
+                        <v-list-tile-title>{{ b.belief }}</v-list-tile-title>
+                      </v-list-tile>
+                    </v-list>
+                  </v-menu>
+                </v-flex>
+              </v-layout>
+            </v-container>
+            <v-footer :fixed="true" color="white elevation-3" height="44">
+              <v-btn v-if="editStep === 1" :disabled="!editText.trim()" @click="nextEditStep" block large color="primary">weiter</v-btn>
+              <v-btn v-else @click="saveEdit" block large color="primary">speichern</v-btn>
+            </v-footer>
+          </v-content>
+        </div>
       </v-dialog>
 
       <v-dialog v-model="isDeleteDialogShowing" width="300">
@@ -412,7 +414,13 @@ export default {
 .empty-title { font-size: 1.1rem; color: #fff; font-weight: 600; margin: 0 0 6px; }
 .empty-sub { font-size: 0.875rem; color: #8e8e93; margin: 0; }
 
-.step-count { color: #8e8e93; font-size: 0.9rem; }
+.wizard-page {
+  background: #000;
+  min-height: 100vh;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+}
 
 .confirm-dialog { border-radius: 14px !important; overflow: hidden; }
 .confirm-title {
