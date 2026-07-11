@@ -1,6 +1,7 @@
 <template>
   <div class="dark-page">
     <v-toolbar color="#000" dark flat app>
+      <v-toolbar-title>Überzeugungen</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn icon @click="$router.push('/add-belief')">
         <v-icon color="#4ade80">add</v-icon>
@@ -11,8 +12,9 @@
     </v-toolbar>
 
     <v-content>
-      <div class="page-title-area">
-        <h1 class="page-title">Überzeugungen</h1>
+      <div class="intro-card">
+        <span class="intro-icon">💡</span>
+        <p class="intro-text">Deine Überzeugungen sind das Betriebssystem hinter deinem Denken, Fühlen und Handeln. Sie formen dich. Viele davon wurden durch frühe Erfahrungen installiert — nicht bewusst von dir gewählt. Authentizität entsteht, wenn du klar siehst, was du bereits glaubst und dann bewusst wählst, welche Überzeugungen bleiben dürfen.</p>
       </div>
 
       <!-- Segment tabs -->
@@ -55,7 +57,7 @@
               <p class="row-title">{{ entry.belief }}</p>
               <div class="row-badges">
                 <span v-if="patternCount(entry.time) > 0" class="badge-pill">
-                  {{ patternCount(entry.time) }} {{ patternCount(entry.time) === 1 ? 'Trigger' : 'Trigger' }}
+                  {{ patternCount(entry.time) }} {{ patternCount(entry.time) === 1 ? 'Situation' : 'Situationen' }}
                 </span>
               </div>
             </div>
@@ -82,7 +84,7 @@
             class="row-expand"
           >
             <template v-if="associatedPatterns(entry.time).length">
-              <p class="expand-label">Trigger</p>
+              <p class="expand-label">Situationen</p>
               <p v-for="(p, i) in associatedPatterns(entry.time)" :key="i" class="expand-text mb-1">{{ p.trigger || p.name }}</p>
             </template>
             <template v-if="entry.feelings && entry.feelings.length">

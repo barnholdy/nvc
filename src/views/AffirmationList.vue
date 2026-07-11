@@ -1,6 +1,7 @@
 <template>
   <div class="dark-page">
     <v-toolbar color="#000" dark flat app>
+      <v-toolbar-title>Affirmationen</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn icon @click="$router.push('/settings')">
         <v-icon color="#4ade80">settings</v-icon>
@@ -8,8 +9,9 @@
     </v-toolbar>
 
     <v-content>
-      <div class="page-title-area">
-        <h1 class="page-title">Affirmationen</h1>
+      <div class="intro-card">
+        <span class="intro-icon">✨</span>
+        <p class="intro-text">Die Kraft von Affirmationen liegt in der Neuroplastizität — der Fähigkeit des Gehirns, sich durch wiederholte Denkmuster neu zu vernetzen. Wenn du positive Aussagen bewusst wiederholst, stärkst du neuronale Bahnen, die mit Selbstvertrauen verbunden sind.</p>
       </div>
 
       <!-- Header card — like "Time to pray" -->
@@ -30,7 +32,10 @@
           <div :key="item.text + '-row'" class="reminder-row" @click="toggle(i)">
             <div class="reminder-row-body">
               <p class="reminder-text">{{ item.text }}</p>
-              <p class="reminder-meta">{{ amenLabel(item.text) }}</p>
+              <div class="row-badges">
+                <span class="badge-pill">{{ item.beliefCount }} {{ item.beliefCount === 1 ? 'Überzeugung' : 'Überzeugungen' }}</span>
+                <span class="reminder-meta">{{ amenLabel(item.text) }}</span>
+              </div>
             </div>
             <button class="amen-btn" @click.stop="sayAmen(item.text)">Amen</button>
           </div>

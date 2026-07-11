@@ -1,6 +1,7 @@
 <template>
   <div class="dark-page">
     <v-toolbar color="#000" dark flat app>
+      <v-toolbar-title>Empathie</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn icon @click="$router.push('/settings')">
         <v-icon color="#4ade80">settings</v-icon>
@@ -8,9 +9,9 @@
     </v-toolbar>
 
     <v-content>
-      <div class="page-title-area">
-        <h1 class="page-title">Empathie</h1>
-        <p class="page-sub">Lass dir einfühlsam spiegeln, was dich gerade bewegt — auf Basis all deiner Muster und Überzeugungen.</p>
+      <div class="intro-card">
+        <span class="intro-icon">❤️</span>
+        <p class="intro-text">Lass dir einfühlsam spiegeln, was dich gerade bewegt — auf Basis all deiner Muster und Überzeugungen.</p>
       </div>
 
       <div class="ios-section">

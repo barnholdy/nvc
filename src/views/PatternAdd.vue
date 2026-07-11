@@ -7,7 +7,7 @@
       <v-btn v-else icon @click="prevStep">
         <v-icon>chevron_left</v-icon>
       </v-btn>
-      <v-toolbar-title>{{ isEditMode ? (editEntry.name || 'Trigger bearbeiten') : 'Neuer Trigger' }}</v-toolbar-title>
+      <v-toolbar-title>{{ isEditMode ? (editEntry.name || 'Situation bearbeiten') : 'Neue Situation' }}</v-toolbar-title>
       <v-spacer></v-spacer>
       <span class="grey--text body-1">{{ step }} / {{ totalSteps }}</span>
     </v-toolbar>

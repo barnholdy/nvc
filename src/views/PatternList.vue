@@ -1,6 +1,7 @@
 <template>
   <div class="dark-page">
     <v-toolbar color="#000" dark flat app>
+      <v-toolbar-title>Situationen</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn icon @click="$router.push('/add-pattern')">
         <v-icon color="#4ade80">add</v-icon>
@@ -11,14 +12,15 @@
     </v-toolbar>
 
     <v-content>
-      <div class="page-title-area">
-        <h1 class="page-title">Situationen</h1>
+      <div class="intro-card">
+        <span class="intro-icon">⚡</span>
+        <p class="intro-text">Zwischen Reiz und Reaktion liegt ein Raum. In diesem Raum liegt unsere Macht, unsere Reaktion zu wählen. In unserer Reaktion liegen unser Wachstum und unsere Freiheit.</p>
       </div>
 
       <div v-if="patterns.length === 0" class="empty-state">
         <span class="empty-icon">⚡</span>
-        <p class="empty-title">Noch keine Trigger</p>
-        <p class="empty-sub">Tippe auf + um einen neuen Trigger hinzuzufügen.</p>
+        <p class="empty-title">Noch keine Situationen</p>
+        <p class="empty-sub">Tippe auf + um eine neue Situation hinzuzufügen.</p>
       </div>
 
       <div v-else class="ios-list">

@@ -45,8 +45,32 @@ html, body {
 }
 .v-toolbar__title {
   color: #fff !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
+  font-size: 1.1rem !important;
   letter-spacing: -0.3px;
+}
+
+/* ─── Shared intro card ─── */
+.intro-card {
+  background: #1c1c1e;
+  border-radius: 16px;
+  margin: 0 16px 16px;
+  padding: 18px 18px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.intro-icon {
+  font-size: 1.6rem;
+  flex-shrink: 0;
+  line-height: 1.3;
+}
+.intro-text {
+  font-size: 0.85rem;
+  color: #8e8e93;
+  line-height: 1.65;
+  margin: 0;
+  font-style: italic;
 }
 .v-toolbar .v-btn .v-icon {
   color: #4ade80 !important;
@@ -67,6 +91,7 @@ html, body {
 }
 .v-bottom-nav .v-btn .v-icon {
   color: inherit !important;
+  font-size: 26px !important;
 }
 .v-bottom-nav .v-btn span {
   color: inherit !important;

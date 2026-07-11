@@ -1,6 +1,7 @@
 <template>
   <div class="dark-page">
     <v-toolbar color="#000" dark flat app>
+      <v-toolbar-title>Handlungen</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn icon @click="$router.push('/settings')">
         <v-icon color="#4ade80">settings</v-icon>
@@ -8,8 +9,9 @@
     </v-toolbar>
 
     <v-content>
-      <div class="page-title-area">
-        <h1 class="page-title">Handlungen</h1>
+      <div class="intro-card">
+        <span class="intro-icon">🎯</span>
+        <p class="intro-text">Handeln überbrückt die Lücke zwischen Absicht und Wirklichkeit. Während Denken Klarheit schafft, erzeugt Handeln Dynamik, liefert echtes Feedback und stärkt das Vertrauen in dich selbst — nicht nur durch Theorie.</p>
       </div>
 
       <div v-if="actions.length === 0" class="empty-state">
@@ -23,10 +25,11 @@
           <div :key="item.text + '-row'" class="ios-row" @click="toggle(i)">
             <div class="row-body">
               <p class="row-title">{{ item.text }}</p>
-              <p class="row-meta">{{ item.beliefCount }} {{ item.beliefCount === 1 ? 'Überzeugung' : 'Überzeugungen' }}</p>
+              <div class="row-badges">
+                <span class="badge-pill">{{ item.beliefCount }} {{ item.beliefCount === 1 ? 'Überzeugung' : 'Überzeugungen' }}</span>
+              </div>
             </div>
             <div class="row-actions">
-              <span class="count-badge">{{ item.beliefCount }}</span>
               <v-btn icon small @click.stop="preDelete(item)" class="row-action-btn">
                 <v-icon small color="#636366">delete</v-icon>
               </v-btn>
@@ -181,6 +184,20 @@ export default {
   font-size: 0.78rem;
   color: #8e8e93;
   margin: 0;
+}
+.row-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+.badge-pill {
+  font-size: 0.7rem;
+  color: #8e8e93;
+  background: #2c2c2e;
+  border-radius: 20px;
+  padding: 1px 6px;
 }
 .row-actions {
   display: flex;
