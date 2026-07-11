@@ -290,6 +290,17 @@ export default {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.amenMap = Object.assign({}, this.amenMap, { [text]: Date.now() });
       localStorage.setItem(AMEN_KEY, JSON.stringify(this.amenMap));
+      this.$store.getters.beliefs.forEach((belief) => {
+        if (!belief.affirmations || !belief.affirmations.length) return;
+        if (belief.affirmations.some(function(a) { return a.text === text; })) {
+          var updated = belief.affirmations.map(function(a) {
+            if (a.text !== text) return a;
+            var current = a.resonance != null ? a.resonance : 0;
+            return Object.assign({}, a, { resonance: Math.min(100, current + 1) });
+          });
+          this.$store.dispatch('updateBelief', Object.assign({}, belief, { affirmations: updated }));
+        }
+      });
       triggerConfetti();
     },
     resonanceColor(v) {
