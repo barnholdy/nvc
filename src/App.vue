@@ -46,7 +46,7 @@ html, body {
 .v-toolbar__title {
   color: #fff !important;
   font-weight: 700 !important;
-  font-size: 1.25rem !important;
+  font-size: 1.45rem !important;
   letter-spacing: -0.3px;
 }
 
