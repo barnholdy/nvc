@@ -4,13 +4,12 @@
       <v-btn icon @click="close">
         <v-icon>close</v-icon>
       </v-btn>
-      <v-toolbar-title>{{ entry ? entry.belief : '' }}</v-toolbar-title>
+      <v-toolbar-title>Empathie bekommen</v-toolbar-title>
     </v-toolbar>
     <v-content>
       <v-container class="mb-5">
         <v-layout column>
           <v-flex class="mt-2 mb-3">
-            <h1 class="headline font-weight-regular">Empathie bekommen</h1>
             <p class="subheading grey--text belief-quote mt-1">„{{ entry ? entry.belief : '' }}"</p>
             <p class="body-1 grey--text mt-2">Lass dir einfühlsam spiegeln, was du gerade erlebst.</p>
           </v-flex>

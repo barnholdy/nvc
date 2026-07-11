@@ -64,15 +64,15 @@
       <!-- Edit dialog -->
       <v-dialog v-model="isEditDialogShowing" fullscreen>
         <div class="wizard-page">
-          <v-toolbar color="#000" dark flat app>
+          <div class="wizard-toolbar">
             <v-btn icon @click="editStep === 1 ? cancelEdit() : prevEditStep()">
               <v-icon>{{ editStep === 1 ? 'close' : 'chevron_left' }}</v-icon>
             </v-btn>
-            <v-toolbar-title>Affirmation bearbeiten</v-toolbar-title>
+            <span class="wizard-title">Affirmation bearbeiten</span>
             <v-spacer></v-spacer>
             <span class="grey--text body-1">{{ editStep }} / 2</span>
-          </v-toolbar>
-          <v-content>
+          </div>
+          <div class="wizard-scroll">
             <v-container class="mb-5">
               <v-layout v-show="editStep === 1" column>
                 <v-flex class="mt-2 mb-3">
@@ -98,29 +98,25 @@
                       @input="removeBeliefFromAffirmation(editOriginalText, s.beliefTime)"
                     >{{ s.beliefText }}</v-chip>
                   </div>
-                  <v-menu v-if="unlinkedBeliefsForEdit.length" bottom>
-                    <v-btn slot="activator" flat small color="primary" class="mt-2 ml-0">
-                      <v-icon left small>add</v-icon>
-                      Überzeugung hinzufügen
-                    </v-btn>
-                    <v-list>
-                      <v-list-tile
+                  <div v-if="unlinkedBeliefsForEdit.length" class="available-chips mt-2">
+                    <p class="caption grey--text mb-1">Hinzufügen:</p>
+                    <div class="chip-list">
+                      <v-chip
                         v-for="b in unlinkedBeliefsForEdit"
                         :key="b.time"
+                        class="available-chip"
                         @click="addBeliefToAffirmation(editOriginalText, b)"
-                      >
-                        <v-list-tile-title>{{ b.belief }}</v-list-tile-title>
-                      </v-list-tile>
-                    </v-list>
-                  </v-menu>
+                      >{{ b.belief }}</v-chip>
+                    </div>
+                  </div>
                 </v-flex>
               </v-layout>
             </v-container>
-            <v-footer :fixed="true" color="white elevation-3" height="44">
-              <v-btn v-if="editStep === 1" :disabled="!editText.trim()" @click="nextEditStep" block large color="primary">weiter</v-btn>
-              <v-btn v-else @click="saveEdit" block large color="primary">speichern</v-btn>
-            </v-footer>
-          </v-content>
+          </div>
+          <div class="wizard-footer-bar">
+            <v-btn v-if="editStep === 1" :disabled="!editText.trim()" @click="nextEditStep" block large color="primary">weiter</v-btn>
+            <v-btn v-else @click="saveEdit" block large color="primary">speichern</v-btn>
+          </div>
         </div>
       </v-dialog>
 
@@ -486,10 +482,47 @@ export default {
 
 .wizard-page {
   background: #000;
-  min-height: 100vh;
   position: fixed;
   inset: 0;
   z-index: 200;
+  display: flex;
+  flex-direction: column;
+}
+.wizard-toolbar {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  height: 56px;
+  flex-shrink: 0;
+  background: #000;
+}
+.wizard-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  margin-left: 4px;
+}
+.wizard-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.wizard-footer-bar {
+  padding: 12px 16px;
+  background: #000;
+  flex-shrink: 0;
+}
+.available-chips { margin-top: 8px; }
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.available-chip {
+  white-space: normal;
+  height: auto !important;
+  padding: 4px 10px !important;
+  cursor: pointer;
 }
 
 .confirm-dialog { border-radius: 14px !important; overflow: hidden; }

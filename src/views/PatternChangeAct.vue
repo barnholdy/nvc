@@ -24,21 +24,17 @@
     </v-flex>
 
     <v-flex class="mt-1">
-      <v-menu v-if="unselectedActs.length" :close-on-content-click="true">
-        <v-btn slot="activator" flat color="primary">
-          <v-icon left small>arrow_drop_down</v-icon>
-          Bestehende hinzufügen
-        </v-btn>
-        <v-list>
-          <v-list-tile
+      <div v-if="unselectedActs.length" class="available-chips mt-2">
+        <p class="caption grey--text mb-1">Hinzufügen:</p>
+        <div class="chip-list">
+          <v-chip
             v-for="a in unselectedActs"
             :key="a"
+            class="available-chip"
             @click="addAct(a)"
-          >
-            <v-list-tile-title>{{ a }}</v-list-tile-title>
-          </v-list-tile>
-        </v-list>
-      </v-menu>
+          >{{ a }}</v-chip>
+        </div>
+      </div>
 
       <template v-if="showNewInput">
         <v-text-field
@@ -269,6 +265,18 @@ export default {
   gap: 6px;
 }
 .suggestion-chip {
+  cursor: pointer;
+  white-space: normal;
+  height: auto !important;
+  padding: 4px 10px !important;
+}
+.available-chips { margin-top: 8px; }
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.available-chip {
   cursor: pointer;
   white-space: normal;
   height: auto !important;
