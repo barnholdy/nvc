@@ -47,6 +47,10 @@
                 <p class="reminder-text">{{ item.text }}</p>
                 <div class="row-badges">
                   <span class="badge-pill">{{ item.beliefCount }} {{ item.beliefCount === 1 ? 'Überzeugung' : 'Überzeugungen' }}</span>
+                  <span v-if="item.resonance != null" class="resonance-pill">
+                    <span class="resonance-fill" :style="{ width: item.resonance + '%', background: resonanceColor(item.resonance) }"></span>
+                    <span class="resonance-label">{{ item.resonance }} %</span>
+                  </span>
                   <span class="reminder-meta">{{ amenLabel(item.text) }}</span>
                 </div>
               </div>
@@ -258,9 +262,10 @@ export default {
         if (!belief.affirmations || !belief.affirmations.length) return;
         belief.affirmations.forEach((a) => {
           if (!a.text) return;
-          if (!map[a.text]) map[a.text] = { text: a.text, beliefCount: 0, sources: [] };
+          if (!map[a.text]) map[a.text] = { text: a.text, beliefCount: 0, sources: [], resonance: null };
           map[a.text].beliefCount += 1;
           map[a.text].sources.push({ beliefTime: belief.time, beliefText: belief.belief });
+          if (map[a.text].resonance === null && a.resonance != null) map[a.text].resonance = a.resonance;
         });
       });
       return Object.values(map).sort((a, b) => b.beliefCount - a.beliefCount);
@@ -286,6 +291,11 @@ export default {
       this.amenMap = Object.assign({}, this.amenMap, { [text]: Date.now() });
       localStorage.setItem(AMEN_KEY, JSON.stringify(this.amenMap));
       triggerConfetti();
+    },
+    resonanceColor(v) {
+      if (v >= 75) return '#4ade80';
+      if (v >= 50) return '#fbbf24';
+      return '#f87171';
     },
     amenLabel(text) {
       const ts = this.amenMap[text];
@@ -529,6 +539,31 @@ export default {
   padding: 1px 6px;
 }
 .reminder-meta { font-size: 0.75rem; color: #8e8e93; }
+.resonance-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #2c2c2e;
+  min-width: 48px;
+}
+.resonance-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  border-radius: 20px;
+  opacity: 0.35;
+}
+.resonance-label {
+  position: relative;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #fff;
+  padding: 0 7px;
+  z-index: 1;
+  white-space: nowrap;
+}
 
 .amen-btn {
   background: #4ade80;
