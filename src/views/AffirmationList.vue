@@ -607,8 +607,8 @@ export default {
   background: #000;
 }
 .wizard-title {
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.45rem;
+  font-weight: 700;
   color: #fff;
   margin-left: 4px;
 }
