@@ -190,9 +190,11 @@ export default {
     },
     filteredBeliefs() {
       return this.beliefs.filter((e) => {
-        if (this.tab === 'open') return !this.hasChangeData(e) && !(e.affirmations && e.affirmations.length);
-        if (this.tab === 'working') return this.hasChangeData(e) && !(e.affirmations && e.affirmations.length);
-        if (this.tab === 'done') return !!(e.affirmations && e.affirmations.length);
+        const complete = this.isComplete(e);
+        const changed = complete && this.hasChangeData(e) && e.affirmations && e.affirmations.length;
+        if (this.tab === 'open') return !complete;
+        if (this.tab === 'working') return complete && !changed;
+        if (this.tab === 'done') return !!changed;
         return true;
       });
     },
