@@ -50,7 +50,7 @@
                   <span class="check-meta">{{ checkLabel(item.text) }}</span>
                 </div>
               </div>
-              <button class="check-btn" @click.stop="doCheck(item.text, $event)">Check</button>
+              <button class="check-btn" @click.stop="doCheck(item.text)">Check</button>
             </div>
           </div>
           <div :key="item.text + '-expand'" v-if="openIndex === i" class="row-expand">
@@ -123,9 +123,44 @@
 
 <script>
 import moment from 'moment';
-import { triggerConfetti } from '../utils/confetti';
 
 const CHECK_KEY = 'nvc.check';
+
+function triggerConfetti() {
+  var canvas = document.createElement('canvas');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  canvas.style.cssText = 'position:fixed;top:0;left:0;pointer-events:none;z-index:9999';
+  document.body.appendChild(canvas);
+  var ctx = canvas.getContext('2d');
+  if (!ctx) { document.body.removeChild(canvas); return; }
+  var COLORS = ['#4ade80', '#f9e02e', '#ff6b6b', '#60c5f9', '#c084fc', '#fb923c'];
+  var cx = canvas.width / 2, cy = canvas.height * 0.55;
+  var particles = [];
+  for (var i = 0; i < 72; i++) {
+    var angle = Math.PI * 2 * i / 72 + (Math.random() - 0.5) * 0.4;
+    var speed = 4 + Math.random() * 8;
+    particles.push({ x: cx, y: cy, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 3,
+      w: 4 + Math.random() * 7, h: 2 + Math.random() * 4,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      rot: Math.random() * Math.PI * 2, vr: (Math.random() - 0.5) * 0.3 });
+  }
+  var start = null, dur = 1500;
+  function frame(ts) {
+    if (!start) start = ts;
+    var t = ts - start;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(function(p) {
+      p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.vx *= 0.99; p.rot += p.vr;
+      ctx.save(); ctx.globalAlpha = Math.max(0, 1 - t / dur);
+      ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore();
+    });
+    if (t < dur) { requestAnimationFrame(frame); }
+    else { if (canvas.parentNode) canvas.parentNode.removeChild(canvas); }
+  }
+  requestAnimationFrame(frame);
+}
 function loadCheckMap() {
   try { return JSON.parse(localStorage.getItem(CHECK_KEY)) || {}; } catch (e) { return {}; }
 }
@@ -164,11 +199,11 @@ export default {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.openIndex = this.openIndex === i ? null : i;
     },
-    doCheck(text, evt) {
+    doCheck(text) {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.checkMap = Object.assign({}, this.checkMap, { [text]: Date.now() });
       localStorage.setItem(CHECK_KEY, JSON.stringify(this.checkMap));
-      triggerConfetti(evt && evt.currentTarget);
+      triggerConfetti();
     },
     checkLabel(text) {
       const ts = this.checkMap[text];
