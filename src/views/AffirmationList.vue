@@ -318,7 +318,13 @@ export default {
       this.editOriginalText = item.text;
       this.editText = item.text;
       this.editStep = 1;
-      this.editSlider = 70;
+      var savedResonance = null;
+      this.$store.getters.beliefs.forEach(function(belief) {
+        if (savedResonance !== null) return;
+        var aff = (belief.affirmations || []).find(function(a) { return a.text === item.text && a.resonance != null; });
+        if (aff) savedResonance = aff.resonance;
+      });
+      this.editSlider = savedResonance !== null ? savedResonance : 70;
       this.bridgeVersions = [];
       this.bridgeError = '';
       this.showBridgeKeyInput = false;
@@ -378,14 +384,15 @@ export default {
     saveEdit() {
       const oldText = this.editOriginalText;
       const newText = this.editText.trim();
+      const resonance = this.editSlider;
       this.isEditDialogShowing = false;
       this.editOriginalText = ''; this.editText = ''; this.editStep = 1;
       this.editSlider = 70; this.bridgeVersions = []; this.bridgeError = '';
-      if (!newText || newText === oldText) return;
+      if (!newText) return;
       this.$store.getters.beliefs.forEach((belief) => {
         if (!belief.affirmations || !belief.affirmations.length) return;
         if (belief.affirmations.some(a => a.text === oldText)) {
-          const updated = belief.affirmations.map(a => (a.text === oldText ? Object.assign({}, a, { text: newText }) : a));
+          const updated = belief.affirmations.map(a => (a.text === oldText ? Object.assign({}, a, { text: newText, resonance }) : a));
           this.$store.dispatch('updateBelief', Object.assign({}, belief, { affirmations: updated }));
         }
       });
