@@ -47,6 +47,10 @@
                 <p class="row-title">{{ item.text }}</p>
                 <div class="row-badges">
                   <span class="badge-pill">{{ item.beliefCount }} {{ item.beliefCount === 1 ? 'Überzeugung' : 'Überzeugungen' }}</span>
+                  <span v-if="item.progress != null" class="progress-pill">
+                    <span class="progress-fill" :style="{ width: item.progress + '%', background: progressColor(item.progress) }"></span>
+                    <span class="progress-label">{{ item.progress }} %</span>
+                  </span>
                   <span class="check-meta">{{ checkLabel(item.text) }}</span>
                 </div>
               </div>
@@ -125,6 +129,7 @@
 import moment from 'moment';
 
 const CHECK_KEY = 'nvc.check';
+const PROGRESS_KEY = 'nvc.progress';
 
 function triggerConfetti() {
   var canvas = document.createElement('canvas');
@@ -164,6 +169,9 @@ function triggerConfetti() {
 function loadCheckMap() {
   try { return JSON.parse(localStorage.getItem(CHECK_KEY)) || {}; } catch (e) { return {}; }
 }
+function loadProgressMap() {
+  try { return JSON.parse(localStorage.getItem(PROGRESS_KEY)) || {}; } catch (e) { return {}; }
+}
 
 export default {
   name: 'action-list',
@@ -176,6 +184,7 @@ export default {
       editOriginalText: '',
       editText: '',
       checkMap: loadCheckMap(),
+      progressMap: loadProgressMap(),
       sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
   },
@@ -191,7 +200,10 @@ export default {
           map[text].sources.push({ beliefText: belief.belief });
         });
       });
-      return Object.values(map).sort((a, b) => b.beliefCount - a.beliefCount);
+      const pm = this.progressMap;
+      return Object.values(map).map(item => Object.assign({}, item, {
+        progress: pm[item.text] != null ? pm[item.text] : null,
+      })).sort((a, b) => b.beliefCount - a.beliefCount);
     },
   },
   methods: {
@@ -203,7 +215,15 @@ export default {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.checkMap = Object.assign({}, this.checkMap, { [text]: Date.now() });
       localStorage.setItem(CHECK_KEY, JSON.stringify(this.checkMap));
+      var current = this.progressMap[text] != null ? this.progressMap[text] : 0;
+      this.progressMap = Object.assign({}, this.progressMap, { [text]: Math.min(100, current + 1) });
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify(this.progressMap));
       triggerConfetti();
+    },
+    progressColor(v) {
+      if (v >= 75) return '#4ade80';
+      if (v >= 50) return '#fbbf24';
+      return '#f87171';
     },
     checkLabel(text) {
       const ts = this.checkMap[text];
@@ -386,6 +406,31 @@ export default {
   padding: 1px 6px;
 }
 .check-meta { font-size: 0.75rem; color: #8e8e93; }
+.progress-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #2c2c2e;
+  min-width: 48px;
+}
+.progress-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  border-radius: 20px;
+  opacity: 0.35;
+}
+.progress-label {
+  position: relative;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #fff;
+  padding: 0 7px;
+  z-index: 1;
+  white-space: nowrap;
+}
 
 .check-btn {
   background: #4ade80;
