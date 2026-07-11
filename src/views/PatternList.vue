@@ -3,10 +3,10 @@
     <v-toolbar color="#000" dark flat app>
       <v-spacer></v-spacer>
       <v-btn icon @click="$router.push('/add-pattern')">
-        <v-icon color="#34c759">add</v-icon>
+        <v-icon color="#4ade80">add</v-icon>
       </v-btn>
       <v-btn icon @click="$router.push('/settings')">
-        <v-icon color="#34c759">settings</v-icon>
+        <v-icon color="#4ade80">settings</v-icon>
       </v-btn>
     </v-toolbar>
 
@@ -287,7 +287,7 @@ export default {
 }
 .confirm-cancel {
   flex: 1;
-  color: #34c759 !important;
+  color: #4ade80 !important;
   border-right: 1px solid #3a3a3c;
 }
 .confirm-delete {

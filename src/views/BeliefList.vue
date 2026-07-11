@@ -3,10 +3,10 @@
     <v-toolbar color="#000" dark flat app>
       <v-spacer></v-spacer>
       <v-btn icon @click="$router.push('/add-belief')">
-        <v-icon color="#34c759">add</v-icon>
+        <v-icon color="#4ade80">add</v-icon>
       </v-btn>
       <v-btn icon @click="$router.push('/settings')">
-        <v-icon color="#34c759">settings</v-icon>
+        <v-icon color="#4ade80">settings</v-icon>
       </v-btn>
     </v-toolbar>
 
@@ -61,13 +61,13 @@
             </div>
             <div class="row-actions">
               <v-btn icon small @click.stop="editEntry(entry)" class="row-action-btn">
-                <v-icon small :color="isComplete(entry) ? '#34c759' : '#636366'">edit</v-icon>
+                <v-icon small :color="isComplete(entry) ? '#4ade80' : '#636366'">edit</v-icon>
               </v-btn>
               <v-btn icon small @click.stop="empathyEntry(entry)" class="row-action-btn">
-                <v-icon small :color="entry.empathy ? '#34c759' : '#636366'">favorite</v-icon>
+                <v-icon small :color="entry.empathy ? '#4ade80' : '#636366'">favorite</v-icon>
               </v-btn>
               <v-btn icon small @click.stop="changeEntry(entry)" class="row-action-btn">
-                <v-icon small :color="hasChangeData(entry) ? '#34c759' : '#636366'">autorenew</v-icon>
+                <v-icon small :color="hasChangeData(entry) ? '#4ade80' : '#636366'">autorenew</v-icon>
               </v-btn>
               <v-btn icon small @click.stop="preDelete(entry)" class="row-action-btn">
                 <v-icon small color="#636366">delete</v-icon>
@@ -290,7 +290,7 @@ export default {
   &.active {
     color: #fff;
     font-weight: 600;
-    &::after { background: #34c759; }
+    &::after { background: #4ade80; }
   }
 }
 
@@ -421,7 +421,7 @@ export default {
   padding: 16px !important;
 }
 .confirm-actions { padding: 0 !important; display: flex; }
-.confirm-cancel { flex: 1; color: #34c759 !important; border-right: 1px solid #3a3a3c; }
+.confirm-cancel { flex: 1; color: #4ade80 !important; border-right: 1px solid #3a3a3c; }
 .confirm-delete { flex: 1; color: #ff453a !important; font-weight: 600 !important; }
 
 .dark-nav { border-top: 1px solid #2c2c2e !important; }

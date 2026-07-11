@@ -2,7 +2,7 @@
   <div class="dark-page">
     <v-toolbar color="#000" dark flat app>
       <v-btn icon @click="$router.back()">
-        <v-icon color="#34c759">arrow_back</v-icon>
+        <v-icon color="#4ade80">arrow_back</v-icon>
       </v-btn>
       <v-toolbar-title>Einstellungen</v-toolbar-title>
     </v-toolbar>
@@ -44,7 +44,7 @@
             <p class="settings-label">Exportieren</p>
             <p class="settings-sub">Alle Daten als JSON herunterladen</p>
           </div>
-          <v-icon color="#34c759">file_download</v-icon>
+          <v-icon color="#4ade80">file_download</v-icon>
         </div>
         <div class="settings-sep"></div>
         <div class="settings-row tappable" @click="triggerImport">
@@ -52,7 +52,7 @@
             <p class="settings-label">Importieren</p>
             <p class="settings-sub">JSON-Datei laden (überschreibt bestehende Daten)</p>
           </div>
-          <v-icon color="#34c759">file_upload</v-icon>
+          <v-icon color="#4ade80">file_upload</v-icon>
         </div>
         <input ref="fileInput" type="file" accept=".json" style="display:none" @change="importData">
         <p v-if="importError" class="feedback-text error-text">{{ importError }}</p>
@@ -225,7 +225,7 @@ export default {
   margin: 0 0 0 16px;
 }
 .save-btn {
-  background: #34c759;
+  background: #4ade80;
   color: #000;
   border: none;
   border-radius: 10px;
@@ -245,7 +245,7 @@ export default {
   margin: 0;
 }
 .error-text { color: #ff453a; }
-.success-text { color: #34c759; }
+.success-text { color: #4ade80; }
 
 .confirm-dialog { border-radius: 14px !important; overflow: hidden; }
 .confirm-title {
@@ -262,6 +262,6 @@ export default {
   padding: 8px 16px 16px !important;
 }
 .confirm-actions { padding: 0 !important; display: flex; }
-.confirm-cancel { flex: 1; color: #34c759 !important; border-right: 1px solid #3a3a3c; }
+.confirm-cancel { flex: 1; color: #4ade80 !important; border-right: 1px solid #3a3a3c; }
 .confirm-delete { flex: 1; color: #ff453a !important; font-weight: 600 !important; }
 </style>

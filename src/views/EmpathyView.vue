@@ -3,7 +3,7 @@
     <v-toolbar color="#000" dark flat app>
       <v-spacer></v-spacer>
       <v-btn icon @click="$router.push('/settings')">
-        <v-icon color="#34c759">settings</v-icon>
+        <v-icon color="#4ade80">settings</v-icon>
       </v-btn>
     </v-toolbar>
 
@@ -232,7 +232,7 @@ export default {
   gap: 8px;
 }
 .primary-btn {
-  background: #34c759;
+  background: #4ade80;
   color: #000;
   border: none;
   border-radius: 12px;
@@ -243,12 +243,12 @@ export default {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   &:disabled { opacity: 0.35; cursor: not-allowed; }
-  &:active:not(:disabled) { background: #30d158; transform: scale(0.98); }
+  &:active:not(:disabled) { background: #3dcc70; transform: scale(0.98); }
 }
 .ghost-btn {
   background: none;
   border: none;
-  color: #34c759;
+  color: #4ade80;
   font-size: 0.95rem;
   font-family: inherit;
   cursor: pointer;

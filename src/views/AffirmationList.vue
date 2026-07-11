@@ -3,7 +3,7 @@
     <v-toolbar color="#000" dark flat app>
       <v-spacer></v-spacer>
       <v-btn icon @click="$router.push('/settings')">
-        <v-icon color="#34c759">settings</v-icon>
+        <v-icon color="#4ade80">settings</v-icon>
       </v-btn>
     </v-toolbar>
 
@@ -353,7 +353,7 @@ export default {
 }
 
 .amen-btn {
-  background: #34c759;
+  background: #4ade80;
   color: #000;
   border: none;
   border-radius: 20px;
@@ -364,7 +364,7 @@ export default {
   cursor: pointer;
   flex-shrink: 0;
   -webkit-tap-highlight-color: transparent;
-  &:active { background: #30d158; transform: scale(0.97); }
+  &:active { background: #3dcc70; transform: scale(0.97); }
 }
 
 .ios-sep {
@@ -423,7 +423,7 @@ export default {
   padding: 16px !important;
 }
 .confirm-actions { padding: 0 !important; display: flex; }
-.confirm-cancel { flex: 1; color: #34c759 !important; border-right: 1px solid #3a3a3c; }
+.confirm-cancel { flex: 1; color: #4ade80 !important; border-right: 1px solid #3a3a3c; }
 .confirm-delete { flex: 1; color: #ff453a !important; font-weight: 600 !important; }
 
 .dark-nav { border-top: 1px solid #2c2c2e !important; }

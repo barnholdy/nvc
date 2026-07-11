@@ -42,12 +42,12 @@ Vue.use(Vuetify, {
     transitions,
   },
   theme: {
-    primary: '#34c759',
-    secondary: '#30d158',
-    accent: '#34c759',
+    primary: '#4ade80',
+    secondary: '#3dcc70',
+    accent: '#4ade80',
     error: '#ff453a',
     warning: '#ffd60a',
     info: '#0a84ff',
-    success: '#34c759',
+    success: '#4ade80',
   },
 });

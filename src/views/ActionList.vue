@@ -3,7 +3,7 @@
     <v-toolbar color="#000" dark flat app>
       <v-spacer></v-spacer>
       <v-btn icon @click="$router.push('/settings')">
-        <v-icon color="#34c759">settings</v-icon>
+        <v-icon color="#4ade80">settings</v-icon>
       </v-btn>
     </v-toolbar>
 
@@ -190,10 +190,10 @@ export default {
 }
 .row-action-btn { margin: 0 !important; }
 .count-badge {
-  color: #34c759;
+  color: #4ade80;
   font-size: 0.8rem;
   font-weight: 700;
-  border: 1.5px solid #34c759;
+  border: 1.5px solid #4ade80;
   border-radius: 20px;
   padding: 1px 7px;
   min-width: 22px;
@@ -252,7 +252,7 @@ export default {
   padding: 16px !important;
 }
 .confirm-actions { padding: 0 !important; display: flex; }
-.confirm-cancel { flex: 1; color: #34c759 !important; border-right: 1px solid #3a3a3c; }
+.confirm-cancel { flex: 1; color: #4ade80 !important; border-right: 1px solid #3a3a3c; }
 .confirm-delete { flex: 1; color: #ff453a !important; font-weight: 600 !important; }
 
 .dark-nav { border-top: 1px solid #2c2c2e !important; }
