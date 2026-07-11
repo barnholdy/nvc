@@ -1,68 +1,78 @@
 <template>
-  <div class="pattern-list">
-    <v-toolbar color="white" app>
-      <v-toolbar-title>Meine Trigger</v-toolbar-title>
+  <div class="dark-page">
+    <v-toolbar color="#000" dark flat app>
       <v-spacer></v-spacer>
-      <v-btn icon to="/add-pattern">
-        <v-icon>add</v-icon>
+      <v-btn icon @click="$router.push('/add-pattern')">
+        <v-icon color="#34c759">add</v-icon>
       </v-btn>
-      <v-btn icon to="/settings">
-        <v-icon>settings</v-icon>
+      <v-btn icon @click="$router.push('/settings')">
+        <v-icon color="#34c759">settings</v-icon>
       </v-btn>
     </v-toolbar>
+
     <v-content>
-      <div class="intro-text body-1 grey--text">
-        <p><em>Zwischen Reiz und Reaktion liegt ein Raum. In diesem Raum liegt unsere Macht, unsere Reaktion zu wählen. In unserer Reaktion liegen unser Wachstum und unsere Freiheit.</em></p>
+      <div class="page-title-area">
+        <h1 class="page-title">Meine Trigger</h1>
       </div>
 
-      <v-card class="entry" v-for="entry in patterns" v-bind:key="entry.time">
-        <v-card-title class="header" @click="toggle(entry.time)">
-          <p class="subheading belief-title mb-1">{{ entry.name }}</p>
-          <div class="header-bottom">
-            <div class="header-meta">
-              <p class="caption grey--text mb-0">{{ formatTime(entry.time) }}</p>
+      <div v-if="patterns.length === 0" class="empty-state">
+        <span class="empty-icon">⚡</span>
+        <p class="empty-title">Noch keine Trigger</p>
+        <p class="empty-sub">Tippe auf + um einen neuen Trigger hinzuzufügen.</p>
+      </div>
+
+      <div v-else class="ios-list">
+        <template v-for="(entry, idx) in patterns">
+          <div
+            :key="entry.time + '-row'"
+            class="ios-row"
+            @click="toggle(entry.time)"
+          >
+            <div class="row-body">
+              <p class="row-title">{{ entry.name }}</p>
+              <p class="row-meta">{{ formatTime(entry.time) }}</p>
             </div>
-            <div class="header-actions">
-              <v-btn icon small @click.stop="editEntry(entry)">
-                <v-icon color="grey darken-2">edit</v-icon>
+            <div class="row-actions">
+              <v-btn icon small @click.stop="editEntry(entry)" class="row-action-btn">
+                <v-icon small color="#636366">edit</v-icon>
               </v-btn>
-              <v-btn icon small @click.stop="preDelete(entry)">
-                <v-icon color="grey darken-2">delete</v-icon>
+              <v-btn icon small @click.stop="preDelete(entry)" class="row-action-btn">
+                <v-icon small color="#636366">delete</v-icon>
               </v-btn>
+              <v-icon class="row-chevron" :class="{ rotated: openEntry === entry.time }">chevron_right</v-icon>
             </div>
           </div>
-        </v-card-title>
-        <template v-if="openEntry === entry.time">
-          <v-divider></v-divider>
-          <v-card-text>
+          <div
+            v-if="openEntry === entry.time"
+            :key="entry.time + '-expand'"
+            class="row-expand"
+          >
             <template v-if="entry.trigger">
-              <p class="section-label caption grey--text">Situation</p>
-              <p class="body-1">{{ entry.trigger }}</p>
+              <p class="expand-label">Situation</p>
+              <p class="expand-text">{{ entry.trigger }}</p>
             </template>
             <template v-if="getBeliefs(entry).length">
-              <p class="section-label caption grey--text mt-2">Überzeugungen</p>
-              <p v-for="(b, idx) in getBeliefs(entry)" :key="idx" class="body-1 mb-1">{{ b.belief }}</p>
+              <p class="expand-label" :class="entry.trigger ? 'mt-3' : ''">Überzeugungen</p>
+              <p v-for="(b, i) in getBeliefs(entry)" :key="i" class="expand-text mb-1">{{ b.belief }}</p>
             </template>
-          </v-card-text>
+          </div>
+          <div :key="entry.time + '-sep'" class="ios-sep" v-if="idx < patterns.length - 1"></div>
         </template>
-      </v-card>
+      </div>
 
-      <v-dialog v-model="isDeleteDialogShowing" width="500">
-        <v-card>
-          <v-card-title class="subheading" primary-title>
-            Eintrag wirklich löschen?
-          </v-card-title>
+      <v-dialog v-model="isDeleteDialogShowing" width="300">
+        <v-card class="confirm-dialog">
+          <v-card-title class="confirm-title">Eintrag löschen?</v-card-title>
           <v-divider></v-divider>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="secondary" flat @click="cancelDelete">abbrechen</v-btn>
-            <v-btn color="red" flat @click="confirmDelete">löschen</v-btn>
+          <v-card-actions class="confirm-actions">
+            <v-btn flat @click="cancelDelete" class="confirm-cancel">Abbrechen</v-btn>
+            <v-btn flat @click="confirmDelete" class="confirm-delete">Löschen</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
     </v-content>
 
-    <v-bottom-nav :value="true" fixed app color="white" class="elevation-3">
+    <v-bottom-nav :value="true" fixed app color="#1c1c1e" class="dark-nav">
       <v-btn flat color="primary" to="/patterns">
         <span>Trigger</span>
         <v-icon>bolt</v-icon>
@@ -103,22 +113,20 @@ export default {
     patterns() {
       return this.$store.getters.patterns
         .concat()
-        .sort(function(a, b) { return b.time - a.time; });
+        .sort((a, b) => b.time - a.time);
     },
   },
   methods: {
     getBeliefs(entry) {
-      var beliefs = this.$store.getters.beliefs;
-      var ids = entry.beliefs || [];
-      return ids.map(function(id) {
-        return beliefs.find(function(b) { return b.time === id; });
-      }).filter(Boolean);
+      const beliefs = this.$store.getters.beliefs;
+      const ids = entry.beliefs || [];
+      return ids.map(id => beliefs.find(b => b.time === id)).filter(Boolean);
     },
     toggle(time) {
       this.openEntry = this.openEntry === time ? null : time;
     },
     editEntry(entry) {
-      this.$router.push('/edit-pattern/' + entry.time);
+      this.$router.push(`/edit-pattern/${entry.time}`);
     },
     preDelete(entry) {
       this.entryToDelete = entry;
@@ -135,47 +143,165 @@ export default {
     },
     formatTime(time) {
       moment.locale('de');
-      return moment(time).format('llll');
+      return moment(time).fromNow();
     },
   },
 };
 </script>
 
 <style scoped lang="scss">
-.intro-text {
-  margin: 1rem;
-  line-height: 1.6;
+.dark-page {
+  background: #000;
+  min-height: 100vh;
 }
-.entry {
-  margin: 1rem;
+
+.page-title-area {
+  padding: 8px 20px 16px;
 }
-.header {
-  cursor: pointer;
-  user-select: none;
-  flex-direction: column;
-  align-items: stretch;
-  padding-bottom: 8px;
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.5px;
+  margin: 0;
 }
-.belief-title {
-  white-space: normal;
-  word-break: break-word;
+
+.ios-list {
+  background: #1c1c1e;
+  border-radius: 12px;
+  margin: 0 16px 24px;
+  overflow: hidden;
 }
-.header-bottom {
+
+.ios-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  padding: 13px 16px 13px 20px;
+  background: #1c1c1e;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    background: #2c2c2e;
+  }
 }
-.header-meta {
+.row-body {
   flex: 1;
   min-width: 0;
 }
-.header-actions {
+.row-title {
+  font-size: 1rem;
+  color: #fff;
+  margin: 0;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.4;
+}
+.row-meta {
+  font-size: 0.78rem;
+  color: #8e8e93;
+  margin: 2px 0 0;
+}
+.row-actions {
   display: flex;
   align-items: center;
   flex-shrink: 0;
+  gap: 0px;
 }
-.section-label {
+.row-action-btn {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.row-chevron {
+  color: #636366 !important;
+  font-size: 1.2rem !important;
+  transition: transform 0.2s ease;
+  margin-left: 4px;
+  &.rotated { transform: rotate(90deg); }
+}
+
+.ios-sep {
+  height: 1px;
+  background: #2c2c2e;
+  margin-left: 20px;
+}
+
+.row-expand {
+  background: #141416;
+  padding: 14px 20px 16px;
+  border-top: 1px solid #2c2c2e;
+}
+.expand-label {
+  font-size: 0.7rem;
+  color: #8e8e93;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
+  margin: 0 0 4px;
+  font-weight: 600;
+}
+.expand-text {
+  font-size: 0.95rem;
+  color: #ebebf5;
+  margin: 0;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+.mt-3 { margin-top: 12px !important; }
+.mb-1 { margin-bottom: 4px !important; }
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 5rem 2rem;
+  text-align: center;
+}
+.empty-icon {
+  font-size: 3rem;
+  opacity: 0.3;
+  display: block;
+  margin-bottom: 16px;
+}
+.empty-title {
+  font-size: 1.1rem;
+  color: #fff;
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+.empty-sub {
+  font-size: 0.875rem;
+  color: #8e8e93;
+  margin: 0;
+}
+
+.confirm-dialog {
+  border-radius: 14px !important;
+  overflow: hidden;
+}
+.confirm-title {
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  color: #fff !important;
+  justify-content: center !important;
+  padding: 16px !important;
+}
+.confirm-actions {
+  padding: 0 !important;
+  display: flex;
+}
+.confirm-cancel {
+  flex: 1;
+  color: #34c759 !important;
+  border-right: 1px solid #3a3a3c;
+}
+.confirm-delete {
+  flex: 1;
+  color: #ff453a !important;
+  font-weight: 600 !important;
+}
+
+.dark-nav {
+  border-top: 1px solid #2c2c2e !important;
 }
 </style>

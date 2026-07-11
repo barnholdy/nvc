@@ -1,81 +1,76 @@
 <template>
-  <div class="affirmation-list">
-    <v-toolbar color="white" app>
-      <v-toolbar-title>Affirmationen</v-toolbar-title>
+  <div class="dark-page">
+    <v-toolbar color="#000" dark flat app>
       <v-spacer></v-spacer>
-      <v-btn icon to="/settings">
-        <v-icon>settings</v-icon>
+      <v-btn icon @click="$router.push('/settings')">
+        <v-icon color="#34c759">settings</v-icon>
       </v-btn>
     </v-toolbar>
+
     <v-content>
-      <div class="intro-text body-1 grey--text">
-        <p><em>Die Kraft von Affirmationen liegt in der Neuroplastizität — der Fähigkeit des Gehirns, sich durch wiederholte Denkmuster neu zu vernetzen. Wenn du positive Aussagen bewusst wiederholst, stärkst du neuronale Bahnen, die mit Selbstvertrauen verbunden sind, reduzierst Stress und trainierst deinen Geist, sich auf Lösungen statt auf Einschränkungen zu fokussieren.</em></p>
+      <div class="page-title-area">
+        <h1 class="page-title">Affirmationen</h1>
       </div>
-      <template v-if="affirmations.length">
-        <v-card
-          class="affirmation-card"
-          v-for="(item, i) in affirmations"
-          :key="item.text"
-        >
-          <v-card-title class="affirmation-header" @click="toggle(i)">
-            <p class="body-1 affirmation-text mb-0">{{ item.text }}</p>
-            <div class="header-actions">
-              <span class="count-badge">{{ item.beliefCount }}</span>
-              <v-btn icon small @click.stop="startEdit(item)">
-                <v-icon color="grey darken-2">edit</v-icon>
+
+      <!-- Header card — like "Time to pray" -->
+      <div v-if="affirmations.length" class="reminder-card">
+        <span class="reminder-icon">✨</span>
+        <p class="reminder-title">Zeit für Affirmationen</p>
+        <p class="reminder-sub">Deine Affirmationen warten auf dich</p>
+      </div>
+
+      <div v-if="affirmations.length === 0" class="empty-state">
+        <span class="empty-icon">✨</span>
+        <p class="empty-title">Noch keine Affirmationen</p>
+        <p class="empty-sub">Füge Affirmationen zu deinen Überzeugungen hinzu.</p>
+      </div>
+
+      <div v-else class="reminder-list">
+        <template v-for="(item, i) in affirmations">
+          <div :key="item.text + '-row'" class="reminder-row" @click="toggle(i)">
+            <div class="reminder-row-body">
+              <p class="reminder-text">{{ item.text }}</p>
+              <p class="reminder-meta">{{ amenLabel(item.text) }}</p>
+            </div>
+            <button class="amen-btn" @click.stop="sayAmen(item.text)">Amen</button>
+          </div>
+          <div :key="item.text + '-expand'" v-if="openIndex === i" class="row-expand">
+            <p class="expand-label">Überzeugungen</p>
+            <p v-for="(s, j) in item.sources" :key="j" class="expand-text mb-1">„{{ s.beliefText }}"</p>
+            <div class="expand-actions">
+              <v-btn icon small @click.stop="startEdit(item)" class="row-action-btn">
+                <v-icon small color="#636366">edit</v-icon>
               </v-btn>
-              <v-btn icon small @click.stop="preDelete(item)">
-                <v-icon color="grey darken-2">delete</v-icon>
+              <v-btn icon small @click.stop="preDelete(item)" class="row-action-btn">
+                <v-icon small color="#636366">delete</v-icon>
               </v-btn>
             </div>
-          </v-card-title>
-          <template v-if="openIndex === i">
-            <v-divider></v-divider>
-            <v-card-text>
-              <p class="caption grey--text mb-1 section-label">Überzeugungen</p>
-              <p v-for="(s, j) in item.sources" :key="j" class="body-1 belief-quote mb-1">„{{ s.beliefText }}"</p>
-            </v-card-text>
-          </template>
-        </v-card>
-      </template>
-
-      <div v-else class="empty-state">
-        <v-icon large color="grey lighten-2">stars</v-icon>
-        <p class="body-1 grey--text mt-2">Noch keine Affirmationen vorhanden.</p>
-        <p class="caption grey--text">Füge Affirmationen zu deinen Überzeugungen hinzu.</p>
+          </div>
+          <div :key="item.text + '-sep'" class="ios-sep" v-if="i < affirmations.length - 1 && openIndex !== i"></div>
+        </template>
       </div>
 
-      <!-- Edit wizard (fullscreen, 2 steps) -->
+      <!-- Edit dialog -->
       <v-dialog v-model="isEditDialogShowing" fullscreen>
         <v-card>
-          <v-toolbar color="white" app>
+          <v-toolbar color="#000" dark flat app>
             <v-btn icon @click="editStep === 1 ? cancelEdit() : prevEditStep()">
               <v-icon>{{ editStep === 1 ? 'close' : 'chevron_left' }}</v-icon>
             </v-btn>
             <v-toolbar-title>Affirmation bearbeiten</v-toolbar-title>
             <v-spacer></v-spacer>
-            <span class="grey--text body-1">{{ editStep }} / 2</span>
+            <span class="step-count">{{ editStep }} / 2</span>
           </v-toolbar>
           <v-container class="mt-4">
-
-            <!-- Step 1: Text -->
             <v-layout v-show="editStep === 1" column>
               <v-flex class="mt-2 mb-3">
                 <h1 class="headline font-weight-regular">Affirmation</h1>
                 <p class="body-1 grey--text mt-2">Formuliere eine positive, kraftvolle Aussage im Präsens.</p>
               </v-flex>
               <v-flex>
-                <v-textarea
-                  v-model="editText"
-                  placeholder="..."
-                  auto-grow
-                  rows="4"
-                  hide-details
-                ></v-textarea>
+                <v-textarea v-model="editText" placeholder="..." auto-grow rows="4" hide-details></v-textarea>
               </v-flex>
             </v-layout>
-
-            <!-- Step 2: Beliefs -->
             <v-layout v-show="editStep === 2" column>
               <v-flex class="mt-2 mb-3">
                 <h1 class="headline font-weight-regular">Überzeugungen</h1>
@@ -108,31 +103,27 @@
                 </v-menu>
               </v-flex>
             </v-layout>
-
           </v-container>
-          <v-footer fixed color="white elevation-3" height="44">
+          <v-footer fixed color="#1c1c1e" height="56">
             <v-btn v-if="editStep === 1" :disabled="!editText.trim()" @click="nextEditStep" block large color="primary">weiter</v-btn>
             <v-btn v-else @click="saveEdit" block large color="primary">speichern</v-btn>
           </v-footer>
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="isDeleteDialogShowing" width="500">
-        <v-card>
-          <v-card-title class="subheading" primary-title>
-            Affirmation wirklich löschen?
-          </v-card-title>
+      <v-dialog v-model="isDeleteDialogShowing" width="300">
+        <v-card class="confirm-dialog">
+          <v-card-title class="confirm-title">Affirmation löschen?</v-card-title>
           <v-divider></v-divider>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="secondary" flat @click="cancelDelete">abbrechen</v-btn>
-            <v-btn color="red" flat @click="confirmDelete">löschen</v-btn>
+          <v-card-actions class="confirm-actions">
+            <v-btn flat @click="cancelDelete" class="confirm-cancel">Abbrechen</v-btn>
+            <v-btn flat @click="confirmDelete" class="confirm-delete">Löschen</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
     </v-content>
 
-    <v-bottom-nav :value="true" fixed app color="white" class="elevation-3">
+    <v-bottom-nav :value="true" fixed app color="#1c1c1e" class="dark-nav">
       <v-btn flat color="grey" to="/patterns">
         <span>Trigger</span>
         <v-icon>bolt</v-icon>
@@ -158,6 +149,14 @@
 </template>
 
 <script>
+import moment from 'moment';
+
+const AMEN_KEY = 'nvc.amen';
+
+function loadAmenMap() {
+  try { return JSON.parse(localStorage.getItem(AMEN_KEY)) || {}; } catch (e) { return {}; }
+}
+
 export default {
   name: 'affirmation-list',
   data() {
@@ -169,44 +168,47 @@ export default {
       editText: '',
       itemToDelete: null,
       isDeleteDialogShowing: false,
+      amenMap: loadAmenMap(),
     };
   },
   computed: {
     affirmations() {
-      var map = {};
-      this.$store.getters.beliefs.forEach(function(belief) {
+      const map = {};
+      this.$store.getters.beliefs.forEach((belief) => {
         if (!belief.affirmations || !belief.affirmations.length) return;
-        belief.affirmations.forEach(function(a, idx) {
+        belief.affirmations.forEach((a) => {
           if (!a.text) return;
-          if (!map[a.text]) {
-            map[a.text] = { text: a.text, beliefCount: 0, sources: [] };
-          }
+          if (!map[a.text]) map[a.text] = { text: a.text, beliefCount: 0, sources: [] };
           map[a.text].beliefCount += 1;
-          map[a.text].sources.push({ beliefTime: belief.time, affirmationIndex: idx, beliefText: belief.belief });
+          map[a.text].sources.push({ beliefTime: belief.time, beliefText: belief.belief });
         });
       });
-      var result = [];
-      Object.keys(map).forEach(function(key) { result.push(map[key]); });
-      return result.sort(function(a, b) { return b.beliefCount - a.beliefCount; });
+      return Object.values(map).sort((a, b) => b.beliefCount - a.beliefCount);
     },
     currentEditAffirmation() {
-      var key = this.editOriginalText;
+      const key = this.editOriginalText;
       if (!key) return null;
-      var found = null;
-      this.affirmations.forEach(function(a) { if (a.text === key) found = a; });
-      return found;
+      return this.affirmations.find(a => a.text === key) || null;
     },
     unlinkedBeliefsForEdit() {
       if (!this.currentEditAffirmation) return [];
-      var linkedTimes = this.currentEditAffirmation.sources.map(function(s) { return s.beliefTime; });
-      return this.$store.getters.beliefs.filter(function(b) {
-        return linkedTimes.indexOf(b.time) === -1;
-      });
+      const linked = this.currentEditAffirmation.sources.map(s => s.beliefTime);
+      return this.$store.getters.beliefs.filter(b => linked.indexOf(b.time) === -1);
     },
   },
   methods: {
     toggle(i) {
       this.openIndex = this.openIndex === i ? null : i;
+    },
+    sayAmen(text) {
+      this.amenMap = Object.assign({}, this.amenMap, { [text]: Date.now() });
+      localStorage.setItem(AMEN_KEY, JSON.stringify(this.amenMap));
+    },
+    amenLabel(text) {
+      const ts = this.amenMap[text];
+      if (!ts) return 'Noch nicht gesagt';
+      moment.locale('de');
+      return moment(ts).fromNow();
     },
     startEdit(item) {
       this.editOriginalText = item.text;
@@ -214,12 +216,8 @@ export default {
       this.editStep = 1;
       this.isEditDialogShowing = true;
     },
-    nextEditStep() {
-      this.editStep = 2;
-    },
-    prevEditStep() {
-      this.editStep = 1;
-    },
+    nextEditStep() { this.editStep = 2; },
+    prevEditStep() { this.editStep = 1; },
     cancelEdit() {
       this.isEditDialogShowing = false;
       this.editOriginalText = '';
@@ -227,33 +225,29 @@ export default {
       this.editStep = 1;
     },
     saveEdit() {
-      var oldText = this.editOriginalText;
-      var newText = this.editText.trim();
+      const oldText = this.editOriginalText;
+      const newText = this.editText.trim();
       this.isEditDialogShowing = false;
       this.editOriginalText = '';
       this.editText = '';
       this.editStep = 1;
       if (!newText || newText === oldText) return;
-      var self = this;
-      this.$store.getters.beliefs.forEach(function(belief) {
+      this.$store.getters.beliefs.forEach((belief) => {
         if (!belief.affirmations || !belief.affirmations.length) return;
-        if (belief.affirmations.some(function(a) { return a.text === oldText; })) {
-          var updated = belief.affirmations.map(function(a) {
-            return a.text === oldText ? Object.assign({}, a, { text: newText }) : a;
-          });
-          self.$store.dispatch('updateBelief', Object.assign({}, belief, { affirmations: updated }));
+        if (belief.affirmations.some(a => a.text === oldText)) {
+          const updated = belief.affirmations.map(a => (a.text === oldText ? Object.assign({}, a, { text: newText }) : a));
+          this.$store.dispatch('updateBelief', Object.assign({}, belief, { affirmations: updated }));
         }
       });
     },
     addBeliefToAffirmation(text, belief) {
-      var existing = belief.affirmations || [];
-      var updated = existing.concat([{ text: text }]);
+      const updated = (belief.affirmations || []).concat([{ text }]);
       this.$store.dispatch('updateBelief', Object.assign({}, belief, { affirmations: updated }));
     },
     removeBeliefFromAffirmation(text, beliefTime) {
-      var belief = this.$store.getters.beliefs.find(function(b) { return b.time === beliefTime; });
+      const belief = this.$store.getters.beliefs.find(b => b.time === beliefTime);
       if (!belief) return;
-      var updated = (belief.affirmations || []).filter(function(a) { return a.text !== text; });
+      const updated = (belief.affirmations || []).filter(a => a.text !== text);
       this.$store.dispatch('updateBelief', Object.assign({}, belief, { affirmations: updated }));
     },
     preDelete(item) {
@@ -266,78 +260,176 @@ export default {
     },
     confirmDelete() {
       this.isDeleteDialogShowing = false;
-      var text = this.itemToDelete ? this.itemToDelete.text : null;
+      const text = this.itemToDelete ? this.itemToDelete.text : null;
       this.itemToDelete = null;
       if (!text) return;
-      var self = this;
-      this.$store.getters.beliefs.forEach(function(belief) {
+      this.$store.getters.beliefs.forEach((belief) => {
         if (!belief.affirmations || !belief.affirmations.length) return;
-        if (belief.affirmations.some(function(a) { return a.text === text; })) {
-          var updated = belief.affirmations.filter(function(a) { return a.text !== text; });
-          self.$store.dispatch('updateBelief', Object.assign({}, belief, { affirmations: updated }));
+        if (belief.affirmations.some(a => a.text === text)) {
+          const updated = belief.affirmations.filter(a => a.text !== text);
+          this.$store.dispatch('updateBelief', Object.assign({}, belief, { affirmations: updated }));
         }
       });
-      self.openIndex = null;
+      this.openIndex = null;
     },
   },
 };
 </script>
 
 <style scoped lang="scss">
-.intro-text {
-  margin: 1rem;
-  line-height: 1.6;
+.dark-page {
+  background: #000;
+  min-height: 100vh;
 }
-.affirmation-card {
-  margin: 1rem;
+
+.page-title-area {
+  padding: 8px 20px 16px;
 }
-.affirmation-header {
-  cursor: pointer;
-  user-select: none;
-  align-items: flex-start !important;
-  padding: 12px 16px !important;
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+/* ─── "Time to pray" card ─── */
+.reminder-card {
+  background: #1c1c1e;
+  border-radius: 16px;
+  margin: 0 16px 20px;
+  padding: 28px 20px;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
-.affirmation-text {
-  white-space: normal;
-  word-break: break-word;
-  line-height: 1.5;
-  flex: 1;
-  margin-right: 8px;
+.reminder-icon {
+  font-size: 2.4rem;
+  display: block;
+  margin-bottom: 12px;
 }
-.header-actions {
+.reminder-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 4px;
+}
+.reminder-sub {
+  font-size: 0.875rem;
+  color: #8e8e93;
+  margin: 0;
+}
+
+/* ─── Reminder list ─── */
+.reminder-list {
+  background: #1c1c1e;
+  border-radius: 12px;
+  margin: 0 16px 24px;
+  overflow: hidden;
+}
+.reminder-row {
   display: flex;
   align-items: center;
-  flex-shrink: 0;
-  gap: 4px;
+  padding: 14px 16px 14px 20px;
+  background: #1c1c1e;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  &:active { background: #2c2c2e; }
 }
-.count-badge {
-  color: #00838f;
-  font-size: 0.85rem;
-  font-weight: bold;
-  min-width: 18px;
-  text-align: center;
-  border: 1.5px solid #00838f;
+.reminder-row-body {
+  flex: 1;
+  min-width: 0;
+  margin-right: 12px;
+}
+.reminder-text {
+  font-size: 0.95rem;
+  color: #fff;
+  margin: 0 0 3px;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.4;
+}
+.reminder-meta {
+  font-size: 0.78rem;
+  color: #8e8e93;
+  margin: 0;
+}
+
+.amen-btn {
+  background: #34c759;
+  color: #000;
+  border: none;
   border-radius: 20px;
-  padding: 2px 6px;
+  padding: 7px 18px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  &:active { background: #30d158; transform: scale(0.97); }
 }
-.belief-chips {
-  display: flex;
-  flex-wrap: wrap;
+
+.ios-sep {
+  height: 1px;
+  background: #2c2c2e;
+  margin-left: 20px;
 }
-.belief-quote {
+
+.row-expand {
+  background: #141416;
+  padding: 14px 20px 16px;
+  border-top: 1px solid #2c2c2e;
+}
+.expand-label {
+  font-size: 0.68rem;
+  color: #8e8e93;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+.expand-text {
+  font-size: 0.93rem;
+  color: #ebebf5;
+  margin: 0;
+  line-height: 1.5;
   font-style: italic;
 }
-.section-label {
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+.expand-actions {
+  display: flex;
+  margin-top: 8px;
 }
+.row-action-btn { margin: 0 !important; }
+.mb-1 { margin-bottom: 4px !important; }
+.belief-chips { display: flex; flex-wrap: wrap; }
+
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 4rem 2rem;
+  padding: 5rem 2rem;
   text-align: center;
 }
+.empty-icon { font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 16px; }
+.empty-title { font-size: 1.1rem; color: #fff; font-weight: 600; margin: 0 0 6px; }
+.empty-sub { font-size: 0.875rem; color: #8e8e93; margin: 0; }
+
+.step-count { color: #8e8e93; font-size: 0.9rem; }
+
+.confirm-dialog { border-radius: 14px !important; overflow: hidden; }
+.confirm-title {
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  color: #fff !important;
+  justify-content: center !important;
+  padding: 16px !important;
+}
+.confirm-actions { padding: 0 !important; display: flex; }
+.confirm-cancel { flex: 1; color: #34c759 !important; border-right: 1px solid #3a3a3c; }
+.confirm-delete { flex: 1; color: #ff453a !important; font-weight: 600 !important; }
+
+.dark-nav { border-top: 1px solid #2c2c2e !important; }
 </style>

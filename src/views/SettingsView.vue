@@ -1,86 +1,89 @@
 <template>
-  <div>
-    <v-toolbar color="white" app>
+  <div class="dark-page">
+    <v-toolbar color="#000" dark flat app>
       <v-btn icon @click="$router.back()">
-        <v-icon>arrow_back</v-icon>
+        <v-icon color="#34c759">arrow_back</v-icon>
       </v-btn>
       <v-toolbar-title>Einstellungen</v-toolbar-title>
     </v-toolbar>
+
     <v-content>
-      <v-container class="mb-5">
-        <v-layout column>
+      <div class="page-title-area">
+        <h1 class="page-title">Einstellungen</h1>
+      </div>
 
-          <v-flex class="mt-3 mb-2">
-            <p class="subheading font-weight-medium">Anthropic API Key</p>
-            <p class="body-1 grey--text mb-2">Wird für die KI-gestützte Empathie und Vorschläge benötigt.</p>
-            <v-text-field
-              v-model="apiKey"
-              label="API Key"
-              type="password"
-              single-line
-              outline
-              hide-details
-              class="mb-2"
-            ></v-text-field>
-            <v-btn flat color="primary" :disabled="!apiKeyChanged" @click="saveApiKey">Speichern</v-btn>
-          </v-flex>
+      <!-- API Key -->
+      <p class="section-header">KI</p>
+      <div class="settings-group">
+        <div class="settings-row">
+          <div class="settings-row-body">
+            <p class="settings-label">Anthropic API Key</p>
+            <p class="settings-sub">Für KI-gestützte Empathie und Vorschläge</p>
+          </div>
+        </div>
+        <div class="settings-input-row">
+          <v-text-field
+            v-model="apiKey"
+            placeholder="sk-ant-..."
+            type="password"
+            single-line
+            hide-details
+            class="dark-input"
+          ></v-text-field>
+          <button class="save-btn" :disabled="!apiKeyChanged" @click="saveApiKey">
+            Speichern
+          </button>
+        </div>
+      </div>
 
-          <v-divider class="my-3"></v-divider>
+      <!-- Data -->
+      <p class="section-header">Daten</p>
+      <div class="settings-group">
+        <div class="settings-row tappable" @click="exportData">
+          <div class="settings-row-body">
+            <p class="settings-label">Exportieren</p>
+            <p class="settings-sub">Alle Daten als JSON herunterladen</p>
+          </div>
+          <v-icon color="#34c759">file_download</v-icon>
+        </div>
+        <div class="settings-sep"></div>
+        <div class="settings-row tappable" @click="triggerImport">
+          <div class="settings-row-body">
+            <p class="settings-label">Importieren</p>
+            <p class="settings-sub">JSON-Datei laden (überschreibt bestehende Daten)</p>
+          </div>
+          <v-icon color="#34c759">file_upload</v-icon>
+        </div>
+        <input ref="fileInput" type="file" accept=".json" style="display:none" @change="importData">
+        <p v-if="importError" class="feedback-text error-text">{{ importError }}</p>
+        <p v-if="importSuccess" class="feedback-text success-text">Daten erfolgreich importiert.</p>
+      </div>
 
-          <v-flex class="mb-2">
-            <p class="subheading font-weight-medium">Daten exportieren</p>
-            <p class="body-1 grey--text mb-2">Alle Trigger, Überzeugungen und zugehörige Daten als JSON-Datei herunterladen.</p>
-            <v-btn flat color="primary" @click="exportData">
-              <v-icon left>file_download</v-icon>
-              Exportieren
-            </v-btn>
-          </v-flex>
+      <!-- Danger zone -->
+      <p class="section-header danger-header">Gefahrenzone</p>
+      <div class="settings-group">
+        <div class="settings-row tappable danger-row" @click="showResetDialog = true">
+          <div class="settings-row-body">
+            <p class="settings-label danger-label">Alle Daten löschen</p>
+            <p class="settings-sub">Unwiderruflich — exportiere vorher</p>
+          </div>
+          <v-icon color="#ff453a">delete_forever</v-icon>
+        </div>
+      </div>
 
-          <v-divider class="my-3"></v-divider>
-
-          <v-flex class="mb-2">
-            <p class="subheading font-weight-medium">Daten importieren</p>
-            <p class="body-1 grey--text mb-2">Eine zuvor exportierte JSON-Datei laden. Bestehende Daten werden überschrieben.</p>
-            <v-btn flat color="primary" @click="triggerImport">
-              <v-icon left>file_upload</v-icon>
-              Importieren
-            </v-btn>
-            <input ref="fileInput" type="file" accept=".json" style="display:none" @change="importData">
-            <p v-if="importError" class="caption red--text mt-1">{{ importError }}</p>
-            <p v-if="importSuccess" class="caption green--text mt-1">Daten erfolgreich importiert.</p>
-          </v-flex>
-
-          <v-divider class="my-3"></v-divider>
-
-          <v-flex class="mb-2">
-            <p class="subheading font-weight-medium">Alle Daten zurücksetzen</p>
-            <p class="body-1 grey--text mb-2">Löscht alle Trigger, Überzeugungen und zugehörige Daten unwiderruflich.</p>
-            <v-btn flat color="red" @click="showResetDialog = true">
-              <v-icon left>delete_forever</v-icon>
-              Zurücksetzen
-            </v-btn>
-          </v-flex>
-
-        </v-layout>
-      </v-container>
+      <v-dialog v-model="showResetDialog" width="300">
+        <v-card class="confirm-dialog">
+          <v-card-title class="confirm-title">Alle Daten löschen?</v-card-title>
+          <v-divider></v-divider>
+          <v-card-text class="confirm-body">Diese Aktion kann nicht rückgängig gemacht werden.</v-card-text>
+          <v-divider></v-divider>
+          <v-card-actions class="confirm-actions">
+            <v-btn flat @click="showResetDialog = false" class="confirm-cancel">Abbrechen</v-btn>
+            <v-btn flat @click="resetData" class="confirm-delete">Löschen</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </v-content>
-
-    <v-dialog v-model="showResetDialog" width="500">
-      <v-card>
-        <v-card-title class="subheading" primary-title>
-          Alle Daten wirklich löschen?
-        </v-card-title>
-        <v-card-text class="body-1 grey--text">
-          Diese Aktion kann nicht rückgängig gemacht werden. Exportiere deine Daten vorher, wenn du sie sichern möchtest.
-        </v-card-text>
-        <v-divider></v-divider>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="secondary" flat @click="showResetDialog = false">Abbrechen</v-btn>
-          <v-btn color="red" flat @click="resetData">Löschen</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </div>
 </template>
 
@@ -97,9 +100,7 @@ export default {
     };
   },
   computed: {
-    apiKeyChanged() {
-      return this.apiKey !== this.savedApiKey;
-    },
+    apiKeyChanged() { return this.apiKey !== this.savedApiKey; },
   },
   methods: {
     saveApiKey() {
@@ -107,17 +108,14 @@ export default {
       this.savedApiKey = this.apiKey;
     },
     exportData() {
-      var data = {
-        patterns: this.$store.getters.patterns,
-        beliefs: this.$store.getters.beliefs,
-      };
-      var json = JSON.stringify(data, null, 2);
-      var blob = new Blob([json], { type: 'application/json' });
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      var date = new Date().toISOString().slice(0, 10);
+      const data = { patterns: this.$store.getters.patterns, beliefs: this.$store.getters.beliefs };
+      const json = JSON.stringify(data, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const date = new Date().toISOString().slice(0, 10);
       a.href = url;
-      a.download = 'beliefs-export-' + date + '.json';
+      a.download = `beliefs-export-${date}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -130,24 +128,20 @@ export default {
       this.$refs.fileInput.click();
     },
     importData(event) {
-      var file = event.target.files[0];
+      const file = event.target.files[0];
       if (!file) return;
-      var self = this;
-      var reader = new FileReader();
-      reader.onload = function(e) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
         try {
-          var data = JSON.parse(e.target.result);
-          if (!data.patterns || !data.beliefs) {
-            self.importError = 'Ungültiges Format: patterns oder beliefs fehlen.';
-            return;
-          }
-          self.$store.commit('setPatterns', data.patterns);
-          self.$store.commit('setBeliefs', data.beliefs);
+          const data = JSON.parse(e.target.result);
+          if (!data.patterns || !data.beliefs) { this.importError = 'Ungültiges Format.'; return; }
+          this.$store.commit('setPatterns', data.patterns);
+          this.$store.commit('setBeliefs', data.beliefs);
           localStorage.setItem('nvc.patterns', JSON.stringify(data.patterns));
           localStorage.setItem('nvc.beliefs', JSON.stringify(data.beliefs));
-          self.importSuccess = true;
+          this.importSuccess = true;
         } catch (err) {
-          self.importError = 'Datei konnte nicht gelesen werden.';
+          this.importError = 'Datei konnte nicht gelesen werden.';
         }
       };
       reader.readAsText(file);
@@ -165,4 +159,109 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.dark-page {
+  background: #000;
+  min-height: 100vh;
+}
+.page-title-area {
+  padding: 8px 20px 8px;
+}
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+.section-header {
+  font-size: 0.75rem;
+  color: #8e8e93;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 600;
+  margin: 20px 20px 6px;
+}
+.danger-header { color: #ff453a !important; }
+
+.settings-group {
+  background: #1c1c1e;
+  border-radius: 12px;
+  margin: 0 16px;
+  overflow: hidden;
+}
+.settings-row {
+  display: flex;
+  align-items: center;
+  padding: 13px 16px;
+  &.tappable {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    &:active { background: #2c2c2e; }
+  }
+}
+.settings-row-body { flex: 1; min-width: 0; }
+.settings-label {
+  font-size: 0.95rem;
+  color: #fff;
+  margin: 0 0 2px;
+  font-weight: 500;
+}
+.danger-label { color: #ff453a !important; }
+.settings-sub {
+  font-size: 0.78rem;
+  color: #8e8e93;
+  margin: 0;
+}
+.settings-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 16px 12px;
+  border-top: 1px solid #2c2c2e;
+}
+.settings-sep {
+  height: 1px;
+  background: #2c2c2e;
+  margin: 0 0 0 16px;
+}
+.save-btn {
+  background: #34c759;
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  &:disabled { opacity: 0.35; cursor: not-allowed; }
+}
+.feedback-text {
+  font-size: 0.8rem;
+  padding: 0 16px 10px;
+  margin: 0;
+}
+.error-text { color: #ff453a; }
+.success-text { color: #34c759; }
+
+.confirm-dialog { border-radius: 14px !important; overflow: hidden; }
+.confirm-title {
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  color: #fff !important;
+  justify-content: center !important;
+  padding: 16px !important;
+}
+.confirm-body {
+  font-size: 0.875rem !important;
+  color: #8e8e93 !important;
+  text-align: center;
+  padding: 8px 16px 16px !important;
+}
+.confirm-actions { padding: 0 !important; display: flex; }
+.confirm-cancel { flex: 1; color: #34c759 !important; border-right: 1px solid #3a3a3c; }
+.confirm-delete { flex: 1; color: #ff453a !important; font-weight: 600 !important; }
 </style>

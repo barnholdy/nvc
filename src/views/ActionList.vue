@@ -1,63 +1,59 @@
 <template>
-  <div class="action-list">
-    <v-toolbar color="white" app>
-      <v-toolbar-title>Handlungen</v-toolbar-title>
+  <div class="dark-page">
+    <v-toolbar color="#000" dark flat app>
       <v-spacer></v-spacer>
-      <v-btn icon to="/settings">
-        <v-icon>settings</v-icon>
+      <v-btn icon @click="$router.push('/settings')">
+        <v-icon color="#34c759">settings</v-icon>
       </v-btn>
     </v-toolbar>
+
     <v-content>
-      <div class="intro-text body-1 grey--text">
-        <p><em>Handeln überbrückt die Lücke zwischen Absicht und Wirklichkeit und verwandelt abstrakte Ideen in greifbare Ergebnisse. Während Denken Klarheit und Strategie schafft, erzeugt Handeln Dynamik, liefert echtes Feedback, stärkt das Vertrauen in sich selbst und ermöglicht es dir, durch praktische Erfahrung zu lernen — nicht nur durch Theorie.</em></p>
+      <div class="page-title-area">
+        <h1 class="page-title">Handlungen</h1>
       </div>
-      <template v-if="actions.length">
-        <v-card
-          class="action-card"
-          v-for="(item, i) in actions"
-          :key="item.text"
-        >
-          <v-card-title class="action-header" @click="toggle(i)">
-            <p class="body-1 action-text mb-0">{{ item.text }}</p>
-            <div class="header-actions">
-              <span class="count-badge">{{ item.beliefCount }}</span>
-              <v-btn icon small @click.stop="preDelete(item)">
-                <v-icon color="grey darken-2">delete</v-icon>
-              </v-btn>
+
+      <div v-if="actions.length === 0" class="empty-state">
+        <span class="empty-icon">🏃</span>
+        <p class="empty-title">Noch keine Handlungen</p>
+        <p class="empty-sub">Füge Handlungen im Änderungsprozess einer Überzeugung hinzu.</p>
+      </div>
+
+      <div v-else class="ios-list">
+        <template v-for="(item, i) in actions">
+          <div :key="item.text + '-row'" class="ios-row" @click="toggle(i)">
+            <div class="row-body">
+              <p class="row-title">{{ item.text }}</p>
+              <p class="row-meta">{{ item.beliefCount }} {{ item.beliefCount === 1 ? 'Überzeugung' : 'Überzeugungen' }}</p>
             </div>
-          </v-card-title>
-          <template v-if="openIndex === i">
-            <v-divider></v-divider>
-            <v-card-text>
-              <p class="caption grey--text mb-1 section-label">Überzeugungen</p>
-              <p v-for="(s, j) in item.sources" :key="j" class="body-1 belief-quote mb-1">„{{ s.beliefText }}"</p>
-            </v-card-text>
-          </template>
-        </v-card>
-      </template>
-
-      <div v-else class="empty-state">
-        <v-icon large color="grey lighten-2">directions_run</v-icon>
-        <p class="body-1 grey--text mt-2">Noch keine Handlungen vorhanden.</p>
-        <p class="caption grey--text">Füge Handlungen im Änderungsprozess einer Überzeugung hinzu.</p>
+            <div class="row-actions">
+              <span class="count-badge">{{ item.beliefCount }}</span>
+              <v-btn icon small @click.stop="preDelete(item)" class="row-action-btn">
+                <v-icon small color="#636366">delete</v-icon>
+              </v-btn>
+              <v-icon class="row-chevron" :class="{ rotated: openIndex === i }">chevron_right</v-icon>
+            </div>
+          </div>
+          <div :key="item.text + '-expand'" v-if="openIndex === i" class="row-expand">
+            <p class="expand-label">Überzeugungen</p>
+            <p v-for="(s, j) in item.sources" :key="j" class="expand-text mb-1">„{{ s.beliefText }}"</p>
+          </div>
+          <div :key="item.text + '-sep'" class="ios-sep" v-if="i < actions.length - 1"></div>
+        </template>
       </div>
 
-      <v-dialog v-model="isDeleteDialogShowing" width="500">
-        <v-card>
-          <v-card-title class="subheading" primary-title>
-            Handlung wirklich löschen?
-          </v-card-title>
+      <v-dialog v-model="isDeleteDialogShowing" width="300">
+        <v-card class="confirm-dialog">
+          <v-card-title class="confirm-title">Handlung löschen?</v-card-title>
           <v-divider></v-divider>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="secondary" flat @click="cancelDelete">abbrechen</v-btn>
-            <v-btn color="red" flat @click="confirmDelete">löschen</v-btn>
+          <v-card-actions class="confirm-actions">
+            <v-btn flat @click="cancelDelete" class="confirm-cancel">Abbrechen</v-btn>
+            <v-btn flat @click="confirmDelete" class="confirm-delete">Löschen</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
     </v-content>
 
-    <v-bottom-nav :value="true" fixed app color="white" class="elevation-3">
+    <v-bottom-nav :value="true" fixed app color="#1c1c1e" class="dark-nav">
       <v-btn flat color="grey" to="/patterns">
         <span>Trigger</span>
         <v-icon>bolt</v-icon>
@@ -94,21 +90,17 @@ export default {
   },
   computed: {
     actions() {
-      var map = {};
-      this.$store.getters.beliefs.forEach(function(belief) {
-        var acts = belief.reflection && belief.reflection.changeActs ? belief.reflection.changeActs : [];
-        acts.forEach(function(text) {
+      const map = {};
+      this.$store.getters.beliefs.forEach((belief) => {
+        const acts = belief.reflection && belief.reflection.changeActs ? belief.reflection.changeActs : [];
+        acts.forEach((text) => {
           if (!text) return;
-          if (!map[text]) {
-            map[text] = { text: text, beliefCount: 0, sources: [] };
-          }
+          if (!map[text]) map[text] = { text, beliefCount: 0, sources: [] };
           map[text].beliefCount += 1;
           map[text].sources.push({ beliefText: belief.belief });
         });
       });
-      var result = [];
-      Object.keys(map).forEach(function(key) { result.push(map[key]); });
-      return result.sort(function(a, b) { return b.beliefCount - a.beliefCount; });
+      return Object.values(map).sort((a, b) => b.beliefCount - a.beliefCount);
     },
   },
   methods: {
@@ -125,78 +117,148 @@ export default {
     },
     confirmDelete() {
       this.isDeleteDialogShowing = false;
-      var text = this.itemToDelete ? this.itemToDelete.text : null;
+      const text = this.itemToDelete ? this.itemToDelete.text : null;
       this.itemToDelete = null;
       if (!text) return;
-      var self = this;
-      this.$store.getters.beliefs.forEach(function(belief) {
-        var acts = belief.reflection && belief.reflection.changeActs ? belief.reflection.changeActs : [];
+      this.$store.getters.beliefs.forEach((belief) => {
+        const acts = belief.reflection && belief.reflection.changeActs ? belief.reflection.changeActs : [];
         if (acts.indexOf(text) !== -1) {
-          var updated = Object.assign({}, belief, {
+          const updated = Object.assign({}, belief, {
             reflection: Object.assign({}, belief.reflection, {
-              changeActs: acts.filter(function(a) { return a !== text; }),
+              changeActs: acts.filter(a => a !== text),
             }),
           });
-          self.$store.dispatch('updateBelief', updated);
+          this.$store.dispatch('updateBelief', updated);
         }
       });
-      self.openIndex = null;
+      this.openIndex = null;
     },
   },
 };
 </script>
 
 <style scoped lang="scss">
-.intro-text {
-  margin: 1rem;
-  line-height: 1.6;
+.dark-page {
+  background: #000;
+  min-height: 100vh;
 }
-.action-card {
-  margin: 1rem;
+
+.page-title-area {
+  padding: 8px 20px 16px;
 }
-.action-header {
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+.ios-list {
+  background: #1c1c1e;
+  border-radius: 12px;
+  margin: 0 16px 24px;
+  overflow: hidden;
+}
+.ios-row {
+  display: flex;
+  align-items: center;
+  padding: 13px 12px 13px 20px;
+  background: #1c1c1e;
   cursor: pointer;
   user-select: none;
-  align-items: flex-start !important;
-  padding: 12px 16px !important;
-  display: flex;
-  justify-content: space-between;
+  -webkit-tap-highlight-color: transparent;
+  &:active { background: #2c2c2e; }
 }
-.action-text {
+.row-body {
+  flex: 1;
+  min-width: 0;
+}
+.row-title {
+  font-size: 0.95rem;
+  color: #fff;
+  margin: 0 0 2px;
   white-space: normal;
   word-break: break-word;
-  line-height: 1.5;
-  flex: 1;
-  margin-right: 8px;
+  line-height: 1.4;
 }
-.header-actions {
+.row-meta {
+  font-size: 0.78rem;
+  color: #8e8e93;
+  margin: 0;
+}
+.row-actions {
   display: flex;
   align-items: center;
   flex-shrink: 0;
   gap: 4px;
 }
+.row-action-btn { margin: 0 !important; }
 .count-badge {
-  color: #00838f;
-  font-size: 0.85rem;
-  font-weight: bold;
-  min-width: 18px;
-  text-align: center;
-  border: 1.5px solid #00838f;
+  color: #34c759;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: 1.5px solid #34c759;
   border-radius: 20px;
-  padding: 2px 6px;
+  padding: 1px 7px;
+  min-width: 22px;
+  text-align: center;
 }
-.belief-quote {
+.row-chevron {
+  color: #636366 !important;
+  font-size: 1.2rem !important;
+  transition: transform 0.2s ease;
+  &.rotated { transform: rotate(90deg); }
+}
+.ios-sep {
+  height: 1px;
+  background: #2c2c2e;
+  margin-left: 20px;
+}
+.row-expand {
+  background: #141416;
+  padding: 14px 20px 16px;
+  border-top: 1px solid #2c2c2e;
+}
+.expand-label {
+  font-size: 0.68rem;
+  color: #8e8e93;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+.expand-text {
+  font-size: 0.93rem;
+  color: #ebebf5;
+  margin: 0;
+  line-height: 1.5;
   font-style: italic;
 }
-.section-label {
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
+.mb-1 { margin-bottom: 4px !important; }
+
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 4rem 2rem;
+  padding: 5rem 2rem;
   text-align: center;
 }
+.empty-icon { font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 16px; }
+.empty-title { font-size: 1.1rem; color: #fff; font-weight: 600; margin: 0 0 6px; }
+.empty-sub { font-size: 0.875rem; color: #8e8e93; margin: 0; }
+
+.confirm-dialog { border-radius: 14px !important; overflow: hidden; }
+.confirm-title {
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  color: #fff !important;
+  justify-content: center !important;
+  padding: 16px !important;
+}
+.confirm-actions { padding: 0 !important; display: flex; }
+.confirm-cancel { flex: 1; color: #34c759 !important; border-right: 1px solid #3a3a3c; }
+.confirm-delete { flex: 1; color: #ff453a !important; font-weight: 600 !important; }
+
+.dark-nav { border-top: 1px solid #2c2c2e !important; }
 </style>

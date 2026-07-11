@@ -19,15 +19,102 @@ export default {
 </script>
 
 <style lang="scss">
+/* ─── Dark theme base ─── */
 html, body {
+  background: #000 !important;
   touch-action: manipulation;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
+.application, .v-application {
+  background: #000 !important;
+  color: #fff !important;
+}
+
+.v-content, main.v-content {
+  background: #000 !important;
+}
+
+/* ─── Toolbar ─── */
+.v-toolbar, .v-toolbar.theme--light {
+  background-color: #000 !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  border-bottom: 1px solid #2c2c2e !important;
+}
+.v-toolbar__title {
+  color: #fff !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.3px;
+}
+.v-toolbar .v-btn .v-icon {
+  color: #34c759 !important;
+}
+.v-toolbar .v-btn {
+  color: #34c759 !important;
+}
+
+/* ─── Bottom nav ─── */
+.v-bottom-nav {
+  background: #1c1c1e !important;
+  border-top: 1px solid #2c2c2e !important;
+  box-shadow: none !important;
+}
+.v-bottom-nav .v-btn {
+  color: #636366 !important;
+  opacity: 1 !important;
+}
+.v-bottom-nav .v-btn .v-icon {
+  color: inherit !important;
+}
+.v-bottom-nav .v-btn span {
+  color: inherit !important;
+}
+.v-bottom-nav .v-btn.primary--text {
+  color: #34c759 !important;
+}
+
+/* ─── Cards ─── */
+.v-card {
+  background: #1c1c1e !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+.v-card__title { color: #fff !important; }
+.v-card__text { color: #ebebf5 !important; }
+.v-card__actions .v-btn { color: #34c759 !important; }
+.v-card__actions .v-btn.red--text { color: #ff453a !important; }
+
+/* ─── Dividers ─── */
+.v-divider {
+  border-color: #2c2c2e !important;
+}
+
+/* ─── Dialogs ─── */
+.v-overlay {
+  background: rgba(0,0,0,0.7) !important;
+}
+.v-dialog .v-card {
+  background: #2c2c2e !important;
+  border-radius: 14px !important;
+  overflow: hidden;
+}
+.v-dialog .v-card__title {
+  color: #fff !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+}
+.v-dialog .v-card__text { color: #ebebf5 !important; }
+
+/* ─── Chips ─── */
 .v-chip {
   height: auto !important;
   white-space: normal !important;
   max-width: 100% !important;
+  background: #3a3a3c !important;
+  color: #fff !important;
+  border: none !important;
 }
 .v-chip .v-chip__content {
   white-space: normal !important;
@@ -36,5 +123,80 @@ html, body {
   min-height: 28px;
   padding-top: 4px;
   padding-bottom: 4px;
+  color: #fff !important;
 }
+.v-chip .v-icon { color: #8e8e93 !important; }
+
+/* ─── Text inputs ─── */
+.v-input input, .v-input textarea {
+  color: #fff !important;
+  caret-color: #34c759 !important;
+}
+.v-input .v-label { color: #8e8e93 !important; }
+.v-text-field .v-input__slot {
+  background: #1c1c1e !important;
+}
+.v-text-field--outline .v-input__slot {
+  border-color: #3a3a3c !important;
+}
+.v-textarea textarea { color: #fff !important; }
+.v-text-field__slot { background: transparent !important; }
+
+/* ─── Buttons ─── */
+.v-btn.primary {
+  background-color: #34c759 !important;
+  color: #000 !important;
+  font-weight: 600 !important;
+}
+.v-btn.primary--text { color: #34c759 !important; }
+.v-btn.secondary--text { color: #30d158 !important; }
+.v-btn.grey--text { color: #636366 !important; }
+.v-btn.red--text { color: #ff453a !important; }
+.v-btn.red { background-color: #ff453a !important; color: #fff !important; }
+.v-btn[disabled] { opacity: 0.35 !important; }
+.v-btn:not(.primary):not(.red) { color: #34c759 !important; }
+
+/* ─── Typography ─── */
+.grey--text, .grey--text.text--darken-2 { color: #8e8e93 !important; }
+.white--text { color: #fff !important; }
+.subheading { color: #fff !important; }
+.headline { color: #fff !important; }
+.caption { color: #8e8e93 !important; }
+.body-1 { color: #ebebf5 !important; }
+
+/* ─── List ─── */
+.v-list { background: #1c1c1e !important; }
+.v-list__tile__title { color: #fff !important; }
+.v-list__tile__sub-title { color: #8e8e93 !important; }
+.v-list__tile { color: #fff !important; }
+
+/* ─── Menu ─── */
+.v-menu__content {
+  background: #2c2c2e !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+}
+.v-menu__content .v-list { background: #2c2c2e !important; }
+
+/* ─── Footer / wizard ─── */
+.v-footer {
+  background: #1c1c1e !important;
+  border-top: 1px solid #2c2c2e !important;
+  box-shadow: none !important;
+}
+.v-footer .v-btn { color: #34c759 !important; }
+.v-footer .v-btn.primary {
+  background-color: #34c759 !important;
+  color: #000 !important;
+  border-radius: 12px !important;
+}
+
+/* ─── Slider ─── */
+.v-slider__thumb { background: #34c759 !important; border-color: #34c759 !important; }
+.v-slider__track__fill { background: #34c759 !important; }
+.v-slider__track { background: #3a3a3c !important; }
+
+/* ─── Container ─── */
+.v-container { background: transparent !important; }
+.v-content__wrap { background: #000 !important; }
 </style>

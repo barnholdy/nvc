@@ -20,7 +20,6 @@ import {
   transitions,
 } from 'vuetify';
 import 'vuetify/src/stylus/app.styl';
-import colors from 'vuetify/es5/util/colors';
 
 Vue.use(Vuetify, {
   components: {
@@ -43,12 +42,12 @@ Vue.use(Vuetify, {
     transitions,
   },
   theme: {
-    primary: colors.cyan.darken2,
-    secondary: colors.cyan.lighten2,
-    accent: colors.cyan.darken2,
-    error: colors.red.base,
-    warning: colors.yellow.base,
-    info: colors.blue.base,
-    success: colors.green.base,
+    primary: '#34c759',
+    secondary: '#30d158',
+    accent: '#34c759',
+    error: '#ff453a',
+    warning: '#ffd60a',
+    info: '#0a84ff',
+    success: '#34c759',
   },
 });
