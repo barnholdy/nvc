@@ -12,7 +12,7 @@
 
     <v-content>
       <div class="page-title-area">
-        <h1 class="page-title">Meine Trigger</h1>
+        <h1 class="page-title">Situationen</h1>
       </div>
 
       <div v-if="patterns.length === 0" class="empty-state">
@@ -74,23 +74,18 @@
 
     <v-bottom-nav :value="true" fixed app color="#1c1c1e" class="dark-nav">
       <v-btn flat color="primary" to="/patterns">
-        <span>Trigger</span>
         <v-icon>bolt</v-icon>
       </v-btn>
       <v-btn flat color="grey" to="/beliefs">
-        <span>Überzeugungen</span>
         <v-icon>lightbulb_outline</v-icon>
       </v-btn>
       <v-btn flat color="grey" to="/affirmations">
-        <span>Affirmationen</span>
         <v-icon>stars</v-icon>
       </v-btn>
       <v-btn flat color="grey" to="/actions">
-        <span>Handlungen</span>
         <v-icon>directions_run</v-icon>
       </v-btn>
       <v-btn flat color="grey" to="/empathy">
-        <span>Empathie</span>
         <v-icon>favorite_border</v-icon>
       </v-btn>
     </v-bottom-nav>
