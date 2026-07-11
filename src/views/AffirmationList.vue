@@ -70,7 +70,7 @@
             </v-btn>
             <span class="wizard-title">Affirmation bearbeiten</span>
             <v-spacer></v-spacer>
-            <span class="grey--text body-1">{{ editStep }} / 2</span>
+            <span class="grey--text body-1">{{ editStep }} / 3</span>
           </div>
           <div class="wizard-scroll">
             <v-container class="mb-5">
@@ -83,7 +83,61 @@
                   <v-textarea v-model="editText" placeholder="..." auto-grow rows="4" hide-details></v-textarea>
                 </v-flex>
               </v-layout>
+
               <v-layout v-show="editStep === 2" column>
+                <v-flex class="mt-2 mb-3">
+                  <h1 class="headline font-weight-regular">Wie fühlt sich das an?</h1>
+                  <p class="body-1 grey--text belief-quote mt-1">„{{ editText }}"</p>
+                  <p class="body-1 grey--text mt-2">Wie wahr fühlt sich diese Affirmation gerade an?</p>
+                </v-flex>
+                <v-flex class="mt-1">
+                  <div class="slider-row">
+                    <span class="slider-end-label">0 %</span>
+                    <input type="range" min="0" max="100" v-model.number="editSlider" class="resonance-slider" />
+                    <span class="slider-end-label">100 %</span>
+                  </div>
+                  <p class="slider-value-label">{{ editSlider }} %</p>
+                </v-flex>
+                <v-flex v-if="editSlider < 50" class="mt-4">
+                  <p class="body-1 grey--text">Klingt das noch weit weg? Probiere eine Brücken-Version.</p>
+                  <template v-if="showBridgeKeyInput">
+                    <p class="caption grey--text mb-1">Anthropic API Key eingeben:</p>
+                    <v-text-field
+                      v-model="bridgeKeyInput"
+                      label="API Key"
+                      type="password"
+                      single-line
+                      hide-details
+                      class="mb-2"
+                    ></v-text-field>
+                    <v-btn small flat color="primary" :disabled="!bridgeKeyInput" @click="saveBridgeKey">Speichern &amp; generieren</v-btn>
+                    <v-btn small flat color="grey" @click="showBridgeKeyInput = false">Abbrechen</v-btn>
+                  </template>
+                  <template v-else>
+                    <v-btn small flat color="primary" :loading="isBridgeLoading" @click="generateBridgeVersions">
+                      <v-icon small left>auto_awesome</v-icon>
+                      Brücken-Version generieren
+                    </v-btn>
+                    <v-btn v-if="apiKey" small flat icon @click="showBridgeKeyInput = true" title="API Key ändern">
+                      <v-icon small color="grey lighten-1">settings</v-icon>
+                    </v-btn>
+                  </template>
+                  <p v-if="bridgeError" class="caption red--text mt-1">{{ bridgeError }}</p>
+                  <div v-if="bridgeVersions.length" class="mt-3">
+                    <p class="caption grey--text mb-1">Wähle eine Version, um sie zu übernehmen:</p>
+                    <div class="chip-list">
+                      <v-chip
+                        v-for="(b, i) in bridgeVersions"
+                        :key="i"
+                        class="available-chip bridge-chip"
+                        @click="selectBridge(b)"
+                      >{{ b }}</v-chip>
+                    </div>
+                  </div>
+                </v-flex>
+              </v-layout>
+
+              <v-layout v-show="editStep === 3" column>
                 <v-flex class="mt-2 mb-3">
                   <h1 class="headline font-weight-regular">Überzeugungen</h1>
                   <p class="body-1 grey--text mt-2">Verknüpfe diese Affirmation mit deinen Überzeugungen.</p>
@@ -114,7 +168,7 @@
             </v-container>
           </div>
           <div class="wizard-footer-bar">
-            <v-btn v-if="editStep === 1" :disabled="!editText.trim()" @click="nextEditStep" block large color="primary">weiter</v-btn>
+            <v-btn v-if="editStep < 3" :disabled="editStep === 1 && !editText.trim()" @click="nextEditStep" block large color="primary">weiter</v-btn>
             <v-btn v-else @click="saveEdit" block large color="primary">speichern</v-btn>
           </div>
         </div>
@@ -205,6 +259,12 @@ export default {
       editStep: 1,
       editOriginalText: '',
       editText: '',
+      editSlider: 70,
+      bridgeVersions: [],
+      isBridgeLoading: false,
+      bridgeError: '',
+      showBridgeKeyInput: false,
+      bridgeKeyInput: '',
       itemToDelete: null,
       isDeleteDialogShowing: false,
       amenMap: loadAhoMap(),
@@ -258,19 +318,69 @@ export default {
       this.editOriginalText = item.text;
       this.editText = item.text;
       this.editStep = 1;
+      this.editSlider = 70;
+      this.bridgeVersions = [];
+      this.bridgeError = '';
+      this.showBridgeKeyInput = false;
+      this.bridgeKeyInput = '';
       this.isEditDialogShowing = true;
     },
-    nextEditStep() { this.editStep = 2; },
-    prevEditStep() { this.editStep = 1; },
+    nextEditStep() { this.editStep = Math.min(this.editStep + 1, 3); },
+    prevEditStep() { this.editStep = Math.max(this.editStep - 1, 1); },
     cancelEdit() {
       this.isEditDialogShowing = false;
       this.editOriginalText = ''; this.editText = ''; this.editStep = 1;
+      this.editSlider = 70; this.bridgeVersions = []; this.bridgeError = '';
+    },
+    saveBridgeKey() {
+      this.apiKey = this.bridgeKeyInput;
+      localStorage.setItem('nvc.apiKey', this.apiKey);
+      this.bridgeKeyInput = '';
+      this.showBridgeKeyInput = false;
+      this.generateBridgeVersions();
+    },
+    generateBridgeVersions() {
+      if (!this.apiKey) { this.showBridgeKeyInput = true; return; }
+      this.isBridgeLoading = true;
+      this.bridgeError = '';
+      this.bridgeVersions = [];
+      var self = this;
+      var prompt = 'Du hilfst dabei, Affirmationen in glaubwürdigere "Brücken-Versionen" umzuformulieren.\n\nEine Brücken-Version vermeidet den behauptenden Endzustand („Ich bin…", „Ich werde…") und beschreibt stattdessen den Weg dorthin – sie klingt dadurch schon jetzt wahr.\n\nBeispiele:\n„Ich bin sicher und geborgen." → „Ich übe, mich sicherer zu fühlen."\n„Ich werde geliebt, auch wenn ich nichts leiste." → „Ich bin offen für die Möglichkeit, auch ohne Leistung zu genügen."\n„Ich stehe selbstsicher zu mir." → „Ich lerne, für mich einzustehen."\n\nAffirmation: „' + this.editText.trim() + '"\n\nGeneriere genau 3 Brücken-Versionen. Nur die 3 Sätze, einer pro Zeile, ohne Nummerierung.';
+      fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': this.apiKey,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 200,
+          messages: [{ role: 'user', content: prompt }],
+        }),
+      }).then(function(res) {
+        if (!res.ok) return res.json().catch(function() { return {}; }).then(function(err) { throw new Error((err.error && err.error.message) || 'Fehler ' + res.status); });
+        return res.json();
+      }).then(function(data) {
+        self.bridgeVersions = data.content[0].text.split('\n').map(function(s) { return s.trim(); }).filter(function(s) { return s.length > 0; }).slice(0, 3);
+      }).catch(function(e) {
+        self.bridgeError = e.message || 'Brücken-Versionen konnten nicht geladen werden.';
+      }).then(function() {
+        self.isBridgeLoading = false;
+      });
+    },
+    selectBridge(text) {
+      this.editText = text;
+      this.bridgeVersions = [];
+      this.editSlider = 70;
     },
     saveEdit() {
       const oldText = this.editOriginalText;
       const newText = this.editText.trim();
       this.isEditDialogShowing = false;
       this.editOriginalText = ''; this.editText = ''; this.editStep = 1;
+      this.editSlider = 70; this.bridgeVersions = []; this.bridgeError = '';
       if (!newText || newText === oldText) return;
       this.$store.getters.beliefs.forEach((belief) => {
         if (!belief.affirmations || !belief.affirmations.length) return;
@@ -524,6 +634,55 @@ export default {
   padding: 4px 10px !important;
   cursor: pointer;
 }
+.bridge-chip { white-space: normal; height: auto !important; padding: 6px 12px !important; line-height: 1.5; }
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px;
+}
+.slider-end-label {
+  font-size: 0.78rem;
+  color: #8e8e93;
+  flex-shrink: 0;
+}
+.resonance-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: #3a3a3c;
+  outline: none;
+  cursor: pointer;
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #4ade80;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  }
+  &::-moz-range-thumb {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #4ade80;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  }
+}
+.slider-value-label {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 12px 0 0;
+}
+.belief-quote { font-style: italic; }
 
 .confirm-dialog { border-radius: 14px !important; overflow: hidden; }
 .confirm-title {
