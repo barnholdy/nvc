@@ -30,6 +30,12 @@
             @touchmove="tsMove($event, i)"
             @touchend="tsEnd($event, i)"
           >
+            <div class="swipe-right-panel">
+              <button class="swipe-btn swipe-btn-edit" @click.stop="startEdit(item)">
+                <v-icon small color="#fff">edit</v-icon>
+                <span>Bearb.</span>
+              </button>
+            </div>
             <div class="swipe-left-panel">
               <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(item)">
                 <v-icon small color="#fff">delete</v-icon>
@@ -53,6 +59,34 @@
           <div :key="item.text + '-sep'" class="ios-sep" v-if="i < actions.length - 1"></div>
         </template>
       </div>
+
+      <!-- Edit wizard -->
+      <v-dialog v-model="isEditDialogShowing" fullscreen>
+        <div class="wizard-page">
+          <v-toolbar color="#000" dark flat app>
+            <v-btn icon @click="cancelEdit">
+              <v-icon>close</v-icon>
+            </v-btn>
+            <v-toolbar-title>Handlung bearbeiten</v-toolbar-title>
+          </v-toolbar>
+          <v-content>
+            <v-container class="mb-5">
+              <v-layout column>
+                <v-flex class="mt-2 mb-3">
+                  <h1 class="headline font-weight-regular">Handlung</h1>
+                  <p class="body-1 grey--text mt-2">Beschreibe die konkrete Handlung, die du umsetzen möchtest.</p>
+                </v-flex>
+                <v-flex>
+                  <v-textarea v-model="editText" placeholder="..." auto-grow rows="4" hide-details></v-textarea>
+                </v-flex>
+              </v-layout>
+            </v-container>
+            <v-footer :fixed="true" color="white elevation-3" height="44">
+              <v-btn :disabled="!editText.trim()" @click="saveEdit" block large color="primary">speichern</v-btn>
+            </v-footer>
+          </v-content>
+        </div>
+      </v-dialog>
 
       <v-dialog v-model="isDeleteDialogShowing" width="300">
         <v-card class="confirm-dialog">
@@ -94,6 +128,9 @@ export default {
       openIndex: null,
       itemToDelete: null,
       isDeleteDialogShowing: false,
+      isEditDialogShowing: false,
+      editOriginalText: '',
+      editText: '',
       sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
   },
@@ -116,6 +153,36 @@ export default {
     toggle(i) {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.openIndex = this.openIndex === i ? null : i;
+    },
+    startEdit(item) {
+      this.sw.openIdx = null; this.sw.openDir = null;
+      this.editOriginalText = item.text;
+      this.editText = item.text;
+      this.isEditDialogShowing = true;
+    },
+    cancelEdit() {
+      this.isEditDialogShowing = false;
+      this.editOriginalText = '';
+      this.editText = '';
+    },
+    saveEdit() {
+      const oldText = this.editOriginalText;
+      const newText = this.editText.trim();
+      this.isEditDialogShowing = false;
+      this.editOriginalText = '';
+      this.editText = '';
+      if (!newText || newText === oldText) return;
+      this.$store.getters.beliefs.forEach((belief) => {
+        const acts = belief.reflection && belief.reflection.changeActs ? belief.reflection.changeActs : [];
+        if (acts.indexOf(oldText) !== -1) {
+          const updated = Object.assign({}, belief, {
+            reflection: Object.assign({}, belief.reflection, {
+              changeActs: acts.map(a => (a === oldText ? newText : a)),
+            }),
+          });
+          this.$store.dispatch('updateBelief', updated);
+        }
+      });
     },
     preDelete(item) { this.sw.openIdx = null; this.sw.openDir = null; this.itemToDelete = item; this.isDeleteDialogShowing = true; },
     cancelDelete() { this.isDeleteDialogShowing = false; this.itemToDelete = null; },
@@ -149,7 +216,7 @@ export default {
         this.sw.isH = Math.abs(dx) >= Math.abs(dy);
       if (!this.sw.isH) return;
       e.preventDefault();
-      this.sw.dx = Math.max(-80, Math.min(dx, 0)); // left-only
+      this.sw.dx = Math.max(-80, Math.min(dx, 65));
       this.sw.drag = true;
     },
     tsEnd(e, i) {
@@ -161,6 +228,7 @@ export default {
         else { this.toggle(i); }
       } else if (this.sw.drag) {
         if (this.sw.dx < -40) { this.sw.openIdx = i; this.sw.openDir = 'left'; }
+        else if (this.sw.dx > 40) { this.sw.openIdx = i; this.sw.openDir = 'right'; }
         else { this.sw.openIdx = null; this.sw.openDir = null; }
         this.openIndex = null;
       }
@@ -171,7 +239,7 @@ export default {
       const live = s.touchIdx === i && s.drag && s.isH;
       let x = 0;
       if (live) x = s.dx;
-      else if (s.openIdx === i && s.openDir === 'left') x = -80;
+      else if (s.openIdx === i) x = s.openDir === 'left' ? -80 : 65;
       return { transform: `translateX(${x}px)`, transition: live ? 'none' : 'transform 0.2s ease' };
     },
     deskClick(i) {
@@ -198,6 +266,12 @@ export default {
   overflow: hidden;
   background: #1c1c1e;
 }
+.swipe-right-panel {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  display: flex;
+  align-items: stretch;
+}
 .swipe-left-panel {
   position: absolute;
   right: 0; top: 0; bottom: 0;
@@ -222,6 +296,7 @@ export default {
   &:active { opacity: 0.85; }
 }
 .swipe-btn-delete { background: #ff453a; width: 80px; }
+.swipe-btn-edit { background: #636366; }
 
 .ios-row {
   position: relative;
@@ -284,6 +359,14 @@ export default {
 .empty-icon { font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 16px; }
 .empty-title { font-size: 1.1rem; color: #fff; font-weight: 600; margin: 0 0 6px; }
 .empty-sub { font-size: 0.875rem; color: #8e8e93; margin: 0; }
+
+.wizard-page {
+  background: #000;
+  min-height: 100vh;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+}
 
 .confirm-dialog { border-radius: 14px !important; overflow: hidden; }
 .confirm-title {
