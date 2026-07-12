@@ -39,6 +39,7 @@
         <pattern-change-act
           v-show="step === 3"
           :belief="entry ? entry.belief : ''"
+          :withoutBelief="withoutBelief"
           :withoutBeliefFeelings="selectedWithoutBeliefFeelings"
           :affirmations="affirmations"
           :initialActs="changeActs"

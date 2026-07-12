@@ -3,6 +3,7 @@
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Handeln</h1>
       <p v-if="belief" class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
+      <p v-if="withoutBelief" class="subheading grey--text belief-quote mt-1">„{{ withoutBelief }}"</p>
       <div v-if="withoutBeliefFeelings && withoutBeliefFeelings.length" class="mb-2">
         <tag-list :items="withoutBeliefFeelings"></tag-list>
       </div>
