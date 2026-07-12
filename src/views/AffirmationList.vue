@@ -26,7 +26,7 @@
         <p class="empty-title">Keine Einträge</p>
         <p class="empty-sub">
           <template v-if="tab === 'open'">Füge Affirmationen zu deinen Überzeugungen hinzu.</template>
-          <template v-else-if="tab === 'dabei'">Noch keine Affirmationen zwischen 50 % und 74 %.</template>
+          <template v-else-if="tab === 'dabei'">Noch keine Affirmationen zwischen 1 % und 74 %.</template>
           <template v-else>Noch keine vollständig verinnerlichten Affirmationen.</template>
         </p>
       </div>
@@ -271,8 +271,8 @@ export default {
     filteredAffirmations() {
       return this.affirmations.filter(item => {
         const r = item.resonance;
-        if (this.tab === 'open') return r === null || r < 50;
-        if (this.tab === 'dabei') return r !== null && r >= 50 && r < 75;
+        if (this.tab === 'open') return r === null || r === 0;
+        if (this.tab === 'dabei') return r !== null && r >= 1 && r < 75;
         if (this.tab === 'verinnerlicht') return r !== null && r >= 75;
         return true;
       });
