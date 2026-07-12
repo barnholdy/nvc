@@ -101,7 +101,7 @@
               <v-layout v-show="editStep === 2" column>
                 <v-flex class="mt-2 mb-3">
                   <h1 class="headline font-weight-regular">Wie fühlt sich das an?</h1>
-                  <p class="body-1 grey--text belief-quote mt-1">„{{ editText }}"</p>
+                  <p class="subheading grey--text belief-quote mt-1">„{{ editText }}"</p>
                   <p class="body-1 grey--text mt-2">Wie wahr fühlt sich diese Affirmation gerade an?</p>
                 </v-flex>
                 <v-flex class="mt-1">
@@ -136,7 +136,7 @@
               <v-layout v-show="editStep === 3" column>
                 <v-flex class="mt-2 mb-3">
                   <h1 class="headline font-weight-regular">Überzeugungen</h1>
-                  <p class="body-1 grey--text belief-quote mt-1">„{{ editText }}"</p>
+                  <p class="subheading grey--text belief-quote mt-1">„{{ editText }}"</p>
                   <p class="body-1 grey--text mt-2">Verknüpfe diese Affirmation mit deinen Überzeugungen.</p>
                 </v-flex>
                 <v-flex v-if="currentEditAffirmation">

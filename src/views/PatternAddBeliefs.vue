@@ -22,21 +22,17 @@
     </v-flex>
 
     <v-flex class="mt-1">
-      <v-menu v-if="unselectedBeliefs.length" :close-on-content-click="true">
-        <v-btn slot="activator" flat color="primary">
-          <v-icon left small>arrow_drop_down</v-icon>
-          Bestehenden hinzufügen
-        </v-btn>
-        <v-list>
-          <v-list-tile
+      <div v-if="unselectedBeliefs.length" class="available-chips mt-2">
+        <p class="caption grey--text mb-1">Hinzufügen:</p>
+        <div class="chip-list">
+          <v-chip
             v-for="b in unselectedBeliefs"
             :key="b.time"
+            class="available-chip"
             @click="addBelief(b.time)"
-          >
-            <v-list-tile-title>{{ b.belief }}</v-list-tile-title>
-          </v-list-tile>
-        </v-list>
-      </v-menu>
+          >{{ b.belief }}</v-chip>
+        </div>
+      </div>
 
       <template v-if="showNewInput">
         <v-text-field
@@ -131,6 +127,18 @@ export default {
   gap: 6px;
 }
 .selected-chip {
+  white-space: normal;
+  height: auto !important;
+  padding: 4px 10px !important;
+}
+.available-chips { margin-top: 8px; }
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.available-chip {
+  cursor: pointer;
   white-space: normal;
   height: auto !important;
   padding: 4px 10px !important;

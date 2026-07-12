@@ -2,6 +2,7 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Name</h1>
+      <p v-if="trigger" class="subheading grey--text belief-quote mt-1">„{{ trigger }}"</p>
       <p class="body-1 grey--text mt-2">Wie möchtest du diese Situation nennen?</p>
     </v-flex>
     <v-flex>
@@ -143,6 +144,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.belief-quote { font-style: italic; }
 .suggestions {
   display: flex;
   flex-wrap: wrap;
