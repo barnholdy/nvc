@@ -105,6 +105,7 @@ export default {
   mounted() {
     document.addEventListener('gesturestart', e => e.preventDefault(), { passive: false });
     document.addEventListener('touchmove', e => { if (e.scale !== 1) e.preventDefault(); }, { passive: false });
+    this.$root.$on('show-onboarding', () => { this.showOnboarding = true; this.obStep = 1; });
   },
 };
 </script>

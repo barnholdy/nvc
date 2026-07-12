@@ -59,6 +59,18 @@
         <p v-if="importSuccess" class="feedback-text success-text">Daten erfolgreich importiert.</p>
       </div>
 
+      <!-- Onboarding -->
+      <p class="section-header">Über die App</p>
+      <div class="settings-group">
+        <div class="settings-row tappable" @click="showOnboarding">
+          <div class="settings-row-body">
+            <p class="settings-label">Einführung anzeigen</p>
+            <p class="settings-sub">Intro-Slideshow erneut öffnen</p>
+          </div>
+          <v-icon color="#4ade80">info_outline</v-icon>
+        </div>
+      </div>
+
       <!-- Danger zone -->
       <p class="section-header danger-header">Gefahrenzone</p>
       <div class="settings-group">
@@ -145,6 +157,10 @@ export default {
         }
       };
       reader.readAsText(file);
+    },
+    showOnboarding() {
+      localStorage.removeItem('nvc.onboarded');
+      this.$root.$emit('show-onboarding');
     },
     resetData() {
       this.showResetDialog = false;
