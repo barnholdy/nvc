@@ -8,6 +8,18 @@
     </v-toolbar>
 
     <v-content>
+      <!-- Profil -->
+      <p class="section-header">Profil</p>
+      <div class="settings-group">
+        <div class="settings-row tappable" @click="$router.push('/profile')">
+          <div class="settings-row-body">
+            <p class="settings-label">Dein Profil</p>
+            <p class="settings-sub">Kernmuster, Bedürfnis- und Affektprofil</p>
+          </div>
+          <v-icon color="#4ade80">person_outline</v-icon>
+        </div>
+      </div>
+
       <!-- KI -->
       <p class="section-header">KI</p>
       <div class="settings-group">
