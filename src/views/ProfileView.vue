@@ -58,7 +58,7 @@
                 <span class="stat-count">{{ n.count }}×</span>
               </div>
               <div class="stat-bar-bg">
-                <div class="stat-bar-fill" :style="{ width: pct(n.count, topNeeds[0].count) }"></div>
+                <div class="stat-bar-fill" :style="{ width: pct(n.count, topNeeds[0].count), background: '#ABA929' }"></div>
               </div>
             </div>
             <div v-if="i < topNeeds.length - 1" class="settings-sep"></div>
@@ -80,7 +80,7 @@
                 <span class="stat-count">{{ f.count }}×</span>
               </div>
               <div class="stat-bar-bg">
-                <div class="stat-bar-fill" :style="{ width: pct(f.count, topFeelings[0].count) }"></div>
+                <div class="stat-bar-fill" :style="{ width: pct(f.count, topFeelings[0].count), background: feelingColor(f.valence) }"></div>
               </div>
             </div>
             <div v-if="i < topFeelings.length - 1" class="settings-sep"></div>
@@ -125,20 +125,21 @@ export default {
     },
     topFeelings() {
       var counts = {};
+      var valences = {};
       this.beliefs.forEach(function(b) {
-        var all = (b.feelings || []).concat(
-          (b.reflection && b.reflection.withoutBeliefFeelings) || []
-        );
         var seen = {};
-        all.forEach(function(f) {
+        (b.feelings || []).forEach(function(f) {
           if (f && f.name && !seen[f.name]) {
             seen[f.name] = true;
             counts[f.name] = (counts[f.name] || 0) + 1;
+            if (typeof valences[f.name] === 'undefined' && f.valence !== undefined) {
+              valences[f.name] = f.valence;
+            }
           }
         });
       });
       return Object.keys(counts)
-        .map(function(name) { return { name: name, count: counts[name] }; })
+        .map(function(name) { return { name: name, count: counts[name], valence: valences[name] }; })
         .sort(function(a, b) { return b.count - a.count; })
         .slice(0, 5);
     },
@@ -147,6 +148,13 @@ export default {
     pct(count, max) {
       if (!max) return '0%';
       return Math.round(count / max * 100) + '%';
+    },
+    feelingColor(valence) {
+      var v = parseInt(valence, 10);
+      if (v >= 1) return '#4ed58b';
+      if (v === 0) return '#5EBDB4';
+      if (v <= -1) return '#fc5e53';
+      return '#ABA929';
     },
     async generateKernmuster() {
       if (!this.apiKey) {
@@ -323,7 +331,6 @@ export default {
 }
 .stat-bar-fill {
   height: 100%;
-  background: linear-gradient(to right, #4ade80, #22c55e);
   border-radius: 8px;
   transition: width 0.5s ease;
   min-width: 8px;
