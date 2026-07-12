@@ -77,7 +77,7 @@
 
       <!-- Edit dialog -->
       <v-dialog v-model="isEditDialogShowing" fullscreen>
-        <div class="wizard-page">
+        <div v-if="isEditDialogShowing" class="wizard-page">
           <div class="wizard-toolbar">
             <v-btn icon @click="editStep === 1 ? cancelEdit() : prevEditStep()">
               <v-icon>{{ editStep === 1 ? 'close' : 'chevron_left' }}</v-icon>
@@ -195,9 +195,6 @@
       </v-btn>
       <v-btn flat color="grey" to="/actions">
         <v-icon>gps_fixed</v-icon>
-      </v-btn>
-      <v-btn flat color="grey" to="/empathy">
-        <v-icon>favorite_border</v-icon>
       </v-btn>
     </v-bottom-nav>
   </div>

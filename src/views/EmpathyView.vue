@@ -1,11 +1,10 @@
 <template>
   <div class="dark-page">
     <v-toolbar color="#000" dark flat app>
-      <v-toolbar-title>Empathie</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn icon @click="$router.push('/settings')">
-        <v-icon color="#4ade80">settings</v-icon>
+      <v-btn icon @click="$router.back()">
+        <v-icon color="#4ade80">arrow_back</v-icon>
       </v-btn>
+      <v-toolbar-title>Empathie</v-toolbar-title>
     </v-toolbar>
 
     <v-content>
@@ -58,23 +57,6 @@
       </div>
     </v-content>
 
-    <v-bottom-nav :value="true" fixed app color="#1c1c1e" class="dark-nav">
-      <v-btn flat color="grey" to="/patterns">
-        <v-icon>bolt</v-icon>
-      </v-btn>
-      <v-btn flat color="grey" to="/beliefs">
-        <v-icon>lightbulb_outline</v-icon>
-      </v-btn>
-      <v-btn flat color="grey" to="/affirmations">
-        <v-icon>flare</v-icon>
-      </v-btn>
-      <v-btn flat color="grey" to="/actions">
-        <v-icon>gps_fixed</v-icon>
-      </v-btn>
-      <v-btn flat color="primary" to="/empathy">
-        <v-icon>favorite_border</v-icon>
-      </v-btn>
-    </v-bottom-nav>
   </div>
 </template>
 
@@ -334,6 +316,4 @@ export default {
 .mt-2 { margin-top: 8px !important; }
 .mt-3 { margin-top: 12px !important; }
 .mt-4 { margin-top: 20px !important; }
-
-.dark-nav { border-top: 1px solid #2c2c2e !important; }
 </style>

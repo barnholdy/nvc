@@ -128,9 +128,6 @@
       <v-btn flat color="primary" to="/actions">
         <v-icon>gps_fixed</v-icon>
       </v-btn>
-      <v-btn flat color="grey" to="/empathy">
-        <v-icon>favorite_border</v-icon>
-      </v-btn>
     </v-bottom-nav>
   </div>
 </template>
