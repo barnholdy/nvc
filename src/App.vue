@@ -17,8 +17,8 @@
               <div class="ob-steps">
                 <div class="ob-step-row"><span class="ob-step-icon">⚡</span><span><strong>Situationen</strong> — Erkenne Auslöser und Muster in deinem Alltag.</span></div>
                 <div class="ob-step-row"><span class="ob-step-icon">💡</span><span><strong>Überzeugungen</strong> — Benenne die Glaubenssätze dahinter und wie sie sich anfühlen.</span></div>
-                <div class="ob-step-row"><span class="ob-step-icon">✨</span><span><strong>Affirmationen &amp; Handlungen</strong> — Formuliere neue Perspektiven und setze kleine Schritte um.</span></div>
-                <div class="ob-step-row"><span class="ob-step-icon">❤️</span><span><strong>Empathie</strong> — Lass dich einfühlsam spiegeln, was du gerade erlebst.</span></div>
+                <div class="ob-step-row"><span class="ob-step-icon">✨</span><span><strong>Affirmationen</strong> — Formuliere neue, kraftvolle Perspektiven im Präsens.</span></div>
+                <div class="ob-step-row"><span class="ob-step-icon">🎯</span><span><strong>Handlungen</strong> — Setze konkrete Schritte um und verankere die Veränderung.</span></div>
               </div>
             </div>
 
