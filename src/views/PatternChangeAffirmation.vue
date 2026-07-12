@@ -2,6 +2,7 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Affirmationen</h1>
+      <p v-if="belief" class="body-1 belief-quote mt-1">„{{ belief }}"</p>
       <template v-if="withoutBelief">
         <p class="body-1 belief-quote mt-1">„{{ withoutBelief }}"</p>
         <div v-if="withoutBeliefFeelings && withoutBeliefFeelings.length" class="mb-2">
