@@ -153,6 +153,10 @@ export default {
       localStorage.removeItem('nvc.patterns');
       localStorage.removeItem('nvc.beliefs');
       localStorage.removeItem('nvc.globalEmpathy');
+      localStorage.removeItem('nvc.amen');
+      localStorage.removeItem('nvc.check');
+      localStorage.removeItem('nvc.progress');
+      localStorage.removeItem('nvc.onboarded');
     },
   },
 };

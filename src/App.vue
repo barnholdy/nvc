@@ -1,12 +1,103 @@
 <template>
   <v-app>
     <router-view/>
+
+    <transition name="ob-fade">
+      <div v-if="showOnboarding" class="ob-overlay" @click.self="null">
+        <div class="ob-card">
+          <div class="ob-slides">
+
+            <!-- Slide 1: Wie es funktioniert -->
+            <div v-show="obStep === 1" class="ob-slide">
+              <span class="ob-icon">🧭</span>
+              <h2 class="ob-title">Wie die App funktioniert</h2>
+              <p class="ob-text">
+                Diese App begleitet dich dabei, dein inneres Betriebssystem zu verstehen und zu verändern — in vier Schritten:
+              </p>
+              <div class="ob-steps">
+                <div class="ob-step-row"><span class="ob-step-icon">⚡</span><span><strong>Situationen</strong> — Erkenne Auslöser und Muster in deinem Alltag.</span></div>
+                <div class="ob-step-row"><span class="ob-step-icon">💡</span><span><strong>Überzeugungen</strong> — Benenne die Glaubenssätze dahinter und wie sie sich anfühlen.</span></div>
+                <div class="ob-step-row"><span class="ob-step-icon">✨</span><span><strong>Affirmationen &amp; Handlungen</strong> — Formuliere neue Perspektiven und setze kleine Schritte um.</span></div>
+                <div class="ob-step-row"><span class="ob-step-icon">❤️</span><span><strong>Empathie</strong> — Lass dich einfühlsam spiegeln, was du gerade erlebst.</span></div>
+              </div>
+            </div>
+
+            <!-- Slide 2: Sicherheitshinweis -->
+            <div v-show="obStep === 2" class="ob-slide">
+              <span class="ob-icon">💙</span>
+              <h2 class="ob-title">Ein ehrlicher Hinweis</h2>
+              <p class="ob-text">
+                Diese App berührt persönliche Überzeugungen, Gefühle und Selbstbild. Das kann heilsam sein — manchmal aber auch Belastendes aufwühlen.
+              </p>
+              <p class="ob-text">
+                <strong>Sie ersetzt keine Therapie oder professionelle Begleitung.</strong> Wenn du in einer Krise bist oder professionelle Unterstützung brauchst:
+              </p>
+              <div class="ob-contact-box">
+                <p class="ob-contact-row">📞 <strong>Telefonseelsorge</strong><br><span class="ob-contact-detail">0800 111 0 111 — kostenlos, 24 h</span></p>
+                <p class="ob-contact-row">🌐 <strong>Online-Beratung</strong><br><span class="ob-contact-detail">online.telefonseelsorge.de</span></p>
+              </div>
+            </div>
+
+            <!-- Slide 3: Datenschutz & KI -->
+            <div v-show="obStep === 3" class="ob-slide">
+              <span class="ob-icon">🔒</span>
+              <h2 class="ob-title">Deine Daten &amp; KI</h2>
+              <p class="ob-text">
+                Alle deine Einträge werden <strong>ausschließlich lokal</strong> in deinem Browser gespeichert — kein Server, kein Konto, keine Synchronisation.
+              </p>
+              <div class="ob-privacy-box">
+                <div class="ob-privacy-row">
+                  <span class="ob-priv-label">Lokal gespeichert</span>
+                  <span class="ob-priv-val">Überzeugungen, Affirmationen, Handlungen, Situationen</span>
+                </div>
+                <div class="ob-privacy-divider"></div>
+                <div class="ob-privacy-row">
+                  <span class="ob-priv-label">KI-Verarbeitung</span>
+                  <span class="ob-priv-val">Wenn du die Empathie-Funktion nutzt, werden deine Eingaben zur Verarbeitung an die Anthropic API übertragen. Es gelten <strong>Anthropics Datenschutzrichtlinien</strong>. Du kannst die Funktion jederzeit weglassen.</span>
+                </div>
+                <div class="ob-privacy-divider"></div>
+                <div class="ob-privacy-row">
+                  <span class="ob-priv-label">API Key</span>
+                  <span class="ob-priv-val">Wird nur lokal auf deinem Gerät gespeichert.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dots -->
+          <div class="ob-dots">
+            <span v-for="n in 3" :key="n" class="ob-dot" :class="{ active: obStep === n }"></span>
+          </div>
+
+          <!-- Actions -->
+          <div class="ob-actions">
+            <button v-if="obStep < 3" class="ob-btn-ghost" @click="obStep++">Überspringen</button>
+            <button v-if="obStep < 3" class="ob-btn-primary" @click="obStep++">Weiter</button>
+            <button v-if="obStep === 3" class="ob-btn-primary ob-btn-full" @click="finishOnboarding">Los geht's</button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </v-app>
 </template>
 
 <script>
+const ONBOARDING_KEY = 'nvc.onboarded';
+
 export default {
   name: 'app',
+  data() {
+    return {
+      showOnboarding: !localStorage.getItem(ONBOARDING_KEY),
+      obStep: 1,
+    };
+  },
+  methods: {
+    finishOnboarding() {
+      localStorage.setItem(ONBOARDING_KEY, '1');
+      this.showOnboarding = false;
+    },
+  },
   created() {
     this.$store.dispatch('loadPatterns');
     this.$store.dispatch('loadBeliefs');
@@ -230,4 +321,140 @@ html, body {
 /* ─── Container ─── */
 .v-container { background: transparent !important; }
 .v-content__wrap { background: #000 !important; }
+
+/* ─── Onboarding overlay ─── */
+.ob-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: rgba(0, 0, 0, 0.82);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+@media (min-height: 600px) {
+  .ob-overlay { align-items: center; }
+}
+.ob-card {
+  background: #1c1c1e;
+  border-radius: 24px 24px 16px 16px;
+  width: 100%;
+  max-width: 480px;
+  padding: 28px 24px 20px;
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.6);
+  display: flex;
+  flex-direction: column;
+}
+@media (min-height: 600px) {
+  .ob-card { border-radius: 24px; }
+}
+.ob-slides { min-height: 340px; }
+.ob-slide { display: flex; flex-direction: column; }
+.ob-icon { font-size: 2.6rem; margin-bottom: 12px; line-height: 1; }
+.ob-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 12px;
+  letter-spacing: -0.3px;
+}
+.ob-text {
+  font-size: 0.9rem;
+  color: #ebebf5;
+  line-height: 1.65;
+  margin: 0 0 10px;
+}
+.ob-steps { margin-top: 8px; display: flex; flex-direction: column; gap: 10px; }
+.ob-step-row {
+  display: flex;
+  gap: 10px;
+  font-size: 0.875rem;
+  color: #ebebf5;
+  line-height: 1.5;
+  align-items: flex-start;
+}
+.ob-step-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+.ob-contact-box {
+  background: #2c2c2e;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ob-contact-row {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #ebebf5;
+  line-height: 1.5;
+}
+.ob-contact-detail { color: #8e8e93; font-size: 0.82rem; }
+.ob-privacy-box {
+  background: #2c2c2e;
+  border-radius: 12px;
+  padding: 4px 0;
+  margin-top: 10px;
+}
+.ob-privacy-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 11px 16px;
+}
+.ob-privacy-divider { height: 1px; background: #3a3a3c; margin: 0; }
+.ob-priv-label {
+  font-size: 0.72rem;
+  color: #8e8e93;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+.ob-priv-val { font-size: 0.85rem; color: #ebebf5; line-height: 1.5; }
+.ob-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin: 20px 0 16px;
+}
+.ob-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #3a3a3c;
+  transition: background 0.2s;
+  &.active { background: #4ade80; }
+}
+.ob-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.ob-btn-primary {
+  background: #4ade80;
+  color: #000;
+  border: none;
+  border-radius: 12px;
+  padding: 13px 24px;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  margin-left: auto;
+  -webkit-tap-highlight-color: transparent;
+  &:active { background: #3dcc70; transform: scale(0.98); }
+}
+.ob-btn-full { width: 100%; margin-left: 0; }
+.ob-btn-ghost {
+  background: none;
+  border: none;
+  color: #636366;
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 13px 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.ob-fade-enter-active, .ob-fade-leave-active { transition: opacity 0.25s; }
+.ob-fade-enter, .ob-fade-leave-to { opacity: 0; }
 </style>
