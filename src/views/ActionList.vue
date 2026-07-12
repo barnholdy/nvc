@@ -15,14 +15,24 @@
         <p class="intro-text">Handeln überbrückt die Lücke zwischen Absicht und Wirklichkeit. Es erzeugt echtes Feedback und stärkt das Vertrauen in dich selbst.</p>
       </div>
 
-      <div v-if="actions.length === 0" class="empty-state">
+      <div class="segment-row">
+        <button class="seg-tab" :class="{ active: tab === 'open' }" @click="tab = 'open'">Offen</button>
+        <button class="seg-tab" :class="{ active: tab === 'dabei' }" @click="tab = 'dabei'">Dabei</button>
+        <button class="seg-tab" :class="{ active: tab === 'verinnerlicht' }" @click="tab = 'verinnerlicht'">Verinnerlicht</button>
+      </div>
+
+      <div v-if="filteredActions.length === 0" class="empty-state">
         <span class="empty-icon">🏃</span>
-        <p class="empty-title">Noch keine Handlungen</p>
-        <p class="empty-sub">Füge Handlungen im Änderungsprozess einer Überzeugung hinzu.</p>
+        <p class="empty-title">Keine Einträge</p>
+        <p class="empty-sub">
+          <template v-if="tab === 'open'">Füge Handlungen im Änderungsprozess einer Überzeugung hinzu.</template>
+          <template v-else-if="tab === 'dabei'">Noch keine Handlungen zwischen 50 % und 74 %.</template>
+          <template v-else>Noch keine vollständig verinnerlichten Handlungen.</template>
+        </p>
       </div>
 
       <div v-else class="ios-list">
-        <template v-for="(item, i) in actions">
+        <template v-for="(item, i) in filteredActions">
           <div
             :key="item.text + '-row'"
             class="swipe-outer"
@@ -61,7 +71,7 @@
             <p class="expand-label">Überzeugungen</p>
             <p v-for="(s, j) in item.sources" :key="j" class="expand-text mb-1">„{{ s.beliefText }}"</p>
           </div>
-          <div :key="item.text + '-sep'" class="ios-sep" v-if="i < actions.length - 1"></div>
+          <div :key="item.text + '-sep'" class="ios-sep" v-if="i < filteredActions.length - 1"></div>
         </template>
       </div>
 
@@ -177,6 +187,7 @@ export default {
   name: 'action-list',
   data() {
     return {
+      tab: 'open',
       openIndex: null,
       itemToDelete: null,
       isDeleteDialogShowing: false,
@@ -188,7 +199,19 @@ export default {
       sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
   },
+  watch: {
+    tab() { this.sw.openIdx = null; this.sw.openDir = null; this.openIndex = null; },
+  },
   computed: {
+    filteredActions() {
+      return this.actions.filter(item => {
+        const p = item.progress;
+        if (this.tab === 'open') return p === null || p < 50;
+        if (this.tab === 'dabei') return p !== null && p >= 50 && p < 75;
+        if (this.tab === 'verinnerlicht') return p !== null && p >= 75;
+        return true;
+      });
+    },
     actions() {
       const map = {};
       this.$store.getters.beliefs.forEach((belief) => {
@@ -329,6 +352,34 @@ export default {
 
 <style scoped lang="scss">
 .dark-page { background: #000; min-height: 100vh; }
+
+.segment-row {
+  display: flex;
+  padding: 0 16px 16px;
+  border-bottom: 1px solid #2c2c2e;
+  margin-bottom: 4px;
+}
+.seg-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 8px 0;
+  font-size: 0.875rem;
+  color: #8e8e93;
+  cursor: pointer;
+  position: relative;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 2px;
+    background: transparent;
+    border-radius: 2px;
+  }
+  &.active { color: #fff; font-weight: 600; &::after { background: #4ade80; } }
+}
 
 .ios-list {
   background: #1c1c1e;
