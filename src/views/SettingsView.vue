@@ -8,10 +8,6 @@
     </v-toolbar>
 
     <v-content>
-      <div class="page-title-area">
-        <h1 class="page-title">Einstellungen</h1>
-      </div>
-
       <!-- KI -->
       <p class="section-header">KI</p>
       <div class="settings-group">
