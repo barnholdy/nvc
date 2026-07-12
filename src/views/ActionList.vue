@@ -26,7 +26,7 @@
         <p class="empty-title">Keine Einträge</p>
         <p class="empty-sub">
           <template v-if="tab === 'open'">Füge Handlungen im Änderungsprozess einer Überzeugung hinzu.</template>
-          <template v-else-if="tab === 'dabei'">Noch keine Handlungen zwischen 50 % und 74 %.</template>
+          <template v-else-if="tab === 'dabei'">Noch keine Handlungen zwischen 1 % und 74 %.</template>
           <template v-else>Noch keine vollständig verinnerlichten Handlungen.</template>
         </p>
       </div>
@@ -203,8 +203,8 @@ export default {
     filteredActions() {
       return this.actions.filter(item => {
         const p = item.progress;
-        if (this.tab === 'open') return p === null || p < 50;
-        if (this.tab === 'dabei') return p !== null && p >= 50 && p < 75;
+        if (this.tab === 'open') return p === null || p === 0;
+        if (this.tab === 'dabei') return p !== null && p >= 1 && p < 75;
         if (this.tab === 'verinnerlicht') return p !== null && p >= 75;
         return true;
       });
