@@ -136,7 +136,17 @@ export default {
       this.savedApiKey = this.apiKey;
     },
     exportData() {
-      const data = { patterns: this.$store.getters.patterns, beliefs: this.$store.getters.beliefs };
+      function tryParse(key) {
+        try { return JSON.parse(localStorage.getItem(key)); } catch (e) { return null; }
+      }
+      const data = {
+        patterns: this.$store.getters.patterns,
+        beliefs: this.$store.getters.beliefs,
+        amen: tryParse('nvc.amen') || {},
+        check: tryParse('nvc.check') || {},
+        progress: tryParse('nvc.progress') || {},
+        globalEmpathy: tryParse('nvc.globalEmpathy'),
+      };
       const json = JSON.stringify(data, null, 2);
       const blob = new Blob([json], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -167,6 +177,10 @@ export default {
           this.$store.commit('setBeliefs', data.beliefs);
           localStorage.setItem('nvc.patterns', JSON.stringify(data.patterns));
           localStorage.setItem('nvc.beliefs', JSON.stringify(data.beliefs));
+          if (data.amen) localStorage.setItem('nvc.amen', JSON.stringify(data.amen));
+          if (data.check) localStorage.setItem('nvc.check', JSON.stringify(data.check));
+          if (data.progress) localStorage.setItem('nvc.progress', JSON.stringify(data.progress));
+          if (data.globalEmpathy) localStorage.setItem('nvc.globalEmpathy', JSON.stringify(data.globalEmpathy));
           this.importSuccess = true;
         } catch (err) {
           this.importError = 'Datei konnte nicht gelesen werden.';
