@@ -189,6 +189,8 @@ export default {
       localStorage.removeItem('nvc.check');
       localStorage.removeItem('nvc.progress');
       localStorage.removeItem('nvc.onboarded');
+      localStorage.removeItem('nvc.kernmuster');
+      localStorage.removeItem('nvc.kernmusterSnapshot');
     },
   },
 };

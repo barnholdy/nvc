@@ -41,9 +41,11 @@
         <div v-else class="settings-row tappable" @click="generateKernmuster">
           <div class="settings-row-body">
             <p class="settings-label">{{ kernmuster.length ? 'Neu analysieren' : 'Muster analysieren' }}</p>
-            <p class="settings-sub">KI clustert deine Überzeugungen</p>
+            <p class="settings-sub" :class="{ 'changed-sub': dataChanged }">
+              {{ dataChanged ? 'Überzeugungen haben sich geändert' : 'KI clustert deine Überzeugungen' }}
+            </p>
           </div>
-          <v-icon color="#4ade80">auto_awesome</v-icon>
+          <v-icon :color="dataChanged ? '#fd9927' : '#4ade80'">auto_awesome</v-icon>
         </div>
       </div>
 
@@ -100,8 +102,10 @@
 export default {
   name: 'profile-view',
   data() {
+    var saved = localStorage.getItem('nvc.kernmuster');
     return {
-      kernmuster: [],
+      kernmuster: saved ? JSON.parse(saved) : [],
+      kernmusterSnapshot: localStorage.getItem('nvc.kernmusterSnapshot') || '',
       isLoadingKernmuster: false,
       kernmusterError: '',
       apiKey: localStorage.getItem('nvc.apiKey') || '',
@@ -110,6 +114,12 @@ export default {
   computed: {
     beliefs() {
       return this.$store.getters.beliefs;
+    },
+    currentSnapshot() {
+      return this.beliefs.map(function(b) { return b.belief; }).slice().sort().join('|');
+    },
+    dataChanged() {
+      return this.kernmuster.length > 0 && this.currentSnapshot !== this.kernmusterSnapshot;
     },
     topNeeds() {
       var counts = {};
@@ -203,6 +213,9 @@ export default {
         const match = text.match(/\[[\s\S]*\]/);
         if (!match) throw new Error('Ungültiges Antwortformat.');
         this.kernmuster = JSON.parse(match[0]);
+        this.kernmusterSnapshot = this.currentSnapshot;
+        localStorage.setItem('nvc.kernmuster', JSON.stringify(this.kernmuster));
+        localStorage.setItem('nvc.kernmusterSnapshot', this.kernmusterSnapshot);
       } catch (e) {
         this.kernmusterError = e.message || 'Analyse fehlgeschlagen.';
       } finally {
@@ -254,6 +267,7 @@ export default {
   color: #8e8e93;
   margin: 0;
 }
+.changed-sub { color: #fd9927 !important; }
 .settings-sep {
   height: 1px;
   background: #2c2c2e;
