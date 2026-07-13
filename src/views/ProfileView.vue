@@ -72,7 +72,6 @@
       </div>
 
       <!-- Affektprofil -->
-      <p class="section-header">Affektprofil</p>
       <div class="affect-grid">
         <div>
           <p class="affect-col-label">Überzeugung</p>
@@ -358,7 +357,7 @@ export default {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-  margin: 0 16px;
+  margin: 0 8px;
 }
 .affect-col-label {
   font-size: 0.7rem;
@@ -366,7 +365,8 @@ export default {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  margin: 0 4px 5px;
+  margin: 0 0 5px;
+  text-align: right;
 }
 .stat-item-sm {
   padding: 9px 10px !important;
