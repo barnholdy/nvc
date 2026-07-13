@@ -12,7 +12,7 @@
       <div class="intro-card">
         <span class="intro-icon">🎯</span>
         <p class="intro-title">Vom Denken zum Handeln</p>
-        <p class="intro-text">Handeln überbrückt die Lücke zwischen Absicht und Wirklichkeit. Es erzeugt echtes Feedback und stärkt das Vertrauen in dich selbst.</p>
+        <p class="intro-text">Wenn du nicht änderst, ändert sich nichts. Handeln überbrückt die Lücke zwischen Absicht und Wirklichkeit. Es erzeugt echtes Feedback und stärkt das Vertrauen in dich selbst.</p>
       </div>
 
       <div class="segment-row">
