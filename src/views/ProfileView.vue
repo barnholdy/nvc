@@ -73,23 +73,51 @@
 
       <!-- Affektprofil -->
       <p class="section-header">Affektprofil</p>
-      <div class="settings-group">
-        <template v-if="topFeelings.length">
-          <div v-for="(f, i) in topFeelings" :key="f.name">
-            <div class="stat-item">
-              <div class="stat-header-row">
-                <span class="stat-name">{{ f.name }}</span>
-                <span class="stat-count">{{ f.count }}×</span>
+      <div class="affect-grid">
+        <div>
+          <p class="affect-col-label">Überzeugung</p>
+          <div class="settings-group">
+            <template v-if="topFeelings.length">
+              <div v-for="(f, i) in topFeelings" :key="f.name">
+                <div class="stat-item stat-item-sm">
+                  <div class="stat-header-row">
+                    <span class="stat-name stat-name-sm">{{ f.name }}</span>
+                    <span class="stat-count">{{ f.count }}×</span>
+                  </div>
+                  <div class="stat-bar-bg">
+                    <div class="stat-bar-fill" :style="{ width: pct(f.count, topFeelings[0].count), background: feelingColor(f.valence) }"></div>
+                  </div>
+                </div>
+                <div v-if="i < topFeelings.length - 1" class="settings-sep"></div>
               </div>
-              <div class="stat-bar-bg">
-                <div class="stat-bar-fill" :style="{ width: pct(f.count, topFeelings[0].count), background: feelingColor(f.valence) }"></div>
-              </div>
+            </template>
+            <div v-else class="info-row">
+              <p class="info-text">–</p>
             </div>
-            <div v-if="i < topFeelings.length - 1" class="settings-sep"></div>
           </div>
-        </template>
-        <div v-else class="info-row">
-          <p class="info-text">Noch keine Gefühle in Überzeugungen erfasst.</p>
+        </div>
+
+        <div>
+          <p class="affect-col-label">Neue Perspektive</p>
+          <div class="settings-group">
+            <template v-if="topChangeProcessFeelings.length">
+              <div v-for="(f, i) in topChangeProcessFeelings" :key="f.name">
+                <div class="stat-item stat-item-sm">
+                  <div class="stat-header-row">
+                    <span class="stat-name stat-name-sm">{{ f.name }}</span>
+                    <span class="stat-count">{{ f.count }}×</span>
+                  </div>
+                  <div class="stat-bar-bg">
+                    <div class="stat-bar-fill" :style="{ width: pct(f.count, topChangeProcessFeelings[0].count), background: feelingColor(f.valence) }"></div>
+                  </div>
+                </div>
+                <div v-if="i < topChangeProcessFeelings.length - 1" class="settings-sep"></div>
+              </div>
+            </template>
+            <div v-else class="info-row">
+              <p class="info-text">–</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -134,11 +162,22 @@ export default {
         .slice(0, 5);
     },
     topFeelings() {
+      return this._countFeelings(function(b) { return b.feelings || []; });
+    },
+    topChangeProcessFeelings() {
+      return this._countFeelings(function(b) {
+        return (b.reflection && b.reflection.withoutBeliefFeelings) || [];
+      });
+    },
+  },
+  methods: {
+    _countFeelings(getFeelings) {
       var counts = {};
       var valences = {};
-      this.beliefs.forEach(function(b) {
+      var beliefs = this.beliefs;
+      beliefs.forEach(function(b) {
         var seen = {};
-        (b.feelings || []).forEach(function(f) {
+        getFeelings(b).forEach(function(f) {
           if (f && f.name && !seen[f.name]) {
             seen[f.name] = true;
             counts[f.name] = (counts[f.name] || 0) + 1;
@@ -153,8 +192,6 @@ export default {
         .sort(function(a, b) { return b.count - a.count; })
         .slice(0, 5);
     },
-  },
-  methods: {
     pct(count, max) {
       if (!max) return '0%';
       return Math.round(count / max * 100) + '%';
@@ -316,6 +353,32 @@ export default {
   margin: 0;
 }
 
+/* Affektprofil two-column */
+.affect-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 0 16px;
+}
+.affect-col-label {
+  font-size: 0.7rem;
+  color: #8e8e93;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 4px 5px;
+}
+.stat-item-sm {
+  padding: 9px 10px !important;
+}
+.stat-name-sm {
+  font-size: 0.82rem !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
 /* Stat bars */
 .stat-item {
   padding: 13px 16px;
@@ -325,6 +388,7 @@ export default {
   justify-content: space-between;
   align-items: baseline;
   margin-bottom: 8px;
+  min-width: 0;
 }
 .stat-name {
   font-size: 0.95rem;
