@@ -146,6 +146,8 @@ export default {
         check: tryParse('nvc.check') || {},
         progress: tryParse('nvc.progress') || {},
         globalEmpathy: tryParse('nvc.globalEmpathy'),
+        affirmationStatus: tryParse('nvc.affirmationStatus') || {},
+        actionStatus: tryParse('nvc.actionStatus') || {},
       };
       const json = JSON.stringify(data, null, 2);
       const blob = new Blob([json], { type: 'application/json' });
@@ -181,6 +183,8 @@ export default {
           if (data.check) localStorage.setItem('nvc.check', JSON.stringify(data.check));
           if (data.progress) localStorage.setItem('nvc.progress', JSON.stringify(data.progress));
           if (data.globalEmpathy) localStorage.setItem('nvc.globalEmpathy', JSON.stringify(data.globalEmpathy));
+          if (data.affirmationStatus) localStorage.setItem('nvc.affirmationStatus', JSON.stringify(data.affirmationStatus));
+          if (data.actionStatus) localStorage.setItem('nvc.actionStatus', JSON.stringify(data.actionStatus));
           this.importSuccess = true;
         } catch (err) {
           this.importError = 'Datei konnte nicht gelesen werden.';
@@ -205,6 +209,8 @@ export default {
       localStorage.removeItem('nvc.onboarded');
       localStorage.removeItem('nvc.kernmuster');
       localStorage.removeItem('nvc.kernmusterSnapshot');
+      localStorage.removeItem('nvc.affirmationStatus');
+      localStorage.removeItem('nvc.actionStatus');
     },
   },
 };

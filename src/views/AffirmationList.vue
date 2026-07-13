@@ -26,8 +26,8 @@
         <p class="empty-title">Keine Einträge</p>
         <p class="empty-sub">
           <template v-if="tab === 'open'">Füge Affirmationen zu deinen Überzeugungen hinzu.</template>
-          <template v-else-if="tab === 'dabei'">Noch keine Affirmationen zwischen 1 % und 74 %.</template>
-          <template v-else>Noch keine vollständig verinnerlichten Affirmationen.</template>
+          <template v-else-if="tab === 'dabei'">Noch keine Affirmationen als „Dabei" markiert.</template>
+          <template v-else>Noch keine Affirmationen als „Verinnerlicht" markiert.</template>
         </p>
       </div>
 
@@ -41,10 +41,13 @@
             @touchend="tsEnd($event, i)"
           >
             <div class="swipe-right-panel">
-              <button class="swipe-btn swipe-btn-edit" @click.stop="startEdit(item)">
-                <v-icon small color="#fff">edit</v-icon>
-                <span>Bearb.</span>
-              </button>
+              <button
+                v-for="s in otherStatuses(item.text)"
+                :key="s.key"
+                class="swipe-btn status-btn"
+                :style="{ background: s.color }"
+                @click.stop="setStatus(item.text, s.key)"
+              ><span>{{ s.label }}</span></button>
             </div>
             <div class="swipe-left-panel">
               <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(item)">
@@ -52,7 +55,7 @@
                 <span>Löschen</span>
               </button>
             </div>
-            <div class="reminder-row" :style="rowSt(i, 65)" @click="deskClick(i)">
+            <div class="reminder-row" :style="rowSt(i, 130)" @click="deskClick(i)">
               <div class="reminder-row-body">
                 <p class="reminder-text">{{ item.text }}</p>
                 <div class="row-badges">
@@ -68,7 +71,12 @@
             </div>
           </div>
           <div :key="item.text + '-expand'" v-if="openIndex === i" class="row-expand">
-            <p class="expand-label">Überzeugungen</p>
+            <div class="expand-header">
+              <p class="expand-label">Überzeugungen</p>
+              <button class="expand-edit-btn" @click.stop="startEdit(item)">
+                <v-icon small color="#8e8e93">edit</v-icon>
+              </button>
+            </div>
             <p v-for="(s, j) in item.sources" :key="j" class="expand-text mb-1">„{{ s.beliefText }}"</p>
           </div>
           <div :key="item.text + '-sep'" class="ios-sep" v-if="i < filteredAffirmations.length - 1 && openIndex !== i"></div>
@@ -204,6 +212,12 @@
 import moment from 'moment';
 
 const AMEN_KEY = 'nvc.amen';
+const AFF_STATUS_KEY = 'nvc.affirmationStatus';
+const ALL_STATUSES = [
+  { key: 'open', label: 'Offen', color: '#636366' },
+  { key: 'dabei', label: 'Dabei', color: '#fd9927' },
+  { key: 'verinnerlicht', label: 'Verinn.', color: '#4ade80' },
+];
 
 function triggerConfetti() {
   var canvas = document.createElement('canvas');
@@ -243,6 +257,9 @@ function triggerConfetti() {
 function loadAhoMap() {
   try { return JSON.parse(localStorage.getItem(AMEN_KEY)) || {}; } catch (e) { return {}; }
 }
+function loadAffStatusMap() {
+  try { return JSON.parse(localStorage.getItem(AFF_STATUS_KEY)) || {}; } catch (e) { return {}; }
+}
 
 export default {
   name: 'affirmation-list',
@@ -261,6 +278,7 @@ export default {
       itemToDelete: null,
       isDeleteDialogShowing: false,
       amenMap: loadAhoMap(),
+      statusMap: loadAffStatusMap(),
       sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
   },
@@ -269,13 +287,14 @@ export default {
   },
   computed: {
     filteredAffirmations() {
-      return this.affirmations.filter(item => {
-        const r = item.resonance;
-        if (this.tab === 'open') return r === null || r === 0;
-        if (this.tab === 'dabei') return r !== null && r >= 1 && r < 75;
-        if (this.tab === 'verinnerlicht') return r !== null && r >= 75;
+      var sm = this.statusMap;
+      return this.affirmations.filter(function(item) {
+        var s = sm[item.text] || 'open';
+        if (this.tab === 'open') return s === 'open';
+        if (this.tab === 'dabei') return s === 'dabei';
+        if (this.tab === 'verinnerlicht') return s === 'verinnerlicht';
         return true;
-      });
+      }, this);
     },
     affirmations() {
       const map = {};
@@ -454,7 +473,7 @@ export default {
         this.sw.isH = Math.abs(dx) >= Math.abs(dy);
       if (!this.sw.isH) return;
       e.preventDefault();
-      this.sw.dx = Math.max(-80, Math.min(dx, 65));
+      this.sw.dx = Math.max(-80, Math.min(dx, 130));
       this.sw.drag = true;
     },
     tsEnd(e, i) {
@@ -483,6 +502,16 @@ export default {
     deskClick(i) {
       if (this.sw.openIdx !== null) { this.sw.openIdx = null; this.sw.openDir = null; return; }
       this.toggle(i);
+    },
+    otherStatuses(text) {
+      var current = this.statusMap[text] || 'open';
+      return ALL_STATUSES.filter(function(s) { return s.key !== current; });
+    },
+    setStatus(text, status) {
+      this.statusMap = Object.assign({}, this.statusMap, { [text]: status });
+      localStorage.setItem(AFF_STATUS_KEY, JSON.stringify(this.statusMap));
+      this.sw.openIdx = null;
+      this.sw.openDir = null;
     },
   },
 };
@@ -562,7 +591,7 @@ export default {
   &:active { opacity: 0.85; }
 }
 .swipe-btn-delete { background: #ff453a; width: 80px; }
-.swipe-btn-edit { background: #636366; }
+.status-btn { color: #000; font-size: 0.72rem; }
 
 .reminder-row {
   position: relative;
@@ -646,6 +675,20 @@ export default {
   background: #141416;
   padding: 14px 20px 16px;
   border-top: 1px solid #2c2c2e;
+}
+.expand-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 0 6px;
+  .expand-label { margin: 0; }
+}
+.expand-edit-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 .expand-label {
   font-size: 0.68rem;
