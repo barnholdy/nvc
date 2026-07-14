@@ -205,7 +205,7 @@ export default {
   name: 'action-list',
   data() {
     return {
-      tab: 'open',
+      tab: 'dabei',
       openIndex: null,
       itemToDelete: null,
       isDeleteDialogShowing: false,

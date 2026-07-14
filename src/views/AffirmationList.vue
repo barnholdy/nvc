@@ -269,7 +269,7 @@ export default {
   name: 'affirmation-list',
   data() {
     return {
-      tab: 'open',
+      tab: 'dabei',
       openIndex: null,
       isEditDialogShowing: false,
       editStep: 1,
