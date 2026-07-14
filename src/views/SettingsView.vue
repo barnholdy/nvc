@@ -156,6 +156,8 @@ export default {
         globalEmpathy: tryParse('nvc.globalEmpathy'),
         affirmationStatus: tryParse('nvc.affirmationStatus') || {},
         actionStatus: tryParse('nvc.actionStatus') || {},
+        kernmuster: tryParse('nvc.kernmuster') || [],
+        kernmusterSnapshot: localStorage.getItem('nvc.kernmusterSnapshot') || '',
       };
       const json = JSON.stringify(data, null, 2);
       const blob = new Blob([json], { type: 'application/json' });
@@ -193,6 +195,8 @@ export default {
           if (data.globalEmpathy) localStorage.setItem('nvc.globalEmpathy', JSON.stringify(data.globalEmpathy));
           if (data.affirmationStatus) localStorage.setItem('nvc.affirmationStatus', JSON.stringify(data.affirmationStatus));
           if (data.actionStatus) localStorage.setItem('nvc.actionStatus', JSON.stringify(data.actionStatus));
+          if (data.kernmuster) localStorage.setItem('nvc.kernmuster', JSON.stringify(data.kernmuster));
+          if (data.kernmusterSnapshot) localStorage.setItem('nvc.kernmusterSnapshot', data.kernmusterSnapshot);
           this.importSuccess = true;
         } catch (err) {
           this.importError = 'Datei konnte nicht gelesen werden.';
