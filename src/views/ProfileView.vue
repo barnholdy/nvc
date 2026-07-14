@@ -10,8 +10,6 @@
     <v-content>
 
       <!-- Kernmuster -->
-      <p class="section-header">Kernmuster</p>
-
       <div v-if="kernmuster.length" class="kern-grid">
         <div>
           <p class="kern-col-label">Muster</p>
@@ -30,8 +28,8 @@
           <div class="settings-group">
             <template v-for="(k, i) in kernmuster">
               <div :key="i" class="pattern-item">
-                <p class="aufloesungs-title">{{ k.title }}</p>
-                <p v-for="(a, j) in (k.aufloesungen || [])" :key="j" class="aufloesungs-item">{{ a }}</p>
+                <p class="pattern-title">{{ k.title }}</p>
+                <p class="pattern-beliefs">{{ (k.aufloesungen || []).join(' · ') }}</p>
               </div>
               <div :key="'s'+i" v-if="i < kernmuster.length - 1" class="settings-sep"></div>
             </template>
@@ -382,19 +380,6 @@ export default {
   color: #8e8e93;
   margin: 0;
   line-height: 1.5;
-}
-.aufloesungs-title {
-  font-size: 0.75rem;
-  color: #636366;
-  font-weight: 600;
-  margin: 0 0 4px;
-}
-.aufloesungs-item {
-  font-size: 0.78rem;
-  color: #ebebf5;
-  margin: 0 0 4px;
-  line-height: 1.4;
-  &:last-child { margin-bottom: 0; }
 }
 
 /* Loading / info */
