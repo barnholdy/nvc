@@ -11,18 +11,36 @@
 
       <!-- Kernmuster -->
       <p class="section-header">Kernmuster</p>
-      <div class="settings-group">
-        <template v-if="kernmuster.length">
-          <div v-for="(k, i) in kernmuster" :key="i">
-            <div class="pattern-item">
-              <p class="pattern-title">{{ k.title }}</p>
-              <p class="pattern-beliefs">{{ k.beliefs.join(' · ') }}</p>
-            </div>
-            <div v-if="i < kernmuster.length - 1" class="settings-sep"></div>
+
+      <div v-if="kernmuster.length" class="kern-grid">
+        <div>
+          <p class="kern-col-label">Muster</p>
+          <div class="settings-group">
+            <template v-for="(k, i) in kernmuster">
+              <div :key="i" class="pattern-item">
+                <p class="pattern-title">{{ k.title }}</p>
+                <p class="pattern-beliefs">{{ k.beliefs.join(' · ') }}</p>
+              </div>
+              <div :key="'s'+i" v-if="i < kernmuster.length - 1" class="settings-sep"></div>
+            </template>
           </div>
-          <div class="settings-sep"></div>
-        </template>
-        <template v-else-if="!isLoadingKernmuster">
+        </div>
+        <div>
+          <p class="kern-col-label">Auflösungen</p>
+          <div class="settings-group">
+            <template v-for="(k, i) in kernmuster">
+              <div :key="i" class="pattern-item">
+                <p class="aufloesungs-title">{{ k.title }}</p>
+                <p v-for="(a, j) in (k.aufloesungen || [])" :key="j" class="aufloesungs-item">{{ a }}</p>
+              </div>
+              <div :key="'s'+i" v-if="i < kernmuster.length - 1" class="settings-sep"></div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-group" :style="kernmuster.length ? 'margin-top:8px' : ''">
+        <template v-if="!kernmuster.length && !isLoadingKernmuster">
           <div v-if="kernmusterError" class="info-row">
             <p class="error-text">{{ kernmusterError }}</p>
           </div>
@@ -33,7 +51,9 @@
             <p class="info-text">Noch keine Überzeugungen vorhanden.</p>
           </div>
         </template>
-
+        <div v-if="kernmusterError && kernmuster.length" class="info-row">
+          <p class="error-text">{{ kernmusterError }}</p>
+        </div>
         <div v-if="isLoadingKernmuster" class="loading-row">
           <v-progress-circular indeterminate color="#4ade80" size="18" width="2"></v-progress-circular>
           <span class="loading-label">Analysiere…</span>
@@ -219,11 +239,32 @@ export default {
         return (i + 1) + '. ' + b.belief;
       }).join('\n');
 
+      var affirmationTexts = [];
+      var actionTexts = [];
+      this.beliefs.forEach(function(b) {
+        (b.affirmations || []).forEach(function(a) {
+          if (a.text && affirmationTexts.indexOf(a.text) === -1) affirmationTexts.push(a.text);
+        });
+        var acts = (b.reflection && b.reflection.changeActs) || [];
+        acts.forEach(function(act) {
+          if (act && actionTexts.indexOf(act) === -1) actionTexts.push(act);
+        });
+      });
+
       var prompt = 'Analysiere diese Glaubenssätze und gruppiere sie in 3–5 Kernmuster (Cluster).\n' +
-        'Jedes Cluster erhält einen prägnanten deutschen Namen und listet die dazugehörigen Glaubenssätze auf.\n\n' +
-        'Glaubenssätze:\n' + beliefTexts + '\n\n' +
-        'Antworte ausschließlich mit einem JSON-Array (kein Markdown, kein Text davor oder danach):\n' +
-        '[{"title":"Clustername","beliefs":["Glaube 1","Glaube 2"]},...]';
+        'Jedes Cluster erhält einen prägnanten deutschen Namen und listet die dazugehörigen Glaubenssätze auf.\n' +
+        'Generiere außerdem für jedes Cluster 2–3 konkrete Auflösungen – Affirmationen, Handlungen oder Umdeutungen, die das Muster transformieren.\n\n' +
+        'Glaubenssätze:\n' + beliefTexts + '\n\n';
+
+      if (affirmationTexts.length) {
+        prompt += 'Vorhandene Affirmationen (als Inspiration für Auflösungen):\n' + affirmationTexts.join('\n') + '\n\n';
+      }
+      if (actionTexts.length) {
+        prompt += 'Vorhandene Handlungen (als Inspiration für Auflösungen):\n' + actionTexts.join('\n') + '\n\n';
+      }
+
+      prompt += 'Antworte ausschließlich mit einem JSON-Array (kein Markdown, kein Text davor oder danach):\n' +
+        '[{"title":"Clustername","beliefs":["Glaube 1","Glaube 2"],"aufloesungen":["Auflösung 1","Auflösung 2"]},...]';
 
       try {
         const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -236,7 +277,7 @@ export default {
           },
           body: JSON.stringify({
             model: 'claude-haiku-4-5-20251001',
-            max_tokens: 1000,
+            max_tokens: 2000,
             messages: [{ role: 'user', content: prompt }],
           }),
         });
@@ -310,21 +351,50 @@ export default {
   margin: 0 0 0 16px;
 }
 
-/* Kernmuster */
+/* Kernmuster two-column */
+.kern-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 0 16px;
+  .settings-group { margin: 0; }
+}
+.kern-col-label {
+  font-size: 0.7rem;
+  color: #8e8e93;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 5px;
+  text-align: left;
+}
 .pattern-item {
-  padding: 13px 16px;
+  padding: 10px 10px;
 }
 .pattern-title {
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   color: #fff;
   font-weight: 600;
   margin: 0 0 4px;
 }
 .pattern-beliefs {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: #8e8e93;
   margin: 0;
   line-height: 1.5;
+}
+.aufloesungs-title {
+  font-size: 0.75rem;
+  color: #636366;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+.aufloesungs-item {
+  font-size: 0.78rem;
+  color: #ebebf5;
+  margin: 0 0 4px;
+  line-height: 1.4;
+  &:last-child { margin-bottom: 0; }
 }
 
 /* Loading / info */
