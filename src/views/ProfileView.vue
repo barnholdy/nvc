@@ -357,7 +357,8 @@ export default {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-  margin: 0 8px;
+  margin: 20px 16px 0;
+  .settings-group { margin: 0; }
 }
 .affect-col-label {
   font-size: 0.7rem;
@@ -366,7 +367,7 @@ export default {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin: 0 0 5px;
-  text-align: right;
+  text-align: left;
 }
 .stat-item-sm {
   padding: 9px 10px !important;
