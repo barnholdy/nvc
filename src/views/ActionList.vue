@@ -453,7 +453,7 @@ export default {
   &:active { opacity: 0.85; }
 }
 .swipe-btn-delete { background: #ff453a; width: 80px; }
-.swipe-btn-edit { background: #3a3a3c; }
+.swipe-btn-edit { background: #636366; }
 .status-btn { color: #000; font-size: 0.72rem; }
 
 .ios-row {

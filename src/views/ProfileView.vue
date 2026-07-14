@@ -356,7 +356,7 @@ export default {
 .affect-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 16px;
   margin: 20px 16px 0;
   .settings-group { margin: 0; }
 }
