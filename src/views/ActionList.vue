@@ -16,8 +16,8 @@
       </div>
 
       <div class="segment-row">
-        <button class="seg-tab" :class="{ active: tab === 'dabei' }" @click="tab = 'dabei'">Dabei</button>
         <button class="seg-tab" :class="{ active: tab === 'open' }" @click="tab = 'open'">Offen</button>
+        <button class="seg-tab" :class="{ active: tab === 'dabei' }" @click="tab = 'dabei'">Dabei</button>
         <button class="seg-tab" :class="{ active: tab === 'verinnerlicht' }" @click="tab = 'verinnerlicht'">Verinnerlicht</button>
       </div>
 
@@ -41,6 +41,10 @@
             @touchend="tsEnd($event, i)"
           >
             <div class="swipe-right-panel">
+              <button class="swipe-btn swipe-btn-edit" @click.stop="startEdit(item)">
+                <v-icon small color="#fff">edit</v-icon>
+                <span>Bearb.</span>
+              </button>
               <button
                 v-for="s in otherStatuses(item.text)"
                 :key="s.key"
@@ -48,9 +52,6 @@
                 :style="{ background: s.color }"
                 @click.stop="setStatus(item.text, s.key)"
               ><span>{{ s.label }}</span></button>
-              <button class="swipe-btn swipe-btn-edit" @click.stop="startEdit(item)">
-                <v-icon small color="#fff">edit</v-icon>
-              </button>
             </div>
             <div class="swipe-left-panel">
               <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(item)">
@@ -204,7 +205,7 @@ export default {
   name: 'action-list',
   data() {
     return {
-      tab: 'dabei',
+      tab: 'open',
       openIndex: null,
       itemToDelete: null,
       isDeleteDialogShowing: false,
