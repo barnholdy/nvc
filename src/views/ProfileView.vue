@@ -10,34 +10,30 @@
     <v-content>
 
       <!-- Kernmuster -->
-      <div v-if="kernmuster.length" class="kern-grid">
-        <div>
-          <p class="kern-col-label">Muster</p>
-          <div class="settings-group">
-            <template v-for="(k, i) in kernmuster">
-              <div :key="i" class="pattern-item">
-                <p class="pattern-title">{{ k.title }}</p>
-                <p class="pattern-beliefs">{{ k.beliefs.join(' · ') }}</p>
-              </div>
-              <div :key="'s'+i" v-if="i < kernmuster.length - 1" class="settings-sep"></div>
-            </template>
-          </div>
+      <template v-if="kernmuster.length">
+        <p class="section-header">Muster</p>
+        <div class="settings-group">
+          <template v-for="(k, i) in kernmuster">
+            <div :key="i" class="pattern-item">
+              <p class="pattern-title">{{ k.title }}</p>
+              <p class="pattern-beliefs">{{ k.beliefs.join(' · ') }}</p>
+            </div>
+            <div :key="'s'+i" v-if="i < kernmuster.length - 1" class="settings-sep"></div>
+          </template>
         </div>
-        <div>
-          <p class="kern-col-label">Auflösungen</p>
-          <div class="settings-group">
-            <template v-for="(k, i) in kernmuster">
-              <div :key="i" class="pattern-item">
-                <p class="pattern-title">{{ k.title }}</p>
-                <p class="pattern-beliefs">{{ (k.aufloesungen || []).join(' · ') }}</p>
-              </div>
-              <div :key="'s'+i" v-if="i < kernmuster.length - 1" class="settings-sep"></div>
-            </template>
-          </div>
+        <p class="section-header">Auflösungen</p>
+        <div class="settings-group">
+          <template v-for="(k, i) in kernmuster">
+            <div :key="i" class="pattern-item">
+              <p class="pattern-title">{{ k.title }}</p>
+              <p class="pattern-beliefs">{{ (k.aufloesungen || []).join(' · ') }}</p>
+            </div>
+            <div :key="'s'+i" v-if="i < kernmuster.length - 1" class="settings-sep"></div>
+          </template>
         </div>
-      </div>
+      </template>
 
-      <div class="settings-group" :style="kernmuster.length ? 'margin-top:8px' : ''">
+      <div class="settings-group" :style="kernmuster.length ? 'margin-top:20px' : ''">
         <template v-if="!kernmuster.length && !isLoadingKernmuster">
           <div v-if="kernmusterError" class="info-row">
             <p class="error-text">{{ kernmusterError }}</p>
@@ -349,25 +345,8 @@ export default {
   margin: 0 0 0 16px;
 }
 
-/* Kernmuster two-column */
-.kern-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin: 0 16px;
-  .settings-group { margin: 0; }
-}
-.kern-col-label {
-  font-size: 0.7rem;
-  color: #8e8e93;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin: 0 0 5px;
-  text-align: left;
-}
 .pattern-item {
-  padding: 10px 10px;
+  padding: 13px 16px;
 }
 .pattern-title {
   font-size: 0.88rem;
