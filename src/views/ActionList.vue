@@ -16,8 +16,8 @@
       </div>
 
       <div class="segment-row">
-        <button class="seg-tab" :class="{ active: tab === 'open' }" @click="tab = 'open'">Offen</button>
         <button class="seg-tab" :class="{ active: tab === 'dabei' }" @click="tab = 'dabei'">Dabei</button>
+        <button class="seg-tab" :class="{ active: tab === 'open' }" @click="tab = 'open'">Offen</button>
         <button class="seg-tab" :class="{ active: tab === 'verinnerlicht' }" @click="tab = 'verinnerlicht'">Verinnerlicht</button>
       </div>
 
@@ -48,6 +48,9 @@
                 :style="{ background: s.color }"
                 @click.stop="setStatus(item.text, s.key)"
               ><span>{{ s.label }}</span></button>
+              <button class="swipe-btn swipe-btn-edit" @click.stop="startEdit(item)">
+                <v-icon small color="#fff">edit</v-icon>
+              </button>
             </div>
             <div class="swipe-left-panel">
               <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(item)">
@@ -201,7 +204,7 @@ export default {
   name: 'action-list',
   data() {
     return {
-      tab: 'open',
+      tab: 'dabei',
       openIndex: null,
       itemToDelete: null,
       isDeleteDialogShowing: false,
@@ -332,7 +335,7 @@ export default {
         this.sw.isH = Math.abs(dx) >= Math.abs(dy);
       if (!this.sw.isH) return;
       e.preventDefault();
-      this.sw.dx = Math.max(-80, Math.min(dx, 130));
+      this.sw.dx = Math.max(-80, Math.min(dx, 195));
       this.sw.drag = true;
     },
     tsEnd(e, i) {
@@ -355,7 +358,7 @@ export default {
       const live = s.touchIdx === i && s.drag && s.isH;
       let x = 0;
       if (live) x = s.dx;
-      else if (s.openIdx === i) x = s.openDir === 'left' ? -80 : 130;
+      else if (s.openIdx === i) x = s.openDir === 'left' ? -80 : 195;
       return { transform: `translateX(${x}px)`, transition: live ? 'none' : 'transform 0.2s ease' };
     },
     deskClick(i) {
@@ -450,6 +453,7 @@ export default {
   &:active { opacity: 0.85; }
 }
 .swipe-btn-delete { background: #ff453a; width: 80px; }
+.swipe-btn-edit { background: #3a3a3c; }
 .status-btn { color: #000; font-size: 0.72rem; }
 
 .ios-row {
