@@ -85,6 +85,14 @@
           </div>
           <v-icon color="#4ade80">info_outline</v-icon>
         </div>
+        <div class="settings-sep"></div>
+        <div class="settings-row tappable" @click="reloadApp">
+          <div class="settings-row-body">
+            <p class="settings-label">App aktualisieren</p>
+            <p class="settings-sub">Neueste Version laden</p>
+          </div>
+          <v-icon color="#4ade80">refresh</v-icon>
+        </div>
       </div>
 
       <!-- Danger zone -->
@@ -195,6 +203,9 @@ export default {
     showOnboarding() {
       localStorage.removeItem('nvc.onboarded');
       this.$root.$emit('show-onboarding');
+    },
+    reloadApp() {
+      window.location.reload(true);
     },
     resetData() {
       this.showResetDialog = false;
