@@ -5,26 +5,6 @@
       <p class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
     </v-flex>
 
-    <!-- Summary of selected items -->
-    <v-flex v-if="selFeelings.length > 0 || selNeeds.length > 0" class="mb-3">
-      <div class="summary-section">
-        <span
-          v-for="item in selFeelings"
-          :key="'sf_' + item.name"
-          class="my-chip"
-          :style="{ backgroundColor: emotionColor(item.emotionId), color: '#000' }"
-          @click="removeFeeling(item.name)"
-        >{{ item.name }} <span class="my-chip-x">×</span></span>
-        <span
-          v-for="item in selNeeds"
-          :key="'sn_' + item.name"
-          class="my-chip"
-          :style="{ backgroundColor: emotionColor(item.emotionId), color: '#000' }"
-          @click="removeNeed(item.name)"
-        >{{ item.name }} <span class="my-chip-x">×</span></span>
-      </div>
-    </v-flex>
-
     <!-- Accordion: all levels always visible -->
     <v-flex>
       <div v-for="e in taxonomy.grundemotionen" :key="e.id" class="mb-2">
@@ -38,12 +18,20 @@
           <div class="emotion-row-body">
             <span class="emotion-row-label" :style="{ color: emotionColor(e.id) }">{{ e.label }}</span>
             <span class="emotion-row-desc">{{ e.beschreibung }}</span>
-            <div v-if="emotionSelections(e.id).length > 0" class="emotion-selections">
+            <div v-if="selFeelings.filter(function(f){ return f.emotionId === e.id; }).length > 0" class="emotion-selections">
               <span
-                v-for="item in emotionSelections(e.id)"
-                :key="item.name"
+                v-for="item in selFeelings.filter(function(f){ return f.emotionId === e.id; })"
+                :key="'f_' + item.name"
                 class="emotion-sel-chip"
                 :style="{ backgroundColor: emotionColor(e.id), color: '#000' }"
+              >{{ item.name }}</span>
+            </div>
+            <div v-if="selNeeds.filter(function(n){ return n.emotionId === e.id; }).length > 0" class="emotion-selections emotion-selections--needs">
+              <span
+                v-for="item in selNeeds.filter(function(n){ return n.emotionId === e.id; })"
+                :key="'n_' + item.name"
+                class="emotion-sel-chip"
+                :style="{ backgroundColor: '#c8963e', color: '#000' }"
               >{{ item.name }}</span>
             </div>
           </div>
@@ -84,8 +72,8 @@
                   :key="n.name"
                   class="my-chip"
                   :style="isSelectedNeed(n.name)
-                    ? { backgroundColor: emotionColor(e.id), color: '#000' }
-                    : { backgroundColor: '#3a3a3c', color: emotionColor(e.id) }"
+                    ? { backgroundColor: '#c8963e', color: '#000' }
+                    : { backgroundColor: '#3a3a3c', color: '#c8963e' }"
                   @click.stop="toggleNeed(n.name, e.id)"
                 >{{ n.name }}</span>
               </div>
@@ -221,12 +209,6 @@ export default {
 <style scoped lang="scss">
 .belief-quote { font-style: italic; }
 
-.summary-section {
-  display: flex;
-  flex-wrap: wrap;
-  padding: 4px 0;
-}
-
 .emotion-row {
   display: flex;
   align-items: center;
@@ -242,6 +224,7 @@ export default {
 .emotion-row-label { display: block; font-weight: 600; font-size: 0.95rem; }
 .emotion-row-desc { display: block; font-size: 0.78rem; color: #8e8e93; margin-top: 2px; }
 .emotion-selections { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
+.emotion-selections--needs { margin-top: 4px; }
 .emotion-sel-chip {
   display: inline-block;
   padding: 2px 8px;
