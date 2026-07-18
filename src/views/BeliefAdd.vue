@@ -21,14 +21,8 @@
           @blurred="isFooterFixed = true">
         </belief-add-belief>
 
-        <belief-add-feeling
-          v-show="step === 2"
-          :belief="belief"
-          :availableFeelings="availableFeelings">
-        </belief-add-feeling>
-
         <belief-add-reaction
-          v-show="step === 3"
+          v-show="step === 2"
           :belief="belief"
           :initialValue="withBelief"
           @changed="withBelief = $event"
@@ -36,14 +30,18 @@
           @blurred="isFooterFixed = true">
         </belief-add-reaction>
 
-        <belief-add-need
-          v-show="step === 4"
+        <belief-add-feeling-need
+          ref="feelingNeed"
+          v-show="step === 3"
           :belief="belief"
-          :availableNeeds="availableNeeds">
-        </belief-add-need>
+          :taxonomy="taxonomy"
+          :initialFeelings="selectedFeelings"
+          :initialNeeds="selectedNeeds"
+          @change="selectedFeelings = $event.feelings; selectedNeeds = $event.needs">
+        </belief-add-feeling-need>
 
         <belief-add-hypothese
-          v-show="step === 5"
+          v-show="step === 4"
           :belief="belief"
           :initialValue="origin"
           @changed="origin = $event"
@@ -75,32 +73,17 @@
 
 <script>
 import BeliefAddBelief from '@/views/BeliefAddBelief.vue';
-import BeliefAddFeeling from '@/views/BeliefAddFeeling.vue';
 import BeliefAddReaction from '@/views/BeliefAddReaction.vue';
-import BeliefAddNeed from '@/views/BeliefAddNeed.vue';
+import BeliefAddFeelingNeed from '@/views/BeliefAddFeelingNeed.vue';
 import BeliefAddHypothese from '@/views/BeliefAddHypothese.vue';
-import availableFeelingsSrc from '../assets/feelings.json';
-import availableNeedsSrc from '../assets/needs.json';
-
-function buildFeelings(selectedFeelings) {
-  return availableFeelingsSrc.feelings.filter(function(f) { return f.rank >= -80; }).map(function(f) {
-    return Object.assign({}, f, { isSelected: selectedFeelings.some(function(sf) { return sf.name === f.name; }) });
-  });
-}
-
-function buildNeeds(selectedNeeds) {
-  return availableNeedsSrc.needs.filter(function(n) { return n.rank >= -80; }).map(function(n) {
-    return Object.assign({}, n, { isSelected: selectedNeeds.some(function(sn) { return sn.name === n.name; }) });
-  });
-}
+import taxonomy from '../assets/taxonomy.json';
 
 export default {
   name: 'belief-add',
   components: {
     BeliefAddBelief,
-    BeliefAddFeeling,
     BeliefAddReaction,
-    BeliefAddNeed,
+    BeliefAddFeelingNeed,
     BeliefAddHypothese,
   },
   data() {
@@ -108,11 +91,12 @@ export default {
       .find(function(b) { return b.time === parseInt(this.$route.params.time, 10); }, this);
     return {
       step: 1,
-      totalSteps: 5,
+      totalSteps: 4,
+      taxonomy: taxonomy,
       editEntry: editEntry || null,
       belief: editEntry ? editEntry.belief : '',
-      availableFeelings: buildFeelings(editEntry ? editEntry.feelings || [] : []),
-      availableNeeds: buildNeeds(editEntry ? editEntry.needs || [] : []),
+      selectedFeelings: editEntry ? editEntry.feelings || [] : [],
+      selectedNeeds: editEntry ? editEntry.needs || [] : [],
       withBelief: editEntry ? editEntry.withBelief || '' : '',
       origin: editEntry && editEntry.reflection ? editEntry.reflection.origin || '' : '',
       isFooterFixed: true,
@@ -121,12 +105,6 @@ export default {
   computed: {
     isEditMode() {
       return !!this.editEntry;
-    },
-    selectedFeelings() {
-      return this.availableFeelings.filter(function(f) { return f.isSelected; });
-    },
-    selectedNeeds() {
-      return this.availableNeeds.filter(function(n) { return n.isSelected; });
     },
     isStepComplete() {
       if (this.step === 1) return this.belief.trim() !== '';
@@ -139,8 +117,12 @@ export default {
       this.$vuetify.goTo(0, { duration: 0 });
     },
     prevStep() {
-      this.step -= 1;
-      this.$vuetify.goTo(0, { duration: 0 });
+      if (this.step === 3 && this.$refs.feelingNeed && this.$refs.feelingNeed.level !== 'primary') {
+        this.$refs.feelingNeed.goBack();
+      } else {
+        this.step -= 1;
+        this.$vuetify.goTo(0, { duration: 0 });
+      }
     },
     save() {
       var existingReflection = this.editEntry ? (this.editEntry.reflection || {}) : {};
