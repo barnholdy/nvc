@@ -8,24 +8,20 @@
     <!-- Summary of selected items -->
     <v-flex v-if="selFeelings.length > 0 || selNeeds.length > 0" class="mb-3">
       <div class="summary-section">
-        <v-chip
+        <span
           v-for="item in selFeelings"
           :key="'sf_' + item.name"
-          small close
-          :color="emotionColor(item.emotionId)"
-          text-color="#000"
-          class="mr-1 mb-1"
-          @input="removeFeeling(item.name)"
-        >{{ item.name }}</v-chip>
-        <v-chip
+          class="my-chip my-chip--close"
+          :style="{ backgroundColor: emotionColor(item.emotionId), color: '#000' }"
+          @click="removeFeeling(item.name)"
+        >{{ item.name }} <span class="my-chip-x">×</span></span>
+        <span
           v-for="item in selNeeds"
           :key="'sn_' + item.name"
-          small close
-          :color="emotionColor(item.emotionId)"
-          text-color="#000"
-          class="mr-1 mb-1"
-          @input="removeNeed(item.name)"
-        >{{ item.name }}</v-chip>
+          class="my-chip my-chip--close"
+          :style="{ backgroundColor: emotionColor(item.emotionId), color: '#000' }"
+          @click="removeNeed(item.name)"
+        >{{ item.name }} <span class="my-chip-x">×</span></span>
       </div>
     </v-flex>
 
@@ -74,27 +70,27 @@
     <v-flex v-else>
       <p class="section-label">Gefühle</p>
       <div class="chips-wrap mb-3">
-        <v-chip
+        <span
           v-for="f in activeCluster.gefuehle"
           :key="f.name"
-          small
-          :color="isSelectedFeeling(f.name) ? emotionColor(activePrimary.id) : '#2c2c2e'"
-          :text-color="isSelectedFeeling(f.name) ? '#000' : emotionColor(activePrimary.id)"
-          class="mr-1 mb-1"
+          class="my-chip"
+          :style="isSelectedFeeling(f.name)
+            ? { backgroundColor: emotionColor(activePrimary.id), color: '#000' }
+            : { backgroundColor: '#2c2c2e', color: emotionColor(activePrimary.id) }"
           @click="toggleFeeling(f.name)"
-        >{{ f.name }}</v-chip>
+        >{{ f.name }}</span>
       </div>
       <p class="section-label">Bedürfnisse</p>
       <div class="chips-wrap">
-        <v-chip
+        <span
           v-for="n in activeCluster.beduerfnisse"
           :key="n.name"
-          small
-          :color="isSelectedNeed(n.name) ? emotionColor(activePrimary.id) : '#2c2c2e'"
-          :text-color="isSelectedNeed(n.name) ? '#000' : emotionColor(activePrimary.id)"
-          class="mr-1 mb-1"
+          class="my-chip"
+          :style="isSelectedNeed(n.name)
+            ? { backgroundColor: emotionColor(activePrimary.id), color: '#000' }
+            : { backgroundColor: '#2c2c2e', color: emotionColor(activePrimary.id) }"
           @click="toggleNeed(n.name)"
-        >{{ n.name }}</v-chip>
+        >{{ n.name }}</span>
       </div>
       <div class="mt-4 text-xs-center">
         <v-btn flat color="primary" @click="level = 'primary'">
@@ -293,4 +289,24 @@ export default {
   margin: 0 0 8px;
 }
 .chips-wrap { display: flex; flex-wrap: wrap; }
+
+.my-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 16px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin: 3px 4px 3px 0;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s;
+  &:active { opacity: 0.7; }
+}
+.my-chip-x {
+  margin-left: 4px;
+  font-size: 1rem;
+  line-height: 1;
+  opacity: 0.7;
+}
 </style>
