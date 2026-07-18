@@ -198,9 +198,7 @@ export default {
 .summary-section {
   display: flex;
   flex-wrap: wrap;
-  padding: 8px;
-  background: #f5f5f5;
-  border-radius: 8px;
+  padding: 4px 0;
 }
 
 .fn-breadcrumb {
@@ -246,12 +244,13 @@ export default {
   margin-bottom: 8px;
   border-radius: 8px;
   border-left: 4px solid;
-  background: #f5f5f5;
+  background: #2c2c2e;
+  color: #fff;
   cursor: pointer;
   font-weight: 500;
   font-size: 0.9rem;
   -webkit-tap-highlight-color: transparent;
-  &:active { background: #e8e8e8; }
+  &:active { background: #3a3a3c; }
 }
 
 .section-label {
