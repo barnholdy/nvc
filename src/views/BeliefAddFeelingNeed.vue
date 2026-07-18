@@ -41,14 +41,18 @@
 
     <!-- Level 1: Grundemotionen -->
     <v-flex v-if="level === 'primary'">
-      <div class="emotion-grid">
-        <div
-          v-for="e in taxonomy.grundemotionen"
-          :key="e.id"
-          class="emotion-card"
-          :class="'emotion-' + e.id"
-          @click="choosePrimary(e)"
-        >{{ e.label }}</div>
+      <div
+        v-for="e in taxonomy.grundemotionen"
+        :key="e.id"
+        class="emotion-row"
+        :style="{ borderLeftColor: emotionColor(e.id) }"
+        @click="choosePrimary(e)"
+      >
+        <div class="emotion-row-body">
+          <span class="emotion-row-label" :style="{ color: emotionColor(e.id) }">{{ e.label }}</span>
+          <span class="emotion-row-desc">{{ e.beschreibung }}</span>
+        </div>
+        <v-icon small :color="emotionColor(e.id)">chevron_right</v-icon>
       </div>
     </v-flex>
 
@@ -238,30 +242,21 @@ export default {
 .fn-active { color: #333; font-weight: 600; }
 .fn-clickable { cursor: pointer; &:hover { color: #333; } }
 
-.emotion-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+.emotion-row {
+  display: flex;
+  align-items: center;
+  padding: 13px 12px 13px 14px;
   margin-bottom: 8px;
-}
-.emotion-card {
-  padding: 18px 6px;
-  border-radius: 12px;
-  text-align: center;
-  font-weight: 600;
-  font-size: 0.88rem;
+  border-radius: 8px;
+  border-left: 4px solid;
+  background: #2c2c2e;
   cursor: pointer;
-  border: 2px solid;
-  transition: opacity 0.15s;
   -webkit-tap-highlight-color: transparent;
-  &:active { opacity: 0.7; }
+  &:active { background: #3a3a3c; }
 }
-.emotion-freude       { background: rgba(74,222,128,0.12);  border-color: #4ade80; color: #16a34a; }
-.emotion-traurigkeit  { background: rgba(96,165,250,0.12);  border-color: #60a5fa; color: #2563eb; }
-.emotion-wut          { background: rgba(248,113,113,0.12); border-color: #f87171; color: #dc2626; }
-.emotion-angst        { background: rgba(251,146,60,0.12);  border-color: #fb923c; color: #ea580c; }
-.emotion-ueberraschung { background: rgba(192,132,252,0.12); border-color: #c084fc; color: #9333ea; }
-.emotion-ekel         { background: rgba(163,230,53,0.12);  border-color: #a3e635; color: #65a30d; }
+.emotion-row-body { flex: 1; min-width: 0; }
+.emotion-row-label { display: block; font-weight: 600; font-size: 0.95rem; }
+.emotion-row-desc { display: block; font-size: 0.78rem; color: #8e8e93; margin-top: 2px; }
 
 .cluster-row {
   display: flex;
