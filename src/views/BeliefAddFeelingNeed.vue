@@ -78,9 +78,8 @@
           v-for="f in activeCluster.gefuehle"
           :key="f.name"
           small
-          :color="emotionColor(activePrimary.id)"
+          :color="isSelectedFeeling(f.name) ? emotionColor(activePrimary.id) : '#2c2c2e'"
           :text-color="isSelectedFeeling(f.name) ? '#000' : emotionColor(activePrimary.id)"
-          :outline="!isSelectedFeeling(f.name)"
           class="mr-1 mb-1"
           @click="toggleFeeling(f.name)"
         >{{ f.name }}</v-chip>
@@ -91,9 +90,8 @@
           v-for="n in activeCluster.beduerfnisse"
           :key="n.name"
           small
-          :color="emotionColor(activePrimary.id)"
+          :color="isSelectedNeed(n.name) ? emotionColor(activePrimary.id) : '#2c2c2e'"
           :text-color="isSelectedNeed(n.name) ? '#000' : emotionColor(activePrimary.id)"
-          :outline="!isSelectedNeed(n.name)"
           class="mr-1 mb-1"
           @click="toggleNeed(n.name)"
         >{{ n.name }}</v-chip>
