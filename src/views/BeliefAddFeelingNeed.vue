@@ -26,14 +26,6 @@
                 :style="{ backgroundColor: emotionColor(e.id), color: '#000' }"
               >{{ item.name }}</span>
             </div>
-            <div v-if="selNeeds.filter(function(n){ return n.emotionId === e.id; }).length > 0" class="emotion-selections emotion-selections--needs">
-              <span
-                v-for="item in selNeeds.filter(function(n){ return n.emotionId === e.id; })"
-                :key="'n_' + item.name"
-                class="emotion-sel-chip"
-                :style="{ backgroundColor: '#c8963e', color: '#000' }"
-              >{{ item.name }}</span>
-            </div>
           </div>
           <v-icon small :color="emotionColor(e.id)">{{ activeEmotionId === e.id ? 'expand_less' : 'expand_more' }}</v-icon>
         </div>
@@ -82,6 +74,19 @@
           </div>
         </div>
 
+      </div>
+
+      <!-- Selected needs box -->
+      <div v-if="selNeeds.length > 0" class="needs-box mt-3">
+        <p class="section-label">Ausgewählte Bedürfnisse</p>
+        <div class="chips-wrap">
+          <span
+            v-for="item in selNeeds"
+            :key="'sn_' + item.name"
+            class="emotion-sel-chip"
+            :style="{ backgroundColor: '#c8963e', color: '#000' }"
+          >{{ item.name }}</span>
+        </div>
       </div>
     </v-flex>
   </v-layout>
@@ -224,7 +229,14 @@ export default {
 .emotion-row-label { display: block; font-weight: 600; font-size: 0.95rem; }
 .emotion-row-desc { display: block; font-size: 0.78rem; color: #8e8e93; margin-top: 2px; }
 .emotion-selections { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
-.emotion-selections--needs { margin-top: 4px; }
+
+.needs-box {
+  padding: 12px 14px;
+  background: #1c1c1e;
+  border-radius: 8px;
+  border-left: 4px solid #c8963e;
+}
+.needs-box .chips-wrap { margin-top: 2px; }
 .emotion-sel-chip {
   display: inline-block;
   padding: 2px 8px;
