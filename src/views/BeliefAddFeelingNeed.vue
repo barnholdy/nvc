@@ -38,6 +38,14 @@
           <div class="emotion-row-body">
             <span class="emotion-row-label" :style="{ color: emotionColor(e.id) }">{{ e.label }}</span>
             <span class="emotion-row-desc">{{ e.beschreibung }}</span>
+            <div v-if="emotionSelections(e.id).length > 0" class="emotion-selections">
+              <span
+                v-for="item in emotionSelections(e.id)"
+                :key="item.name"
+                class="emotion-sel-chip"
+                :style="{ backgroundColor: emotionColor(e.id), color: '#000' }"
+              >{{ item.name }}</span>
+            </div>
           </div>
           <v-icon small :color="emotionColor(e.id)">{{ activeEmotionId === e.id ? 'expand_less' : 'expand_more' }}</v-icon>
         </div>
@@ -114,6 +122,11 @@ export default {
     };
   },
   methods: {
+    emotionSelections: function(emotionId) {
+      var f = this.selFeelings.filter(function(x) { return x.emotionId === emotionId; });
+      var n = this.selNeeds.filter(function(x) { return x.emotionId === emotionId; });
+      return f.concat(n);
+    },
     toggleEmotion: function(id) {
       if (this.activeEmotionId === id) {
         this.activeEmotionId = null;
@@ -228,6 +241,14 @@ export default {
 .emotion-row-body { flex: 1; min-width: 0; }
 .emotion-row-label { display: block; font-weight: 600; font-size: 0.95rem; }
 .emotion-row-desc { display: block; font-size: 0.78rem; color: #8e8e93; margin-top: 2px; }
+.emotion-selections { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
+.emotion-sel-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
 
 .cluster-section {
   margin: 4px 0 0 12px;
