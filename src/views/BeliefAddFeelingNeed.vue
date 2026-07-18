@@ -11,95 +11,81 @@
         <span
           v-for="item in selFeelings"
           :key="'sf_' + item.name"
-          class="my-chip my-chip--close"
+          class="my-chip"
           :style="{ backgroundColor: emotionColor(item.emotionId), color: '#000' }"
           @click="removeFeeling(item.name)"
         >{{ item.name }} <span class="my-chip-x">×</span></span>
         <span
           v-for="item in selNeeds"
           :key="'sn_' + item.name"
-          class="my-chip my-chip--close"
+          class="my-chip"
           :style="{ backgroundColor: emotionColor(item.emotionId), color: '#000' }"
           @click="removeNeed(item.name)"
         >{{ item.name }} <span class="my-chip-x">×</span></span>
       </div>
     </v-flex>
 
-    <!-- Breadcrumb for level 2/3 -->
-    <v-flex v-if="level !== 'primary'" class="mb-2">
-      <div class="fn-breadcrumb">
-        <span class="fn-crumb fn-clickable" @click="level = 'primary'">Grundemotionen</span>
-        <v-icon small color="#999">chevron_right</v-icon>
-        <span v-if="level === 'secondary'" class="fn-crumb fn-active">{{ activePrimary.label }}</span>
-        <template v-if="level === 'cluster'">
-          <span class="fn-crumb fn-clickable" @click="level = 'secondary'">{{ activePrimary.label }}</span>
-          <v-icon small color="#999">chevron_right</v-icon>
-          <span class="fn-crumb fn-active">{{ activeCluster.label }}</span>
-        </template>
-      </div>
-    </v-flex>
+    <!-- Accordion: all levels always visible -->
+    <v-flex>
+      <div v-for="e in taxonomy.grundemotionen" :key="e.id" class="mb-2">
 
-    <!-- Level 1: Grundemotionen -->
-    <v-flex v-if="level === 'primary'">
-      <div
-        v-for="e in taxonomy.grundemotionen"
-        :key="e.id"
-        class="emotion-row"
-        :style="{ borderLeftColor: emotionColor(e.id) }"
-        @click="choosePrimary(e)"
-      >
-        <div class="emotion-row-body">
-          <span class="emotion-row-label" :style="{ color: emotionColor(e.id) }">{{ e.label }}</span>
-          <span class="emotion-row-desc">{{ e.beschreibung }}</span>
+        <!-- Level 1: Emotion row -->
+        <div
+          class="emotion-row"
+          :style="{ borderLeftColor: emotionColor(e.id) }"
+          @click="toggleEmotion(e.id)"
+        >
+          <div class="emotion-row-body">
+            <span class="emotion-row-label" :style="{ color: emotionColor(e.id) }">{{ e.label }}</span>
+            <span class="emotion-row-desc">{{ e.beschreibung }}</span>
+          </div>
+          <v-icon small :color="emotionColor(e.id)">{{ activeEmotionId === e.id ? 'expand_less' : 'expand_more' }}</v-icon>
         </div>
-        <v-icon small :color="emotionColor(e.id)">chevron_right</v-icon>
-      </div>
-    </v-flex>
 
-    <!-- Level 2: Unterkategorien -->
-    <v-flex v-else-if="level === 'secondary'">
-      <div
-        v-for="c in activePrimary.unterkategorien"
-        :key="c.id"
-        class="cluster-row"
-        :style="{ borderLeftColor: emotionColor(activePrimary.id) }"
-        @click="chooseCluster(c)"
-      >
-        <span>{{ c.label }}</span>
-        <v-icon small>chevron_right</v-icon>
-      </div>
-    </v-flex>
+        <!-- Level 2: Clusters (when emotion is expanded) -->
+        <div v-if="activeEmotionId === e.id" class="cluster-section">
+          <div v-for="c in e.unterkategorien" :key="c.id" class="mb-1">
 
-    <!-- Level 3: Feelings + Needs for selected cluster -->
-    <v-flex v-else>
-      <p class="section-label">Gefühle</p>
-      <div class="chips-wrap mb-3">
-        <span
-          v-for="f in activeCluster.gefuehle"
-          :key="f.name"
-          class="my-chip"
-          :style="isSelectedFeeling(f.name)
-            ? { backgroundColor: emotionColor(activePrimary.id), color: '#000' }
-            : { backgroundColor: '#2c2c2e', color: emotionColor(activePrimary.id) }"
-          @click="toggleFeeling(f.name)"
-        >{{ f.name }}</span>
-      </div>
-      <p class="section-label">Bedürfnisse</p>
-      <div class="chips-wrap">
-        <span
-          v-for="n in activeCluster.beduerfnisse"
-          :key="n.name"
-          class="my-chip"
-          :style="isSelectedNeed(n.name)
-            ? { backgroundColor: emotionColor(activePrimary.id), color: '#000' }
-            : { backgroundColor: '#2c2c2e', color: emotionColor(activePrimary.id) }"
-          @click="toggleNeed(n.name)"
-        >{{ n.name }}</span>
-      </div>
-      <div class="mt-4 text-xs-center">
-        <v-btn flat color="primary" @click="level = 'primary'">
-          <v-icon left>add</v-icon>Weiteres Gefühl hinzufügen
-        </v-btn>
+            <div
+              class="cluster-row"
+              :style="{ borderLeftColor: emotionColor(e.id) }"
+              @click.stop="toggleCluster(c.id)"
+            >
+              <span>{{ c.label }}</span>
+              <v-icon small color="#8e8e93">{{ activeClusterId === c.id ? 'expand_less' : 'expand_more' }}</v-icon>
+            </div>
+
+            <!-- Level 3: Feelings + Needs (when cluster is expanded) -->
+            <div v-if="activeClusterId === c.id" class="selection-section">
+              <p class="section-label">Gefühle</p>
+              <div class="chips-wrap mb-3">
+                <span
+                  v-for="f in c.gefuehle"
+                  :key="f.name"
+                  class="my-chip"
+                  :style="isSelectedFeeling(f.name)
+                    ? { backgroundColor: emotionColor(e.id), color: '#000' }
+                    : { backgroundColor: '#3a3a3c', color: emotionColor(e.id) }"
+                  @click.stop="toggleFeeling(f.name, e.id)"
+                >{{ f.name }}</span>
+              </div>
+              <p class="section-label">Bedürfnisse</p>
+              <div class="chips-wrap">
+                <span
+                  v-for="n in c.beduerfnisse"
+                  :key="n.name"
+                  class="my-chip"
+                  :style="isSelectedNeed(n.name)
+                    ? { backgroundColor: emotionColor(e.id), color: '#000' }
+                    : { backgroundColor: '#3a3a3c', color: emotionColor(e.id) }"
+                  @click.stop="toggleNeed(n.name, e.id)"
+                >{{ n.name }}</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
       </div>
     </v-flex>
   </v-layout>
@@ -117,9 +103,8 @@ export default {
   data: function() {
     var self = this;
     return {
-      level: 'primary',
-      activePrimary: null,
-      activeCluster: null,
+      activeEmotionId: null,
+      activeClusterId: null,
       selFeelings: this.initialFeelings.map(function(f) {
         return { name: f.name, emotionId: self.findEmotionForFeeling(f.name) };
       }),
@@ -129,20 +114,17 @@ export default {
     };
   },
   methods: {
-    choosePrimary: function(emotion) {
-      this.activePrimary = emotion;
-      this.level = 'secondary';
-    },
-    chooseCluster: function(cluster) {
-      this.activeCluster = cluster;
-      this.level = 'cluster';
-    },
-    goBack: function() {
-      if (this.level === 'cluster') {
-        this.level = 'secondary';
-      } else if (this.level === 'secondary') {
-        this.level = 'primary';
+    toggleEmotion: function(id) {
+      if (this.activeEmotionId === id) {
+        this.activeEmotionId = null;
+        this.activeClusterId = null;
+      } else {
+        this.activeEmotionId = id;
+        this.activeClusterId = null;
       }
+    },
+    toggleCluster: function(id) {
+      this.activeClusterId = this.activeClusterId === id ? null : id;
     },
     isSelectedFeeling: function(name) {
       return this.selFeelings.some(function(f) { return f.name === name; });
@@ -150,21 +132,21 @@ export default {
     isSelectedNeed: function(name) {
       return this.selNeeds.some(function(n) { return n.name === name; });
     },
-    toggleFeeling: function(name) {
+    toggleFeeling: function(name, emotionId) {
       var idx = this.selFeelings.findIndex(function(f) { return f.name === name; });
       if (idx >= 0) {
         this.selFeelings.splice(idx, 1);
       } else {
-        this.selFeelings.push({ name: name, emotionId: this.activePrimary.id });
+        this.selFeelings.push({ name: name, emotionId: emotionId });
       }
       this.emitChange();
     },
-    toggleNeed: function(name) {
+    toggleNeed: function(name, emotionId) {
       var idx = this.selNeeds.findIndex(function(n) { return n.name === name; });
       if (idx >= 0) {
         this.selNeeds.splice(idx, 1);
       } else {
-        this.selNeeds.push({ name: name, emotionId: this.activePrimary.id });
+        this.selNeeds.push({ name: name, emotionId: emotionId });
       }
       this.emitChange();
     },
@@ -232,21 +214,10 @@ export default {
   padding: 4px 0;
 }
 
-.fn-breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.82rem;
-}
-.fn-crumb { color: #999; }
-.fn-active { color: #333; font-weight: 600; }
-.fn-clickable { cursor: pointer; &:hover { color: #333; } }
-
 .emotion-row {
   display: flex;
   align-items: center;
   padding: 13px 12px 13px 14px;
-  margin-bottom: 8px;
   border-radius: 8px;
   border-left: 4px solid;
   background: #2c2c2e;
@@ -258,30 +229,41 @@ export default {
 .emotion-row-label { display: block; font-weight: 600; font-size: 0.95rem; }
 .emotion-row-desc { display: block; font-size: 0.78rem; color: #8e8e93; margin-top: 2px; }
 
+.cluster-section {
+  margin: 4px 0 0 12px;
+}
+
 .cluster-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 13px 12px 13px 14px;
-  margin-bottom: 8px;
+  padding: 11px 12px 11px 14px;
   border-radius: 8px;
   border-left: 4px solid;
-  background: #2c2c2e;
+  background: #1c1c1e;
   color: #fff;
   cursor: pointer;
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   -webkit-tap-highlight-color: transparent;
-  &:active { background: #3a3a3c; }
+  &:active { background: #2c2c2e; }
+}
+
+.selection-section {
+  padding: 12px 12px 8px 14px;
+  background: #111;
+  border-radius: 0 0 8px 8px;
+  margin-bottom: 4px;
+  border-left: 4px solid #2c2c2e;
 }
 
 .section-label {
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 600;
-  color: #888;
+  color: #636366;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin: 0 0 8px;
+  margin: 0 0 6px;
 }
 .chips-wrap { display: flex; flex-wrap: wrap; }
 

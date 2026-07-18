@@ -117,12 +117,8 @@ export default {
       this.$vuetify.goTo(0, { duration: 0 });
     },
     prevStep() {
-      if (this.step === 3 && this.$refs.feelingNeed && this.$refs.feelingNeed.level !== 'primary') {
-        this.$refs.feelingNeed.goBack();
-      } else {
-        this.step -= 1;
-        this.$vuetify.goTo(0, { duration: 0 });
-      }
+      this.step -= 1;
+      this.$vuetify.goTo(0, { duration: 0 });
     },
     save() {
       var existingReflection = this.editEntry ? (this.editEntry.reflection || {}) : {};
