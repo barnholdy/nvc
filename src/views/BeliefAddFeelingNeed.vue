@@ -9,19 +9,23 @@
     <v-flex v-if="selFeelings.length > 0 || selNeeds.length > 0" class="mb-3">
       <div class="summary-section">
         <v-chip
-          v-for="name in selFeelings"
-          :key="'sf_' + name"
-          small close color="#4ade80" text-color="#000"
+          v-for="item in selFeelings"
+          :key="'sf_' + item.name"
+          small close
+          :color="emotionColor(item.emotionId)"
+          text-color="#000"
           class="mr-1 mb-1"
-          @input="removeFeeling(name)"
-        >{{ name }}</v-chip>
+          @input="removeFeeling(item.name)"
+        >{{ item.name }}</v-chip>
         <v-chip
-          v-for="name in selNeeds"
-          :key="'sn_' + name"
-          small close color="#1565c0" text-color="#fff"
+          v-for="item in selNeeds"
+          :key="'sn_' + item.name"
+          small close
+          :color="emotionColor(item.emotionId)"
+          text-color="#000"
           class="mr-1 mb-1"
-          @input="removeNeed(name)"
-        >{{ name }}</v-chip>
+          @input="removeNeed(item.name)"
+        >{{ item.name }}</v-chip>
       </div>
     </v-flex>
 
@@ -74,8 +78,8 @@
           v-for="f in activeCluster.gefuehle"
           :key="f.name"
           small
-          :color="isSelectedFeeling(f.name) ? '#4ade80' : undefined"
-          :text-color="isSelectedFeeling(f.name) ? '#000' : undefined"
+          :color="emotionColor(activePrimary.id)"
+          :text-color="isSelectedFeeling(f.name) ? '#000' : emotionColor(activePrimary.id)"
           :outline="!isSelectedFeeling(f.name)"
           class="mr-1 mb-1"
           @click="toggleFeeling(f.name)"
@@ -87,8 +91,8 @@
           v-for="n in activeCluster.beduerfnisse"
           :key="n.name"
           small
-          :color="isSelectedNeed(n.name) ? '#1565c0' : undefined"
-          :text-color="isSelectedNeed(n.name) ? '#fff' : undefined"
+          :color="emotionColor(activePrimary.id)"
+          :text-color="isSelectedNeed(n.name) ? '#000' : emotionColor(activePrimary.id)"
           :outline="!isSelectedNeed(n.name)"
           class="mr-1 mb-1"
           @click="toggleNeed(n.name)"
@@ -113,12 +117,17 @@ export default {
     initialNeeds: { type: Array, default: function() { return []; } },
   },
   data: function() {
+    var self = this;
     return {
       level: 'primary',
       activePrimary: null,
       activeCluster: null,
-      selFeelings: this.initialFeelings.map(function(f) { return f.name; }),
-      selNeeds: this.initialNeeds.map(function(n) { return n.name; }),
+      selFeelings: this.initialFeelings.map(function(f) {
+        return { name: f.name, emotionId: self.findEmotionForFeeling(f.name) };
+      }),
+      selNeeds: this.initialNeeds.map(function(n) {
+        return { name: n.name, emotionId: self.findEmotionForNeed(n.name) };
+      }),
     };
   },
   methods: {
@@ -138,44 +147,68 @@ export default {
       }
     },
     isSelectedFeeling: function(name) {
-      return this.selFeelings.indexOf(name) >= 0;
+      return this.selFeelings.some(function(f) { return f.name === name; });
     },
     isSelectedNeed: function(name) {
-      return this.selNeeds.indexOf(name) >= 0;
+      return this.selNeeds.some(function(n) { return n.name === name; });
     },
     toggleFeeling: function(name) {
-      var idx = this.selFeelings.indexOf(name);
+      var idx = this.selFeelings.findIndex(function(f) { return f.name === name; });
       if (idx >= 0) {
         this.selFeelings.splice(idx, 1);
       } else {
-        this.selFeelings.push(name);
+        this.selFeelings.push({ name: name, emotionId: this.activePrimary.id });
       }
       this.emitChange();
     },
     toggleNeed: function(name) {
-      var idx = this.selNeeds.indexOf(name);
+      var idx = this.selNeeds.findIndex(function(n) { return n.name === name; });
       if (idx >= 0) {
         this.selNeeds.splice(idx, 1);
       } else {
-        this.selNeeds.push(name);
+        this.selNeeds.push({ name: name, emotionId: this.activePrimary.id });
       }
       this.emitChange();
     },
     removeFeeling: function(name) {
-      var idx = this.selFeelings.indexOf(name);
+      var idx = this.selFeelings.findIndex(function(f) { return f.name === name; });
       if (idx >= 0) { this.selFeelings.splice(idx, 1); }
       this.emitChange();
     },
     removeNeed: function(name) {
-      var idx = this.selNeeds.indexOf(name);
+      var idx = this.selNeeds.findIndex(function(n) { return n.name === name; });
       if (idx >= 0) { this.selNeeds.splice(idx, 1); }
       this.emitChange();
     },
     emitChange: function() {
       this.$emit('change', {
-        feelings: this.selFeelings.map(function(name) { return { name: name }; }),
-        needs: this.selNeeds.map(function(name) { return { name: name }; }),
+        feelings: this.selFeelings.map(function(f) { return { name: f.name }; }),
+        needs: this.selNeeds.map(function(n) { return { name: n.name }; }),
       });
+    },
+    findEmotionForFeeling: function(name) {
+      var emotions = this.taxonomy.grundemotionen;
+      for (var i = 0; i < emotions.length; i++) {
+        var cats = emotions[i].unterkategorien;
+        for (var j = 0; j < cats.length; j++) {
+          if (cats[j].gefuehle.some(function(f) { return f.name === name; })) {
+            return emotions[i].id;
+          }
+        }
+      }
+      return 'freude';
+    },
+    findEmotionForNeed: function(name) {
+      var emotions = this.taxonomy.grundemotionen;
+      for (var i = 0; i < emotions.length; i++) {
+        var cats = emotions[i].unterkategorien;
+        for (var j = 0; j < cats.length; j++) {
+          if (cats[j].beduerfnisse.some(function(n) { return n.name === name; })) {
+            return emotions[i].id;
+          }
+        }
+      }
+      return 'freude';
     },
     emotionColor: function(id) {
       var map = {
