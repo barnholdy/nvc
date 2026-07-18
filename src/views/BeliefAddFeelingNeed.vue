@@ -5,16 +5,16 @@
       <p class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
     </v-flex>
 
-    <!-- Accordion: all levels always visible -->
     <v-flex>
-      <div v-for="e in taxonomy.grundemotionen" :key="e.id" class="mb-2">
-
-        <!-- Level 1: Emotion row -->
-        <div
-          class="emotion-row"
-          :style="{ borderLeftColor: emotionColor(e.id) }"
-          @click="toggleEmotion(e.id)"
-        >
+      <div
+        v-for="e in taxonomy.grundemotionen"
+        :key="e.id"
+        class="emotion-card mb-2"
+        :style="{ borderColor: emotionColor(e.id) }"
+      >
+        <!-- Header -->
+        <div class="emotion-card-header" @click="toggleEmotion(e.id)">
+          <span class="emotion-emoji">{{ emotionEmoji(e.id) }}</span>
           <div class="emotion-row-body">
             <span class="emotion-row-label" :style="{ color: emotionColor(e.id) }">{{ e.label }}</span>
             <span class="emotion-row-desc">{{ e.beschreibung }}</span>
@@ -30,20 +30,15 @@
           <v-icon small :color="emotionColor(e.id)">{{ activeEmotionId === e.id ? 'expand_less' : 'expand_more' }}</v-icon>
         </div>
 
-        <!-- Level 2: Clusters (when emotion is expanded) -->
-        <div v-if="activeEmotionId === e.id" class="cluster-section">
-          <div v-for="c in e.unterkategorien" :key="c.id" class="mb-1">
+        <!-- Clusters (when emotion is expanded) -->
+        <div v-if="activeEmotionId === e.id" class="emotion-card-body">
+          <div v-for="c in e.unterkategorien" :key="c.id">
 
-            <div
-              class="cluster-row"
-              :style="{ borderLeftColor: emotionColor(e.id) }"
-              @click.stop="toggleCluster(c.id)"
-            >
-              <span>{{ c.label }}</span>
-              <v-icon small color="#8e8e93">{{ activeClusterId === c.id ? 'expand_less' : 'expand_more' }}</v-icon>
+            <div class="cluster-row" @click.stop="toggleCluster(c.id)">
+              {{ c.label }}
             </div>
 
-            <!-- Level 3: Feelings + Needs (when cluster is expanded) -->
+            <!-- Feelings + Needs (when cluster is expanded) -->
             <div v-if="activeClusterId === c.id" class="selection-section">
               <p class="section-label">Gefühle</p>
               <div class="chips-wrap mb-3">
@@ -73,7 +68,6 @@
 
           </div>
         </div>
-
       </div>
 
       <!-- Selected needs box -->
@@ -115,11 +109,6 @@ export default {
     };
   },
   methods: {
-    emotionSelections: function(emotionId) {
-      var f = this.selFeelings.filter(function(x) { return x.emotionId === emotionId; });
-      var n = this.selNeeds.filter(function(x) { return x.emotionId === emotionId; });
-      return f.concat(n);
-    },
     toggleEmotion: function(id) {
       if (this.activeEmotionId === id) {
         this.activeEmotionId = null;
@@ -207,6 +196,17 @@ export default {
       };
       return map[id] || '#9e9e9e';
     },
+    emotionEmoji: function(id) {
+      var map = {
+        freude: '😊',
+        traurigkeit: '😢',
+        wut: '😠',
+        angst: '😰',
+        ueberraschung: '😮',
+        ekel: '🤢',
+      };
+      return map[id] || '😶';
+    },
   },
 };
 </script>
@@ -214,29 +214,33 @@ export default {
 <style scoped lang="scss">
 .belief-quote { font-style: italic; }
 
-.emotion-row {
+.emotion-card {
+  border: 1.5px solid;
+  border-radius: 12px;
+  background: #1c1c1e;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.emotion-card-header {
   display: flex;
   align-items: center;
-  padding: 13px 12px 13px 14px;
-  border-radius: 8px;
-  border-left: 4px solid;
-  background: #2c2c2e;
+  padding: 13px 14px;
   cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  &:active { background: #3a3a3c; }
+  &:active { background: #2c2c2e; }
 }
+
+.emotion-emoji {
+  font-size: 1.6rem;
+  margin-right: 12px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
 .emotion-row-body { flex: 1; min-width: 0; }
 .emotion-row-label { display: block; font-weight: 600; font-size: 0.95rem; }
 .emotion-row-desc { display: block; font-size: 0.78rem; color: #8e8e93; margin-top: 2px; }
 .emotion-selections { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
-
-.needs-box {
-  padding: 12px 14px;
-  background: #1c1c1e;
-  border-radius: 8px;
-  border-left: 4px solid #c8963e;
-}
-.needs-box .chips-wrap { margin-top: 2px; }
 .emotion-sel-chip {
   display: inline-block;
   padding: 2px 8px;
@@ -245,49 +249,44 @@ export default {
   font-weight: 600;
 }
 
-.cluster-section {
-  margin: 4px 0 0 12px;
+.emotion-card-body {
+  border-top: 1px solid #2c2c2e;
 }
 
 .cluster-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 11px 12px 11px 14px;
-  border-radius: 8px;
-  border-left: 4px solid;
-  background: #1c1c1e;
+  padding: 11px 14px 11px 20px;
   color: #fff;
   cursor: pointer;
   font-weight: 500;
   font-size: 0.88rem;
+  border-top: 1px solid #2c2c2e;
   -webkit-tap-highlight-color: transparent;
+  &:first-child { border-top: none; }
   &:active { background: #2c2c2e; }
 }
 
 .selection-section {
-  padding: 12px 12px 8px 14px;
+  padding: 12px 14px 10px 20px;
   background: #111;
-  border-radius: 0 0 8px 8px;
-  margin-bottom: 4px;
-  border-left: 4px solid #2c2c2e;
+  border-top: 1px solid #2c2c2e;
 }
 
 .section-label {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 600;
   color: #636366;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   margin: 0 0 6px;
 }
+
 .chips-wrap { display: flex; flex-wrap: wrap; }
 
 .my-chip {
   display: inline-flex;
   align-items: center;
   padding: 5px 12px;
-  border-radius: 16px;
+  border-radius: 20px;
   font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
@@ -296,10 +295,12 @@ export default {
   transition: opacity 0.15s;
   &:active { opacity: 0.7; }
 }
-.my-chip-x {
-  margin-left: 4px;
-  font-size: 1rem;
-  line-height: 1;
-  opacity: 0.7;
+
+.needs-box {
+  border: 1.5px solid #c8963e;
+  border-radius: 12px;
+  background: #1c1c1e;
+  padding: 13px 14px;
 }
+.needs-box .chips-wrap { margin-top: 4px; }
 </style>
