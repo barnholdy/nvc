@@ -24,7 +24,10 @@
           <div class="emotion-row-body">
             <span class="emotion-row-label" :style="{ color: emotionColor(e.id) }">{{ e.label }}</span>
             <span class="emotion-row-desc">{{ e.beschreibung }}</span>
-            <div v-if="displayedFeelingsFor(e.id).length > 0" class="emotion-selections">
+            <div
+              v-if="!isNeedsMode && displayedFeelingsFor(e.id).length > 0"
+              class="emotion-selections"
+            >
               <span
                 v-for="item in displayedFeelingsFor(e.id)"
                 :key="'f-' + item.name"
@@ -34,7 +37,7 @@
             </div>
             <div
               v-if="isNeedsMode && selectedNeedsFor(e.id).length > 0"
-              class="emotion-selections emotion-selections--needs"
+              class="emotion-selections"
             >
               <span
                 v-for="item in selectedNeedsFor(e.id)"
@@ -51,20 +54,33 @@
         <div v-if="activeEmotionId === e.id" class="emotion-card-body">
           <div v-for="c in visibleClusters(e)" :key="c.id">
 
+            <!-- Fill and counter always report selected feelings, in both modes -->
             <div class="cluster-row" @click.stop="toggleCluster(c.id)">
               <span
-                v-if="clusterSelCount(c) > 0"
+                v-if="clusterFeelingCount(c) > 0"
                 class="cluster-fill"
-                :style="{ width: clusterPct(c) + '%', background: itemColor(e.id) }"
+                :style="{ width: clusterPct(c) + '%', background: emotionColor(e.id) }"
               ></span>
               <span class="cluster-label">{{ c.label }}</span>
-              <span v-if="clusterSelCount(c) > 0" class="cluster-count">
-                {{ clusterSelCount(c) }}/{{ itemsFor(c).length }}
+              <span v-if="clusterFeelingCount(c) > 0" class="cluster-count">
+                {{ clusterFeelingCount(c) }}/{{ clusterFeelingTotal(c) }}
               </span>
             </div>
 
             <!-- Selectable items (when cluster is expanded) -->
             <div v-if="activeClusterId === c.id" class="selection-section">
+              <!-- In needs mode the feelings picked here are the context for choosing -->
+              <div
+                v-if="isNeedsMode && selectedFeelingsInCluster(c).length > 0"
+                class="cluster-feelings"
+              >
+                <span
+                  v-for="item in selectedFeelingsInCluster(c)"
+                  :key="'cf-' + item.name"
+                  class="emotion-sel-chip"
+                  :style="{ backgroundColor: emotionColor(e.id), color: '#000' }"
+                >{{ item.name }}</span>
+              </div>
               <div class="chips-wrap">
                 <span
                   v-for="item in itemsFor(c)"
@@ -176,9 +192,9 @@ export default {
     // In needs mode only the clusters the user picked a feeling in are offered.
     visibleClusters: function(emotion) {
       if (!this.isNeedsMode) return emotion.unterkategorien;
-      var names = this.contextNames;
+      var self = this;
       return emotion.unterkategorien.filter(function(c) {
-        return (c.gefuehle || []).some(function(f) { return names[f.name]; });
+        return self.clusterFeelingCount(c) > 0;
       });
     },
     // Feeling chips on the card header: the live edit state in feelings mode,
@@ -193,16 +209,28 @@ export default {
     selectedNeedsFor: function(emotionId) {
       return this.selNeeds.filter(function(n) { return n.emotionId === emotionId; });
     },
-    clusterSelCount: function(cluster) {
+    // Is this feeling selected? Needs mode reads the previous step's selection.
+    isFeelingChosen: function(name) {
+      return this.isNeedsMode ? !!this.contextNames[name] : this.isSelectedFeeling(name);
+    },
+    selectedFeelingsInCluster: function(cluster) {
       var self = this;
-      return this.itemsFor(cluster).filter(function(i) {
-        return self.isSelectedItem(i.name);
-      }).length;
+      return (cluster.gefuehle || []).filter(function(f) {
+        return self.isFeelingChosen(f.name);
+      });
+    },
+    // The cluster bar and counter always report selected feelings — in the needs
+    // step too, so it keeps saying the same thing as in the feelings step.
+    clusterFeelingTotal: function(cluster) {
+      return (cluster.gefuehle || []).length;
+    },
+    clusterFeelingCount: function(cluster) {
+      return this.selectedFeelingsInCluster(cluster).length;
     },
     clusterPct: function(cluster) {
-      var total = this.itemsFor(cluster).length;
+      var total = this.clusterFeelingTotal(cluster);
       if (!total) return 0;
-      return Math.round((this.clusterSelCount(cluster) / total) * 100);
+      return Math.round((this.clusterFeelingCount(cluster) / total) * 100);
     },
 
     /* ── accordion ── */
@@ -328,7 +356,13 @@ export default {
 .emotion-row-label { display: block; font-weight: 600; font-size: 0.95rem; }
 .emotion-row-desc { display: block; font-size: 0.78rem; color: #8e8e93; margin-top: 2px; }
 .emotion-selections { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
-.emotion-selections--needs { margin-top: 4px; }
+
+.cluster-feelings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 10px;
+}
 
 .empty-hint {
   font-size: 0.875rem;
