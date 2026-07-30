@@ -65,23 +65,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Overview of everything selected in this step -->
-      <div
-        v-if="allSelections.length > 0"
-        class="summary-box mt-3"
-        :style="{ borderColor: isNeedsMode ? NEED_COLOR : ACCENT_COLOR }"
-      >
-        <p class="section-label">{{ isNeedsMode ? 'Ausgewählte Bedürfnisse' : 'Ausgewählte Gefühle' }}</p>
-        <div class="chips-wrap">
-          <span
-            v-for="item in allSelections"
-            :key="item.name"
-            class="emotion-sel-chip"
-            :style="{ backgroundColor: itemColor(item.emotionId), color: '#000' }"
-          >{{ item.name }}</span>
-        </div>
-      </div>
     </v-flex>
   </v-layout>
 </template>
@@ -93,7 +76,6 @@ import {
   emotionIdForFeeling,
   emotionIdForNeed,
   NEED_COLOR,
-  ACCENT_COLOR,
 } from '@/utils/emotions';
 
 export default {
@@ -121,8 +103,6 @@ export default {
     };
   },
   computed: {
-    NEED_COLOR: function() { return NEED_COLOR; },
-    ACCENT_COLOR: function() { return ACCENT_COLOR; },
     isNeedsMode: function() {
       return this.mode === 'needs';
     },
@@ -329,15 +309,6 @@ export default {
   border-top: 1px solid #2c2c2e;
 }
 
-.section-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: #636366;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin: 0 0 6px;
-}
-
 .chips-wrap { display: flex; flex-wrap: wrap; }
 
 .my-chip {
@@ -353,12 +324,4 @@ export default {
   transition: opacity 0.15s;
   &:active { opacity: 0.7; }
 }
-
-.summary-box {
-  border: 1.5px solid;
-  border-radius: 12px;
-  background: #1c1c1e;
-  padding: 13px 14px;
-}
-.summary-box .chips-wrap { margin-top: 4px; gap: 4px; }
 </style>
