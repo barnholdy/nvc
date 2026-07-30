@@ -31,17 +31,25 @@
         </belief-add-reaction>
 
         <belief-add-feeling-need
-          ref="feelingNeed"
           v-show="step === 3"
+          mode="feelings"
           :belief="belief"
           :taxonomy="taxonomy"
           :initialFeelings="selectedFeelings"
+          @change="selectedFeelings = $event">
+        </belief-add-feeling-need>
+
+        <belief-add-feeling-need
+          v-show="step === 4"
+          mode="needs"
+          :belief="belief"
+          :taxonomy="taxonomy"
           :initialNeeds="selectedNeeds"
-          @change="selectedFeelings = $event.feelings; selectedNeeds = $event.needs">
+          @change="selectedNeeds = $event">
         </belief-add-feeling-need>
 
         <belief-add-hypothese
-          v-show="step === 4"
+          v-show="step === 5"
           :belief="belief"
           :initialValue="origin"
           @changed="origin = $event"
@@ -91,7 +99,7 @@ export default {
       .find(function(b) { return b.time === parseInt(this.$route.params.time, 10); }, this);
     return {
       step: 1,
-      totalSteps: 4,
+      totalSteps: 5,
       taxonomy: taxonomy,
       editEntry: editEntry || null,
       belief: editEntry ? editEntry.belief : '',
