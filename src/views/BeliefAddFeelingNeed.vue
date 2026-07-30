@@ -31,9 +31,10 @@
               <span
                 v-for="item in displayedFeelingsFor(e.id)"
                 :key="'f-' + item.name"
-                class="emotion-sel-chip"
+                class="emotion-sel-chip emotion-sel-chip--removable"
                 :style="{ backgroundColor: emotionColor(e.id), color: '#000' }"
-              >{{ item.name }}</span>
+                @click.stop="removeSelection(item)"
+              >{{ item.name }}<span class="chip-x">×</span></span>
             </div>
             <div
               v-if="isNeedsMode && selectedNeedsFor(e.id).length > 0"
@@ -42,9 +43,10 @@
               <span
                 v-for="item in selectedNeedsFor(e.id)"
                 :key="'n-' + item.name"
-                class="emotion-sel-chip"
+                class="emotion-sel-chip emotion-sel-chip--removable"
                 :style="{ backgroundColor: needColor(), color: '#000' }"
-              >{{ item.name }}</span>
+                @click.stop="removeSelection(item)"
+              >{{ item.name }}<span class="chip-x">×</span></span>
             </div>
           </div>
           <v-icon small :color="emotionColor(e.id)">{{ activeEmotionId === e.id ? 'expand_less' : 'expand_more' }}</v-icon>
@@ -188,6 +190,12 @@ export default {
     },
     needColor: function() {
       return NEED_COLOR;
+    },
+    // Remove straight from the overview chips, without hunting the item down in
+    // its cluster. Both toggles remove when the entry is already selected.
+    removeSelection: function(item) {
+      if (this.isNeedsMode) this.toggleNeed(item.name, item.emotionId);
+      else this.toggleFeeling(item.name, item.emotionId);
     },
     // In needs mode only the clusters the user picked a feeling in are offered.
     visibleClusters: function(emotion) {
@@ -376,6 +384,19 @@ export default {
   border-radius: 10px;
   font-size: 0.72rem;
   font-weight: 600;
+}
+.emotion-sel-chip--removable {
+  padding-right: 5px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  &:active { opacity: 0.7; }
+}
+.chip-x {
+  margin-left: 5px;
+  font-size: 0.9rem;
+  line-height: 1;
+  vertical-align: -1px;
+  opacity: 0.65;
 }
 
 .emotion-card-body {
