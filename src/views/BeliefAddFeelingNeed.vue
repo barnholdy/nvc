@@ -7,8 +7,13 @@
     </v-flex>
 
     <v-flex>
+      <p v-if="isNeedsMode && visibleEmotions.length === 0" class="empty-hint">
+        Wähle im vorigen Schritt Gefühle aus — dann erscheinen hier die passenden
+        Bedürfnisse.
+      </p>
+
       <div
-        v-for="e in taxonomy.grundemotionen"
+        v-for="e in visibleEmotions"
         :key="e.id"
         class="emotion-card mb-2"
         :style="{ borderColor: emotionColor(e.id) }"
@@ -19,12 +24,23 @@
           <div class="emotion-row-body">
             <span class="emotion-row-label" :style="{ color: emotionColor(e.id) }">{{ e.label }}</span>
             <span class="emotion-row-desc">{{ e.beschreibung }}</span>
-            <div v-if="selectionsFor(e.id).length > 0" class="emotion-selections">
+            <div v-if="displayedFeelingsFor(e.id).length > 0" class="emotion-selections">
               <span
-                v-for="item in selectionsFor(e.id)"
-                :key="item.name"
+                v-for="item in displayedFeelingsFor(e.id)"
+                :key="'f-' + item.name"
                 class="emotion-sel-chip"
-                :style="{ backgroundColor: itemColor(e.id), color: '#000' }"
+                :style="{ backgroundColor: emotionColor(e.id), color: '#000' }"
+              >{{ item.name }}</span>
+            </div>
+            <div
+              v-if="isNeedsMode && selectedNeedsFor(e.id).length > 0"
+              class="emotion-selections emotion-selections--needs"
+            >
+              <span
+                v-for="item in selectedNeedsFor(e.id)"
+                :key="'n-' + item.name"
+                class="emotion-sel-chip"
+                :style="{ backgroundColor: needColor(), color: '#000' }"
               >{{ item.name }}</span>
             </div>
           </div>
@@ -33,7 +49,7 @@
 
         <!-- Clusters (when emotion is expanded) -->
         <div v-if="activeEmotionId === e.id" class="emotion-card-body">
-          <div v-for="c in e.unterkategorien" :key="c.id">
+          <div v-for="c in visibleClusters(e)" :key="c.id">
 
             <div class="cluster-row" @click.stop="toggleCluster(c.id)">
               <span
@@ -74,7 +90,7 @@ import {
   emotionColor,
   emotionValence,
   emotionIdForFeeling,
-  emotionIdForNeed,
+  emotionIdsForNeed,
   NEED_COLOR,
 } from '@/utils/emotions';
 
@@ -88,6 +104,11 @@ export default {
     prompt: { type: String, default: '' },
     initialFeelings: { type: Array, default: function() { return []; } },
     initialNeeds: { type: Array, default: function() { return []; } },
+    // Read-only context for needs mode: the feelings picked in the previous step.
+    // Must stay a prop — both wizard steps are rendered with v-show, so this
+    // component is created before anything is selected and a data() copy would
+    // never see the selection.
+    contextFeelings: { type: Array, default: function() { return []; } },
   },
   data: function() {
     var self = this;
@@ -119,6 +140,20 @@ export default {
     allSelections: function() {
       return this.isNeedsMode ? this.selNeeds : this.selFeelings;
     },
+    // O(1) lookup so cluster filtering doesn't scan the selection per cluster.
+    contextNames: function() {
+      var map = {};
+      this.contextFeelings.forEach(function(f) { map[f.name] = true; });
+      return map;
+    },
+    // Needs mode only shows the Grundemotionen the user actually felt something in.
+    visibleEmotions: function() {
+      if (!this.isNeedsMode) return this.taxonomy.grundemotionen;
+      var self = this;
+      return this.taxonomy.grundemotionen.filter(function(e) {
+        return self.displayedFeelingsFor(e.id).length > 0;
+      });
+    },
   },
   methods: {
     /* ── mode-aware helpers ── */
@@ -135,8 +170,28 @@ export default {
     itemColor: function(emotionId) {
       return this.isNeedsMode ? NEED_COLOR : this.emotionColor(emotionId);
     },
-    selectionsFor: function(emotionId) {
-      return this.allSelections.filter(function(x) { return x.emotionId === emotionId; });
+    needColor: function() {
+      return NEED_COLOR;
+    },
+    // In needs mode only the clusters the user picked a feeling in are offered.
+    visibleClusters: function(emotion) {
+      if (!this.isNeedsMode) return emotion.unterkategorien;
+      var names = this.contextNames;
+      return emotion.unterkategorien.filter(function(c) {
+        return (c.gefuehle || []).some(function(f) { return names[f.name]; });
+      });
+    },
+    // Feeling chips on the card header: the live edit state in feelings mode,
+    // the previous step's selection in needs mode.
+    displayedFeelingsFor: function(emotionId) {
+      var list = this.isNeedsMode ? this.contextFeelings : this.selFeelings;
+      return list.filter(function(item) {
+        var id = item.emotionId || emotionIdForFeeling(item.name);
+        return id === emotionId;
+      });
+    },
+    selectedNeedsFor: function(emotionId) {
+      return this.selNeeds.filter(function(n) { return n.emotionId === emotionId; });
     },
     clusterSelCount: function(cluster) {
       var self = this;
@@ -205,8 +260,25 @@ export default {
     findEmotionForFeeling: function(name) {
       return emotionIdForFeeling(name);
     },
+    // A need can sit under several Grundemotionen. Prefer one the user actually
+    // has a feeling in, otherwise a restored need would be filed under a
+    // Grundemotion that needs mode hides — making it invisible.
     findEmotionForNeed: function(name) {
-      return emotionIdForNeed(name);
+      var ids = emotionIdsForNeed(name);
+      if (!ids.length) return null;
+      // Reads contextFeelings (a prop), not the contextNames computed: this runs
+      // from data(), where computeds do not exist yet.
+      var names = {};
+      this.contextFeelings.forEach(function(f) { names[f.name] = true; });
+      var emotions = this.taxonomy.grundemotionen;
+      var withFeeling = ids.filter(function(id) {
+        var emotion = emotions.find(function(e) { return e.id === id; });
+        if (!emotion) return false;
+        return emotion.unterkategorien.some(function(c) {
+          return (c.gefuehle || []).some(function(f) { return names[f.name]; });
+        });
+      })[0];
+      return withFeeling || ids[0];
     },
     emotionColor: function(id) {
       return emotionColor(id);
@@ -256,6 +328,14 @@ export default {
 .emotion-row-label { display: block; font-weight: 600; font-size: 0.95rem; }
 .emotion-row-desc { display: block; font-size: 0.78rem; color: #8e8e93; margin-top: 2px; }
 .emotion-selections { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
+.emotion-selections--needs { margin-top: 4px; }
+
+.empty-hint {
+  font-size: 0.875rem;
+  color: #8e8e93;
+  line-height: 1.5;
+  margin: 4px 2px 0;
+}
 .emotion-sel-chip {
   display: inline-block;
   padding: 2px 8px;

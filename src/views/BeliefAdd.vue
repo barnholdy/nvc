@@ -45,6 +45,7 @@
           :belief="belief"
           :taxonomy="taxonomy"
           :initialNeeds="selectedNeeds"
+          :contextFeelings="selectedFeelings"
           @change="selectedNeeds = $event">
         </belief-add-feeling-need>
 

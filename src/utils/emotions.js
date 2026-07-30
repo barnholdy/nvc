@@ -14,9 +14,6 @@ export const EMOTION_COLORS = {
 // Bedürfnisse are always shown in ochre, regardless of their Grundemotion.
 export const NEED_COLOR = '#c8963e';
 
-// The app's primary green accent.
-export const ACCENT_COLOR = '#4ade80';
-
 // Feelings saved before the taxonomy was introduced are not in the tree —
 // they stay neutral grey rather than being mis-coloured as a Grundemotion.
 export const UNKNOWN_COLOR = '#9e9e9e';
@@ -34,12 +31,18 @@ export function emotionValence(id) {
 }
 
 // name -> Grundemotion id, indexed once at module load.
+// Feeling names are unique across the tree, so one id per name is enough.
+// Need names are NOT: 33 of 174 appear in several Unterkategorien, 29 of those
+// across several Grundemotionen (e.g. "Würde"), so needs keep every match.
 const feelingIndex = {};
 const needIndex = {};
 taxonomy.grundemotionen.forEach((e) => {
   e.unterkategorien.forEach((c) => {
     (c.gefuehle || []).forEach((f) => { feelingIndex[f.name] = e.id; });
-    (c.beduerfnisse || []).forEach((n) => { needIndex[n.name] = e.id; });
+    (c.beduerfnisse || []).forEach((n) => {
+      if (!needIndex[n.name]) needIndex[n.name] = [];
+      if (needIndex[n.name].indexOf(e.id) === -1) needIndex[n.name].push(e.id);
+    });
   });
 });
 
@@ -47,15 +50,11 @@ export function emotionIdForFeeling(name) {
   return feelingIndex[name] || null;
 }
 
-export function emotionIdForNeed(name) {
-  return needIndex[name] || null;
+export function emotionIdsForNeed(name) {
+  return needIndex[name] || [];
 }
 
 export function colorForFeeling(name) {
   const id = feelingIndex[name];
   return id ? emotionColor(id) : UNKNOWN_COLOR;
-}
-
-export function colorForNeed() {
-  return NEED_COLOR;
 }
