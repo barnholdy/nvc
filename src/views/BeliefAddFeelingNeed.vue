@@ -70,7 +70,7 @@
       <div
         v-if="allSelections.length > 0"
         class="summary-box mt-3"
-        :style="{ borderColor: isNeedsMode ? '#c8963e' : '#4ade80' }"
+        :style="{ borderColor: isNeedsMode ? NEED_COLOR : ACCENT_COLOR }"
       >
         <p class="section-label">{{ isNeedsMode ? 'Ausgewählte Bedürfnisse' : 'Ausgewählte Gefühle' }}</p>
         <div class="chips-wrap">
@@ -87,6 +87,15 @@
 </template>
 
 <script>
+import {
+  emotionColor,
+  emotionValence,
+  emotionIdForFeeling,
+  emotionIdForNeed,
+  NEED_COLOR,
+  ACCENT_COLOR,
+} from '@/utils/emotions';
+
 export default {
   name: 'belief-add-feeling-need',
   props: {
@@ -112,6 +121,8 @@ export default {
     };
   },
   computed: {
+    NEED_COLOR: function() { return NEED_COLOR; },
+    ACCENT_COLOR: function() { return ACCENT_COLOR; },
     isNeedsMode: function() {
       return this.mode === 'needs';
     },
@@ -142,7 +153,7 @@ export default {
       else this.toggleFeeling(name, emotionId);
     },
     itemColor: function(emotionId) {
-      return this.isNeedsMode ? '#c8963e' : this.emotionColor(emotionId);
+      return this.isNeedsMode ? NEED_COLOR : this.emotionColor(emotionId);
     },
     selectionsFor: function(emotionId) {
       return this.allSelections.filter(function(x) { return x.emotionId === emotionId; });
@@ -204,51 +215,21 @@ export default {
         return { name: x.name, valence: self.valenceFor(x.emotionId) };
       }));
     },
-    // Numeric valence kept for TagList colouring and the profile statistics,
-    // derived from the Grundemotion's `valenz` in the taxonomy.
+    // Numeric valence kept for the profile statistics, derived from the
+    // Grundemotion's `valenz` in the taxonomy.
     valenceFor: function(emotionId) {
-      var emotion = this.taxonomy.grundemotionen.find(function(e) { return e.id === emotionId; });
-      var map = { erfuellt: 2, neutral: 0, unerfuellt: -2 };
-      if (!emotion) return 0;
-      var v = map[emotion.valenz];
-      return typeof v === 'undefined' ? 0 : v;
+      return emotionValence(emotionId);
     },
 
     /* ── taxonomy lookups ── */
     findEmotionForFeeling: function(name) {
-      var emotions = this.taxonomy.grundemotionen;
-      for (var i = 0; i < emotions.length; i++) {
-        var cats = emotions[i].unterkategorien;
-        for (var j = 0; j < cats.length; j++) {
-          if (cats[j].gefuehle.some(function(f) { return f.name === name; })) {
-            return emotions[i].id;
-          }
-        }
-      }
-      return 'freude';
+      return emotionIdForFeeling(name);
     },
     findEmotionForNeed: function(name) {
-      var emotions = this.taxonomy.grundemotionen;
-      for (var i = 0; i < emotions.length; i++) {
-        var cats = emotions[i].unterkategorien;
-        for (var j = 0; j < cats.length; j++) {
-          if (cats[j].beduerfnisse.some(function(n) { return n.name === name; })) {
-            return emotions[i].id;
-          }
-        }
-      }
-      return 'freude';
+      return emotionIdForNeed(name);
     },
     emotionColor: function(id) {
-      var map = {
-        freude: '#4ade80',
-        traurigkeit: '#60a5fa',
-        wut: '#f87171',
-        angst: '#fb923c',
-        ueberraschung: '#c084fc',
-        ekel: '#a3e635',
-      };
-      return map[id] || '#9e9e9e';
+      return emotionColor(id);
     },
     emotionEmoji: function(id) {
       var map = {

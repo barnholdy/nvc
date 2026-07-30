@@ -87,14 +87,7 @@
             </template>
             <template v-if="entry.feelings && entry.feelings.length">
               <p class="expand-label mt-3">Gefühle</p>
-              <div class="chip-row mb-2">
-                <span
-                  v-for="(f, i) in entry.feelings"
-                  :key="i"
-                  class="colored-chip"
-                  :style="{ backgroundColor: feelingColor(f.name), color: '#000' }"
-                >{{ f.name }}</span>
-              </div>
+              <feeling-chips :items="entry.feelings" type="feelings" class="mb-2"></feeling-chips>
             </template>
             <template v-if="entry.withBelief">
               <p class="expand-label mt-3">Reaktion</p>
@@ -102,14 +95,7 @@
             </template>
             <template v-if="entry.needs && entry.needs.length">
               <p class="expand-label mt-3">Bedürfnis</p>
-              <div class="chip-row mb-2">
-                <span
-                  v-for="(n, i) in entry.needs"
-                  :key="i"
-                  class="colored-chip"
-                  :style="{ backgroundColor: '#c8963e', color: '#000' }"
-                >{{ n.name }}</span>
-              </div>
+              <feeling-chips :items="entry.needs" type="needs" class="mb-2"></feeling-chips>
             </template>
             <template v-if="entry.reflection && entry.reflection.origin">
               <p class="expand-label mt-3">Ursprung</p>
@@ -170,10 +156,11 @@
 </template>
 
 <script>
-import taxonomy from '../assets/taxonomy.json';
+import FeelingChips from '@/components/FeelingChips.vue';
 
 export default {
   name: 'belief-list',
+  components: { FeelingChips },
   data() {
     return {
       openEntry: null,
@@ -289,29 +276,6 @@ export default {
     deskClick(i) {
       if (this.sw.openIdx !== null) { this.sw.openIdx = null; this.sw.openDir = null; return; }
       this.onRowTap(i);
-    },
-    feelingColor: function(name) {
-      var emotions = taxonomy.grundemotionen;
-      for (var i = 0; i < emotions.length; i++) {
-        var cats = emotions[i].unterkategorien;
-        for (var j = 0; j < cats.length; j++) {
-          if (cats[j].gefuehle.some(function(f) { return f.name === name; })) {
-            return this.emotionColor(emotions[i].id);
-          }
-        }
-      }
-      return '#4ade80';
-    },
-    emotionColor: function(id) {
-      var map = {
-        freude: '#4ade80',
-        traurigkeit: '#60a5fa',
-        wut: '#f87171',
-        angst: '#fb923c',
-        ueberraschung: '#c084fc',
-        ekel: '#a3e635',
-      };
-      return map[id] || '#9e9e9e';
     },
   },
 };
@@ -454,12 +418,6 @@ export default {
 .expand-text { font-size: 0.93rem; color: #ebebf5; margin: 0; line-height: 1.5; }
 .empathy-text { white-space: pre-wrap; }
 .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
-.colored-chip {
-  border-radius: 20px;
-  padding: 4px 10px;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
 .mt-3 { margin-top: 12px !important; }
 .mt-2 { margin-top: 8px !important; }
 .mb-1 { margin-bottom: 4px !important; }

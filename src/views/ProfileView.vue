@@ -74,7 +74,7 @@
                 <span class="stat-count">{{ n.count }}×</span>
               </div>
               <div class="stat-bar-bg">
-                <div class="stat-bar-fill" :style="{ width: pct(n.count, topNeeds[0].count), background: '#ABA929' }"></div>
+                <div class="stat-bar-fill" :style="{ width: pct(n.count, topNeeds[0].count), background: NEED_COLOR }"></div>
               </div>
             </div>
             <div v-if="i < topNeeds.length - 1" class="settings-sep"></div>
@@ -98,7 +98,7 @@
                     <span class="stat-count">{{ f.count }}×</span>
                   </div>
                   <div class="stat-bar-bg">
-                    <div class="stat-bar-fill" :style="{ width: pct(f.count, topFeelings[0].count), background: feelingColor(f.valence) }"></div>
+                    <div class="stat-bar-fill" :style="{ width: pct(f.count, topFeelings[0].count), background: feelingColor(f.name) }"></div>
                   </div>
                 </div>
                 <div v-if="i < topFeelings.length - 1" class="settings-sep"></div>
@@ -121,7 +121,7 @@
                     <span class="stat-count">{{ f.count }}×</span>
                   </div>
                   <div class="stat-bar-bg">
-                    <div class="stat-bar-fill" :style="{ width: pct(f.count, topChangeProcessFeelings[0].count), background: feelingColor(f.valence) }"></div>
+                    <div class="stat-bar-fill" :style="{ width: pct(f.count, topChangeProcessFeelings[0].count), background: feelingColor(f.name) }"></div>
                   </div>
                 </div>
                 <div v-if="i < topChangeProcessFeelings.length - 1" class="settings-sep"></div>
@@ -140,6 +140,8 @@
 </template>
 
 <script>
+import { colorForFeeling, NEED_COLOR } from '@/utils/emotions';
+
 export default {
   name: 'profile-view',
   data() {
@@ -153,6 +155,7 @@ export default {
     };
   },
   computed: {
+    NEED_COLOR() { return NEED_COLOR; },
     beliefs() {
       return this.$store.getters.beliefs;
     },
@@ -209,12 +212,8 @@ export default {
       if (!max) return '0%';
       return Math.round(count / max * 100) + '%';
     },
-    feelingColor(valence) {
-      var v = parseInt(valence, 10);
-      if (v >= 1) return '#4ed58b';
-      if (v === 0) return '#5EBDB4';
-      if (v <= -1) return '#fc5e53';
-      return '#ABA929';
+    feelingColor(name) {
+      return colorForFeeling(name);
     },
     async generateKernmuster() {
       if (!this.apiKey) {

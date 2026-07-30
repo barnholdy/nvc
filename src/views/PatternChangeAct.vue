@@ -5,7 +5,7 @@
       <p v-if="belief" class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
       <p v-if="withoutBelief" class="subheading grey--text belief-quote mt-1">„{{ withoutBelief }}"</p>
       <div v-if="withoutBeliefFeelings && withoutBeliefFeelings.length" class="mb-2">
-        <tag-list :items="withoutBeliefFeelings"></tag-list>
+        <feeling-chips :items="withoutBeliefFeelings" type="feelings"></feeling-chips>
       </div>
       <div v-if="affirmations && affirmations.length" class="selected-chips mb-2">
         <v-chip v-for="a in affirmations" :key="a.text" small class="affirmation-chip">{{ a.text }}</v-chip>
@@ -106,11 +106,11 @@
 </template>
 
 <script>
-import TagList from '@/components/TagList.vue';
+import FeelingChips from '@/components/FeelingChips.vue';
 
 export default {
   name: 'pattern-change-act',
-  components: { TagList },
+  components: { FeelingChips },
   props: {
     belief: { type: String, default: '' },
     withoutBelief: { type: String, default: '' },

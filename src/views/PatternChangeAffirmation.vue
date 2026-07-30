@@ -6,7 +6,7 @@
       <template v-if="withoutBelief">
         <p class="subheading grey--text belief-quote mt-1">„{{ withoutBelief }}"</p>
         <div v-if="withoutBeliefFeelings && withoutBeliefFeelings.length" class="mb-2">
-          <tag-list :items="withoutBeliefFeelings"></tag-list>
+          <feeling-chips :items="withoutBeliefFeelings" type="feelings"></feeling-chips>
         </div>
       </template>
       <p class="body-1 grey--text mt-2">Manifestiere deine neue Perspektive und Gefühle in positive, kraftvolle Affirmationen.</p>
@@ -105,11 +105,11 @@
 </template>
 
 <script>
-import TagList from '@/components/TagList.vue';
+import FeelingChips from '@/components/FeelingChips.vue';
 
 export default {
   name: 'pattern-change-affirmation',
-  components: { TagList },
+  components: { FeelingChips },
   props: {
     belief: { type: String, default: '' },
     withoutBelief: { type: String, default: '' },

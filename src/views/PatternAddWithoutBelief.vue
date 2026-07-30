@@ -28,8 +28,9 @@ export default {
   },
   computed: {
     needsText() {
-      var selected = (this.needs || []).filter(function(n) { return n.isSelected; });
-      return selected.map(function(n) { return n.name; }).join(', ');
+      // Persisted needs are already the selected ones ({ name, valence }) and
+      // carry no isSelected flag, so filtering on it would always come up empty.
+      return (this.needs || []).map(function(n) { return n.name; }).join(', ');
     },
     descriptionText() {
       if (this.needsText) {
