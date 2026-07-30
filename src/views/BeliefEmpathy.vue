@@ -57,6 +57,7 @@
 </template>
 
 <script>
+import { dedupeByName } from '@/utils/emotions';
 export default {
   name: 'belief-empathy',
   data() {
@@ -115,7 +116,7 @@ export default {
       var feelings = e.feelings && e.feelings.length ? e.feelings.map(function(f) { return f.name; }).join(', ') : '';
       if (feelings) lines.push('Gefühl: ' + feelings);
       if (e.withBelief) lines.push('Reaktion: ' + e.withBelief);
-      var needs = e.needs && e.needs.length ? e.needs.map(function(n) { return n.name; }).join(', ') : '';
+      var needs = e.needs && e.needs.length ? dedupeByName(e.needs).map(function(n) { return n.name; }).join(', ') : '';
       if (needs) lines.push('Bedürfnis: ' + needs);
       var origin = e.reflection && e.reflection.origin ? e.reflection.origin : '';
       if (origin) lines.push('Ursprungshypothese: ' + origin);

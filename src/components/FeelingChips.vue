@@ -1,7 +1,7 @@
 <template>
   <div class="feeling-chips">
     <span
-      v-for="(item, i) in items"
+      v-for="(item, i) in uniqueItems"
       :key="i"
       class="feeling-chip"
       :style="{ backgroundColor: chipColor(item.name), color: '#000' }"
@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import { colorForFeeling, NEED_COLOR } from '@/utils/emotions';
+import { colorForFeeling, dedupeByName, NEED_COLOR } from '@/utils/emotions';
 
 // Read-only display of feelings or needs, styled exactly like the chips in the
 // feeling selection menu so the two never drift apart.
@@ -19,6 +19,12 @@ export default {
   props: {
     items: { type: Array, default: function() { return []; } },
     type: { type: String, default: 'feelings' },
+  },
+  computed: {
+    // A need can be chosen once per Grundemotion; show it once here.
+    uniqueItems: function() {
+      return dedupeByName(this.items);
+    },
   },
   methods: {
     chipColor: function(name) {

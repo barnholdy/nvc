@@ -61,6 +61,7 @@
 </template>
 
 <script>
+import { dedupeByName } from '@/utils/emotions';
 const STORAGE_KEY = 'nvc.globalEmpathy';
 
 function hashString(str) {
@@ -123,7 +124,7 @@ export default {
           const feelings = b.feelings && b.feelings.length ? b.feelings.map(f => f.name).join(', ') : '';
           if (feelings) lines.push(`  Gefühl: ${feelings}`);
           if (b.withBelief) lines.push(`  Reaktion: ${b.withBelief}`);
-          const needs = b.needs && b.needs.length ? b.needs.map(n => n.name).join(', ') : '';
+          const needs = b.needs && b.needs.length ? dedupeByName(b.needs).map(n => n.name).join(', ') : '';
           if (needs) lines.push(`  Bedürfnis: ${needs}`);
         });
       }

@@ -88,7 +88,7 @@
                   v-for="item in itemsFor(c)"
                   :key="item.name"
                   class="my-chip"
-                  :style="isSelectedItem(item.name)
+                  :style="isSelectedItem(item.name, e.id)
                     ? { backgroundColor: itemColor(e.id), color: '#000' }
                     : { backgroundColor: '#3a3a3c', color: itemColor(e.id) }"
                   @click.stop="toggleItem(item.name, e.id)"
@@ -137,7 +137,7 @@ export default {
         return { name: f.name, emotionId: self.findEmotionForFeeling(f.name) };
       }),
       selNeeds: this.initialNeeds.map(function(n) {
-        return { name: n.name, emotionId: self.findEmotionForNeed(n.name) };
+        return { name: n.name, emotionId: n.emotionId || self.findEmotionForNeed(n.name) };
       }),
     };
   },
@@ -178,8 +178,10 @@ export default {
     itemsFor: function(cluster) {
       return (this.isNeedsMode ? cluster.beduerfnisse : cluster.gefuehle) || [];
     },
-    isSelectedItem: function(name) {
-      return this.isNeedsMode ? this.isSelectedNeed(name) : this.isSelectedFeeling(name);
+    isSelectedItem: function(name, emotionId) {
+      return this.isNeedsMode
+        ? this.isSelectedNeed(name, emotionId)
+        : this.isSelectedFeeling(name);
     },
     toggleItem: function(name, emotionId) {
       if (this.isNeedsMode) this.toggleNeed(name, emotionId);
@@ -259,8 +261,12 @@ export default {
     isSelectedFeeling: function(name) {
       return this.selFeelings.some(function(f) { return f.name === name; });
     },
-    isSelectedNeed: function(name) {
-      return this.selNeeds.some(function(n) { return n.name === name; });
+    // Scoped to the Grundemotion: the same need may be chosen under several of
+    // them and removing it from one must leave the others alone.
+    isSelectedNeed: function(name, emotionId) {
+      return this.selNeeds.some(function(n) {
+        return n.name === name && n.emotionId === emotionId;
+      });
     },
     toggleFeeling: function(name, emotionId) {
       var idx = this.selFeelings.findIndex(function(f) { return f.name === name; });
@@ -272,7 +278,9 @@ export default {
       this.emitChange();
     },
     toggleNeed: function(name, emotionId) {
-      var idx = this.selNeeds.findIndex(function(n) { return n.name === name; });
+      var idx = this.selNeeds.findIndex(function(n) {
+        return n.name === name && n.emotionId === emotionId;
+      });
       if (idx >= 0) {
         this.selNeeds.splice(idx, 1);
       } else {
@@ -283,7 +291,11 @@ export default {
     emitChange: function() {
       var self = this;
       this.$emit('change', this.allSelections.map(function(x) {
-        return { name: x.name, valence: self.valenceFor(x.emotionId) };
+        return {
+          name: x.name,
+          valence: self.valenceFor(x.emotionId),
+          emotionId: x.emotionId,
+        };
       }));
     },
     // Numeric valence kept for the profile statistics, derived from the

@@ -19,6 +19,7 @@
 </template>
 
 <script>
+import { dedupeByName } from '@/utils/emotions';
 export default {
   name: 'pattern-add-without-belief',
   props: {
@@ -30,7 +31,7 @@ export default {
     needsText() {
       // Persisted needs are already the selected ones ({ name, valence }) and
       // carry no isSelected flag, so filtering on it would always come up empty.
-      return (this.needs || []).map(function(n) { return n.name; }).join(', ');
+      return dedupeByName(this.needs).map(function(n) { return n.name; }).join(', ');
     },
     descriptionText() {
       if (this.needsText) {

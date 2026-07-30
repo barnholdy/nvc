@@ -58,3 +58,14 @@ export function colorForFeeling(name) {
   const id = feelingIndex[name];
   return id ? emotionColor(id) : UNKNOWN_COLOR;
 }
+
+// A need can be picked once per Grundemotion, so a belief may hold the same
+// name several times. Read-only views collapse those to one entry.
+export function dedupeByName(items) {
+  const seen = {};
+  return (items || []).filter((item) => {
+    if (!item || !item.name || seen[item.name]) return false;
+    seen[item.name] = true;
+    return true;
+  });
+}

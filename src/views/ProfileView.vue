@@ -168,8 +168,13 @@ export default {
     topNeeds() {
       var counts = {};
       this.beliefs.forEach(function(b) {
+        // A need may be stored once per Grundemotion — count it once per belief.
+        var seen = {};
         (b.needs || []).forEach(function(n) {
-          if (n && n.name) counts[n.name] = (counts[n.name] || 0) + 1;
+          if (n && n.name && !seen[n.name]) {
+            seen[n.name] = true;
+            counts[n.name] = (counts[n.name] || 0) + 1;
+          }
         });
       });
       return Object.keys(counts)
