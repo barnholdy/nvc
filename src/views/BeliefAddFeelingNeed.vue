@@ -1,13 +1,9 @@
 <template>
   <v-layout column>
     <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">{{ isNeedsMode ? 'Bedürfnisse' : 'Gefühle' }}</h1>
+      <h1 class="headline font-weight-regular">{{ headlineText }}</h1>
       <p class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
-      <p class="body-1 grey--text mt-2">
-        {{ isNeedsMode
-          ? 'Was will dir diese Überzeugung über deine Bedürfnisse sagen? Was brauchst du eigentlich?'
-          : 'Was fühlst du, wenn die Überzeugung wahr ist?' }}
-      </p>
+      <p class="body-1 grey--text mt-2">{{ promptText }}</p>
     </v-flex>
 
     <v-flex>
@@ -97,6 +93,8 @@ export default {
     belief: { type: String, default: '' },
     taxonomy: { type: Object, required: true },
     mode: { type: String, default: 'feelings' },
+    headline: { type: String, default: '' },
+    prompt: { type: String, default: '' },
     initialFeelings: { type: Array, default: function() { return []; } },
     initialNeeds: { type: Array, default: function() { return []; } },
   },
@@ -116,6 +114,16 @@ export default {
   computed: {
     isNeedsMode: function() {
       return this.mode === 'needs';
+    },
+    headlineText: function() {
+      if (this.headline) return this.headline;
+      return this.isNeedsMode ? 'Bedürfnisse' : 'Gefühle';
+    },
+    promptText: function() {
+      if (this.prompt) return this.prompt;
+      return this.isNeedsMode
+        ? 'Was will dir diese Überzeugung über deine Bedürfnisse sagen? Was brauchst du eigentlich?'
+        : 'Was fühlst du, wenn die Überzeugung wahr ist?';
     },
     allSelections: function() {
       return this.isNeedsMode ? this.selNeeds : this.selFeelings;
@@ -191,7 +199,19 @@ export default {
       this.emitChange();
     },
     emitChange: function() {
-      this.$emit('change', this.allSelections.map(function(x) { return { name: x.name }; }));
+      var self = this;
+      this.$emit('change', this.allSelections.map(function(x) {
+        return { name: x.name, valence: self.valenceFor(x.emotionId) };
+      }));
+    },
+    // Numeric valence kept for TagList colouring and the profile statistics,
+    // derived from the Grundemotion's `valenz` in the taxonomy.
+    valenceFor: function(emotionId) {
+      var emotion = this.taxonomy.grundemotionen.find(function(e) { return e.id === emotionId; });
+      var map = { erfuellt: 2, neutral: 0, unerfuellt: -2 };
+      if (!emotion) return 0;
+      var v = map[emotion.valenz];
+      return typeof v === 'undefined' ? 0 : v;
     },
 
     /* ── taxonomy lookups ── */

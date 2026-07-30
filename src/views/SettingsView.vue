@@ -93,6 +93,14 @@
           </div>
           <v-icon color="#4ade80">refresh</v-icon>
         </div>
+        <div class="settings-sep"></div>
+        <div class="settings-row">
+          <div class="settings-row-body">
+            <p class="settings-label">Version</p>
+            <p class="settings-sub">Build {{ buildStamp }}</p>
+          </div>
+          <span class="version-badge">{{ appVersion }}</span>
+        </div>
       </div>
 
       <!-- Danger zone -->
@@ -133,6 +141,8 @@ export default {
       showResetDialog: false,
       importError: '',
       importSuccess: false,
+      appVersion: process.env.VUE_APP_VERSION || 'dev',
+      buildStamp: process.env.VUE_APP_BUILD || 'unbekannt',
     };
   },
   computed: {
@@ -155,6 +165,7 @@ export default {
         progress: tryParse('nvc.progress') || {},
         globalEmpathy: tryParse('nvc.globalEmpathy'),
         affirmationStatus: tryParse('nvc.affirmationStatus') || {},
+        affirmationProgress: tryParse('nvc.affirmationProgress') || {},
         actionStatus: tryParse('nvc.actionStatus') || {},
         kernmuster: tryParse('nvc.kernmuster') || [],
         kernmusterSnapshot: localStorage.getItem('nvc.kernmusterSnapshot') || '',
@@ -194,6 +205,7 @@ export default {
           if (data.progress) localStorage.setItem('nvc.progress', JSON.stringify(data.progress));
           if (data.globalEmpathy) localStorage.setItem('nvc.globalEmpathy', JSON.stringify(data.globalEmpathy));
           if (data.affirmationStatus) localStorage.setItem('nvc.affirmationStatus', JSON.stringify(data.affirmationStatus));
+          if (data.affirmationProgress) localStorage.setItem('nvc.affirmationProgress', JSON.stringify(data.affirmationProgress));
           if (data.actionStatus) localStorage.setItem('nvc.actionStatus', JSON.stringify(data.actionStatus));
           if (data.kernmuster) localStorage.setItem('nvc.kernmuster', JSON.stringify(data.kernmuster));
           if (data.kernmusterSnapshot) localStorage.setItem('nvc.kernmusterSnapshot', data.kernmusterSnapshot);
@@ -225,6 +237,7 @@ export default {
       localStorage.removeItem('nvc.kernmuster');
       localStorage.removeItem('nvc.kernmusterSnapshot');
       localStorage.removeItem('nvc.affirmationStatus');
+      localStorage.removeItem('nvc.affirmationProgress');
       localStorage.removeItem('nvc.actionStatus');
     },
   },
@@ -311,6 +324,15 @@ export default {
   flex-shrink: 0;
   -webkit-tap-highlight-color: transparent;
   &:disabled { opacity: 0.35; cursor: not-allowed; }
+}
+.version-badge {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #8e8e93;
+  background: #2c2c2e;
+  border-radius: 20px;
+  padding: 3px 10px;
+  flex-shrink: 0;
 }
 .feedback-text {
   font-size: 0.8rem;

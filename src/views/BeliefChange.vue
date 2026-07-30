@@ -18,17 +18,27 @@
           :belief="entry ? entry.belief : ''"
           :initialValue="withoutBelief"
           :needs="entry ? entry.needs || [] : []"
-          :availableFeelings="availableWithoutBeliefFeelings"
           @changed="withoutBelief = $event"
           @focussed="isFooterFixed = false"
           @blurred="isFooterFixed = true">
         </pattern-add-without-belief>
 
-        <pattern-change-affirmation
+        <belief-add-feeling-need
           v-show="step === 2"
+          mode="feelings"
+          headline="Neue Gefühle"
+          prompt="Wie würdest du dich fühlen, wenn du diese Überzeugung loslassen könntest?"
+          :belief="entry ? entry.belief : ''"
+          :taxonomy="taxonomy"
+          :initialFeelings="withoutBeliefFeelings"
+          @change="withoutBeliefFeelings = $event">
+        </belief-add-feeling-need>
+
+        <pattern-change-affirmation
+          v-show="step === 3"
           :belief="entry ? entry.belief : ''"
           :withoutBelief="withoutBelief"
-          :withoutBeliefFeelings="selectedWithoutBeliefFeelings"
+          :withoutBeliefFeelings="withoutBeliefFeelings"
           :initialAffirmations="affirmations"
           :allAffirmations="allAffirmations"
           @changed="affirmations = $event"
@@ -37,10 +47,10 @@
         </pattern-change-affirmation>
 
         <pattern-change-act
-          v-show="step === 3"
+          v-show="step === 4"
           :belief="entry ? entry.belief : ''"
           :withoutBelief="withoutBelief"
-          :withoutBeliefFeelings="selectedWithoutBeliefFeelings"
+          :withoutBeliefFeelings="withoutBeliefFeelings"
           :affirmations="affirmations"
           :initialActs="changeActs"
           :allActs="allActs"
@@ -70,20 +80,16 @@
 
 <script>
 import PatternAddWithoutBelief from '@/views/PatternAddWithoutBelief.vue';
+import BeliefAddFeelingNeed from '@/views/BeliefAddFeelingNeed.vue';
 import PatternChangeAffirmation from '@/views/PatternChangeAffirmation.vue';
 import PatternChangeAct from '@/views/PatternChangeAct.vue';
-import availableFeelingsSrc from '../assets/feelings.json';
-
-function buildFeelings(selectedFeelings) {
-  return availableFeelingsSrc.feelings.filter(function(f) { return f.rank >= -80; }).map(function(f) {
-    return Object.assign({}, f, { isSelected: selectedFeelings.some(function(sf) { return sf.name === f.name; }) });
-  });
-}
+import taxonomy from '../assets/taxonomy.json';
 
 export default {
   name: 'belief-change',
   components: {
     PatternAddWithoutBelief,
+    BeliefAddFeelingNeed,
     PatternChangeAffirmation,
     PatternChangeAct,
   },
@@ -94,18 +100,16 @@ export default {
     return {
       entry: entry || null,
       step: 1,
-      totalSteps: 3,
+      totalSteps: 4,
+      taxonomy: taxonomy,
       withoutBelief: r.withoutBelief || '',
-      availableWithoutBeliefFeelings: buildFeelings(r.withoutBeliefFeelings || []),
+      withoutBeliefFeelings: r.withoutBeliefFeelings || [],
       affirmations: entry ? entry.affirmations || [] : [],
       changeActs: r.changeActs || (r.changeAct ? r.changeAct.split('\n').filter(Boolean) : []),
       isFooterFixed: true,
     };
   },
   computed: {
-    selectedWithoutBeliefFeelings() {
-      return this.availableWithoutBeliefFeelings.filter(function(f) { return f.isSelected; });
-    },
     allActs() {
       var seen = {};
       var result = [];
@@ -146,7 +150,7 @@ export default {
         reflection: {
           origin: this.entry && this.entry.reflection ? (this.entry.reflection.origin || '') : '',
           withoutBelief: this.withoutBelief,
-          withoutBeliefFeelings: this.selectedWithoutBeliefFeelings,
+          withoutBeliefFeelings: this.withoutBeliefFeelings,
           turnarounds: [],
           changeAct: '',
           changeActs: this.changeActs,

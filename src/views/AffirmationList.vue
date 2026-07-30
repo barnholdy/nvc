@@ -64,9 +64,9 @@
                 <p class="reminder-text">{{ item.text }}</p>
                 <div class="row-badges">
                   <span class="badge-pill">{{ item.beliefCount }} {{ item.beliefCount === 1 ? 'Überzeugung' : 'Überzeugungen' }}</span>
-                  <span v-if="item.resonance != null" class="resonance-pill">
-                    <span class="resonance-fill" :style="{ width: item.resonance + '%', background: resonanceColor(item.resonance) }"></span>
-                    <span class="resonance-label">{{ item.resonance }} %</span>
+                  <span v-if="item.progress != null" class="progress-pill">
+                    <span class="progress-fill" :style="{ width: item.progress + '%', background: progressColor(item.progress) }"></span>
+                    <span class="progress-label">{{ item.progress }} %</span>
                   </span>
                   <span class="reminder-meta">{{ amenLabel(item.text) }}</span>
                 </div>
@@ -217,6 +217,9 @@ import moment from 'moment';
 
 const AMEN_KEY = 'nvc.amen';
 const AFF_STATUS_KEY = 'nvc.affirmationStatus';
+// Fortschritt der Affirmation — bewusst getrennt vom Resonanz-Wert
+// („Wie wahr fühlt sich diese Affirmation gerade an?"), analog zu den Handlungen.
+const AFF_PROGRESS_KEY = 'nvc.affirmationProgress';
 const ALL_STATUSES = [
   { key: 'open', label: 'Offen', color: '#636366' },
   { key: 'dabei', label: 'Dabei', color: '#fd9927' },
@@ -264,6 +267,9 @@ function loadAhoMap() {
 function loadAffStatusMap() {
   try { return JSON.parse(localStorage.getItem(AFF_STATUS_KEY)) || {}; } catch (e) { return {}; }
 }
+function loadAffProgressMap() {
+  try { return JSON.parse(localStorage.getItem(AFF_PROGRESS_KEY)) || {}; } catch (e) { return {}; }
+}
 
 export default {
   name: 'affirmation-list',
@@ -283,6 +289,7 @@ export default {
       isDeleteDialogShowing: false,
       amenMap: loadAhoMap(),
       statusMap: loadAffStatusMap(),
+      progressMap: loadAffProgressMap(),
       sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
   },
@@ -312,7 +319,10 @@ export default {
           if (map[a.text].resonance === null && a.resonance != null) map[a.text].resonance = a.resonance;
         });
       });
-      return Object.values(map).sort((a, b) => b.beliefCount - a.beliefCount);
+      const pm = this.progressMap;
+      return Object.values(map).map(item => Object.assign({}, item, {
+        progress: pm[item.text] != null ? pm[item.text] : null,
+      })).sort((a, b) => b.beliefCount - a.beliefCount);
     },
     currentEditAffirmation() {
       const key = this.editOriginalText;
@@ -334,20 +344,12 @@ export default {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.amenMap = Object.assign({}, this.amenMap, { [text]: Date.now() });
       localStorage.setItem(AMEN_KEY, JSON.stringify(this.amenMap));
-      this.$store.getters.beliefs.forEach((belief) => {
-        if (!belief.affirmations || !belief.affirmations.length) return;
-        if (belief.affirmations.some(function(a) { return a.text === text; })) {
-          var updated = belief.affirmations.map(function(a) {
-            if (a.text !== text) return a;
-            var current = a.resonance != null ? a.resonance : 0;
-            return Object.assign({}, a, { resonance: Math.min(100, current + 1) });
-          });
-          this.$store.dispatch('updateBelief', Object.assign({}, belief, { affirmations: updated }));
-        }
-      });
+      var current = this.progressMap[text] != null ? this.progressMap[text] : 0;
+      this.progressMap = Object.assign({}, this.progressMap, { [text]: Math.min(100, current + 1) });
+      localStorage.setItem(AFF_PROGRESS_KEY, JSON.stringify(this.progressMap));
       triggerConfetti();
     },
-    resonanceColor(v) {
+    progressColor(v) {
       if (v >= 75) return '#4ade80';
       if (v >= 50) return '#fbbf24';
       return '#f87171';
@@ -633,7 +635,7 @@ export default {
   padding: 1px 6px;
 }
 .reminder-meta { font-size: 0.75rem; color: #8e8e93; }
-.resonance-pill {
+.progress-pill {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -643,13 +645,13 @@ export default {
   background: #2c2c2e;
   min-width: 48px;
 }
-.resonance-fill {
+.progress-fill {
   position: absolute;
   left: 0; top: 0; bottom: 0;
   border-radius: 20px;
   opacity: 0.35;
 }
-.resonance-label {
+.progress-label {
   position: relative;
   font-size: 0.68rem;
   font-weight: 600;

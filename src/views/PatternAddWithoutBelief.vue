@@ -15,33 +15,16 @@
         @blur="$emit('blurred')"
       ></v-text-field>
     </v-flex>
-    <template v-if="availableFeelings && availableFeelings.length">
-      <v-flex class="mt-4 mb-2">
-        <p class="body-1 grey--text">Wie würdest du dich fühlen?</p>
-      </v-flex>
-      <v-flex>
-        <tag-list
-          :items="availableFeelings"
-          :isInteractive="true"
-          :isFilterNameEnabled="true"
-          :isFilterValenceEnabled="true"
-        ></tag-list>
-      </v-flex>
-    </template>
   </v-layout>
 </template>
 
 <script>
-import TagList from '@/components/TagList.vue';
-
 export default {
   name: 'pattern-add-without-belief',
-  components: { TagList },
   props: {
     belief: { type: String, default: '' },
     initialValue: { type: String, default: '' },
     needs: { type: Array, default: function() { return []; } },
-    availableFeelings: { type: Array, default: null },
   },
   computed: {
     needsText() {
