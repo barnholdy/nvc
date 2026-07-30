@@ -64,12 +64,12 @@
                 <p class="row-title">{{ item.text }}</p>
                 <div class="row-badges">
                   <span class="badge-pill">{{ item.beliefCount }} {{ item.beliefCount === 1 ? 'Überzeugung' : 'Überzeugungen' }}</span>
-                  <span v-if="item.progress != null" class="progress-pill">
+                  <span class="progress-pill">
                     <span class="progress-fill" :style="{ width: item.progress + '%', background: progressColor(item.progress) }"></span>
                     <span class="progress-label">{{ item.progress }} %</span>
                   </span>
-                  <span class="check-meta">{{ checkLabel(item.text) }}</span>
                 </div>
+                <p class="check-meta">{{ checkLabel(item.text) }}</p>
               </div>
               <button class="check-btn" @click.stop="doCheck(item.text)">Check</button>
             </div>
@@ -245,7 +245,7 @@ export default {
       });
       const pm = this.progressMap;
       return Object.values(map).map(item => Object.assign({}, item, {
-        progress: pm[item.text] != null ? pm[item.text] : null,
+        progress: pm[item.text] != null ? pm[item.text] : 0,
       })).sort((a, b) => b.beliefCount - a.beliefCount);
     },
   },
@@ -487,7 +487,11 @@ export default {
   border-radius: 20px;
   padding: 1px 6px;
 }
-.check-meta { font-size: 0.75rem; color: #8e8e93; }
+.check-meta {
+  font-size: 0.75rem;
+  color: #8e8e93;
+  margin: 4px 0 0;
+}
 .progress-pill {
   position: relative;
   display: inline-flex;
