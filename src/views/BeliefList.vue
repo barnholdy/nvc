@@ -157,6 +157,7 @@
 
 <script>
 import FeelingChips from '@/components/FeelingChips.vue';
+import { beliefStatus, hasChangeData } from '@/utils/beliefStatus';
 
 export default {
   name: 'belief-list',
@@ -181,14 +182,7 @@ export default {
         .sort((a, b) => ((map[b.time] || 0) - (map[a.time] || 0)) || (b.time - a.time));
     },
     filteredBeliefs() {
-      return this.beliefs.filter((e) => {
-        const complete = this.isComplete(e);
-        const changed = complete && this.hasChangeData(e) && e.affirmations && e.affirmations.length;
-        if (this.tab === 'open') return !complete;
-        if (this.tab === 'working') return complete && !changed;
-        if (this.tab === 'done') return !!changed;
-        return true;
-      });
+      return this.beliefs.filter(e => beliefStatus(e) === this.tab);
     },
     patternCountMap() {
       const map = {};
@@ -207,18 +201,8 @@ export default {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.openEntry = this.openEntry === time ? null : time;
     },
-    isComplete(entry) {
-      return !!(
-        entry.feelings && entry.feelings.length &&
-        entry.withBelief &&
-        entry.needs && entry.needs.length &&
-        entry.reflection && entry.reflection.origin
-      );
-    },
-    hasChangeData(entry) {
-      const r = entry.reflection || {};
-      return !!(r.withoutBelief || r.changeAct || (r.changeActs && r.changeActs.length));
-    },
+    // Still a method: the template calls hasChangeData(entry) directly.
+    hasChangeData(entry) { return hasChangeData(entry); },
     empathyEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/empathy-belief/${entry.time}`); },
     changeEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/change-belief/${entry.time}`); },
     editEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/edit-belief/${entry.time}`); },

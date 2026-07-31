@@ -64,7 +64,18 @@
             </template>
             <template v-if="getBeliefs(entry).length">
               <p class="expand-label" :class="entry.trigger ? 'mt-3' : ''">Überzeugungen</p>
-              <p v-for="(b, i) in getBeliefs(entry)" :key="i" class="expand-text mb-1">{{ b.belief }}</p>
+              <div
+                v-for="b in getBeliefs(entry)"
+                :key="b.time"
+                class="belief-row"
+                @click="editBelief(b)"
+              >
+                <div class="belief-row-body">
+                  <p class="expand-text">{{ b.belief }}</p>
+                  <span class="status-pill" :style="{ color: statusColor(b) }">{{ statusLabel(b) }}</span>
+                </div>
+                <v-icon small class="belief-chevron">chevron_right</v-icon>
+              </div>
             </template>
           </div>
           <div :key="entry.time + '-sep'" class="ios-sep" v-if="idx < patterns.length - 1"></div>
@@ -102,6 +113,7 @@
 
 <script>
 import moment from 'moment';
+import { beliefStatusLabel, beliefStatusColor } from '@/utils/beliefStatus';
 
 export default {
   name: 'pattern-list',
@@ -122,6 +134,12 @@ export default {
     getBeliefs(entry) {
       const beliefs = this.$store.getters.beliefs;
       return (entry.beliefs || []).map(id => beliefs.find(b => b.time === id)).filter(Boolean);
+    },
+    statusLabel(belief) { return beliefStatusLabel(belief); },
+    statusColor(belief) { return beliefStatusColor(belief); },
+    editBelief(belief) {
+      this.sw.openIdx = null; this.sw.openDir = null;
+      this.$router.push(`/edit-belief/${belief.time}`);
     },
     toggle(time) {
       this.sw.openIdx = null; this.sw.openDir = null;
@@ -289,6 +307,33 @@ export default {
   margin: 0;
   line-height: 1.5;
   white-space: pre-wrap;
+}
+
+.belief-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  cursor: pointer;
+  border-top: 1px solid #2c2c2e;
+  -webkit-tap-highlight-color: transparent;
+  &:first-of-type { border-top: none; }
+  &:active { opacity: 0.6; }
+}
+.belief-row-body { flex: 1; min-width: 0; }
+.status-pill {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: #2c2c2e;
+  border-radius: 20px;
+  padding: 1px 8px;
+}
+.belief-chevron {
+  color: #636366 !important;
+  font-size: 1.1rem !important;
+  flex-shrink: 0;
+  margin-left: 6px;
 }
 .mt-3 { margin-top: 12px !important; }
 .mb-1 { margin-bottom: 4px !important; }
