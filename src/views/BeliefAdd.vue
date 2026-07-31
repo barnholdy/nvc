@@ -86,6 +86,7 @@ import BeliefAddReaction from '@/views/BeliefAddReaction.vue';
 import BeliefAddFeelingNeed from '@/views/BeliefAddFeelingNeed.vue';
 import BeliefAddHypothese from '@/views/BeliefAddHypothese.vue';
 import taxonomy from '../assets/taxonomy.json';
+import { beliefStatus } from '@/utils/beliefStatus';
 
 export default {
   name: 'belief-add',
@@ -138,12 +139,14 @@ export default {
         needs: this.selectedNeeds,
         reflection: Object.assign({ withoutBelief: '', turnarounds: [], changeAct: '' }, existingReflection, { origin: this.origin }),
       };
+      const saved = this.isEditMode ? Object.assign({}, this.editEntry, payload) : payload;
       if (this.isEditMode) {
-        this.$store.dispatch('updateBelief', Object.assign({}, this.editEntry, payload));
+        this.$store.dispatch('updateBelief', saved);
       } else {
-        this.$store.dispatch('saveBelief', payload);
+        this.$store.dispatch('saveBelief', saved);
       }
-      this.$router.push('/beliefs');
+      // Editing can move the belief to another tab — land on the one it is in now.
+      this.$router.push({ path: '/beliefs', query: { tab: beliefStatus(saved) } });
     },
     close() {
       this.$router.push('/beliefs');

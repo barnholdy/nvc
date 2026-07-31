@@ -84,6 +84,7 @@ import BeliefAddFeelingNeed from '@/views/BeliefAddFeelingNeed.vue';
 import PatternChangeAffirmation from '@/views/PatternChangeAffirmation.vue';
 import PatternChangeAct from '@/views/PatternChangeAct.vue';
 import taxonomy from '../assets/taxonomy.json';
+import { beliefStatus } from '@/utils/beliefStatus';
 
 export default {
   name: 'belief-change',
@@ -145,7 +146,7 @@ export default {
       this.$vuetify.goTo(0, { duration: 0 });
     },
     save() {
-      this.$store.dispatch('updateBelief', Object.assign({}, this.entry, {
+      const saved = Object.assign({}, this.entry, {
         affirmations: this.affirmations,
         reflection: {
           origin: this.entry && this.entry.reflection ? (this.entry.reflection.origin || '') : '',
@@ -155,8 +156,10 @@ export default {
           changeAct: '',
           changeActs: this.changeActs,
         },
-      }));
-      this.$router.push('/beliefs');
+      });
+      this.$store.dispatch('updateBelief', saved);
+      // This flow usually moves the belief to "Verändert" — open that tab.
+      this.$router.push({ path: '/beliefs', query: { tab: beliefStatus(saved) } });
     },
     close() {
       this.$router.push('/beliefs');

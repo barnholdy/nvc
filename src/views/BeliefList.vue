@@ -157,7 +157,7 @@
 
 <script>
 import FeelingChips from '@/components/FeelingChips.vue';
-import { beliefStatus, hasChangeData } from '@/utils/beliefStatus';
+import { beliefStatus, hasChangeData, isBeliefStatus } from '@/utils/beliefStatus';
 
 export default {
   name: 'belief-list',
@@ -167,7 +167,8 @@ export default {
       openEntry: null,
       entryToDelete: null,
       isDeleteDialogShowing: false,
-      tab: 'open',
+      // Saving a belief returns here with the tab it now belongs to.
+      tab: isBeliefStatus(this.$route.query.tab) ? this.$route.query.tab : 'open',
       sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
   },

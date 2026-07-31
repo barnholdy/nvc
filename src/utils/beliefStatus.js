@@ -1,6 +1,12 @@
 // Single source of truth for how far a belief has been worked through.
 // Lives here so the belief list and the Situationen list cannot drift apart.
 
+export const BELIEF_STATUSES = ['open', 'working', 'done'];
+
+export function isBeliefStatus(value) {
+  return BELIEF_STATUSES.indexOf(value) !== -1;
+}
+
 export const BELIEF_STATUS_LABELS = {
   open: 'Offen',
   working: 'Ausgefüllt',
