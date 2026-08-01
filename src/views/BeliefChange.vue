@@ -59,6 +59,7 @@
                 Zurück zur neuen Perspektive
               </v-btn>
             </div>
+            <p class="body-1 grey--text mt-4 mb-0">Was fühlst du?</p>
           </v-flex>
         </belief-add-feeling-need>
 

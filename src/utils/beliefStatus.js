@@ -35,10 +35,23 @@ export function hasChangeData(belief) {
   return !!(r.withoutBelief || r.changeAct || (r.changeActs && r.changeActs.length));
 }
 
+// Every field the "Überzeugung verändern" wizard collects. bodyIntensity is left
+// out on purpose: the slider always carries a value, so it cannot be "unfilled".
+export function hasCompleteChange(belief) {
+  const r = (belief && belief.reflection) || {};
+  return !!(
+    r.exceptions &&
+    r.withoutBelief &&
+    r.withoutBeliefFeelings && r.withoutBeliefFeelings.length &&
+    belief && belief.affirmations && belief.affirmations.length &&
+    r.changeActs && r.changeActs.length
+  );
+}
+
 export function beliefStatus(belief) {
+  if (hasCompleteChange(belief)) return 'done';
   if (!isComplete(belief)) return 'open';
-  const changed = hasChangeData(belief) && belief.affirmations && belief.affirmations.length;
-  return changed ? 'done' : 'working';
+  return 'working';
 }
 
 export function beliefStatusLabel(belief) {
