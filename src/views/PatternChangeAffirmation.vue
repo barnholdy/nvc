@@ -9,7 +9,20 @@
           <feeling-chips :items="withoutBeliefFeelings" type="feelings"></feeling-chips>
         </div>
       </template>
-      <p class="body-1 grey--text mt-2">Manifestiere deine neue Perspektive und Gefühle in positive, kraftvolle Affirmationen.</p>
+      <p class="body-1 grey--text mt-2 prompt-lines">Formuliere einen Satz, der zu dem passt, was du gerade gespürt hast.
+Er hilft dir, die alte Überzeugung in Richtung der neuen Perspektive zu verschieben.
+Halte den Satz glaubwürdig: Der positivste Satz, den du gerade noch als wahr empfinden kannst.</p>
+
+      <div class="mt-4">
+        <p class="body-1 grey--text mb-2">Lies dir den Satz laut vor. Wie wahr fühlt er sich an?</p>
+        <div class="slider-row">
+          <span class="slider-end-label">0</span>
+          <input type="range" min="0" max="10" v-model.number="truth" class="truth-slider" />
+          <span class="slider-end-label">10</span>
+        </div>
+        <p class="slider-value-label">{{ truth }}</p>
+        <p class="truth-guidance">Ziel: 6–8. Bei 9–10 ist er meist zu brav und trägt nicht durch echte Belastung. Unter 5 ist er noch zu weit weg — dann kleiner formulieren.</p>
+      </div>
     </v-flex>
 
     <v-flex v-if="selectedAffirmations.length" class="mb-2">
@@ -116,6 +129,7 @@ export default {
     withoutBeliefFeelings: { type: Array, default: function() { return []; } },
     initialAffirmations: { type: Array, default: function() { return []; } },
     allAffirmations: { type: Array, default: function() { return []; } },
+    initialTruth: { type: Number, default: 5 },
   },
   data() {
     var initial = this.initialAffirmations.map(function(a) { return { text: a.text, count: a.count || 1 }; });
@@ -132,6 +146,7 @@ export default {
     });
     return {
       pool: merged,
+      truth: this.initialTruth,
       selectedTexts: selectedTexts,
       showNewInput: false,
       newAffirmationText: '',
@@ -156,6 +171,9 @@ export default {
   watch: {
     selectedTexts: function() {
       this.$emit('changed', this.selectedAffirmations.slice());
+    },
+    truth: function(val) {
+      this.$emit('truthChanged', val);
     },
   },
   methods: {
@@ -254,6 +272,60 @@ export default {
 <style scoped lang="scss">
 .belief-quote {
   font-style: italic;
+}
+.prompt-lines {
+  white-space: pre-line;
+}
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px;
+}
+.slider-end-label {
+  font-size: 0.78rem;
+  color: #8e8e93;
+  flex-shrink: 0;
+}
+.truth-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: #3a3a3c;
+  outline: none;
+  cursor: pointer;
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #4ade80;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  }
+  &::-moz-range-thumb {
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 50%;
+    background: #4ade80;
+    cursor: pointer;
+  }
+}
+.slider-value-label {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 8px 0 0;
+}
+.truth-guidance {
+  font-size: 0.8rem;
+  color: #8e8e93;
+  line-height: 1.5;
+  margin: 6px 0 0;
 }
 .selected-chips {
   display: flex;
