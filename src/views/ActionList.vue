@@ -17,8 +17,8 @@
 
       <div class="segment-row">
         <button class="seg-tab" :class="{ active: tab === 'open' }" @click="tab = 'open'">Offen</button>
+        <button class="seg-tab" :class="{ active: tab === 'dabei' }" @click="tab = 'dabei'">Dabei</button>
         <button class="seg-tab" :class="{ active: tab === 'done' }" @click="tab = 'done'">Durchgeführt</button>
-        <button class="seg-tab" :class="{ active: tab === 'evaluated' }" @click="tab = 'evaluated'">Ausgewertet</button>
       </div>
 
       <div v-if="filteredRows.length === 0" class="empty-state">
@@ -26,7 +26,7 @@
         <p class="empty-title">Keine Einträge</p>
         <p class="empty-sub">
           <template v-if="tab === 'open'">Wische in der Überzeugungs-Liste nach rechts und wähle „Handeln", um ein Experiment zu planen.</template>
-          <template v-else-if="tab === 'done'">Noch kein Experiment als durchgeführt markiert.</template>
+          <template v-else-if="tab === 'dabei'">Noch kein Experiment als gemacht markiert.</template>
           <template v-else>Noch kein Experiment ausgewertet.</template>
         </p>
       </div>
@@ -41,7 +41,7 @@
             @touchend="tsEnd($event, i)"
           >
             <div class="swipe-right-panel">
-              <button class="swipe-btn swipe-btn-edit" @click.stop="startEdit(row)">
+              <button class="swipe-btn swipe-btn-edit" @click.stop="editExperiment(row)">
                 <v-icon small color="#fff">edit</v-icon>
                 <span>Bearb.</span>
               </button>
@@ -55,12 +55,8 @@
             <div class="ios-row" :style="rowSt(i)" @click="deskClick(i)">
               <div class="row-body">
                 <p class="row-title">{{ row.experiment.situation || 'Ohne Situation' }}</p>
-                <div class="row-badges">
-                  <span
-                    class="badge-pill state-pill"
-                    :style="{ color: stateColor(row.experiment) }"
-                  >{{ stateLabel(row.experiment) }}</span>
-                  <span v-if="gapOf(row.experiment) !== null" class="badge-pill gap-pill"
+                <div v-if="gapOf(row.experiment) !== null" class="row-badges">
+                  <span class="badge-pill gap-pill"
                     :style="{ color: gapColor(gapOf(row.experiment)) }">
                     {{ row.experiment.fearExpected }} → {{ row.experiment.fearActual }}
                   </span>
@@ -74,13 +70,13 @@
               <button
                 v-if="needsPlan(row.experiment)"
                 class="check-btn plan-btn"
-                @click.stop="planExperiment(row)"
+                @click.stop="editExperiment(row)"
               >Planen</button>
               <button
                 v-else-if="state(row.experiment) === 'planned'"
                 class="check-btn"
                 @click.stop="markDone(row)"
-              >Erledigt</button>
+              >Gemacht</button>
               <button
                 v-else-if="state(row.experiment) === 'done'"
                 class="check-btn"
@@ -90,17 +86,30 @@
           </div>
 
           <div :key="row.experiment.id + '-expand'" v-if="openIndex === i" class="row-expand">
+            <div class="expand-header">
+              <p class="expand-label">Überzeugung</p>
+              <button class="expand-edit-btn" @click.stop="editExperiment(row)">
+                <v-icon small color="#8e8e93">edit</v-icon>
+              </button>
+            </div>
+            <p class="expand-text mb-1">„{{ row.beliefText }}"</p>
+
+            <p class="expand-label mt-3">Situation</p>
+            <p class="expand-text mb-1">{{ row.experiment.situation || '—' }}</p>
+
             <template v-if="row.experiment.fear">
-              <p class="expand-label">Befürchtung</p>
+              <p class="expand-label mt-3">Befürchtung</p>
               <p class="expand-text mb-1">{{ row.experiment.fear }}</p>
-              <p v-if="row.experiment.fearExpected !== null" class="expand-meta">
-                Erwartet: {{ row.experiment.fearExpected }} von 100
-              </p>
             </template>
+            <p v-if="row.experiment.fearExpected !== null" class="expand-meta">
+              Erwartet: {{ row.experiment.fearExpected }} von 100
+            </p>
+
             <template v-if="row.experiment.outcome">
               <p class="expand-label mt-3">Was passiert ist</p>
               <p class="expand-text mb-1">{{ row.experiment.outcome }}</p>
             </template>
+
             <template v-if="gapOf(row.experiment) !== null">
               <p class="expand-label mt-3">Abgleich</p>
               <p class="expand-text mb-1">
@@ -109,8 +118,16 @@
                   ({{ gapOf(row.experiment) > 0 ? '−' : '+' }}{{ Math.abs(gapOf(row.experiment)) }})
                 </span>
               </p>
-              <p v-if="row.experiment.learning" class="expand-text">{{ row.experiment.learning }}</p>
             </template>
+            <template v-if="row.experiment.learning">
+              <p class="expand-label mt-3">Was sagt dir das?</p>
+              <p class="expand-text mb-1">{{ row.experiment.learning }}</p>
+            </template>
+
+            <p class="expand-label mt-3">Verlauf</p>
+            <p class="expand-meta">Geplant: {{ dateLabel(row.experiment.plannedAt) }}</p>
+            <p class="expand-meta">Gemacht: {{ dateLabel(row.experiment.doneAt) }}</p>
+            <p class="expand-meta">Ausgewertet: {{ dateLabel(row.experiment.completedAt) }}</p>
           </div>
 
           <div :key="row.experiment.id + '-sep'" class="ios-sep" v-if="i < filteredRows.length - 1"></div>
@@ -203,36 +220,6 @@
         </div>
       </v-dialog>
 
-      <!-- Edit the situation -->
-      <v-dialog v-model="isEditDialogShowing" fullscreen>
-        <div class="wizard-page">
-          <v-toolbar color="#000" dark flat app>
-            <v-btn icon @click="cancelEdit">
-              <v-icon>close</v-icon>
-            </v-btn>
-            <v-toolbar-title>Situation bearbeiten</v-toolbar-title>
-          </v-toolbar>
-          <v-content>
-            <v-container class="mb-5">
-              <v-layout column>
-                <v-flex class="mt-2 mb-3">
-                  <h1 class="headline font-weight-regular">Situation</h1>
-                  <p class="body-1 grey--text mt-2">
-                    Klein, konkret, überprüfbar — ein Moment, kein Lebensthema.
-                  </p>
-                </v-flex>
-                <v-flex>
-                  <v-textarea v-model="editText" placeholder="..." auto-grow rows="4" hide-details></v-textarea>
-                </v-flex>
-              </v-layout>
-            </v-container>
-            <v-footer :fixed="true" color="white elevation-3" height="44">
-              <v-btn :disabled="!editText.trim()" @click="saveEdit" block large color="primary">speichern</v-btn>
-            </v-footer>
-          </v-content>
-        </div>
-      </v-dialog>
-
       <v-dialog v-model="isDeleteDialogShowing" width="300">
         <v-card class="confirm-dialog">
           <v-card-title class="confirm-title">Experiment löschen?</v-card-title>
@@ -263,11 +250,11 @@
 </template>
 
 <script>
+import moment from 'moment';
 import {
   collectExperiments,
+  experimentDisplayState,
   experimentState,
-  experimentStateLabel,
-  experimentStateColor,
   fearGap,
   fearGapColor,
   isDue,
@@ -317,9 +304,6 @@ export default {
       tab: 'open',
       openIndex: null,
       now: Date.now(),
-      isEditDialogShowing: false,
-      editRow: null,
-      editText: '',
       isResultDialogShowing: false,
       resultRow: null,
       resultStep: 1,
@@ -341,10 +325,7 @@ export default {
     filteredRows() {
       const tab = this.tab;
       return this.rows.filter(function(row) {
-        const s = experimentState(row.experiment);
-        if (tab === 'open') return s === 'draft' || s === 'planned';
-        if (tab === 'done') return s === 'done';
-        return s === 'evaluated';
+        return experimentDisplayState(row.experiment) === tab;
       });
     },
     resultSituation() {
@@ -360,8 +341,6 @@ export default {
   },
   methods: {
     state(x) { return experimentState(x); },
-    stateLabel(x) { return experimentStateLabel(x); },
-    stateColor(x) { return experimentStateColor(x); },
     gapOf(x) { return fearGap(x); },
     gapColor(gap) { return fearGapColor(gap); },
     isDue(x) { return isDue(x, this.now); },
@@ -386,10 +365,6 @@ export default {
       }));
     },
 
-    planExperiment(row) {
-      this.sw.openIdx = null; this.sw.openDir = null;
-      this.$router.push(`/act-belief/${row.beliefTime}/${row.experiment.id}`);
-    },
     markDone(row) {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.persist(row, { doneAt: Date.now() });
@@ -428,22 +403,16 @@ export default {
       }
     },
 
-    startEdit(row) {
+    // Same wizard as "Handeln" on a belief, so there is one place to edit an
+    // experiment.
+    editExperiment(row) {
       this.sw.openIdx = null; this.sw.openDir = null;
-      this.editRow = row;
-      this.editText = row.experiment.situation || '';
-      this.isEditDialogShowing = true;
+      this.$router.push(`/act-belief/${row.beliefTime}/${row.experiment.id}`);
     },
-    cancelEdit() {
-      this.isEditDialogShowing = false;
-      this.editRow = null;
-      this.editText = '';
-    },
-    saveEdit() {
-      const row = this.editRow;
-      const text = this.editText.trim();
-      this.cancelEdit();
-      if (row && text) this.persist(row, { situation: text });
+    dateLabel(ts) {
+      if (!ts) return '—';
+      moment.locale('de');
+      return moment(ts).format('D. MMMM YYYY');
     },
 
     preDelete(row) {
@@ -622,7 +591,6 @@ export default {
   border-radius: 20px;
   padding: 1px 6px;
 }
-.state-pill { font-weight: 600; }
 .gap-pill { font-weight: 600; }
 .check-meta {
   font-size: 0.75rem;

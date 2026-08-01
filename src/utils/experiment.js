@@ -5,18 +5,21 @@
 export const EXPERIMENT_DUE_DAYS = 7;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-export const EXPERIMENT_STATE_LABELS = {
-  draft: 'Entwurf',
-  planned: 'Geplant',
+// The lifecycle keeps four internal states, but only three are ever shown —
+// they line up one-to-one with the tabs in the Handlungen list.
+export const EXPERIMENT_DISPLAY_STATES = ['open', 'dabei', 'done'];
+
+export const EXPERIMENT_DISPLAY_LABELS = {
+  open: 'Offen',
+  dabei: 'Dabei',
   done: 'Durchgeführt',
-  evaluated: 'Ausgewertet',
 };
 
-export const EXPERIMENT_STATE_COLORS = {
-  draft: '#636366',
-  planned: '#fd9927',
-  done: '#60a5fa',
-  evaluated: '#4ade80',
+// Same grey / orange / green convention as the affirmation statuses.
+export const EXPERIMENT_DISPLAY_COLORS = {
+  open: '#636366',
+  dabei: '#fd9927',
+  done: '#4ade80',
 };
 
 export function createExperiment(id) {
@@ -42,12 +45,21 @@ export function experimentState(x) {
   return 'draft';
 }
 
+// draft and planned both read as "Offen": whether the anchor is filled in is a
+// detail of the row, not a status of its own.
+export function experimentDisplayState(x) {
+  const s = experimentState(x);
+  if (s === 'evaluated') return 'done';
+  if (s === 'done') return 'dabei';
+  return 'open';
+}
+
 export function experimentStateLabel(x) {
-  return EXPERIMENT_STATE_LABELS[experimentState(x)];
+  return EXPERIMENT_DISPLAY_LABELS[experimentDisplayState(x)];
 }
 
 export function experimentStateColor(x) {
-  return EXPERIMENT_STATE_COLORS[experimentState(x)];
+  return EXPERIMENT_DISPLAY_COLORS[experimentDisplayState(x)];
 }
 
 // Steps 1 and 2 are complete: there is something to carry out and an anchor to
