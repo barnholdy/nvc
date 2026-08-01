@@ -22,6 +22,7 @@
         <button class="seg-tab" :class="{ active: tab === 'open' }" @click="tab = 'open'">Offen</button>
         <button class="seg-tab" :class="{ active: tab === 'working' }" @click="tab = 'working'">Ausgefüllt</button>
         <button class="seg-tab" :class="{ active: tab === 'done' }" @click="tab = 'done'">Verändert</button>
+        <button class="seg-tab" :class="{ active: tab === 'acted' }" @click="tab = 'acted'">Umgesetzt</button>
       </div>
 
       <div v-if="filteredBeliefs.length === 0" class="empty-state">
@@ -30,7 +31,8 @@
         <p class="empty-sub">
           <template v-if="tab === 'open'">Tippe auf + um eine Überzeugung hinzuzufügen.</template>
           <template v-else-if="tab === 'working'">Noch keine Überzeugungen in Bearbeitung.</template>
-          <template v-else>Noch keine veränderten Überzeugungen.</template>
+          <template v-else-if="tab === 'done'">Noch keine veränderten Überzeugungen.</template>
+          <template v-else>Noch keine umgesetzten Überzeugungen — plane ein Verhaltensexperiment über „Handeln".</template>
         </p>
       </div>
 
@@ -56,6 +58,10 @@
                 <v-icon small color="#fff">autorenew</v-icon>
                 <span>Ändern</span>
               </button>
+              <button class="swipe-btn swipe-btn-act" @click.stop="actEntry(entry)">
+                <v-icon small color="#fff">directions_run</v-icon>
+                <span>Handeln</span>
+              </button>
             </div>
             <div class="swipe-left-panel">
               <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">
@@ -63,7 +69,7 @@
                 <span>Löschen</span>
               </button>
             </div>
-            <div class="ios-row" :style="rowSt(idx, 195)" @click="deskClick(idx)">
+            <div class="ios-row" :style="rowSt(idx, 260)" @click="deskClick(idx)">
               <div class="row-body">
                 <p class="row-title">{{ entry.belief }}</p>
                 <div class="row-badges">
@@ -227,6 +233,7 @@ export default {
     experimentStateLabel(x) { return stateLabelOf(x); },
     empathyEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/empathy-belief/${entry.time}`); },
     changeEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/change-belief/${entry.time}`); },
+    actEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/act-belief/${entry.time}`); },
     editEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/edit-belief/${entry.time}`); },
     preDelete(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.entryToDelete = entry; this.isDeleteDialogShowing = true; },
     confirmDelete() {
@@ -249,7 +256,7 @@ export default {
         this.sw.isH = Math.abs(dx) >= Math.abs(dy);
       if (!this.sw.isH) return;
       e.preventDefault();
-      this.sw.dx = Math.max(-80, Math.min(dx, 195));
+      this.sw.dx = Math.max(-80, Math.min(dx, 260));
       this.sw.drag = true;
     },
     tsEnd(e, i) {
@@ -301,8 +308,9 @@ export default {
   flex: 1;
   background: none;
   border: none;
-  padding: 8px 0;
-  font-size: 0.875rem;
+  padding: 8px 2px;
+  /* four tabs have to fit across a phone */
+  font-size: 0.8rem;
   color: #8e8e93;
   cursor: pointer;
   position: relative;
@@ -365,6 +373,7 @@ export default {
 .swipe-btn-edit { background: #636366; }
 .swipe-btn-empathy { background: #2f7a52; }
 .swipe-btn-change { background: #1a5fa8; }
+.swipe-btn-act { background: #7c3aed; }
 
 .ios-row {
   position: relative;

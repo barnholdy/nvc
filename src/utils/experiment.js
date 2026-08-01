@@ -62,10 +62,15 @@ export function isDue(x, now) {
   return (now - x.plannedAt) >= EXPERIMENT_DUE_DAYS * DAY_MS;
 }
 
+// The action really happened — this is what lifts a belief to "Umgesetzt".
+export function isCarriedOut(x) {
+  return !!(x && x.doneAt);
+}
+
 // Step 4 stays out of reach until the action was actually carried out —
 // otherwise the result could be filled in straight after step 2.
 export function canEvaluate(x) {
-  return !!(x && x.doneAt);
+  return isCarriedOut(x);
 }
 
 // Positive means reality fell short of the fear, which is the evidence.

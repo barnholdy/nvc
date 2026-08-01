@@ -1,49 +1,19 @@
 <template>
   <v-layout column>
     <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">Verhaltensexperiment</h1>
-      <p class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
+      <h1 class="headline font-weight-regular">Befürchtung</h1>
+      <p class="subheading grey--text belief-quote mt-1">„{{ situation }}"</p>
       <p class="body-1 grey--text mt-2">
-        Teste die Überzeugung an der Realität. Was du hier festhältst, wird später mit dem
-        verglichen, was tatsächlich passiert ist.
-      </p>
-    </v-flex>
-
-    <!-- Step 1: Situation -->
-    <v-flex class="mb-4">
-      <p class="section-label">1 · Situation</p>
-      <p class="body-1 grey--text mb-2">
-        In welcher konkreten Situation in den nächsten Tagen könntest du dich so verhalten,
-        als würde diese Überzeugung nicht gelten? Wo, mit wem, wann?
-      </p>
-      <v-text-field
-        placeholder="..."
-        v-model="situation"
-        multi-line
-        rows="4"
-        hide-details
-        @focus="$emit('focussed')"
-        @blur="$emit('blurred')"
-      ></v-text-field>
-      <p class="constraint-text mt-2">
-        Klein, konkret, überprüfbar — ein Moment, kein Lebensthema.
-      </p>
-      <p v-if="isSituationVague" class="follow-up-text">
-        Nenne einen einzelnen Moment mit Ort und Person.
-      </p>
-    </v-flex>
-
-    <!-- Step 2: the fear, locked once planned -->
-    <v-flex class="mb-4">
-      <p class="section-label">2 · Befürchtung</p>
-      <p class="body-1 grey--text mb-2">
         Was genau befürchtest du, wenn du das tust? Sei präzise: Wer reagiert wie?
       </p>
+    </v-flex>
+
+    <v-flex>
       <v-text-field
         placeholder="..."
         v-model="fear"
         multi-line
-        rows="4"
+        rows="5"
         hide-details
         :disabled="isLocked"
         @focus="$emit('focussed')"
@@ -79,12 +49,11 @@
           späteren Abgleich — ohne ihn gibt es nichts zu messen.
         </p>
       </template>
-    </v-flex>
 
-    <v-flex>
-      <p class="outlook-text">
-        Danach führst du genau das aus — nicht mehr, nicht weniger. Das Ergebnis trägst du
-        später unter „Handlungen" ein.
+      <p class="outlook-text mt-4">
+        Danach führst du genau das aus — nicht mehr, nicht weniger. Der Impuls, im letzten
+        Moment doch ins alte Muster zu kippen, ist die Überzeugung selbst. Bemerk ihn,
+        folg ihm nicht. Das Ergebnis trägst du später unter „Handlungen" ein.
       </p>
     </v-flex>
   </v-layout>
@@ -94,14 +63,13 @@
 import moment from 'moment';
 
 export default {
-  name: 'belief-change-experiment',
+  name: 'belief-act-fear',
   props: {
-    belief: { type: String, default: '' },
+    situation: { type: String, default: '' },
     experiment: { type: Object, required: true },
   },
   data() {
     return {
-      situation: this.experiment.situation || '',
       fear: this.experiment.fear || '',
       fearExpected: typeof this.experiment.fearExpected === 'number'
         ? this.experiment.fearExpected
@@ -111,10 +79,6 @@ export default {
     };
   },
   computed: {
-    isSituationVague() {
-      const t = this.situation.trim();
-      return t.length > 0 && (t.length < 25 || t.indexOf(' ') === -1);
-    },
     plannedAtLabel() {
       if (!this.experiment.plannedAt) return '';
       moment.locale('de');
@@ -122,17 +86,12 @@ export default {
     },
   },
   watch: {
-    situation() { this.emitChange(); },
     fear() { this.emitChange(); },
     fearExpected() { this.emitChange(); },
   },
   methods: {
     emitChange() {
-      this.$emit('changed', Object.assign({}, this.experiment, {
-        situation: this.situation,
-        fear: this.fear,
-        fearExpected: this.fearExpected,
-      }));
+      this.$emit('changed', { fear: this.fear, fearExpected: this.fearExpected });
     },
   },
 };
@@ -140,27 +99,6 @@ export default {
 
 <style scoped lang="scss">
 .belief-quote { font-style: italic; }
-
-.section-label {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: #636366;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin: 0 0 6px;
-}
-.constraint-text {
-  font-size: 0.8rem;
-  color: #8e8e93;
-  line-height: 1.5;
-  margin: 0;
-}
-.follow-up-text {
-  font-size: 0.8rem;
-  color: #fd9927;
-  line-height: 1.5;
-  margin: 4px 0 0;
-}
 .anchor-note {
   font-size: 0.8rem;
   color: #8e8e93;

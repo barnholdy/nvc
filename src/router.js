@@ -41,6 +41,11 @@ export default new Router({
       component: () => import('./views/BeliefChange.vue'),
     },
     {
+      path: '/act-belief/:time/:experimentId?',
+      name: 'act-belief',
+      component: () => import('./views/BeliefAct.vue'),
+    },
+    {
       path: '/empathy-belief/:time',
       name: 'empathy-belief',
       component: () => import('./views/BeliefEmpathy.vue'),

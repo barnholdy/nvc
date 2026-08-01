@@ -25,7 +25,7 @@
         <span class="empty-icon">🏃</span>
         <p class="empty-title">Keine Einträge</p>
         <p class="empty-sub">
-          <template v-if="tab === 'open'">Plane ein Experiment im Änderungsprozess einer Überzeugung.</template>
+          <template v-if="tab === 'open'">Wische in der Überzeugungs-Liste nach rechts und wähle „Handeln", um ein Experiment zu planen.</template>
           <template v-else-if="tab === 'done'">Noch kein Experiment als durchgeführt markiert.</template>
           <template v-else>Noch kein Experiment ausgewertet.</template>
         </p>
@@ -388,7 +388,7 @@ export default {
 
     planExperiment(row) {
       this.sw.openIdx = null; this.sw.openDir = null;
-      this.$router.push(`/change-belief/${row.beliefTime}`);
+      this.$router.push(`/act-belief/${row.beliefTime}/${row.experiment.id}`);
     },
     markDone(row) {
       this.sw.openIdx = null; this.sw.openDir = null;

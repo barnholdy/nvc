@@ -74,15 +74,6 @@
           @focussed="isFooterFixed = false"
           @blurred="isFooterFixed = true">
         </pattern-change-affirmation>
-
-        <belief-change-experiment
-          v-show="step === 5"
-          :belief="entry ? entry.belief : ''"
-          :experiment="experiment"
-          @changed="experiment = $event"
-          @focussed="isFooterFixed = false"
-          @blurred="isFooterFixed = true">
-        </belief-change-experiment>
       </v-container>
 
       <v-footer :fixed="isFooterFixed" color="white elevation-3" height="44">
@@ -108,9 +99,7 @@ import BeliefChangeAbsoluteness from '@/views/BeliefChangeAbsoluteness.vue';
 import PatternAddWithoutBelief from '@/views/PatternAddWithoutBelief.vue';
 import BeliefAddFeelingNeed from '@/views/BeliefAddFeelingNeed.vue';
 import PatternChangeAffirmation from '@/views/PatternChangeAffirmation.vue';
-import BeliefChangeExperiment from '@/views/BeliefChangeExperiment.vue';
 import { beliefStatus } from '@/utils/beliefStatus';
-import { createExperiment, experimentState, isPlanned } from '@/utils/experiment';
 import taxonomy from '../assets/taxonomy.json';
 
 // Below this the body sensation counts as "not there yet" and the wizard offers
@@ -124,23 +113,15 @@ export default {
     PatternAddWithoutBelief,
     BeliefAddFeelingNeed,
     PatternChangeAffirmation,
-    BeliefChangeExperiment,
   },
   data() {
     const entry = this.$store.getters.beliefs
       .find(function(b) { return b.time === parseInt(this.$route.params.time, 10); }, this);
     const r = entry && entry.reflection ? entry.reflection : {};
-    // Continue the experiment that has not been evaluated yet, else start one.
-    const open = (r.experiments || []).filter(function(x) {
-      return experimentState(x) !== 'evaluated';
-    });
-    const openExperiment = open.length
-      ? Object.assign({}, open[open.length - 1])
-      : createExperiment(Date.now());
     return {
       entry: entry || null,
       step: 1,
-      totalSteps: 5,
+      totalSteps: 4,
       taxonomy: taxonomy,
       exceptions: r.exceptions || '',
       // Midpoint so the "too far away" hint does not fire before it is touched.
@@ -148,7 +129,6 @@ export default {
       withoutBelief: r.withoutBelief || '',
       withoutBeliefFeelings: r.withoutBeliefFeelings || [],
       affirmations: entry ? entry.affirmations || [] : [],
-      experiment: openExperiment,
       isFooterFixed: true,
     };
   },
@@ -181,22 +161,6 @@ export default {
       this.step = step;
       this.$vuetify.goTo(0, { duration: 0 });
     },
-    // Stamp plannedAt the moment steps 1+2 are complete — that starts the clock
-    // for "Schon durchgeführt?" and locks the anchor.
-    mergedExperiments() {
-      const r = (this.entry && this.entry.reflection) || {};
-      const list = (r.experiments || []).slice();
-      const current = Object.assign({}, this.experiment);
-      if (!current.plannedAt && isPlanned(current)) current.plannedAt = Date.now();
-      // Nothing entered at all: do not persist an empty experiment.
-      if (!current.situation && !current.fear) {
-        return list.filter(function(x) { return x.id !== current.id; });
-      }
-      const idx = list.findIndex(function(x) { return x.id === current.id; });
-      if (idx >= 0) list.splice(idx, 1, current);
-      else list.push(current);
-      return list;
-    },
     save() {
       const saved = Object.assign({}, this.entry, {
         affirmations: this.affirmations,
@@ -207,7 +171,10 @@ export default {
           withoutBelief: this.withoutBelief,
           withoutBeliefFeelings: this.withoutBeliefFeelings,
           turnarounds: [],
-          experiments: this.mergedExperiments(),
+          // Experiments belong to the Handeln wizard now; carry them through
+          // untouched, otherwise this literal would wipe them.
+          experiments: (this.entry && this.entry.reflection
+            && this.entry.reflection.experiments) || [],
         },
       });
       this.$store.dispatch('updateBelief', saved);
