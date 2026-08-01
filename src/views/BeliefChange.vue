@@ -37,6 +37,7 @@
           headline="Neue Gefühle"
           prompt="Bleib einen Moment in dieser Vorstellung. Was passiert im Körper? Wird etwas leichter, weiter, wärmer — oder bleibt es gleich?"
           :belief="entry ? entry.belief : ''"
+          :perspective="withoutBelief"
           :taxonomy="taxonomy"
           :initialFeelings="withoutBeliefFeelings"
           @change="withoutBeliefFeelings = $event">
