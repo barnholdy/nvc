@@ -13,7 +13,7 @@ export const BELIEF_STATUS_LABELS = {
   open: 'Offen',
   working: 'Ausgefüllt',
   done: 'Verändert',
-  acted: 'Umgesetzt',
+  acted: 'Gehandelt',
 };
 
 // Same convention as the affirmation statuses: grey / orange / green.

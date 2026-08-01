@@ -22,7 +22,7 @@
         <button class="seg-tab" :class="{ active: tab === 'open' }" @click="tab = 'open'">Offen</button>
         <button class="seg-tab" :class="{ active: tab === 'working' }" @click="tab = 'working'">Ausgefüllt</button>
         <button class="seg-tab" :class="{ active: tab === 'done' }" @click="tab = 'done'">Verändert</button>
-        <button class="seg-tab" :class="{ active: tab === 'acted' }" @click="tab = 'acted'">Umgesetzt</button>
+        <button class="seg-tab" :class="{ active: tab === 'acted' }" @click="tab = 'acted'">Gehandelt</button>
       </div>
 
       <div v-if="filteredBeliefs.length === 0" class="empty-state">
@@ -32,7 +32,7 @@
           <template v-if="tab === 'open'">Tippe auf + um eine Überzeugung hinzuzufügen.</template>
           <template v-else-if="tab === 'working'">Noch keine Überzeugungen in Bearbeitung.</template>
           <template v-else-if="tab === 'done'">Noch keine veränderten Überzeugungen.</template>
-          <template v-else>Noch keine umgesetzten Überzeugungen — plane ein Verhaltensexperiment über „Handeln".</template>
+          <template v-else>Noch keine gehandelten Überzeugungen — plane ein Verhaltensexperiment über „Handeln".</template>
         </p>
       </div>
 
@@ -48,19 +48,19 @@
             <div class="swipe-right-panel">
               <button class="swipe-btn swipe-btn-edit" @click.stop="editEntry(entry)">
                 <v-icon small color="#fff">edit</v-icon>
-                <span>Bearb.</span>
-              </button>
-              <button class="swipe-btn swipe-btn-empathy" @click.stop="empathyEntry(entry)">
-                <v-icon small color="#fff">favorite</v-icon>
-                <span>Empathie</span>
+                <span>Ausfüllen</span>
               </button>
               <button class="swipe-btn swipe-btn-change" @click.stop="changeEntry(entry)">
                 <v-icon small color="#fff">autorenew</v-icon>
-                <span>Ändern</span>
+                <span>Verändern</span>
               </button>
               <button class="swipe-btn swipe-btn-act" @click.stop="actEntry(entry)">
                 <v-icon small color="#fff">directions_run</v-icon>
                 <span>Handeln</span>
+              </button>
+              <button class="swipe-btn swipe-btn-empathy" @click.stop="empathyEntry(entry)">
+                <v-icon small color="#fff">favorite</v-icon>
+                <span>Empathie</span>
               </button>
             </div>
             <div class="swipe-left-panel">
@@ -78,6 +78,11 @@
                   </span>
                 </div>
               </div>
+              <button
+                v-if="rowActionLabel(entry)"
+                class="row-action-btn"
+                @click.stop="runRowAction(entry)"
+              >{{ rowActionLabel(entry) }}</button>
               <v-icon class="row-chevron" :class="{ rotated: openEntry === entry.time }">chevron_right</v-icon>
             </div>
           </div>
@@ -271,6 +276,20 @@ export default {
     empathyEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/empathy-belief/${entry.time}`); },
     changeEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/change-belief/${entry.time}`); },
     actEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/act-belief/${entry.time}`); },
+    // The one step that moves this belief forward from where it stands.
+    rowActionLabel(entry) {
+      const s = beliefStatus(entry);
+      if (s === 'open') return 'Ausfüllen';
+      if (s === 'working') return 'Verändern';
+      if (s === 'done') return 'Handeln';
+      return '';
+    },
+    runRowAction(entry) {
+      const s = beliefStatus(entry);
+      if (s === 'open') this.editEntry(entry);
+      else if (s === 'working') this.changeEntry(entry);
+      else if (s === 'done') this.actEntry(entry);
+    },
     editEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/edit-belief/${entry.time}`); },
     preDelete(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.entryToDelete = entry; this.isDeleteDialogShowing = true; },
     confirmDelete() {
@@ -280,7 +299,8 @@ export default {
     },
     cancelDelete() { this.isDeleteDialogShowing = false; this.entryToDelete = null; },
     tsStart(e, i) {
-      if (e.target && e.target.closest && e.target.closest('.swipe-btn')) return;
+      if (e.target && e.target.closest
+        && (e.target.closest('.swipe-btn') || e.target.closest('.row-action-btn'))) return;
       const t = e.touches[0];
       this.sw.touchIdx = i; this.sw.startX = t.clientX; this.sw.startY = t.clientY;
       this.sw.dx = 0; this.sw.isH = null; this.sw.drag = false;
@@ -441,6 +461,21 @@ export default {
   background: #2c2c2e;
   border-radius: 20px;
   padding: 1px 6px;
+}
+.row-action-btn {
+  background: #4ade80;
+  color: #000;
+  border: none;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-left: 8px;
+  -webkit-tap-highlight-color: transparent;
+  &:active { background: #3dcc70; transform: scale(0.97); }
 }
 .row-chevron {
   color: #636366 !important;
