@@ -1,9 +1,9 @@
 <template>
   <v-layout column>
     <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">Neue Perspektive</h1>
+      <h1 class="headline font-weight-regular">Absolutheit prüfen</h1>
       <p class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
-      <p class="body-1 grey--text mt-2">Stell dir einen Tag vor, an dem diese Überzeugung einfach nicht existiert. Was wärst du ohne sie? Wie würdest du in eine Begegnung gehen? Was würdest du tun oder lassen?</p>
+      <p class="body-1 grey--text mt-2">Stimmt diese Überzeugung wirklich in jeder Situation? Nenne 2–3 konkrete Momente, in denen das nicht der Fall war.</p>
     </v-flex>
     <v-flex>
       <v-text-field
@@ -20,7 +20,7 @@
 
 <script>
 export default {
-  name: 'pattern-add-without-belief',
+  name: 'belief-change-absoluteness',
   props: {
     belief: { type: String, default: '' },
     initialValue: { type: String, default: '' },

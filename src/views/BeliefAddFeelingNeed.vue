@@ -6,6 +6,9 @@
       <p class="body-1 grey--text mt-2">{{ promptText }}</p>
     </v-flex>
 
+    <!-- Optional block between the prompt and the list (unused by the belief wizard) -->
+    <slot name="beforeList"></slot>
+
     <v-flex>
       <p v-if="isNeedsMode && visibleEmotions.length === 0" class="empty-hint">
         Wähle im vorigen Schritt Gefühle aus — dann erscheinen hier die passenden

@@ -13,29 +13,56 @@
     </v-toolbar>
     <v-content>
       <v-container class="mb-5">
-        <pattern-add-without-belief
+        <belief-change-absoluteness
           v-show="step === 1"
           :belief="entry ? entry.belief : ''"
+          :initialValue="exceptions"
+          @changed="exceptions = $event"
+          @focussed="isFooterFixed = false"
+          @blurred="isFooterFixed = true">
+        </belief-change-absoluteness>
+
+        <pattern-add-without-belief
+          v-show="step === 2"
+          :belief="entry ? entry.belief : ''"
           :initialValue="withoutBelief"
-          :needs="entry ? entry.needs || [] : []"
           @changed="withoutBelief = $event"
           @focussed="isFooterFixed = false"
           @blurred="isFooterFixed = true">
         </pattern-add-without-belief>
 
         <belief-add-feeling-need
-          v-show="step === 2"
+          v-show="step === 3"
           mode="feelings"
           headline="Neue Gefühle"
-          prompt="Wie würdest du dich fühlen, wenn du diese Überzeugung loslassen könntest?"
+          prompt="Bleib einen Moment in dieser Vorstellung. Was passiert im Körper? Wird etwas leichter, weiter, wärmer — oder bleibt es gleich?"
           :belief="entry ? entry.belief : ''"
           :taxonomy="taxonomy"
           :initialFeelings="withoutBeliefFeelings"
           @change="withoutBeliefFeelings = $event">
+          <v-flex slot="beforeList" class="mb-4">
+            <p class="body-1 grey--text mb-2">Wie stark ist diese Empfindung gerade? 0 = nichts, 10 = deutlich.</p>
+            <div class="slider-row">
+              <span class="slider-end-label">0</span>
+              <input type="range" min="0" max="10" v-model.number="bodyIntensity" class="intensity-slider" />
+              <span class="slider-end-label">10</span>
+            </div>
+            <p class="slider-value-label">{{ bodyIntensity }}</p>
+            <div v-if="bodyIntensity < INTENSITY_THRESHOLD" class="intensity-hint">
+              <p class="intensity-hint-text">
+                Noch zu weit weg. Gehen wir kleiner: Wo kannst du die Perspektive ändern,
+                dass sie greifbarer für dich wird?
+              </p>
+              <v-btn small flat color="primary" class="ml-0" @click="goToStep(2)">
+                <v-icon small left>chevron_left</v-icon>
+                Zurück zur neuen Perspektive
+              </v-btn>
+            </div>
+          </v-flex>
         </belief-add-feeling-need>
 
         <pattern-change-affirmation
-          v-show="step === 3"
+          v-show="step === 4"
           :belief="entry ? entry.belief : ''"
           :withoutBelief="withoutBelief"
           :withoutBeliefFeelings="withoutBeliefFeelings"
@@ -47,7 +74,7 @@
         </pattern-change-affirmation>
 
         <pattern-change-act
-          v-show="step === 4"
+          v-show="step === 5"
           :belief="entry ? entry.belief : ''"
           :withoutBelief="withoutBelief"
           :withoutBeliefFeelings="withoutBeliefFeelings"
@@ -79,6 +106,7 @@
 </template>
 
 <script>
+import BeliefChangeAbsoluteness from '@/views/BeliefChangeAbsoluteness.vue';
 import PatternAddWithoutBelief from '@/views/PatternAddWithoutBelief.vue';
 import BeliefAddFeelingNeed from '@/views/BeliefAddFeelingNeed.vue';
 import PatternChangeAffirmation from '@/views/PatternChangeAffirmation.vue';
@@ -86,9 +114,14 @@ import PatternChangeAct from '@/views/PatternChangeAct.vue';
 import taxonomy from '../assets/taxonomy.json';
 import { beliefStatus } from '@/utils/beliefStatus';
 
+// Below this the body sensation counts as "not there yet" and the wizard offers
+// a way back to reshape the new perspective.
+const INTENSITY_THRESHOLD = 4;
+
 export default {
   name: 'belief-change',
   components: {
+    BeliefChangeAbsoluteness,
     PatternAddWithoutBelief,
     BeliefAddFeelingNeed,
     PatternChangeAffirmation,
@@ -101,8 +134,11 @@ export default {
     return {
       entry: entry || null,
       step: 1,
-      totalSteps: 4,
+      totalSteps: 5,
       taxonomy: taxonomy,
+      exceptions: r.exceptions || '',
+      // Midpoint so the "too far away" hint does not fire before it is touched.
+      bodyIntensity: typeof r.bodyIntensity === 'number' ? r.bodyIntensity : 5,
       withoutBelief: r.withoutBelief || '',
       withoutBeliefFeelings: r.withoutBeliefFeelings || [],
       affirmations: entry ? entry.affirmations || [] : [],
@@ -111,6 +147,7 @@ export default {
     };
   },
   computed: {
+    INTENSITY_THRESHOLD() { return INTENSITY_THRESHOLD; },
     allActs() {
       var seen = {};
       var result = [];
@@ -145,11 +182,17 @@ export default {
       this.step -= 1;
       this.$vuetify.goTo(0, { duration: 0 });
     },
+    goToStep(step) {
+      this.step = step;
+      this.$vuetify.goTo(0, { duration: 0 });
+    },
     save() {
       const saved = Object.assign({}, this.entry, {
         affirmations: this.affirmations,
         reflection: {
           origin: this.entry && this.entry.reflection ? (this.entry.reflection.origin || '') : '',
+          exceptions: this.exceptions,
+          bodyIntensity: this.bodyIntensity,
           withoutBelief: this.withoutBelief,
           withoutBeliefFeelings: this.withoutBeliefFeelings,
           turnarounds: [],
@@ -169,4 +212,61 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px;
+}
+.slider-end-label {
+  font-size: 0.78rem;
+  color: #8e8e93;
+  flex-shrink: 0;
+}
+.intensity-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: #3a3a3c;
+  outline: none;
+  cursor: pointer;
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #4ade80;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  }
+  &::-moz-range-thumb {
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 50%;
+    background: #4ade80;
+    cursor: pointer;
+  }
+}
+.slider-value-label {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 8px 0 0;
+}
+.intensity-hint {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.5px solid #fd9927;
+}
+.intensity-hint-text {
+  font-size: 0.875rem;
+  color: #8e8e93;
+  line-height: 1.5;
+  margin: 0 0 6px;
+}
 </style>
