@@ -70,9 +70,7 @@
           :withoutBeliefFeelings="withoutBeliefFeelings"
           :initialAffirmations="affirmations"
           :allAffirmations="allAffirmations"
-          :initialTruth="affirmationTruth"
           @changed="affirmations = $event"
-          @truthChanged="affirmationTruth = $event"
           @focussed="isFooterFixed = false"
           @blurred="isFooterFixed = true">
         </pattern-change-affirmation>
@@ -143,7 +141,6 @@ export default {
       exceptions: r.exceptions || '',
       // Midpoint so the "too far away" hint does not fire before it is touched.
       bodyIntensity: typeof r.bodyIntensity === 'number' ? r.bodyIntensity : 5,
-      affirmationTruth: typeof r.affirmationTruth === 'number' ? r.affirmationTruth : 5,
       withoutBelief: r.withoutBelief || '',
       withoutBeliefFeelings: r.withoutBeliefFeelings || [],
       affirmations: entry ? entry.affirmations || [] : [],
@@ -198,7 +195,6 @@ export default {
           origin: this.entry && this.entry.reflection ? (this.entry.reflection.origin || '') : '',
           exceptions: this.exceptions,
           bodyIntensity: this.bodyIntensity,
-          affirmationTruth: this.affirmationTruth,
           withoutBelief: this.withoutBelief,
           withoutBeliefFeelings: this.withoutBeliefFeelings,
           turnarounds: [],

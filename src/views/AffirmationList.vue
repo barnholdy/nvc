@@ -114,17 +114,22 @@
                 <v-flex class="mt-2 mb-3">
                   <h1 class="headline font-weight-regular">Wie fühlt sich das an?</h1>
                   <p class="subheading grey--text belief-quote mt-1">„{{ editText }}"</p>
-                  <p class="body-1 grey--text mt-2">Wie wahr fühlt sich diese Affirmation gerade an?</p>
+                  <p class="body-1 grey--text mt-2">Lies dir den Satz laut vor. Wie wahr fühlt er sich an?</p>
                 </v-flex>
                 <v-flex class="mt-1">
                   <div class="slider-row">
-                    <span class="slider-end-label">0 %</span>
-                    <input type="range" min="0" max="100" v-model.number="editSlider" class="resonance-slider" />
-                    <span class="slider-end-label">100 %</span>
+                    <span class="slider-end-label">0</span>
+                    <input type="range" min="0" max="10" v-model.number="editSlider" class="resonance-slider" />
+                    <span class="slider-end-label">10</span>
                   </div>
-                  <p class="slider-value-label">{{ editSlider }} %</p>
+                  <p class="slider-value-label" :style="{ color: truthHint.color }">{{ editSlider }}</p>
+                  <p class="truth-target">Ziel: 6–8</p>
+                  <div class="truth-hint" :style="{ borderColor: truthHint.color }">
+                    <p class="truth-hint-title" :style="{ color: truthHint.color }">{{ truthHint.title }}</p>
+                    <p class="truth-hint-text">{{ truthHint.text }}</p>
+                  </div>
                 </v-flex>
-                <v-flex v-if="editSlider < 50" class="mt-4">
+                <v-flex v-if="editSlider < 5" class="mt-4">
                   <p class="body-1 grey--text">Klingt das noch weit weg? Probiere eine Brücken-Version.</p>
                   <v-btn small flat color="primary" :loading="isBridgeLoading" @click="generateBridgeVersions">
                     <v-icon small left>auto_awesome</v-icon>
@@ -214,6 +219,7 @@
 
 <script>
 import moment from 'moment';
+import { normalizeTruth, truthHint, TRUTH_DEFAULT } from '@/utils/affirmationTruth';
 
 const AMEN_KEY = 'nvc.amen';
 const AFF_STATUS_KEY = 'nvc.affirmationStatus';
@@ -281,7 +287,7 @@ export default {
       editStep: 1,
       editOriginalText: '',
       editText: '',
-      editSlider: 70,
+      editSlider: TRUTH_DEFAULT,
       bridgeVersions: [],
       isBridgeLoading: false,
       bridgeError: '',
@@ -297,6 +303,7 @@ export default {
     tab() { this.sw.openIdx = null; this.sw.openDir = null; this.openIndex = null; },
   },
   computed: {
+    truthHint() { return truthHint(this.editSlider); },
     filteredAffirmations() {
       var sm = this.statusMap;
       return this.affirmations.filter(function(item) {
@@ -371,7 +378,7 @@ export default {
         var aff = (belief.affirmations || []).find(function(a) { return a.text === item.text && a.resonance != null; });
         if (aff) savedResonance = aff.resonance;
       });
-      this.editSlider = savedResonance !== null ? savedResonance : 70;
+      this.editSlider = normalizeTruth(savedResonance === null ? undefined : savedResonance);
       this.bridgeVersions = [];
       this.bridgeError = '';
       this.isEditDialogShowing = true;
@@ -381,7 +388,7 @@ export default {
     cancelEdit() {
       this.isEditDialogShowing = false;
       this.editOriginalText = ''; this.editText = ''; this.editStep = 1;
-      this.editSlider = 70; this.bridgeVersions = []; this.bridgeError = '';
+      this.editSlider = TRUTH_DEFAULT; this.bridgeVersions = []; this.bridgeError = '';
     },
     generateBridgeVersions() {
       var apiKey = localStorage.getItem('nvc.apiKey') || '';
@@ -421,7 +428,7 @@ export default {
     selectBridge(text) {
       this.editText = text;
       this.bridgeVersions = [];
-      this.editSlider = 70;
+      this.editSlider = TRUTH_DEFAULT;
     },
     saveEdit() {
       const oldText = this.editOriginalText;
@@ -429,7 +436,7 @@ export default {
       const resonance = this.editSlider;
       this.isEditDialogShowing = false;
       this.editOriginalText = ''; this.editText = ''; this.editStep = 1;
-      this.editSlider = 70; this.bridgeVersions = []; this.bridgeError = '';
+      this.editSlider = TRUTH_DEFAULT; this.bridgeVersions = []; this.bridgeError = '';
       if (!newText) return;
       this.$store.getters.beliefs.forEach((belief) => {
         if (!belief.affirmations || !belief.affirmations.length) return;
@@ -440,8 +447,8 @@ export default {
       });
     },
     addBeliefToAffirmation(text, belief) {
-      const updated = (belief.affirmations || []).concat([{ text }]);
-      this.$store.dispatch('updateBelief', Object.assign({}, belief, { affirmations: updated }));
+      // One affirmation per belief — linking replaces whatever was there.
+      this.$store.dispatch('updateBelief', Object.assign({}, belief, { affirmations: [{ text }] }));
     },
     removeBeliefFromAffirmation(text, beliefTime) {
       const belief = this.$store.getters.beliefs.find(b => b.time === beliefTime);
@@ -805,6 +812,32 @@ export default {
     border: none;
     box-shadow: 0 2px 6px rgba(0,0,0,0.4);
   }
+}
+.truth-target {
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #636366;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 2px 0 10px;
+}
+.truth-hint {
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1.5px solid;
+  transition: border-color 0.2s ease;
+}
+.truth-hint-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 2px;
+}
+.truth-hint-text {
+  font-size: 0.8rem;
+  color: #8e8e93;
+  line-height: 1.5;
+  margin: 0;
 }
 .slider-value-label {
   text-align: center;

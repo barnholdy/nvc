@@ -45,7 +45,7 @@ Halte den Satz glaubwürdig: Der positivste Satz, den du gerade noch als wahr em
 
     <v-flex class="mt-1">
       <div v-if="unselectedAffirmations.length" class="available-chips mt-2">
-        <p class="caption grey--text mb-1">Hinzufügen:</p>
+        <p class="caption grey--text mb-1">{{ selectedAffirmations.length ? 'Stattdessen wählen:' : 'Auswählen:' }}</p>
         <div class="chip-list">
           <v-chip
             v-for="a in unselectedAffirmations"
@@ -125,6 +125,7 @@ Halte den Satz glaubwürdig: Der positivste Satz, den du gerade noch als wahr em
 
 <script>
 import FeelingChips from '@/components/FeelingChips.vue';
+import { normalizeTruth, truthHint } from '@/utils/affirmationTruth';
 
 export default {
   name: 'pattern-change-affirmation',
@@ -135,10 +136,12 @@ export default {
     withoutBeliefFeelings: { type: Array, default: function() { return []; } },
     initialAffirmations: { type: Array, default: function() { return []; } },
     allAffirmations: { type: Array, default: function() { return []; } },
-    initialTruth: { type: Number, default: 5 },
   },
   data() {
-    var initial = this.initialAffirmations.map(function(a) { return { text: a.text, count: a.count || 1 }; });
+    // One affirmation per belief: anything beyond the first is dropped.
+    var initial = this.initialAffirmations.slice(0, 1).map(function(a) {
+      return { text: a.text, count: a.count || 1, resonance: a.resonance };
+    });
     var selectedTexts = initial.map(function(a) { return a.text; });
     // merge allAffirmations with initial, deduplicating by text
     var seen = {};
@@ -152,7 +155,9 @@ export default {
     });
     return {
       pool: merged,
-      truth: this.initialTruth,
+      // The credibility of the selected affirmation, carried on the affirmation
+      // itself so the list's edit dialog reads and writes the same value.
+      truth: normalizeTruth(initial.length ? initial[0].resonance : undefined),
       selectedTexts: selectedTexts,
       showNewInput: false,
       newAffirmationText: '',
@@ -165,36 +170,7 @@ export default {
     };
   },
   computed: {
-    // Feedback follows the slider: too far away, almost, on target, or so
-    // agreeable it will not hold up under real strain.
-    truthHint() {
-      if (this.truth < 5) {
-        return {
-          color: '#f87171',
-          title: 'Noch zu weit weg',
-          text: 'Formuliere den Satz kleiner: Was kannst du gerade eben noch als wahr empfinden?',
-        };
-      }
-      if (this.truth === 5) {
-        return {
-          color: '#fd9927',
-          title: 'Fast da',
-          text: 'Ein kleiner Schritt zurück macht ihn glaubwürdiger.',
-        };
-      }
-      if (this.truth <= 8) {
-        return {
-          color: '#4ade80',
-          title: 'Guter Bereich',
-          text: 'Positiv und trotzdem glaubwürdig — dieser Satz trägt.',
-        };
-      }
-      return {
-        color: '#fd9927',
-        title: 'Wahrscheinlich zu brav',
-        text: 'Einem Satz, dem du so leicht zustimmst, fehlt meist die Kraft für echte Belastung. Formuliere ihn mutiger.',
-      };
-    },
+    truthHint() { return truthHint(this.truth); },
     selectedAffirmations() {
       var selectedTexts = this.selectedTexts;
       return this.pool.filter(function(a) { return selectedTexts.indexOf(a.text) !== -1; });
@@ -205,21 +181,22 @@ export default {
     },
   },
   watch: {
-    selectedTexts: function() {
-      this.$emit('changed', this.selectedAffirmations.slice());
-    },
-    truth: function(val) {
-      this.$emit('truthChanged', val);
-    },
+    selectedTexts: function() { this.emitChange(); },
+    truth: function() { this.emitChange(); },
   },
   methods: {
-    addAffirmation(text) {
-      if (this.selectedTexts.indexOf(text) === -1) {
-        this.selectedTexts = this.selectedTexts.concat([text]);
-      }
+    emitChange() {
+      var truth = this.truth;
+      this.$emit('changed', this.selectedAffirmations.map(function(a) {
+        return { text: a.text, count: a.count || 1, resonance: truth };
+      }));
     },
-    removeSelected(text) {
-      this.selectedTexts = this.selectedTexts.filter(function(t) { return t !== text; });
+    addAffirmation(text) {
+      // Only one affirmation per belief — picking another replaces it.
+      this.selectedTexts = [text];
+    },
+    removeSelected() {
+      this.selectedTexts = [];
     },
     cancelNew() {
       this.showNewInput = false;
@@ -231,7 +208,7 @@ export default {
       if (this.pool.every(function(a) { return a.text !== text; })) {
         this.pool = this.pool.concat([{ text: text, count: 1 }]);
       }
-      this.selectedTexts = this.selectedTexts.concat([text]);
+      this.selectedTexts = [text];
       this.newAffirmationText = '';
       this.showNewInput = false;
     },
@@ -240,7 +217,7 @@ export default {
         this.pool = this.pool.concat([{ text: s, count: 1 }]);
       }
       if (this.selectedTexts.indexOf(s) === -1) {
-        this.selectedTexts = this.selectedTexts.concat([s]);
+        this.selectedTexts = [s];
       }
     },
     saveApiKey() {
