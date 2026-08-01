@@ -11,97 +11,215 @@
     <v-content>
       <div class="intro-card">
         <span class="intro-icon">🎯</span>
-        <p class="intro-title">Vom Denken zum Handeln</p>
-        <p class="intro-text">Wenn du nicht änderst, ändert sich nichts. Handeln überbrückt die Lücke zwischen Absicht und Wirklichkeit. Es erzeugt echtes Feedback und stärkt das Vertrauen in dich selbst.</p>
+        <p class="intro-title">Verhaltensexperiment</p>
+        <p class="intro-text">Eine Überzeugung lässt sich nicht wegdiskutieren, aber testen. Du schreibst vorher auf, was du befürchtest — und vergleichst es danach mit dem, was wirklich passiert ist. Die Lücke dazwischen ist die Evidenz.</p>
       </div>
 
       <div class="segment-row">
         <button class="seg-tab" :class="{ active: tab === 'open' }" @click="tab = 'open'">Offen</button>
-        <button class="seg-tab" :class="{ active: tab === 'dabei' }" @click="tab = 'dabei'">Dabei</button>
-        <button class="seg-tab" :class="{ active: tab === 'verinnerlicht' }" @click="tab = 'verinnerlicht'">Verinnerlicht</button>
+        <button class="seg-tab" :class="{ active: tab === 'done' }" @click="tab = 'done'">Durchgeführt</button>
+        <button class="seg-tab" :class="{ active: tab === 'evaluated' }" @click="tab = 'evaluated'">Ausgewertet</button>
       </div>
 
-      <div v-if="filteredActions.length === 0" class="empty-state">
+      <div v-if="filteredRows.length === 0" class="empty-state">
         <span class="empty-icon">🏃</span>
         <p class="empty-title">Keine Einträge</p>
         <p class="empty-sub">
-          <template v-if="tab === 'open'">Füge Handlungen im Änderungsprozess einer Überzeugung hinzu.</template>
-          <template v-else-if="tab === 'dabei'">Noch keine Handlungen als „Dabei" markiert.</template>
-          <template v-else>Noch keine Handlungen als „Verinnerlicht" markiert.</template>
+          <template v-if="tab === 'open'">Plane ein Experiment im Änderungsprozess einer Überzeugung.</template>
+          <template v-else-if="tab === 'done'">Noch kein Experiment als durchgeführt markiert.</template>
+          <template v-else>Noch kein Experiment ausgewertet.</template>
         </p>
       </div>
 
       <div v-else class="ios-list">
-        <template v-for="(item, i) in filteredActions">
+        <template v-for="(row, i) in filteredRows">
           <div
-            :key="item.text + '-row'"
+            :key="row.experiment.id + '-row'"
             class="swipe-outer"
             @touchstart="tsStart($event, i)"
             @touchmove="tsMove($event, i)"
             @touchend="tsEnd($event, i)"
           >
             <div class="swipe-right-panel">
-              <button class="swipe-btn swipe-btn-edit" @click.stop="startEdit(item)">
+              <button class="swipe-btn swipe-btn-edit" @click.stop="startEdit(row)">
                 <v-icon small color="#fff">edit</v-icon>
                 <span>Bearb.</span>
               </button>
-              <button
-                v-for="s in otherStatuses(item.text)"
-                :key="s.key"
-                class="swipe-btn status-btn"
-                :style="{ background: s.color }"
-                @click.stop="setStatus(item.text, s.key)"
-              ><span>{{ s.label }}</span></button>
             </div>
             <div class="swipe-left-panel">
-              <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(item)">
+              <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(row)">
                 <v-icon small color="#fff">delete</v-icon>
                 <span>Löschen</span>
               </button>
             </div>
             <div class="ios-row" :style="rowSt(i)" @click="deskClick(i)">
               <div class="row-body">
-                <p class="row-title">{{ item.text }}</p>
+                <p class="row-title">{{ row.experiment.situation || 'Ohne Situation' }}</p>
                 <div class="row-badges">
-                  <span class="badge-pill">{{ item.beliefCount }} {{ item.beliefCount === 1 ? 'Überzeugung' : 'Überzeugungen' }}</span>
-                  <span class="progress-pill">
-                    <span class="progress-fill" :style="{ width: item.progress + '%', background: progressColor(item.progress) }"></span>
-                    <span class="progress-label">{{ item.progress }} %</span>
+                  <span
+                    class="badge-pill state-pill"
+                    :style="{ color: stateColor(row.experiment) }"
+                  >{{ stateLabel(row.experiment) }}</span>
+                  <span v-if="gapOf(row.experiment) !== null" class="badge-pill gap-pill"
+                    :style="{ color: gapColor(gapOf(row.experiment)) }">
+                    {{ row.experiment.fearExpected }} → {{ row.experiment.fearActual }}
                   </span>
                 </div>
-                <p class="check-meta">{{ checkLabel(item.text) }}</p>
+                <p class="check-meta">„{{ row.beliefText }}"</p>
+                <p v-if="isDue(row.experiment)" class="due-hint">Schon durchgeführt?</p>
+                <p v-if="needsPlan(row.experiment)" class="plan-hint">
+                  Befürchtung fehlt — ohne sie gibt es später nichts zu vergleichen.
+                </p>
               </div>
-              <button class="check-btn" @click.stop="doCheck(item.text)">Check</button>
+              <button
+                v-if="needsPlan(row.experiment)"
+                class="check-btn plan-btn"
+                @click.stop="planExperiment(row)"
+              >Planen</button>
+              <button
+                v-else-if="state(row.experiment) === 'planned'"
+                class="check-btn"
+                @click.stop="markDone(row)"
+              >Erledigt</button>
+              <button
+                v-else-if="state(row.experiment) === 'done'"
+                class="check-btn"
+                @click.stop="startResult(row)"
+              >Ergebnis</button>
             </div>
           </div>
-          <div :key="item.text + '-expand'" v-if="openIndex === i" class="row-expand">
-            <div class="expand-header">
-              <p class="expand-label">Überzeugungen</p>
-              <button class="expand-edit-btn" @click.stop="startEdit(item)">
-                <v-icon small color="#8e8e93">edit</v-icon>
-              </button>
-            </div>
-            <p v-for="(s, j) in item.sources" :key="j" class="expand-text mb-1">„{{ s.beliefText }}"</p>
+
+          <div :key="row.experiment.id + '-expand'" v-if="openIndex === i" class="row-expand">
+            <template v-if="row.experiment.fear">
+              <p class="expand-label">Befürchtung</p>
+              <p class="expand-text mb-1">{{ row.experiment.fear }}</p>
+              <p v-if="row.experiment.fearExpected !== null" class="expand-meta">
+                Erwartet: {{ row.experiment.fearExpected }} von 100
+              </p>
+            </template>
+            <template v-if="row.experiment.outcome">
+              <p class="expand-label mt-3">Was passiert ist</p>
+              <p class="expand-text mb-1">{{ row.experiment.outcome }}</p>
+            </template>
+            <template v-if="gapOf(row.experiment) !== null">
+              <p class="expand-label mt-3">Abgleich</p>
+              <p class="expand-text mb-1">
+                Erwartung {{ row.experiment.fearExpected }} · real {{ row.experiment.fearActual }}
+                <span :style="{ color: gapColor(gapOf(row.experiment)) }">
+                  ({{ gapOf(row.experiment) > 0 ? '−' : '+' }}{{ Math.abs(gapOf(row.experiment)) }})
+                </span>
+              </p>
+              <p v-if="row.experiment.learning" class="expand-text">{{ row.experiment.learning }}</p>
+            </template>
           </div>
-          <div :key="item.text + '-sep'" class="ios-sep" v-if="i < filteredActions.length - 1"></div>
+
+          <div :key="row.experiment.id + '-sep'" class="ios-sep" v-if="i < filteredRows.length - 1"></div>
         </template>
       </div>
 
-      <!-- Edit wizard -->
+      <!-- Step 4: result and comparison -->
+      <v-dialog v-model="isResultDialogShowing" fullscreen>
+        <div v-if="isResultDialogShowing" class="wizard-page">
+          <v-toolbar color="#000" dark flat app>
+            <v-btn icon @click="resultStep === 1 ? cancelResult() : resultStep--">
+              <v-icon>{{ resultStep === 1 ? 'close' : 'chevron_left' }}</v-icon>
+            </v-btn>
+            <v-toolbar-title>Ergebnis</v-toolbar-title>
+            <v-spacer></v-spacer>
+            <span class="grey--text body-1">{{ resultStep }} / 2</span>
+          </v-toolbar>
+          <v-content>
+            <v-container class="mb-5">
+              <!-- Facts first, deliberately before any rating -->
+              <v-layout v-show="resultStep === 1" column>
+                <v-flex class="mt-2 mb-3">
+                  <h1 class="headline font-weight-regular">Was ist passiert?</h1>
+                  <p class="subheading grey--text situation-quote mt-1">„{{ resultSituation }}"</p>
+                  <p class="body-1 grey--text mt-2">
+                    Was ist tatsächlich passiert? Beschreibe es, bevor du es bewertest.
+                  </p>
+                </v-flex>
+                <v-flex>
+                  <v-textarea v-model="resultOutcome" placeholder="..." auto-grow rows="6" hide-details></v-textarea>
+                </v-flex>
+              </v-layout>
+
+              <v-layout v-show="resultStep === 2" column>
+                <v-flex class="mt-2 mb-3">
+                  <h1 class="headline font-weight-regular">Abgleich</h1>
+                  <p class="body-1 grey--text mt-2">
+                    Wie stark ist deine Befürchtung tatsächlich eingetreten?
+                  </p>
+                </v-flex>
+                <v-flex>
+                  <div class="slider-row">
+                    <span class="slider-end-label">0</span>
+                    <input type="range" min="0" max="100" v-model.number="resultActual" class="fear-slider" />
+                    <span class="slider-end-label">100</span>
+                  </div>
+                  <p class="slider-value-label">{{ resultActual }}</p>
+                  <div class="scale-legend">
+                    <span>0 = gar nicht</span>
+                    <span>100 = genau so schlimm wie erwartet</span>
+                  </div>
+                </v-flex>
+
+                <v-flex class="mt-4">
+                  <div class="gap-box" :style="{ borderColor: gapColor(resultGap) }">
+                    <p class="gap-line">
+                      Deine Erwartung war
+                      <span class="gap-num">{{ resultExpected }}</span>,
+                      real waren es
+                      <span class="gap-num" :style="{ color: gapColor(resultGap) }">{{ resultActual }}</span>.
+                    </p>
+                    <p class="gap-delta" :style="{ color: gapColor(resultGap) }">
+                      <template v-if="resultGap > 0">{{ resultGap }} Punkte weniger schlimm als befürchtet</template>
+                      <template v-else-if="resultGap === 0">Genau wie befürchtet</template>
+                      <template v-else>{{ Math.abs(resultGap) }} Punkte schlimmer als befürchtet</template>
+                    </p>
+                    <p class="gap-question">Was sagt dir das?</p>
+                  </div>
+                  <v-textarea
+                    v-model="resultLearning"
+                    placeholder="..."
+                    auto-grow
+                    rows="3"
+                    hide-details
+                    class="mt-2"
+                  ></v-textarea>
+                </v-flex>
+              </v-layout>
+            </v-container>
+            <v-footer :fixed="true" color="white elevation-3" height="44">
+              <v-btn
+                v-if="resultStep === 1"
+                :disabled="!resultOutcome.trim()"
+                @click="resultStep = 2"
+                block large color="primary"
+              >weiter</v-btn>
+              <v-btn v-else @click="saveResult" block large color="primary">speichern</v-btn>
+            </v-footer>
+          </v-content>
+        </div>
+      </v-dialog>
+
+      <!-- Edit the situation -->
       <v-dialog v-model="isEditDialogShowing" fullscreen>
         <div class="wizard-page">
           <v-toolbar color="#000" dark flat app>
             <v-btn icon @click="cancelEdit">
               <v-icon>close</v-icon>
             </v-btn>
-            <v-toolbar-title>Handlung bearbeiten</v-toolbar-title>
+            <v-toolbar-title>Situation bearbeiten</v-toolbar-title>
           </v-toolbar>
           <v-content>
             <v-container class="mb-5">
               <v-layout column>
                 <v-flex class="mt-2 mb-3">
-                  <h1 class="headline font-weight-regular">Handlung</h1>
-                  <p class="body-1 grey--text mt-2">Beschreibe die konkrete Handlung, die du umsetzen möchtest.</p>
+                  <h1 class="headline font-weight-regular">Situation</h1>
+                  <p class="body-1 grey--text mt-2">
+                    Klein, konkret, überprüfbar — ein Moment, kein Lebensthema.
+                  </p>
                 </v-flex>
                 <v-flex>
                   <v-textarea v-model="editText" placeholder="..." auto-grow rows="4" hide-details></v-textarea>
@@ -117,7 +235,7 @@
 
       <v-dialog v-model="isDeleteDialogShowing" width="300">
         <v-card class="confirm-dialog">
-          <v-card-title class="confirm-title">Handlung löschen?</v-card-title>
+          <v-card-title class="confirm-title">Experiment löschen?</v-card-title>
           <v-divider></v-divider>
           <v-card-actions class="confirm-actions">
             <v-btn flat @click="cancelDelete" class="confirm-cancel">Abbrechen</v-btn>
@@ -145,16 +263,16 @@
 </template>
 
 <script>
-import moment from 'moment';
-
-const CHECK_KEY = 'nvc.check';
-const PROGRESS_KEY = 'nvc.progress';
-const ACTION_STATUS_KEY = 'nvc.actionStatus';
-const ALL_STATUSES = [
-  { key: 'open', label: 'Offen', color: '#636366' },
-  { key: 'dabei', label: 'Dabei', color: '#fd9927' },
-  { key: 'verinnerlicht', label: 'Verinn.', color: '#4ade80' },
-];
+import {
+  collectExperiments,
+  experimentState,
+  experimentStateLabel,
+  experimentStateColor,
+  fearGap,
+  fearGapColor,
+  isDue,
+  isPlanned,
+} from '@/utils/experiment';
 
 function triggerConfetti() {
   var canvas = document.createElement('canvas');
@@ -191,30 +309,25 @@ function triggerConfetti() {
   }
   requestAnimationFrame(frame);
 }
-function loadCheckMap() {
-  try { return JSON.parse(localStorage.getItem(CHECK_KEY)) || {}; } catch (e) { return {}; }
-}
-function loadProgressMap() {
-  try { return JSON.parse(localStorage.getItem(PROGRESS_KEY)) || {}; } catch (e) { return {}; }
-}
-function loadActionStatusMap() {
-  try { return JSON.parse(localStorage.getItem(ACTION_STATUS_KEY)) || {}; } catch (e) { return {}; }
-}
 
 export default {
   name: 'action-list',
   data() {
     return {
-      tab: 'dabei',
+      tab: 'open',
       openIndex: null,
-      itemToDelete: null,
-      isDeleteDialogShowing: false,
+      now: Date.now(),
       isEditDialogShowing: false,
-      editOriginalText: '',
+      editRow: null,
       editText: '',
-      checkMap: loadCheckMap(),
-      progressMap: loadProgressMap(),
-      statusMap: loadActionStatusMap(),
+      isResultDialogShowing: false,
+      resultRow: null,
+      resultStep: 1,
+      resultOutcome: '',
+      resultActual: 50,
+      resultLearning: '',
+      rowToDelete: null,
+      isDeleteDialogShowing: false,
       sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
   },
@@ -222,106 +335,139 @@ export default {
     tab() { this.sw.openIdx = null; this.sw.openDir = null; this.openIndex = null; },
   },
   computed: {
-    filteredActions() {
-      var sm = this.statusMap;
-      return this.actions.filter(function(item) {
-        var s = sm[item.text] || 'open';
-        if (this.tab === 'open') return s === 'open';
-        if (this.tab === 'dabei') return s === 'dabei';
-        if (this.tab === 'verinnerlicht') return s === 'verinnerlicht';
-        return true;
-      }, this);
+    rows() {
+      return collectExperiments(this.$store.getters.beliefs);
     },
-    actions() {
-      const map = {};
-      this.$store.getters.beliefs.forEach((belief) => {
-        const acts = belief.reflection && belief.reflection.changeActs ? belief.reflection.changeActs : [];
-        acts.forEach((text) => {
-          if (!text) return;
-          if (!map[text]) map[text] = { text, beliefCount: 0, sources: [] };
-          map[text].beliefCount += 1;
-          map[text].sources.push({ beliefText: belief.belief });
-        });
+    filteredRows() {
+      const tab = this.tab;
+      return this.rows.filter(function(row) {
+        const s = experimentState(row.experiment);
+        if (tab === 'open') return s === 'draft' || s === 'planned';
+        if (tab === 'done') return s === 'done';
+        return s === 'evaluated';
       });
-      const pm = this.progressMap;
-      return Object.values(map).map(item => Object.assign({}, item, {
-        progress: pm[item.text] != null ? pm[item.text] : 0,
-      })).sort((a, b) => b.beliefCount - a.beliefCount);
+    },
+    resultSituation() {
+      return this.resultRow ? this.resultRow.experiment.situation : '';
+    },
+    resultExpected() {
+      return this.resultRow ? this.resultRow.experiment.fearExpected : null;
+    },
+    resultGap() {
+      if (this.resultExpected === null) return 0;
+      return this.resultExpected - this.resultActual;
     },
   },
   methods: {
+    state(x) { return experimentState(x); },
+    stateLabel(x) { return experimentStateLabel(x); },
+    stateColor(x) { return experimentStateColor(x); },
+    gapOf(x) { return fearGap(x); },
+    gapColor(gap) { return fearGapColor(gap); },
+    isDue(x) { return isDue(x, this.now); },
+    // A migrated action has a situation but no anchor — it cannot be evaluated.
+    needsPlan(x) { return experimentState(x) !== 'evaluated' && !isPlanned(x); },
     toggle(i) {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.openIndex = this.openIndex === i ? null : i;
     },
-    doCheck(text) {
+
+    // Writes the changed experiment back into its belief, matched by id.
+    persist(row, changes) {
+      const belief = this.$store.getters.beliefs.find(b => b.time === row.beliefTime);
+      if (!belief) return;
+      const r = belief.reflection || {};
+      const list = (r.experiments || []).map((x) => {
+        if (x.id !== row.experiment.id) return x;
+        return Object.assign({}, x, changes);
+      });
+      this.$store.dispatch('updateBelief', Object.assign({}, belief, {
+        reflection: Object.assign({}, r, { experiments: list }),
+      }));
+    },
+
+    planExperiment(row) {
       this.sw.openIdx = null; this.sw.openDir = null;
-      this.checkMap = Object.assign({}, this.checkMap, { [text]: Date.now() });
-      localStorage.setItem(CHECK_KEY, JSON.stringify(this.checkMap));
-      var current = this.progressMap[text] != null ? this.progressMap[text] : 0;
-      this.progressMap = Object.assign({}, this.progressMap, { [text]: Math.min(100, current + 1) });
-      localStorage.setItem(PROGRESS_KEY, JSON.stringify(this.progressMap));
+      this.$router.push(`/change-belief/${row.beliefTime}`);
+    },
+    markDone(row) {
+      this.sw.openIdx = null; this.sw.openDir = null;
+      this.persist(row, { doneAt: Date.now() });
       triggerConfetti();
     },
-    progressColor(v) {
-      if (v >= 75) return '#4ade80';
-      if (v >= 50) return '#fbbf24';
-      return '#f87171';
-    },
-    checkLabel(text) {
-      const ts = this.checkMap[text];
-      if (!ts) return 'Noch nicht ausgeführt';
-      moment.locale('de');
-      return moment(ts).fromNow();
-    },
-    startEdit(item) {
+
+    startResult(row) {
       this.sw.openIdx = null; this.sw.openDir = null;
-      this.editOriginalText = item.text;
-      this.editText = item.text;
+      this.resultRow = row;
+      this.resultStep = 1;
+      this.resultOutcome = row.experiment.outcome || '';
+      this.resultActual = typeof row.experiment.fearActual === 'number' ? row.experiment.fearActual : 50;
+      this.resultLearning = row.experiment.learning || '';
+      this.isResultDialogShowing = true;
+    },
+    cancelResult() {
+      this.isResultDialogShowing = false;
+      this.resultRow = null;
+      this.resultStep = 1;
+      this.resultOutcome = '';
+      this.resultActual = 50;
+      this.resultLearning = '';
+    },
+    saveResult() {
+      const row = this.resultRow;
+      const changes = {
+        outcome: this.resultOutcome.trim(),
+        fearActual: this.resultActual,
+        learning: this.resultLearning.trim(),
+        completedAt: Date.now(),
+      };
+      this.cancelResult();
+      if (row) {
+        this.persist(row, changes);
+        this.tab = 'evaluated';
+      }
+    },
+
+    startEdit(row) {
+      this.sw.openIdx = null; this.sw.openDir = null;
+      this.editRow = row;
+      this.editText = row.experiment.situation || '';
       this.isEditDialogShowing = true;
     },
     cancelEdit() {
       this.isEditDialogShowing = false;
-      this.editOriginalText = '';
+      this.editRow = null;
       this.editText = '';
     },
     saveEdit() {
-      const oldText = this.editOriginalText;
-      const newText = this.editText.trim();
-      this.isEditDialogShowing = false;
-      this.editOriginalText = '';
-      this.editText = '';
-      if (!newText || newText === oldText) return;
-      this.$store.getters.beliefs.forEach((belief) => {
-        const acts = belief.reflection && belief.reflection.changeActs ? belief.reflection.changeActs : [];
-        if (acts.indexOf(oldText) !== -1) {
-          const updated = Object.assign({}, belief, {
-            reflection: Object.assign({}, belief.reflection, {
-              changeActs: acts.map(a => (a === oldText ? newText : a)),
-            }),
-          });
-          this.$store.dispatch('updateBelief', updated);
-        }
-      });
+      const row = this.editRow;
+      const text = this.editText.trim();
+      this.cancelEdit();
+      if (row && text) this.persist(row, { situation: text });
     },
-    preDelete(item) { this.sw.openIdx = null; this.sw.openDir = null; this.itemToDelete = item; this.isDeleteDialogShowing = true; },
-    cancelDelete() { this.isDeleteDialogShowing = false; this.itemToDelete = null; },
+
+    preDelete(row) {
+      this.sw.openIdx = null; this.sw.openDir = null;
+      this.rowToDelete = row;
+      this.isDeleteDialogShowing = true;
+    },
+    cancelDelete() { this.isDeleteDialogShowing = false; this.rowToDelete = null; },
     confirmDelete() {
+      const row = this.rowToDelete;
       this.isDeleteDialogShowing = false;
-      const text = this.itemToDelete ? this.itemToDelete.text : null;
-      this.itemToDelete = null;
-      if (!text) return;
-      this.$store.getters.beliefs.forEach((belief) => {
-        const acts = belief.reflection && belief.reflection.changeActs ? belief.reflection.changeActs : [];
-        if (acts.indexOf(text) !== -1) {
-          const updated = Object.assign({}, belief, {
-            reflection: Object.assign({}, belief.reflection, { changeActs: acts.filter(a => a !== text) }),
-          });
-          this.$store.dispatch('updateBelief', updated);
-        }
-      });
+      this.rowToDelete = null;
+      if (!row) return;
+      const belief = this.$store.getters.beliefs.find(b => b.time === row.beliefTime);
+      if (!belief) return;
+      const r = belief.reflection || {};
+      // Matched by id, so two experiments with the same situation text stay distinct.
+      const list = (r.experiments || []).filter(x => x.id !== row.experiment.id);
+      this.$store.dispatch('updateBelief', Object.assign({}, belief, {
+        reflection: Object.assign({}, r, { experiments: list }),
+      }));
       this.openIndex = null;
     },
+
     tsStart(e, i) {
       if (e.target && e.target.closest && (e.target.closest('.swipe-btn') || e.target.closest('.check-btn'))) return;
       const t = e.touches[0];
@@ -336,7 +482,7 @@ export default {
         this.sw.isH = Math.abs(dx) >= Math.abs(dy);
       if (!this.sw.isH) return;
       e.preventDefault();
-      this.sw.dx = Math.max(-80, Math.min(dx, 195));
+      this.sw.dx = Math.max(-80, Math.min(dx, 65));
       this.sw.drag = true;
     },
     tsEnd(e, i) {
@@ -359,22 +505,12 @@ export default {
       const live = s.touchIdx === i && s.drag && s.isH;
       let x = 0;
       if (live) x = s.dx;
-      else if (s.openIdx === i) x = s.openDir === 'left' ? -80 : 195;
+      else if (s.openIdx === i) x = s.openDir === 'left' ? -80 : 65;
       return { transform: `translateX(${x}px)`, transition: live ? 'none' : 'transform 0.2s ease' };
     },
     deskClick(i) {
       if (this.sw.openIdx !== null) { this.sw.openIdx = null; this.sw.openDir = null; return; }
       this.toggle(i);
-    },
-    otherStatuses(text) {
-      var current = this.statusMap[text] || 'open';
-      return ALL_STATUSES.filter(function(s) { return s.key !== current; });
-    },
-    setStatus(text, status) {
-      this.statusMap = Object.assign({}, this.statusMap, { [text]: status });
-      localStorage.setItem(ACTION_STATUS_KEY, JSON.stringify(this.statusMap));
-      this.sw.openIdx = null;
-      this.sw.openDir = null;
     },
   },
 };
@@ -455,7 +591,6 @@ export default {
 }
 .swipe-btn-delete { background: #ff453a; width: 80px; }
 .swipe-btn-edit { background: #636366; }
-.status-btn { color: #000; font-size: 0.72rem; }
 
 .ios-row {
   position: relative;
@@ -487,35 +622,25 @@ export default {
   border-radius: 20px;
   padding: 1px 6px;
 }
+.state-pill { font-weight: 600; }
+.gap-pill { font-weight: 600; }
 .check-meta {
   font-size: 0.75rem;
   color: #8e8e93;
   margin: 4px 0 0;
+  font-style: italic;
 }
-.progress-pill {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  height: 18px;
-  border-radius: 20px;
-  overflow: hidden;
-  background: #2c2c2e;
-  min-width: 48px;
-}
-.progress-fill {
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  border-radius: 20px;
-  opacity: 0.35;
-}
-.progress-label {
-  position: relative;
-  font-size: 0.68rem;
+.due-hint {
+  font-size: 0.78rem;
+  color: #fd9927;
   font-weight: 600;
-  color: #fff;
-  padding: 0 7px;
-  z-index: 1;
-  white-space: nowrap;
+  margin: 4px 0 0;
+}
+.plan-hint {
+  font-size: 0.75rem;
+  color: #fd9927;
+  margin: 4px 0 0;
+  line-height: 1.4;
 }
 
 .check-btn {
@@ -532,33 +657,13 @@ export default {
   -webkit-tap-highlight-color: transparent;
   &:active { background: #3dcc70; transform: scale(0.97); }
 }
+.plan-btn { background: #fd9927; &:active { background: #e5891f; } }
 
-.row-chevron {
-  color: #636366 !important;
-  font-size: 1.2rem !important;
-  transition: transform 0.2s ease;
-  flex-shrink: 0;
-  &.rotated { transform: rotate(90deg); }
-}
 .ios-sep { height: 1px; background: #2c2c2e; margin-left: 20px; }
 .row-expand {
   background: #141416;
   padding: 14px 20px 16px;
   border-top: 1px solid #2c2c2e;
-}
-.expand-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 0 0 6px;
-  .expand-label { margin: 0; }
-}
-.expand-edit-btn {
-  background: none;
-  border: none;
-  padding: 4px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
 }
 .expand-label {
   font-size: 0.68rem;
@@ -568,8 +673,10 @@ export default {
   margin: 0 0 6px;
   font-weight: 600;
 }
-.expand-text { font-size: 0.93rem; color: #ebebf5; margin: 0; line-height: 1.5; font-style: italic; }
+.expand-text { font-size: 0.93rem; color: #ebebf5; margin: 0; line-height: 1.5; }
+.expand-meta { font-size: 0.78rem; color: #8e8e93; margin: 2px 0 0; }
 .mb-1 { margin-bottom: 4px !important; }
+.mt-3 { margin-top: 12px !important; }
 
 .empty-state {
   display: flex; flex-direction: column; align-items: center;
@@ -586,6 +693,71 @@ export default {
   inset: 0;
   z-index: 200;
 }
+.situation-quote { font-style: italic; }
+
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px;
+}
+.slider-end-label {
+  font-size: 0.78rem;
+  color: #8e8e93;
+  flex-shrink: 0;
+}
+.fear-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: #3a3a3c;
+  outline: none;
+  cursor: pointer;
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #4ade80;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  }
+  &::-moz-range-thumb {
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 50%;
+    background: #4ade80;
+    cursor: pointer;
+  }
+}
+.slider-value-label {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 8px 0 0;
+}
+.scale-legend {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: #636366;
+  margin-top: 2px;
+}
+
+.gap-box {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1.5px solid;
+  transition: border-color 0.2s ease;
+}
+.gap-line { font-size: 0.95rem; color: #ebebf5; margin: 0; line-height: 1.5; }
+.gap-num { font-weight: 700; }
+.gap-delta { font-size: 0.875rem; font-weight: 600; margin: 6px 0 0; }
+.gap-question { font-size: 0.95rem; color: #fff; font-weight: 600; margin: 10px 0 0; }
 
 .confirm-dialog { border-radius: 14px !important; overflow: hidden; }
 .confirm-title {

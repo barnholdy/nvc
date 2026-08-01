@@ -200,6 +200,40 @@ export default new Vuex.Store({
             }
             return b;
           });
+          // Migrate plain action strings → Verhaltensexperimente. Each act
+          // becomes the "Situation" of its own experiment, so a text shared by
+          // several beliefs yields one experiment per belief.
+          beliefs = beliefs.map(function(b) {
+            const r = b.reflection || {};
+            const legacy = r.changeActs || (r.changeAct
+              ? r.changeAct.split('\n').filter(function(s) { return s.trim().length > 0; })
+              : []);
+            if (!r.experiments && !legacy.length) {
+              if (r.changeActs === undefined && r.changeAct === undefined) return b;
+            }
+            migrated = true;
+            const existing = r.experiments || [];
+            const converted = legacy.map(function(text, i) {
+              return {
+                id: b.time + i + 1,
+                situation: text,
+                fear: '',
+                fearExpected: null,
+                plannedAt: null,
+                doneAt: null,
+                outcome: '',
+                fearActual: null,
+                learning: '',
+                completedAt: null,
+              };
+            });
+            const reflection = Object.assign({}, r, {
+              experiments: existing.concat(converted),
+            });
+            delete reflection.changeActs;
+            delete reflection.changeAct;
+            return Object.assign({}, b, { reflection: reflection });
+          });
           if (migrated) {
             localStorage.setItem(BELIEFS_STORAGE_KEY, JSON.stringify(beliefs));
           }

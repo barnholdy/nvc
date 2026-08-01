@@ -1,3 +1,5 @@
+import { isPlanned } from './experiment';
+
 // Single source of truth for how far a belief has been worked through.
 // Lives here so the belief list and the Situationen list cannot drift apart.
 
@@ -32,7 +34,7 @@ export function isComplete(belief) {
 
 export function hasChangeData(belief) {
   const r = (belief && belief.reflection) || {};
-  return !!(r.withoutBelief || r.changeAct || (r.changeActs && r.changeActs.length));
+  return !!(r.withoutBelief || (r.experiments && r.experiments.length));
 }
 
 // Every field the "Überzeugung verändern" wizard collects. bodyIntensity is left
@@ -44,7 +46,8 @@ export function hasCompleteChange(belief) {
     r.withoutBelief &&
     r.withoutBeliefFeelings && r.withoutBeliefFeelings.length &&
     belief && belief.affirmations && belief.affirmations.length &&
-    r.changeActs && r.changeActs.length
+    // At least one experiment is planned (situation + fear + anchor).
+    (r.experiments || []).some(isPlanned)
   );
 }
 

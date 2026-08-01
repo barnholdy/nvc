@@ -243,8 +243,9 @@ export default {
         (b.affirmations || []).forEach(function(a) {
           if (a.text && affirmationTexts.indexOf(a.text) === -1) affirmationTexts.push(a.text);
         });
-        var acts = (b.reflection && b.reflection.changeActs) || [];
-        acts.forEach(function(act) {
+        var experiments = (b.reflection && b.reflection.experiments) || [];
+        experiments.forEach(function(x) {
+          var act = x && x.situation;
           if (act && actionTexts.indexOf(act) === -1) actionTexts.push(act);
         });
       });

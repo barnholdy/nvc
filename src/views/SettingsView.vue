@@ -161,12 +161,9 @@ export default {
         patterns: this.$store.getters.patterns,
         beliefs: this.$store.getters.beliefs,
         amen: tryParse('nvc.amen') || {},
-        check: tryParse('nvc.check') || {},
-        progress: tryParse('nvc.progress') || {},
         globalEmpathy: tryParse('nvc.globalEmpathy'),
         affirmationStatus: tryParse('nvc.affirmationStatus') || {},
         affirmationProgress: tryParse('nvc.affirmationProgress') || {},
-        actionStatus: tryParse('nvc.actionStatus') || {},
         kernmuster: tryParse('nvc.kernmuster') || [],
         kernmusterSnapshot: localStorage.getItem('nvc.kernmusterSnapshot') || '',
       };
@@ -201,12 +198,9 @@ export default {
           localStorage.setItem('nvc.patterns', JSON.stringify(data.patterns));
           localStorage.setItem('nvc.beliefs', JSON.stringify(data.beliefs));
           if (data.amen) localStorage.setItem('nvc.amen', JSON.stringify(data.amen));
-          if (data.check) localStorage.setItem('nvc.check', JSON.stringify(data.check));
-          if (data.progress) localStorage.setItem('nvc.progress', JSON.stringify(data.progress));
           if (data.globalEmpathy) localStorage.setItem('nvc.globalEmpathy', JSON.stringify(data.globalEmpathy));
           if (data.affirmationStatus) localStorage.setItem('nvc.affirmationStatus', JSON.stringify(data.affirmationStatus));
           if (data.affirmationProgress) localStorage.setItem('nvc.affirmationProgress', JSON.stringify(data.affirmationProgress));
-          if (data.actionStatus) localStorage.setItem('nvc.actionStatus', JSON.stringify(data.actionStatus));
           if (data.kernmuster) localStorage.setItem('nvc.kernmuster', JSON.stringify(data.kernmuster));
           if (data.kernmusterSnapshot) localStorage.setItem('nvc.kernmusterSnapshot', data.kernmusterSnapshot);
           this.importSuccess = true;
@@ -231,14 +225,11 @@ export default {
       localStorage.removeItem('nvc.beliefs');
       localStorage.removeItem('nvc.globalEmpathy');
       localStorage.removeItem('nvc.amen');
-      localStorage.removeItem('nvc.check');
-      localStorage.removeItem('nvc.progress');
       localStorage.removeItem('nvc.onboarded');
       localStorage.removeItem('nvc.kernmuster');
       localStorage.removeItem('nvc.kernmusterSnapshot');
       localStorage.removeItem('nvc.affirmationStatus');
       localStorage.removeItem('nvc.affirmationProgress');
-      localStorage.removeItem('nvc.actionStatus');
     },
   },
 };

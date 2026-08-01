@@ -75,18 +75,14 @@
           @blurred="isFooterFixed = true">
         </pattern-change-affirmation>
 
-        <pattern-change-act
+        <belief-change-experiment
           v-show="step === 5"
           :belief="entry ? entry.belief : ''"
-          :withoutBelief="withoutBelief"
-          :withoutBeliefFeelings="withoutBeliefFeelings"
-          :affirmations="affirmations"
-          :initialActs="changeActs"
-          :allActs="allActs"
-          @changed="changeActs = $event"
+          :experiment="experiment"
+          @changed="experiment = $event"
           @focussed="isFooterFixed = false"
           @blurred="isFooterFixed = true">
-        </pattern-change-act>
+        </belief-change-experiment>
       </v-container>
 
       <v-footer :fixed="isFooterFixed" color="white elevation-3" height="44">
@@ -112,9 +108,10 @@ import BeliefChangeAbsoluteness from '@/views/BeliefChangeAbsoluteness.vue';
 import PatternAddWithoutBelief from '@/views/PatternAddWithoutBelief.vue';
 import BeliefAddFeelingNeed from '@/views/BeliefAddFeelingNeed.vue';
 import PatternChangeAffirmation from '@/views/PatternChangeAffirmation.vue';
-import PatternChangeAct from '@/views/PatternChangeAct.vue';
-import taxonomy from '../assets/taxonomy.json';
+import BeliefChangeExperiment from '@/views/BeliefChangeExperiment.vue';
 import { beliefStatus } from '@/utils/beliefStatus';
+import { createExperiment, experimentState, isPlanned } from '@/utils/experiment';
+import taxonomy from '../assets/taxonomy.json';
 
 // Below this the body sensation counts as "not there yet" and the wizard offers
 // a way back to reshape the new perspective.
@@ -127,12 +124,19 @@ export default {
     PatternAddWithoutBelief,
     BeliefAddFeelingNeed,
     PatternChangeAffirmation,
-    PatternChangeAct,
+    BeliefChangeExperiment,
   },
   data() {
     const entry = this.$store.getters.beliefs
       .find(function(b) { return b.time === parseInt(this.$route.params.time, 10); }, this);
     const r = entry && entry.reflection ? entry.reflection : {};
+    // Continue the experiment that has not been evaluated yet, else start one.
+    const open = (r.experiments || []).filter(function(x) {
+      return experimentState(x) !== 'evaluated';
+    });
+    const openExperiment = open.length
+      ? Object.assign({}, open[open.length - 1])
+      : createExperiment(Date.now());
     return {
       entry: entry || null,
       step: 1,
@@ -144,23 +148,12 @@ export default {
       withoutBelief: r.withoutBelief || '',
       withoutBeliefFeelings: r.withoutBeliefFeelings || [],
       affirmations: entry ? entry.affirmations || [] : [],
-      changeActs: r.changeActs || (r.changeAct ? r.changeAct.split('\n').filter(Boolean) : []),
+      experiment: openExperiment,
       isFooterFixed: true,
     };
   },
   computed: {
     INTENSITY_THRESHOLD() { return INTENSITY_THRESHOLD; },
-    allActs() {
-      var seen = {};
-      var result = [];
-      this.$store.getters.beliefs.forEach(function(b) {
-        var acts = (b.reflection && b.reflection.changeActs) || [];
-        acts.forEach(function(a) {
-          if (a && !seen[a]) { seen[a] = true; result.push(a); }
-        });
-      });
-      return result;
-    },
     allAffirmations() {
       var seen = {};
       var result = [];
@@ -188,6 +181,22 @@ export default {
       this.step = step;
       this.$vuetify.goTo(0, { duration: 0 });
     },
+    // Stamp plannedAt the moment steps 1+2 are complete — that starts the clock
+    // for "Schon durchgeführt?" and locks the anchor.
+    mergedExperiments() {
+      const r = (this.entry && this.entry.reflection) || {};
+      const list = (r.experiments || []).slice();
+      const current = Object.assign({}, this.experiment);
+      if (!current.plannedAt && isPlanned(current)) current.plannedAt = Date.now();
+      // Nothing entered at all: do not persist an empty experiment.
+      if (!current.situation && !current.fear) {
+        return list.filter(function(x) { return x.id !== current.id; });
+      }
+      const idx = list.findIndex(function(x) { return x.id === current.id; });
+      if (idx >= 0) list.splice(idx, 1, current);
+      else list.push(current);
+      return list;
+    },
     save() {
       const saved = Object.assign({}, this.entry, {
         affirmations: this.affirmations,
@@ -198,8 +207,7 @@ export default {
           withoutBelief: this.withoutBelief,
           withoutBeliefFeelings: this.withoutBeliefFeelings,
           turnarounds: [],
-          changeAct: '',
-          changeActs: this.changeActs,
+          experiments: this.mergedExperiments(),
         },
       });
       this.$store.dispatch('updateBelief', saved);

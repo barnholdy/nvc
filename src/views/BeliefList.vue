@@ -115,9 +115,22 @@
                 <p class="expand-sub-label mt-2">Affirmationen</p>
                 <p v-for="(a, i) in entry.affirmations" :key="i" class="expand-text mb-1">{{ a.text }}</p>
               </template>
-              <template v-if="entry.reflection && entry.reflection.changeActs && entry.reflection.changeActs.length">
-                <p class="expand-sub-label mt-2">Handlungen</p>
-                <p v-for="(a, i) in entry.reflection.changeActs" :key="i" class="expand-text mb-1">{{ a }}</p>
+              <template v-if="entry.reflection && entry.reflection.experiments && entry.reflection.experiments.length">
+                <p class="expand-sub-label mt-2">Verhaltensexperimente</p>
+                <div
+                  v-for="x in entry.reflection.experiments"
+                  :key="x.id"
+                  class="experiment-log-row"
+                >
+                  <p class="expand-text mb-1">{{ x.situation }}</p>
+                  <p v-if="experimentGap(x) !== null" class="experiment-gap">
+                    Erwartet {{ x.fearExpected }} → real {{ x.fearActual }}
+                    <span :style="{ color: gapColor(experimentGap(x)) }">
+                      ({{ experimentGap(x) > 0 ? '−' : '+' }}{{ Math.abs(experimentGap(x)) }})
+                    </span>
+                  </p>
+                  <p v-else class="experiment-gap">{{ experimentStateLabel(x) }}</p>
+                </div>
               </template>
             </template>
           </div>
@@ -158,6 +171,11 @@
 <script>
 import FeelingChips from '@/components/FeelingChips.vue';
 import { beliefStatus, hasChangeData, isBeliefStatus } from '@/utils/beliefStatus';
+import {
+  fearGap,
+  fearGapColor,
+  experimentStateLabel as stateLabelOf,
+} from '@/utils/experiment';
 
 export default {
   name: 'belief-list',
@@ -204,6 +222,9 @@ export default {
     },
     // Still a method: the template calls hasChangeData(entry) directly.
     hasChangeData(entry) { return hasChangeData(entry); },
+    experimentGap(x) { return fearGap(x); },
+    gapColor(gap) { return fearGapColor(gap); },
+    experimentStateLabel(x) { return stateLabelOf(x); },
     empathyEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/empathy-belief/${entry.time}`); },
     changeEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/change-belief/${entry.time}`); },
     editEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/edit-belief/${entry.time}`); },
@@ -402,6 +423,8 @@ export default {
 .expand-sub-label { font-size: 0.75rem; color: #636366; margin: 0 0 3px; font-style: italic; }
 .expand-text { font-size: 0.93rem; color: #ebebf5; margin: 0; line-height: 1.5; }
 .empathy-text { white-space: pre-wrap; }
+.experiment-log-row { margin-bottom: 8px; }
+.experiment-gap { font-size: 0.78rem; color: #8e8e93; margin: 0; }
 .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
 .mt-3 { margin-top: 12px !important; }
 .mt-2 { margin-top: 8px !important; }

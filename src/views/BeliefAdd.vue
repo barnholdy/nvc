@@ -85,8 +85,8 @@ import BeliefAddBelief from '@/views/BeliefAddBelief.vue';
 import BeliefAddReaction from '@/views/BeliefAddReaction.vue';
 import BeliefAddFeelingNeed from '@/views/BeliefAddFeelingNeed.vue';
 import BeliefAddHypothese from '@/views/BeliefAddHypothese.vue';
-import taxonomy from '../assets/taxonomy.json';
 import { beliefStatus } from '@/utils/beliefStatus';
+import taxonomy from '../assets/taxonomy.json';
 
 export default {
   name: 'belief-add',
@@ -137,7 +137,7 @@ export default {
         feelings: this.selectedFeelings,
         withBelief: this.withBelief,
         needs: this.selectedNeeds,
-        reflection: Object.assign({ withoutBelief: '', turnarounds: [], changeAct: '' }, existingReflection, { origin: this.origin }),
+        reflection: Object.assign({ withoutBelief: '', turnarounds: [] }, existingReflection, { origin: this.origin }),
       };
       const saved = this.isEditMode ? Object.assign({}, this.editEntry, payload) : payload;
       if (this.isEditMode) {
