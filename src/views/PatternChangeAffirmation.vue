@@ -13,16 +13,6 @@
 Er hilft dir, die alte Überzeugung in Richtung der neuen Perspektive zu verschieben.
 Halte den Satz glaubwürdig: Der positivste Satz, den du gerade noch als wahr empfinden kannst.</p>
 
-      <div class="mt-4">
-        <p class="body-1 grey--text mb-2">Lies dir den Satz laut vor. Wie wahr fühlt er sich an?</p>
-        <div class="slider-row">
-          <span class="slider-end-label">0</span>
-          <input type="range" min="0" max="10" v-model.number="truth" class="truth-slider" />
-          <span class="slider-end-label">10</span>
-        </div>
-        <p class="slider-value-label">{{ truth }}</p>
-        <p class="truth-guidance">Ziel: 6–8. Bei 9–10 ist er meist zu brav und trägt nicht durch echte Belastung. Unter 5 ist er noch zu weit weg — dann kleiner formulieren.</p>
-      </div>
     </v-flex>
 
     <v-flex v-if="selectedAffirmations.length" class="mb-2">
@@ -34,6 +24,22 @@ Halte den Satz glaubwürdig: Der positivste Satz, den du gerade noch als wahr em
           class="selected-chip"
           @input="removeSelected(a.text)"
         >{{ a.text }}</v-chip>
+      </div>
+    </v-flex>
+
+    <!-- Only meaningful once there is a sentence to read aloud -->
+    <v-flex v-if="selectedAffirmations.length" class="mb-4">
+      <p class="body-1 grey--text mb-2">Lies dir den Satz laut vor. Wie wahr fühlt er sich an?</p>
+      <div class="slider-row">
+        <span class="slider-end-label">0</span>
+        <input type="range" min="0" max="10" v-model.number="truth" class="truth-slider" />
+        <span class="slider-end-label">10</span>
+      </div>
+      <p class="slider-value-label" :style="{ color: truthHint.color }">{{ truth }}</p>
+      <p class="truth-target">Ziel: 6–8</p>
+      <div class="truth-hint" :style="{ borderColor: truthHint.color }">
+        <p class="truth-hint-title" :style="{ color: truthHint.color }">{{ truthHint.title }}</p>
+        <p class="truth-hint-text">{{ truthHint.text }}</p>
       </div>
     </v-flex>
 
@@ -159,6 +165,36 @@ export default {
     };
   },
   computed: {
+    // Feedback follows the slider: too far away, almost, on target, or so
+    // agreeable it will not hold up under real strain.
+    truthHint() {
+      if (this.truth < 5) {
+        return {
+          color: '#f87171',
+          title: 'Noch zu weit weg',
+          text: 'Formuliere den Satz kleiner: Was kannst du gerade eben noch als wahr empfinden?',
+        };
+      }
+      if (this.truth === 5) {
+        return {
+          color: '#fd9927',
+          title: 'Fast da',
+          text: 'Ein kleiner Schritt zurück macht ihn glaubwürdiger.',
+        };
+      }
+      if (this.truth <= 8) {
+        return {
+          color: '#4ade80',
+          title: 'Guter Bereich',
+          text: 'Positiv und trotzdem glaubwürdig — dieser Satz trägt.',
+        };
+      }
+      return {
+        color: '#fd9927',
+        title: 'Wahrscheinlich zu brav',
+        text: 'Einem Satz, dem du so leicht zustimmst, fehlt meist die Kraft für echte Belastung. Formuliere ihn mutiger.',
+      };
+    },
     selectedAffirmations() {
       var selectedTexts = this.selectedTexts;
       return this.pool.filter(function(a) { return selectedTexts.indexOf(a.text) !== -1; });
@@ -321,11 +357,31 @@ export default {
   font-weight: 600;
   margin: 8px 0 0;
 }
-.truth-guidance {
+.truth-target {
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #636366;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 2px 0 10px;
+}
+.truth-hint {
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1.5px solid;
+  transition: border-color 0.2s ease;
+}
+.truth-hint-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 2px;
+}
+.truth-hint-text {
   font-size: 0.8rem;
   color: #8e8e93;
   line-height: 1.5;
-  margin: 6px 0 0;
+  margin: 0;
 }
 .selected-chips {
   display: flex;
