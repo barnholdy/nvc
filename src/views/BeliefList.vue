@@ -119,23 +119,42 @@
               </template>
               <template v-if="entry.affirmations && entry.affirmations.length">
                 <p class="expand-sub-label mt-2">Affirmationen</p>
-                <p v-for="(a, i) in entry.affirmations" :key="i" class="expand-text mb-1">{{ a.text }}</p>
+                <div
+                  v-for="(a, i) in entry.affirmations"
+                  :key="'aff-' + i"
+                  class="linked-row"
+                  @click.stop="editAffirmation(a)"
+                >
+                  <div class="linked-row-body">
+                    <p class="expand-text">{{ a.text }}</p>
+                    <span class="status-pill" :style="{ color: affStatusColor(a.text) }">
+                      {{ affStatusLabel(a.text) }}
+                    </span>
+                  </div>
+                  <v-icon small class="linked-chevron">chevron_right</v-icon>
+                </div>
               </template>
               <template v-if="entry.reflection && entry.reflection.experiments && entry.reflection.experiments.length">
                 <p class="expand-sub-label mt-2">Verhaltensexperimente</p>
                 <div
                   v-for="x in entry.reflection.experiments"
                   :key="x.id"
-                  class="experiment-log-row"
+                  class="linked-row"
+                  @click.stop="editExperiment(entry, x)"
                 >
-                  <p class="expand-text mb-1">{{ x.situation }}</p>
-                  <p v-if="experimentGap(x) !== null" class="experiment-gap">
-                    Erwartet {{ x.fearExpected }} → real {{ x.fearActual }}
-                    <span :style="{ color: gapColor(experimentGap(x)) }">
-                      ({{ experimentGap(x) > 0 ? '−' : '+' }}{{ Math.abs(experimentGap(x)) }})
+                  <div class="linked-row-body">
+                    <p class="expand-text">{{ x.situation }}</p>
+                    <span class="status-pill" :style="{ color: experimentStateColor(x) }">
+                      {{ experimentStateLabel(x) }}
                     </span>
-                  </p>
-                  <p v-else class="experiment-gap">{{ experimentStateLabel(x) }}</p>
+                    <span v-if="experimentGap(x) !== null" class="experiment-gap">
+                      Erwartet {{ x.fearExpected }} → real {{ x.fearActual }}
+                      <span :style="{ color: gapColor(experimentGap(x)) }">
+                        ({{ experimentGap(x) > 0 ? '−' : '+' }}{{ Math.abs(experimentGap(x)) }})
+                      </span>
+                    </span>
+                  </div>
+                  <v-icon small class="linked-chevron">chevron_right</v-icon>
                 </div>
               </template>
             </template>
@@ -181,7 +200,13 @@ import {
   fearGap,
   fearGapColor,
   experimentStateLabel as stateLabelOf,
+  experimentStateColor as stateColorOf,
 } from '@/utils/experiment';
+import {
+  loadAffStatusMap,
+  affirmationStatusLabel,
+  affirmationStatusColor,
+} from '@/utils/affirmationStatus';
 
 export default {
   name: 'belief-list',
@@ -193,6 +218,7 @@ export default {
       isDeleteDialogShowing: false,
       // Saving a belief returns here with the tab it now belongs to.
       tab: isBeliefStatus(this.$route.query.tab) ? this.$route.query.tab : 'open',
+      affStatusMap: loadAffStatusMap(),
       sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
   },
@@ -229,6 +255,17 @@ export default {
     // Still a method: the template calls hasChangeData(entry) directly.
     hasChangeData(entry) { return hasChangeData(entry); },
     experimentGap(x) { return fearGap(x); },
+    experimentStateColor(x) { return stateColorOf(x); },
+    affStatusLabel(text) { return affirmationStatusLabel(text, this.affStatusMap); },
+    affStatusColor(text) { return affirmationStatusColor(text, this.affStatusMap); },
+    editAffirmation(a) {
+      this.sw.openIdx = null; this.sw.openDir = null;
+      this.$router.push({ path: '/affirmations', query: { edit: a.text } });
+    },
+    editExperiment(entry, x) {
+      this.sw.openIdx = null; this.sw.openDir = null;
+      this.$router.push(`/act-belief/${entry.time}/${x.id}`);
+    },
     gapColor(gap) { return fearGapColor(gap); },
     experimentStateLabel(x) { return stateLabelOf(x); },
     empathyEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/empathy-belief/${entry.time}`); },
@@ -432,8 +469,34 @@ export default {
 .expand-sub-label { font-size: 0.75rem; color: #636366; margin: 0 0 3px; font-style: italic; }
 .expand-text { font-size: 0.93rem; color: #ebebf5; margin: 0; line-height: 1.5; }
 .empathy-text { white-space: pre-wrap; }
-.experiment-log-row { margin-bottom: 8px; }
-.experiment-gap { font-size: 0.78rem; color: #8e8e93; margin: 0; }
+.experiment-gap { display: block; font-size: 0.78rem; color: #8e8e93; margin: 2px 0 0; }
+
+.linked-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  cursor: pointer;
+  border-top: 1px solid #2c2c2e;
+  -webkit-tap-highlight-color: transparent;
+  &:first-of-type { border-top: none; }
+  &:active { opacity: 0.6; }
+}
+.linked-row-body { flex: 1; min-width: 0; }
+.status-pill {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: #2c2c2e;
+  border-radius: 20px;
+  padding: 1px 8px;
+}
+.linked-chevron {
+  color: #636366 !important;
+  font-size: 1.1rem !important;
+  flex-shrink: 0;
+  margin-left: 6px;
+}
 .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
 .mt-3 { margin-top: 12px !important; }
 .mt-2 { margin-top: 8px !important; }

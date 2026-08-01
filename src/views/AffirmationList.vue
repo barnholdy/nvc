@@ -220,17 +220,17 @@
 <script>
 import moment from 'moment';
 import { normalizeTruth, truthHint, TRUTH_DEFAULT } from '@/utils/affirmationTruth';
+import {
+  AFF_STATUS_KEY,
+  AFFIRMATION_STATUSES,
+  loadAffStatusMap,
+  affirmationStatus,
+} from '@/utils/affirmationStatus';
 
 const AMEN_KEY = 'nvc.amen';
-const AFF_STATUS_KEY = 'nvc.affirmationStatus';
 // Fortschritt der Affirmation — bewusst getrennt vom Resonanz-Wert
 // („Wie wahr fühlt sich diese Affirmation gerade an?"), analog zu den Handlungen.
 const AFF_PROGRESS_KEY = 'nvc.affirmationProgress';
-const ALL_STATUSES = [
-  { key: 'open', label: 'Offen', color: '#636366' },
-  { key: 'dabei', label: 'Dabei', color: '#fd9927' },
-  { key: 'verinnerlicht', label: 'Verinn.', color: '#4ade80' },
-];
 
 function triggerConfetti() {
   var canvas = document.createElement('canvas');
@@ -270,9 +270,6 @@ function triggerConfetti() {
 function loadAhoMap() {
   try { return JSON.parse(localStorage.getItem(AMEN_KEY)) || {}; } catch (e) { return {}; }
 }
-function loadAffStatusMap() {
-  try { return JSON.parse(localStorage.getItem(AFF_STATUS_KEY)) || {}; } catch (e) { return {}; }
-}
 function loadAffProgressMap() {
   try { return JSON.parse(localStorage.getItem(AFF_PROGRESS_KEY)) || {}; } catch (e) { return {}; }
 }
@@ -301,6 +298,14 @@ export default {
   },
   watch: {
     tab() { this.sw.openIdx = null; this.sw.openDir = null; this.openIndex = null; },
+  },
+  mounted() {
+    // ?edit=<text> jumps straight into this affirmation's wizard, used by the
+    // belief list.
+    const wanted = this.$route.query.edit;
+    if (!wanted) return;
+    const item = this.affirmations.find(a => a.text === wanted);
+    if (item) this.startEdit(item);
   },
   computed: {
     truthHint() { return truthHint(this.editSlider); },
@@ -517,8 +522,8 @@ export default {
       this.toggle(i);
     },
     otherStatuses(text) {
-      var current = this.statusMap[text] || 'open';
-      return ALL_STATUSES.filter(function(s) { return s.key !== current; });
+      var current = affirmationStatus(text, this.statusMap);
+      return AFFIRMATION_STATUSES.filter(function(s) { return s.key !== current; });
     },
     setStatus(text, status) {
       this.statusMap = Object.assign({}, this.statusMap, { [text]: status });
