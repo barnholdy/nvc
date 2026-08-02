@@ -75,12 +75,7 @@
             </div>
           </div>
           <div :key="item.text + '-expand'" v-if="openIndex === i" class="row-expand">
-            <div class="expand-header">
-              <p class="expand-label">Überzeugungen</p>
-              <button class="expand-edit-btn" @click.stop="startEdit(item)">
-                <v-icon small color="#8e8e93">edit</v-icon>
-              </button>
-            </div>
+            <p class="expand-label">Überzeugungen</p>
             <p v-for="(s, j) in item.sources" :key="j" class="expand-text mb-1">„{{ s.beliefText }}"</p>
           </div>
           <div :key="item.text + '-sep'" class="ios-sep" v-if="i < filteredAffirmations.length - 1 && openIndex !== i"></div>
@@ -698,20 +693,6 @@ export default {
   background: #141416;
   padding: 14px 20px 16px;
   border-top: 1px solid #2c2c2e;
-}
-.expand-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 0 0 6px;
-  .expand-label { margin: 0; }
-}
-.expand-edit-btn {
-  background: none;
-  border: none;
-  padding: 4px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
 }
 .expand-label {
   font-size: 0.68rem;

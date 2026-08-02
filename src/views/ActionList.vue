@@ -83,12 +83,7 @@
           </div>
 
           <div :key="row.experiment.id + '-expand'" v-if="openIndex === i" class="row-expand">
-            <div class="expand-header">
-              <p class="expand-label">Überzeugung</p>
-              <button class="expand-edit-btn" @click.stop="editExperiment(row)">
-                <v-icon small color="#8e8e93">edit</v-icon>
-              </button>
-            </div>
+            <p class="expand-label">Überzeugung</p>
             <p class="expand-text mb-1">„{{ row.beliefText }}"</p>
 
             <p class="expand-label mt-3">Situation</p>
