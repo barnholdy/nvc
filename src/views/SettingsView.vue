@@ -192,9 +192,10 @@ export default {
       reader.onload = (e) => {
         try {
           const data = JSON.parse(e.target.result);
-          if (!data.patterns || !data.beliefs) { this.importError = 'Ungültiges Format.'; return; }
-          this.$store.commit('setPatterns', data.patterns);
-          this.$store.commit('setBeliefs', data.beliefs);
+          if (!Array.isArray(data.patterns) || !Array.isArray(data.beliefs)) {
+            this.importError = 'Ungültiges Format.';
+            return;
+          }
           localStorage.setItem('nvc.patterns', JSON.stringify(data.patterns));
           localStorage.setItem('nvc.beliefs', JSON.stringify(data.beliefs));
           if (data.amen) localStorage.setItem('nvc.amen', JSON.stringify(data.amen));
@@ -203,6 +204,12 @@ export default {
           if (data.affirmationProgress) localStorage.setItem('nvc.affirmationProgress', JSON.stringify(data.affirmationProgress));
           if (data.kernmuster) localStorage.setItem('nvc.kernmuster', JSON.stringify(data.kernmuster));
           if (data.kernmusterSnapshot) localStorage.setItem('nvc.kernmusterSnapshot', data.kernmusterSnapshot);
+          // Load through the store actions rather than committing the parsed
+          // file directly: that is where the migrations and the sanitising of
+          // malformed entries live. Committing raw would let an old or damaged
+          // backup put un-migrated data straight into the running app.
+          this.$store.dispatch('loadPatterns');
+          this.$store.dispatch('loadBeliefs');
           this.importSuccess = true;
         } catch (err) {
           this.importError = 'Datei konnte nicht gelesen werden.';
