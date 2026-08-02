@@ -17,7 +17,7 @@
 
       <div class="segment-row">
         <button class="seg-tab" :class="{ active: tab === 'open' }" @click="tab = 'open'">Offen</button>
-        <button class="seg-tab" :class="{ active: tab === 'dabei' }" @click="tab = 'dabei'">Dabei</button>
+        <button class="seg-tab" :class="{ active: tab === 'planned' }" @click="tab = 'planned'">Geplant</button>
         <button class="seg-tab" :class="{ active: tab === 'done' }" @click="tab = 'done'">Durchgeführt</button>
       </div>
 
@@ -25,9 +25,9 @@
         <span class="empty-icon">🏃</span>
         <p class="empty-title">Keine Einträge</p>
         <p class="empty-sub">
-          <template v-if="tab === 'open'">Wische in der Überzeugungs-Liste nach rechts und wähle „Handeln", um ein Experiment zu planen.</template>
-          <template v-else-if="tab === 'dabei'">Noch kein Experiment als gemacht markiert.</template>
-          <template v-else>Noch kein Experiment ausgewertet.</template>
+          <template v-if="tab === 'open'">Alle Experimente sind geplant — offen ist hier nur, was noch keine Befürchtung hat.</template>
+          <template v-else-if="tab === 'planned'">Noch kein Experiment geplant.</template>
+          <template v-else>Noch kein Experiment durchgeführt.</template>
         </p>
       </div>
 
@@ -43,7 +43,7 @@
             <div class="swipe-right-panel">
               <button class="swipe-btn swipe-btn-edit" @click.stop="editExperiment(row)">
                 <v-icon small color="#fff">edit</v-icon>
-                <span>Bearb.</span>
+                <span>Planen</span>
               </button>
             </div>
             <div class="swipe-left-panel">
@@ -63,13 +63,10 @@
                 </div>
                 <p class="check-meta">„{{ row.beliefText }}"</p>
                 <p v-if="isDue(row.experiment)" class="due-hint">Schon durchgeführt?</p>
-                <p v-if="needsPlan(row.experiment)" class="plan-hint">
-                  Befürchtung fehlt — ohne sie gibt es später nichts zu vergleichen.
-                </p>
               </div>
               <button
                 v-if="needsPlan(row.experiment)"
-                class="check-btn plan-btn"
+                class="check-btn"
                 @click.stop="editExperiment(row)"
               >Planen</button>
               <button
@@ -604,12 +601,6 @@ export default {
   font-weight: 600;
   margin: 4px 0 0;
 }
-.plan-hint {
-  font-size: 0.75rem;
-  color: #fd9927;
-  margin: 4px 0 0;
-  line-height: 1.4;
-}
 
 .check-btn {
   background: #4ade80;
@@ -625,7 +616,6 @@ export default {
   -webkit-tap-highlight-color: transparent;
   &:active { background: #3dcc70; transform: scale(0.97); }
 }
-.plan-btn { background: #fd9927; &:active { background: #e5891f; } }
 
 .ios-sep { height: 1px; background: #2c2c2e; margin-left: 20px; }
 .row-expand {
