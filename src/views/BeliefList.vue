@@ -145,10 +145,22 @@
                   class="mb-1"
                 ></feeling-chips>
               </template>
-              <p
-                v-if="entry.reflection && typeof entry.reflection.bodyIntensity === 'number'"
-                class="expand-meta"
-              >Körperempfindung: {{ entry.reflection.bodyIntensity }} von 10</p>
+              <template v-if="entry.reflection && typeof entry.reflection.bodyIntensity === 'number'">
+                <p class="expand-sub-label mt-2">Körperempfindung</p>
+                <div class="slider-row">
+                  <span class="slider-end-label">0</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="10"
+                    :value="entry.reflection.bodyIntensity"
+                    class="readonly-slider"
+                    disabled
+                  />
+                  <span class="slider-end-label">10</span>
+                </div>
+                <p class="expand-meta">{{ entry.reflection.bodyIntensity }} von 10</p>
+              </template>
               <template v-if="entry.affirmations && entry.affirmations.length">
                 <p class="expand-sub-label mt-2">Affirmationen</p>
                 <div
@@ -540,6 +552,45 @@ export default {
 .empathy-text { white-space: pre-wrap; }
 .experiment-gap { display: block; font-size: 0.78rem; color: #8e8e93; margin: 2px 0 0; }
 .expand-meta { display: block; font-size: 0.78rem; color: #8e8e93; margin: 2px 0 0; }
+
+/* Shows a recorded value — deliberately not interactive. */
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 4px 0;
+}
+.slider-end-label {
+  font-size: 0.72rem;
+  color: #636366;
+  flex-shrink: 0;
+}
+.readonly-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: #3a3a3c;
+  outline: none;
+  opacity: 1;
+  pointer-events: none;
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #4ade80;
+  }
+  &::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border: none;
+    border-radius: 50%;
+    background: #4ade80;
+  }
+}
 
 .linked-row {
   display: flex;
