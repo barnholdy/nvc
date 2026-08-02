@@ -71,7 +71,7 @@
                 </div>
                 <p class="reminder-meta">{{ amenLabel(item.text) }}</p>
               </div>
-              <button class="amen-btn" @click.stop="sayAho(item.text)">Aho</button>
+              <button class="amen-btn" @click.stop="primaryAction(item.text)">{{ primaryLabel(item.text) }}</button>
             </div>
           </div>
           <div :key="item.text + '-expand'" v-if="openIndex === i" class="row-expand">
@@ -519,6 +519,18 @@ export default {
     otherStatuses(text) {
       var current = affirmationStatus(text, this.statusMap);
       return AFFIRMATION_STATUSES.filter(function(s) { return s.key !== current; });
+    },
+    // An affirmation still on "Offen" has not been taken up yet, so its button
+    // starts the practice instead of counting one.
+    primaryLabel(text) {
+      return affirmationStatus(text, this.statusMap) === 'open' ? 'Üben' : 'Aho';
+    },
+    primaryAction(text) {
+      if (affirmationStatus(text, this.statusMap) === 'open') {
+        this.setStatus(text, 'dabei');
+        return;
+      }
+      this.sayAho(text);
     },
     setStatus(text, status) {
       this.statusMap = Object.assign({}, this.statusMap, { [text]: status });
