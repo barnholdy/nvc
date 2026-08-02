@@ -205,14 +205,26 @@ export default new Vuex.Store({
           // several beliefs yields one experiment per belief.
           beliefs = beliefs.map(function(b) {
             const r = b.reflection || {};
-            const legacy = r.changeActs || (r.changeAct
+            const rawActs = Array.isArray(r.changeActs) ? r.changeActs : [];
+            const legacy = rawActs.length ? rawActs : (typeof r.changeAct === 'string'
               ? r.changeAct.split('\n').filter(function(s) { return s.trim().length > 0; })
               : []);
-            if (!r.experiments && !legacy.length) {
-              if (r.changeActs === undefined && r.changeAct === undefined) return b;
-            }
+            // Drop anything that is not a usable experiment object. A single bad
+            // entry used to take down the whole app, so it gets repaired here
+            // rather than merely tolerated at every read site.
+            const existing = (Array.isArray(r.experiments) ? r.experiments : [])
+              .filter(function(x) { return x && typeof x === 'object'; });
+            const wasClean = Array.isArray(r.experiments)
+              && existing.length === r.experiments.length;
+            const nothingToDo = wasClean
+              && !legacy.length
+              && r.changeActs === undefined
+              && r.changeAct === undefined;
+            if (nothingToDo) return b;
+            // Nothing stored at all and nothing legacy: leave the belief alone.
+            if (r.experiments === undefined && !legacy.length
+              && r.changeActs === undefined && r.changeAct === undefined) return b;
             migrated = true;
-            const existing = r.experiments || [];
             const converted = legacy.map(function(text, i) {
               return {
                 id: b.time + i + 1,

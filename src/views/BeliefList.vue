@@ -190,10 +190,10 @@
                   <v-icon small class="linked-chevron">chevron_right</v-icon>
                 </div>
               </template>
-              <template v-if="entry.reflection && entry.reflection.experiments && entry.reflection.experiments.length">
+              <template v-if="experimentsOf(entry).length">
                 <p class="expand-sub-label mt-2">Verhaltensexperimente</p>
                 <div
-                  v-for="x in entry.reflection.experiments"
+                  v-for="x in experimentsOf(entry)"
                   :key="x.id"
                   class="linked-row"
                   @click.stop="editExperiment(entry, x)"
@@ -257,6 +257,7 @@ import {
   fearGapColor,
   experimentStateLabel as stateLabelOf,
   experimentStateColor as stateColorOf,
+  experimentsOf,
 } from '@/utils/experiment';
 import { normalizeTruth } from '@/utils/affirmationTruth';
 import {
@@ -311,6 +312,7 @@ export default {
     },
     // Still a method: the template calls hasChangeData(entry) directly.
     hasChangeData(entry) { return hasChangeData(entry); },
+    experimentsOf(entry) { return experimentsOf(entry); },
     experimentGap(x) { return fearGap(x); },
     experimentStateColor(x) { return stateColorOf(x); },
     truthOf(a) { return normalizeTruth(a.resonance); },

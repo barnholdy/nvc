@@ -240,6 +240,7 @@
 import moment from 'moment';
 import {
   collectExperiments,
+  experimentsOf,
   experimentDisplayState,
   experimentState,
   fearGap,
@@ -344,7 +345,7 @@ export default {
       const belief = this.$store.getters.beliefs.find(b => b.time === row.beliefTime);
       if (!belief) return;
       const r = belief.reflection || {};
-      const list = (r.experiments || []).map((x) => {
+      const list = experimentsOf(belief).map((x) => {
         if (x.id !== row.experiment.id) return x;
         return Object.assign({}, x, changes);
       });
@@ -417,7 +418,7 @@ export default {
       if (!belief) return;
       const r = belief.reflection || {};
       // Matched by id, so two experiments with the same situation text stay distinct.
-      const list = (r.experiments || []).filter(x => x.id !== row.experiment.id);
+      const list = experimentsOf(belief).filter(x => x.id !== row.experiment.id);
       this.$store.dispatch('updateBelief', Object.assign({}, belief, {
         reflection: Object.assign({}, r, { experiments: list }),
       }));

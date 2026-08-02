@@ -103,12 +103,19 @@ export function fearGapColor(gap) {
   return '#f87171';
 }
 
+// The only way to read experiments off a belief. Stored data has been through
+// several migrations, so a malformed entry must not take the whole app down.
+export function experimentsOf(belief) {
+  const r = (belief && belief.reflection) || {};
+  if (!Array.isArray(r.experiments)) return [];
+  return r.experiments.filter(x => x && typeof x === 'object');
+}
+
 // Every experiment across all beliefs, newest first, each tagged with its belief.
 export function collectExperiments(beliefs) {
   const rows = [];
-  (beliefs || []).forEach((belief) => {
-    const list = (belief.reflection && belief.reflection.experiments) || [];
-    list.forEach((x) => {
+  (Array.isArray(beliefs) ? beliefs : []).forEach((belief) => {
+    experimentsOf(belief).forEach((x) => {
       rows.push({ experiment: x, beliefTime: belief.time, beliefText: belief.belief });
     });
   });

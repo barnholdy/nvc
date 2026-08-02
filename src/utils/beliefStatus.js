@@ -1,4 +1,4 @@
-import { isCarriedOut } from './experiment';
+import { isCarriedOut, experimentsOf } from './experiment';
 
 // Single source of truth for how far a belief has been worked through.
 // Lives here so the belief list and the Situationen list cannot drift apart.
@@ -41,7 +41,7 @@ export function hasChangeData(belief) {
     r.exceptions ||
     r.withoutBelief ||
     (r.withoutBeliefFeelings && r.withoutBeliefFeelings.length) ||
-    (r.experiments && r.experiments.length)
+    experimentsOf(belief).length
   );
 }
 
@@ -60,8 +60,7 @@ export function hasCompleteChange(belief) {
 
 // At least one experiment was actually carried out in the real world.
 export function hasActed(belief) {
-  const r = (belief && belief.reflection) || {};
-  return (r.experiments || []).some(isCarriedOut);
+  return experimentsOf(belief).some(isCarriedOut);
 }
 
 export function beliefStatus(belief) {
