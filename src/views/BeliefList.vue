@@ -119,10 +119,6 @@
               <p class="expand-label mt-3">Ursprung</p>
               <p class="expand-text">{{ entry.reflection.origin }}</p>
             </template>
-            <template v-if="entry.empathy">
-              <p class="expand-label mt-3">Empathie</p>
-              <p class="expand-text empathy-text">{{ entry.empathy }}</p>
-            </template>
             <template v-if="hasChangeData(entry) || (entry.affirmations && entry.affirmations.length)">
               <p class="expand-label mt-3">Veränderung</p>
               <template v-if="entry.reflection && entry.reflection.exceptions">
@@ -210,6 +206,11 @@
                   <v-icon small class="linked-chevron">chevron_right</v-icon>
                 </div>
               </template>
+            </template>
+
+            <template v-if="entry.empathy">
+              <p class="expand-label mt-3">Empathie</p>
+              <p class="expand-text empathy-text">{{ entry.empathy }}</p>
             </template>
           </div>
 
