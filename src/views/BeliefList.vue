@@ -3,9 +3,6 @@
     <v-toolbar color="#000" dark flat app>
       <v-toolbar-title>Überzeugungen</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn icon @click="$router.push('/add-belief')">
-        <v-icon color="#4ade80">add</v-icon>
-      </v-btn>
       <v-btn icon @click="$router.push('/settings')">
         <v-icon color="#4ade80">settings</v-icon>
       </v-btn>
@@ -29,7 +26,7 @@
         <span class="empty-icon">💡</span>
         <p class="empty-title">Keine Einträge</p>
         <p class="empty-sub">
-          <template v-if="tab === 'open'">Tippe auf + um eine Überzeugung hinzuzufügen.</template>
+          <template v-if="tab === 'open'">Überzeugungen entstehen beim Anlegen einer Situation.</template>
           <template v-else-if="tab === 'working'">Noch keine Überzeugungen in Bearbeitung.</template>
           <template v-else-if="tab === 'done'">Noch keine veränderten Überzeugungen.</template>
           <template v-else>Noch keine gehandelten Überzeugungen — plane ein Verhaltensexperiment über „Handeln".</template>

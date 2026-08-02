@@ -62,6 +62,7 @@
 
 <script>
 import { dedupeByName } from '@/utils/emotions';
+import { experimentsOf } from '@/utils/experiment';
 const STORAGE_KEY = 'nvc.globalEmpathy';
 
 function hashString(str) {
@@ -102,7 +103,7 @@ export default {
     buildPrompt() {
       const patterns = this.$store.getters.patterns;
       const beliefs = this.$store.getters.beliefs;
-      const system = 'Du bist ein einfühlsamer Gesprächsbegleiter. Eine Person teilt dir ihre persönlichen Muster und Überzeugungen mit – in strukturierter Form. Jedes Muster beschreibt eine Situation und die damit verbundenen Überzeugungen. Jede Überzeugung enthält die Überzeugung selbst, damit verbundene Gefühle, Reaktionen und Bedürfnisse.\n\nDeine Aufgabe ist es, empathisch zu antworten. Halte dich dabei an folgende Prinzipien:\n\n1. Erst spiegeln, dann würdigen – Fasse zusammen, was du gehört hast, ohne zu interpretieren oder zu bewerten. Zeige, dass du wirklich zugehört hast.\n2. Den Kern berühren – Benenne die wiederkehrenden Gefühle und Bedürfnisse direkt und warmherzig. Die Person soll sich gesehen fühlen, nicht analysiert.\n3. Muster erkennen – Wenn sich Themen über mehrere Einträge wiederholen, würdige das behutsam.\n4. Keine Ratschläge, keine Lösungen – Außer die Person fragt explizit danach.\n5. Offene Einladung zum Ende – Schließe mit einer offenen Frage oder einem Raumangebot, kein Druck.\n\nTon: warm, ruhig, präsent. Antworte auf Deutsch.';
+      const system = 'Du bist ein einfühlsamer Gesprächsbegleiter. Eine Person teilt dir ihre persönlichen Muster und Überzeugungen mit – in strukturierter Form. Jedes Muster beschreibt eine Situation und die damit verbundenen Überzeugungen. Jede Überzeugung enthält die Überzeugung selbst, damit verbundene Gefühle, Reaktionen und Bedürfnisse – und, falls vorhanden, die Veränderungsarbeit daran: Ausnahmen, eine neue Perspektive, Affirmationen und Verhaltensexperimente mit vorab notierter Befürchtung und tatsächlichem Ausgang.\n\nDeine Aufgabe ist es, empathisch zu antworten. Halte dich dabei an folgende Prinzipien:\n\n1. Erst spiegeln, dann würdigen – Fasse zusammen, was du gehört hast, ohne zu interpretieren oder zu bewerten. Zeige, dass du wirklich zugehört hast.\n2. Den Kern berühren – Benenne die wiederkehrenden Gefühle und Bedürfnisse direkt und warmherzig. Die Person soll sich gesehen fühlen, nicht analysiert.\n3. Muster erkennen – Wenn sich Themen über mehrere Einträge wiederholen, würdige das behutsam.\n4. Keine Ratschläge, keine Lösungen – Außer die Person fragt explizit danach.\n5. Offene Einladung zum Ende – Schließe mit einer offenen Frage oder einem Raumangebot, kein Druck.\n\nTon: warm, ruhig, präsent. Antworte auf Deutsch.';
       const lines = [system, ''];
       if (patterns.length > 0) {
         lines.push('MUSTER:');
@@ -126,6 +127,24 @@ export default {
           if (b.withBelief) lines.push(`  Reaktion: ${b.withBelief}`);
           const needs = b.needs && b.needs.length ? dedupeByName(b.needs).map(n => n.name).join(', ') : '';
           if (needs) lines.push(`  Bedürfnis: ${needs}`);
+          const r = b.reflection || {};
+          if (r.origin) lines.push(`  Ursprungshypothese: ${r.origin}`);
+          if (r.exceptions) lines.push(`  Ausnahmen: ${r.exceptions}`);
+          if (r.withoutBelief) lines.push(`  Neue Perspektive: ${r.withoutBelief}`);
+          const newFeelings = r.withoutBeliefFeelings && r.withoutBeliefFeelings.length
+            ? r.withoutBeliefFeelings.map(f => f.name).join(', ') : '';
+          if (newFeelings) lines.push(`  Neue Gefühle: ${newFeelings}`);
+          (b.affirmations || []).forEach((a) => {
+            if (a && a.text) lines.push(`  Affirmation: ${a.text}`);
+          });
+          experimentsOf(b).forEach((x) => {
+            const parts = [];
+            if (x.situation) parts.push(x.situation);
+            if (typeof x.fearExpected === 'number') parts.push(`befürchtet ${x.fearExpected}/100`);
+            if (typeof x.fearActual === 'number') parts.push(`real ${x.fearActual}/100`);
+            if (x.learning) parts.push(`Erkenntnis: ${x.learning}`);
+            if (parts.length) lines.push(`  Verhaltensexperiment: ${parts.join(' | ')}`);
+          });
         });
       }
       return lines.join('\n');

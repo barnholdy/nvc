@@ -58,6 +58,8 @@
 
 <script>
 import { dedupeByName } from '@/utils/emotions';
+import { experimentsOf } from '@/utils/experiment';
+import { normalizeTruth } from '@/utils/affirmationTruth';
 export default {
   name: 'belief-empathy',
   data() {
@@ -109,7 +111,7 @@ export default {
     },
     buildPrompt() {
       var e = this.entry;
-      var system = 'Du bist ein einfühlsamer Gesprächsbegleiter. Eine Person teilt dir eine persönliche Situation in strukturierter Form mit – bestehend aus:\n\n- Glaube: Welche Überzeugung oder Interpretation hat die Person?\n- Gefühl: Welche Emotion(en) entstehen dadurch?\n- Reaktion: Wie hat die Person reagiert (innerlich oder äußerlich)?\n- Bedürfnis: Welches unerfüllte Bedürfnis steckt dahinter?\n- Ursprungshypothese: Woher könnte dieser Glaube oder dieses Muster stammen?\n\nDeine Aufgabe ist es, empathisch zu antworten. Halte dich dabei an folgende Prinzipien:\n\n1. Erst spiegeln, dann würdigen – Fasse zusammen, was du gehört hast, ohne zu interpretieren oder zu bewerten. Zeige, dass du wirklich zugehört hast.\n2. Den Kern berühren – Benenne das Gefühl und das Bedürfnis direkt und warmherzig. Die Person soll sich gesehen fühlen, nicht analysiert.\n3. Die Ursprungshypothese würdigen – Anerkenne, wie viel Selbstreflexion darin steckt, ohne sie zu bestätigen oder zu widerlegen.\n4. Keine Ratschläge, keine Lösungen – Außer die Person fragt explizit danach.\n5. Offene Einladung zum Ende – Schließe mit einer offenen Frage oder einem Raumangebot, kein Druck.\n\nTon: warm, ruhig, präsent. Nicht therapeutisch-distanziert, nicht überschwänglich. Sprich die Person direkt an (du/Sie je nach Input). Antworte auf Deutsch, es sei denn, die Person schreibt auf Englisch.';
+      var system = 'Du bist ein einfühlsamer Gesprächsbegleiter. Eine Person teilt dir eine persönliche Situation in strukturierter Form mit – bestehend aus:\n\n- Glaube: Welche Überzeugung oder Interpretation hat die Person?\n- Gefühl: Welche Emotion(en) entstehen dadurch?\n- Reaktion: Wie hat die Person reagiert (innerlich oder äußerlich)?\n- Bedürfnis: Welches unerfüllte Bedürfnis steckt dahinter?\n- Ursprungshypothese: Woher könnte dieser Glaube oder dieses Muster stammen?\n- Veränderungsarbeit: Ausnahmen, eine neue Perspektive, neue Gefühle und ein Affirmationssatz – falls die Person daran schon gearbeitet hat.\n- Verhaltensexperimente: konkrete Situationen, in denen die Person die Überzeugung getestet hat, mit ihrer vorab notierten Befürchtung und dem tatsächlichen Ausgang.\n\nDeine Aufgabe ist es, empathisch zu antworten. Halte dich dabei an folgende Prinzipien:\n\n1. Erst spiegeln, dann würdigen – Fasse zusammen, was du gehört hast, ohne zu interpretieren oder zu bewerten. Zeige, dass du wirklich zugehört hast.\n2. Den Kern berühren – Benenne das Gefühl und das Bedürfnis direkt und warmherzig. Die Person soll sich gesehen fühlen, nicht analysiert.\n3. Die Ursprungshypothese würdigen – Anerkenne, wie viel Selbstreflexion darin steckt, ohne sie zu bestätigen oder zu widerlegen.\n4. Keine Ratschläge, keine Lösungen – Außer die Person fragt explizit danach.\n5. Offene Einladung zum Ende – Schließe mit einer offenen Frage oder einem Raumangebot, kein Druck.\n\nTon: warm, ruhig, präsent. Nicht therapeutisch-distanziert, nicht überschwänglich. Sprich die Person direkt an (du/Sie je nach Input). Antworte auf Deutsch, es sei denn, die Person schreibt auf Englisch.';
 
       var lines = [system, ''];
       if (e.belief) lines.push('Glaube: ' + e.belief);
@@ -118,8 +120,36 @@ export default {
       if (e.withBelief) lines.push('Reaktion: ' + e.withBelief);
       var needs = e.needs && e.needs.length ? dedupeByName(e.needs).map(function(n) { return n.name; }).join(', ') : '';
       if (needs) lines.push('Bedürfnis: ' + needs);
-      var origin = e.reflection && e.reflection.origin ? e.reflection.origin : '';
-      if (origin) lines.push('Ursprungshypothese: ' + origin);
+      var r = e.reflection || {};
+      if (r.origin) lines.push('Ursprungshypothese: ' + r.origin);
+
+      if (r.exceptions) lines.push('Ausnahmen: ' + r.exceptions);
+      if (r.withoutBelief) lines.push('Neue Perspektive: ' + r.withoutBelief);
+      var newFeelings = r.withoutBeliefFeelings && r.withoutBeliefFeelings.length
+        ? r.withoutBeliefFeelings.map(function(f) { return f.name; }).join(', ')
+        : '';
+      if (newFeelings) lines.push('Neue Gefühle: ' + newFeelings);
+      if (typeof r.bodyIntensity === 'number') {
+        lines.push('Körperempfindung dabei: ' + r.bodyIntensity + ' von 10');
+      }
+      (e.affirmations || []).forEach(function(a) {
+        if (!a || !a.text) return;
+        var truth = typeof a.resonance === 'number' ? ' (Glaubwürdigkeit ' + normalizeTruth(a.resonance) + ' von 10)' : '';
+        lines.push('Affirmation: ' + a.text + truth);
+      });
+      experimentsOf(e).forEach(function(x) {
+        var parts = ['Verhaltensexperiment: ' + (x.situation || '—')];
+        if (x.fear) {
+          parts.push('Befürchtung: ' + x.fear
+            + (typeof x.fearExpected === 'number' ? ' (erwartet ' + x.fearExpected + ' von 100)' : ''));
+        }
+        if (x.outcome) {
+          parts.push('Tatsächlich: ' + x.outcome
+            + (typeof x.fearActual === 'number' ? ' (real ' + x.fearActual + ' von 100)' : ''));
+        }
+        if (x.learning) parts.push('Erkenntnis: ' + x.learning);
+        lines.push(parts.join(' | '));
+      });
       return lines.join('\n');
     },
     saveApiKey() {

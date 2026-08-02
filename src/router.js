@@ -41,8 +41,15 @@ export default new Router({
       component: () => import('./views/BeliefChange.vue'),
     },
     {
-      path: '/act-belief/:time/:experimentId?',
+      // Manage the belief's experiments: see them all, add one, remove one.
+      path: '/act-belief/:time',
       name: 'act-belief',
+      component: () => import('./views/BeliefActList.vue'),
+    },
+    {
+      // Plan a specific experiment: situation plus the locked anchor.
+      path: '/act-belief/:time/:experimentId',
+      name: 'plan-experiment',
       component: () => import('./views/BeliefAct.vue'),
     },
     {
