@@ -3,7 +3,7 @@
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Ursprungshypothese</h1>
       <p class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
-      <p class="body-1 grey--text mt-2">Wann hast du diese Überzeugung zum ersten Mal gelernt? Welche frühere Erfahrung hat ihn plausibel gemacht? Was hat er dir damals gebracht (Schutz, Zugehörigkeit, Vermeidung von Ablehnung)?</p>
+      <p class="body-1 grey--text mt-2">Wann hast du diese Überzeugung zum ersten Mal gelernt? Welche frühere Erfahrung hat sie plausibel gemacht? Was hat sie dir damals gebracht (Schutz, Zugehörigkeit, Vermeidung von Ablehnung)?</p>
     </v-flex>
     <v-flex>
       <v-text-field

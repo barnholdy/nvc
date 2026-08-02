@@ -103,6 +103,21 @@
                 <span class="slider-end-label">100</span>
               </div>
             </template>
+            <template v-if="typeof row.experiment.fearActual === 'number'">
+              <p class="expand-label mt-3">Real</p>
+              <div class="slider-row">
+                <span class="slider-end-label">0</span>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  :value="row.experiment.fearActual"
+                  class="readonly-slider"
+                  disabled
+                />
+                <span class="slider-end-label">100</span>
+              </div>
+            </template>
 
             <template v-if="row.experiment.outcome">
               <p class="expand-label mt-3">Was passiert ist</p>
