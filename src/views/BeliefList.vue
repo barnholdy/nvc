@@ -118,10 +118,27 @@
             </template>
             <template v-if="hasChangeData(entry) || (entry.affirmations && entry.affirmations.length)">
               <p class="expand-label mt-3">Veränderung</p>
+              <template v-if="entry.reflection && entry.reflection.exceptions">
+                <p class="expand-sub-label">Ausnahmen</p>
+                <p class="expand-text">{{ entry.reflection.exceptions }}</p>
+              </template>
               <template v-if="entry.reflection && entry.reflection.withoutBelief">
-                <p class="expand-sub-label">Neue Perspektive</p>
+                <p class="expand-sub-label mt-2">Neue Perspektive</p>
                 <p class="expand-text">{{ entry.reflection.withoutBelief }}</p>
               </template>
+              <template v-if="entry.reflection && entry.reflection.withoutBeliefFeelings
+                && entry.reflection.withoutBeliefFeelings.length">
+                <p class="expand-sub-label mt-2">Neue Gefühle</p>
+                <feeling-chips
+                  :items="entry.reflection.withoutBeliefFeelings"
+                  type="feelings"
+                  class="mb-1"
+                ></feeling-chips>
+              </template>
+              <p
+                v-if="entry.reflection && typeof entry.reflection.bodyIntensity === 'number'"
+                class="expand-meta"
+              >Körperempfindung: {{ entry.reflection.bodyIntensity }} von 10</p>
               <template v-if="entry.affirmations && entry.affirmations.length">
                 <p class="expand-sub-label mt-2">Affirmationen</p>
                 <div
@@ -135,6 +152,7 @@
                     <span class="status-pill" :style="{ color: affStatusColor(a.text) }">
                       {{ affStatusLabel(a.text) }}
                     </span>
+                    <span class="expand-meta">Glaubwürdigkeit: {{ truthOf(a) }} von 10</span>
                   </div>
                   <v-icon small class="linked-chevron">chevron_right</v-icon>
                 </div>
@@ -207,6 +225,7 @@ import {
   experimentStateLabel as stateLabelOf,
   experimentStateColor as stateColorOf,
 } from '@/utils/experiment';
+import { normalizeTruth } from '@/utils/affirmationTruth';
 import {
   loadAffStatusMap,
   affirmationStatusLabel,
@@ -261,6 +280,7 @@ export default {
     hasChangeData(entry) { return hasChangeData(entry); },
     experimentGap(x) { return fearGap(x); },
     experimentStateColor(x) { return stateColorOf(x); },
+    truthOf(a) { return normalizeTruth(a.resonance); },
     affStatusLabel(text) { return affirmationStatusLabel(text, this.affStatusMap); },
     affStatusColor(text) { return affirmationStatusColor(text, this.affStatusMap); },
     editAffirmation(a) {
@@ -505,6 +525,7 @@ export default {
 .expand-text { font-size: 0.93rem; color: #ebebf5; margin: 0; line-height: 1.5; }
 .empathy-text { white-space: pre-wrap; }
 .experiment-gap { display: block; font-size: 0.78rem; color: #8e8e93; margin: 2px 0 0; }
+.expand-meta { display: block; font-size: 0.78rem; color: #8e8e93; margin: 2px 0 0; }
 
 .linked-row {
   display: flex;

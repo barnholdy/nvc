@@ -37,7 +37,12 @@ export function isComplete(belief) {
 
 export function hasChangeData(belief) {
   const r = (belief && belief.reflection) || {};
-  return !!(r.withoutBelief || (r.experiments && r.experiments.length));
+  return !!(
+    r.exceptions ||
+    r.withoutBelief ||
+    (r.withoutBeliefFeelings && r.withoutBeliefFeelings.length) ||
+    (r.experiments && r.experiments.length)
+  );
 }
 
 // Every field the "Überzeugung verändern" wizard collects. bodyIntensity is left
