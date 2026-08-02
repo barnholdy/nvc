@@ -94,7 +94,17 @@
           >
             <template v-if="associatedPatterns(entry.time).length">
               <p class="expand-label">Situationen</p>
-              <p v-for="(p, i) in associatedPatterns(entry.time)" :key="i" class="expand-text mb-1">{{ p.trigger || p.name }}</p>
+              <div
+                v-for="p in associatedPatterns(entry.time)"
+                :key="'pat-' + p.time"
+                class="linked-row"
+                @click.stop="editPattern(p)"
+              >
+                <div class="linked-row-body">
+                  <p class="expand-text">{{ p.trigger || p.name }}</p>
+                </div>
+                <v-icon small class="linked-chevron">chevron_right</v-icon>
+              </div>
             </template>
             <template v-if="entry.feelings && entry.feelings.length">
               <p class="expand-label mt-3">Gefühle</p>
@@ -283,6 +293,10 @@ export default {
     truthOf(a) { return normalizeTruth(a.resonance); },
     affStatusLabel(text) { return affirmationStatusLabel(text, this.affStatusMap); },
     affStatusColor(text) { return affirmationStatusColor(text, this.affStatusMap); },
+    editPattern(p) {
+      this.sw.openIdx = null; this.sw.openDir = null;
+      this.$router.push(`/edit-pattern/${p.time}`);
+    },
     editAffirmation(a) {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.$router.push({ path: '/affirmations', query: { edit: a.text } });
