@@ -289,7 +289,8 @@ export default {
   name: 'action-list',
   data() {
     return {
-      tab: 'open',
+      // Planned experiments are the ones waiting on you, so they open first.
+      tab: 'planned',
       openIndex: null,
       now: Date.now(),
       isResultDialogShowing: false,
