@@ -18,7 +18,7 @@
       <div class="segment-row">
         <button class="seg-tab" :class="{ active: tab === 'open' }" @click="tab = 'open'">Offen</button>
         <button class="seg-tab" :class="{ active: tab === 'planned' }" @click="tab = 'planned'">Geplant</button>
-        <button class="seg-tab" :class="{ active: tab === 'done' }" @click="tab = 'done'">Durchgeführt</button>
+        <button class="seg-tab" :class="{ active: tab === 'done' }" @click="tab = 'done'">Ausgewertet</button>
       </div>
 
       <div v-if="filteredRows.length === 0" class="empty-state">
@@ -27,7 +27,7 @@
         <p class="empty-sub">
           <template v-if="tab === 'open'">Alle Experimente sind geplant — offen ist hier nur, was noch keine Befürchtung hat.</template>
           <template v-else-if="tab === 'planned'">Noch kein Experiment geplant.</template>
-          <template v-else>Noch kein Experiment durchgeführt.</template>
+          <template v-else>Noch kein Experiment ausgewertet.</template>
         </p>
       </div>
 
@@ -70,15 +70,10 @@
                 @click.stop="editExperiment(row)"
               >Planen</button>
               <button
-                v-else-if="state(row.experiment) === 'planned'"
-                class="check-btn"
-                @click.stop="markDone(row)"
-              >Gemacht</button>
-              <button
-                v-else-if="state(row.experiment) === 'done'"
+                v-else-if="displayState(row.experiment) === 'planned'"
                 class="check-btn"
                 @click.stop="startResult(row)"
-              >Ergebnis</button>
+              >Auswerten</button>
             </div>
           </div>
 
@@ -333,6 +328,7 @@ export default {
   },
   methods: {
     state(x) { return experimentState(x); },
+    displayState(x) { return experimentDisplayState(x); },
     gapOf(x) { return fearGap(x); },
     gapColor(gap) { return fearGapColor(gap); },
     isDue(x) { return isDue(x, this.now); },
@@ -357,12 +353,6 @@ export default {
       }));
     },
 
-    markDone(row) {
-      this.sw.openIdx = null; this.sw.openDir = null;
-      this.persist(row, { doneAt: Date.now() });
-      triggerConfetti();
-    },
-
     startResult(row) {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.resultRow = row;
@@ -382,16 +372,21 @@ export default {
     },
     saveResult() {
       const row = this.resultRow;
+      const now = Date.now();
       const changes = {
         outcome: this.resultOutcome.trim(),
         fearActual: this.resultActual,
         learning: this.resultLearning.trim(),
-        completedAt: Date.now(),
+        // Evaluating implies it was carried out. Without this the belief would
+        // never reach "Gehandelt", which keys off doneAt.
+        doneAt: (row && row.experiment.doneAt) || now,
+        completedAt: now,
       };
       this.cancelResult();
       if (row) {
         this.persist(row, changes);
-        this.tab = 'evaluated';
+        this.tab = 'done';
+        triggerConfetti();
       }
     },
 

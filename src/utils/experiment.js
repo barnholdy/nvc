@@ -12,7 +12,7 @@ export const EXPERIMENT_DISPLAY_STATES = ['open', 'planned', 'done'];
 export const EXPERIMENT_DISPLAY_LABELS = {
   open: 'Offen',
   planned: 'Geplant',
-  done: 'Durchgeführt',
+  done: 'Ausgewertet',
 };
 
 // Same grey / orange / green convention as the affirmation statuses.
@@ -45,12 +45,15 @@ export function experimentState(x) {
   return 'draft';
 }
 
-// "Offen" is an experiment still missing its anchor, "Geplant" one waiting to be
-// carried out, "Durchgeführt" one that happened — whether or not it is evaluated.
+// "Offen" is an experiment still missing its anchor, "Geplant" one that is ready
+// but not yet evaluated, "Ausgewertet" one with a result.
+// `done` (carried out, no result) only exists in data written before evaluating
+// moved directly onto the Geplant row — it belongs with the ones still to
+// evaluate, not with the finished ones.
 export function experimentDisplayState(x) {
   const s = experimentState(x);
-  if (s === 'done' || s === 'evaluated') return 'done';
-  if (s === 'planned') return 'planned';
+  if (s === 'evaluated') return 'done';
+  if (s === 'planned' || s === 'done') return 'planned';
   return 'open';
 }
 
