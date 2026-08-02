@@ -88,9 +88,21 @@
               <p class="expand-label mt-3">Befürchtung</p>
               <p class="expand-text mb-1">{{ row.experiment.fear }}</p>
             </template>
-            <p v-if="row.experiment.fearExpected !== null" class="expand-meta">
-              Erwartet: {{ row.experiment.fearExpected }} von 100
-            </p>
+            <template v-if="row.experiment.fearExpected !== null">
+              <p class="expand-label mt-3">Erwartet</p>
+              <div class="slider-row">
+                <span class="slider-end-label">0</span>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  :value="row.experiment.fearExpected"
+                  class="readonly-slider"
+                  disabled
+                />
+                <span class="slider-end-label">100</span>
+              </div>
+            </template>
 
             <template v-if="row.experiment.outcome">
               <p class="expand-label mt-3">Was passiert ist</p>
@@ -682,6 +694,33 @@ export default {
     border-radius: 50%;
     background: #4ade80;
     cursor: pointer;
+  }
+}
+/* Shows a recorded value — deliberately not interactive. */
+.readonly-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: #3a3a3c;
+  outline: none;
+  opacity: 1;
+  pointer-events: none;
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #4ade80;
+  }
+  &::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border: none;
+    border-radius: 50%;
+    background: #4ade80;
   }
 }
 .slider-value-label {
