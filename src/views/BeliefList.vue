@@ -159,7 +159,6 @@
                   />
                   <span class="slider-end-label">10</span>
                 </div>
-                <p class="expand-meta">{{ entry.reflection.bodyIntensity }} von 10</p>
               </template>
               <template v-if="entry.affirmations && entry.affirmations.length">
                 <p class="expand-sub-label mt-2">Affirmationen</p>
@@ -174,7 +173,19 @@
                     <span class="status-pill" :style="{ color: affStatusColor(a.text) }">
                       {{ affStatusLabel(a.text) }}
                     </span>
-                    <span class="expand-meta">Glaubwürdigkeit: {{ truthOf(a) }} von 10</span>
+                    <p class="expand-sub-label mt-2">Glaubwürdigkeit</p>
+                    <div class="slider-row">
+                      <span class="slider-end-label">0</span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="10"
+                        :value="truthOf(a)"
+                        class="readonly-slider"
+                        disabled
+                      />
+                      <span class="slider-end-label">10</span>
+                    </div>
                   </div>
                   <v-icon small class="linked-chevron">chevron_right</v-icon>
                 </div>
@@ -551,7 +562,6 @@ export default {
 .expand-text { font-size: 0.93rem; color: #ebebf5; margin: 0; line-height: 1.5; }
 .empathy-text { white-space: pre-wrap; }
 .experiment-gap { display: block; font-size: 0.78rem; color: #8e8e93; margin: 2px 0 0; }
-.expand-meta { display: block; font-size: 0.78rem; color: #8e8e93; margin: 2px 0 0; }
 
 /* Shows a recorded value — deliberately not interactive. */
 .slider-row {
