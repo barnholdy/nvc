@@ -222,8 +222,20 @@
 
               <v-layout v-show="resultStep === 3" column>
                 <v-flex class="mt-2 mb-3">
-                  <h1 class="headline font-weight-regular">Was sagt dir das?</h1>
+                  <h1 class="headline font-weight-regular">Reflexion</h1>
+                  <p class="subheading grey--text situation-quote mt-1">„{{ resultSituation }}"</p>
                 </v-flex>
+
+                <v-flex v-if="resultFear" class="mb-4">
+                  <p class="expand-label">Das hattest du befürchtet</p>
+                  <p class="recall-text">{{ resultFear }}</p>
+                </v-flex>
+
+                <v-flex v-if="resultOutcome.trim()" class="mb-4">
+                  <p class="expand-label">Das ist passiert</p>
+                  <p class="recall-text">{{ resultOutcome }}</p>
+                </v-flex>
+
                 <v-flex>
                   <div class="gap-box" :style="{ borderColor: gapColor(resultGap) }">
                     <p class="gap-line">
@@ -237,15 +249,14 @@
                       <template v-else-if="resultGap === 0">Genau wie befürchtet</template>
                       <template v-else>{{ Math.abs(resultGap) }} Punkte schlimmer als befürchtet</template>
                     </p>
-                    <p class="gap-question">Was sagt dir das?</p>
                   </div>
+                  <p class="gap-question">Was sagt dir das?</p>
                   <v-textarea
                     v-model="resultLearning"
                     placeholder="..."
                     auto-grow
                     rows="4"
                     hide-details
-                    class="mt-2"
                   ></v-textarea>
                 </v-flex>
               </v-layout>
@@ -943,7 +954,7 @@ export default {
 .gap-line { font-size: 0.95rem; color: #ebebf5; margin: 0; line-height: 1.5; }
 .gap-num { font-weight: 700; }
 .gap-delta { font-size: 0.875rem; font-weight: 600; margin: 6px 0 0; }
-.gap-question { font-size: 0.95rem; color: #fff; font-weight: 600; margin: 10px 0 0; }
+.gap-question { font-size: 0.95rem; color: #fff; font-weight: 600; margin: 14px 0 6px; }
 
 .confirm-dialog { border-radius: 14px !important; overflow: hidden; }
 .confirm-title {
