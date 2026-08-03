@@ -58,7 +58,9 @@
 
 <script>
 import { dedupeByName } from '@/utils/emotions';
-import { originArcOf } from '@/utils/originArc';
+import { originArcOf, moodLabel } from '@/utils/originArc';
+import { situationsForBelief } from '@/utils/patterns';
+import { averageTruth } from '@/utils/beliefTrend';
 import { experimentsOf } from '@/utils/experiment';
 import { normalizeTruth } from '@/utils/affirmationTruth';
 export default {
@@ -112,7 +114,7 @@ export default {
     },
     buildPrompt() {
       var e = this.entry;
-      var system = 'Du bist ein einfühlsamer Gesprächsbegleiter. Eine Person teilt dir eine persönliche Situation in strukturierter Form mit – bestehend aus:\n\n- Glaube: Welche Überzeugung oder Interpretation hat die Person?\n- Gefühl: Welche Emotion(en) entstehen dadurch?\n- Reaktion: Wie hat die Person reagiert (innerlich oder äußerlich)?\n- Bedürfnis: Welches unerfüllte Bedürfnis steckt dahinter?\n- Ursprungshypothese: Woher könnte dieser Glaube oder dieses Muster stammen?\n- Veränderungsarbeit: Ausnahmen, eine neue Perspektive, neue Gefühle und ein Affirmationssatz – falls die Person daran schon gearbeitet hat.\n- Verhaltensexperimente: konkrete Situationen, in denen die Person die Überzeugung getestet hat, mit ihrer vorab notierten Befürchtung und dem tatsächlichen Ausgang.\n\nDeine Aufgabe ist es, empathisch zu antworten. Halte dich dabei an folgende Prinzipien:\n\n1. Erst spiegeln, dann würdigen – Fasse zusammen, was du gehört hast, ohne zu interpretieren oder zu bewerten. Zeige, dass du wirklich zugehört hast.\n2. Den Kern berühren – Benenne das Gefühl und das Bedürfnis direkt und warmherzig. Die Person soll sich gesehen fühlen, nicht analysiert.\n3. Die Ursprungshypothese würdigen – Anerkenne, wie viel Selbstreflexion darin steckt, ohne sie zu bestätigen oder zu widerlegen.\n4. Keine Ratschläge, keine Lösungen – Außer die Person fragt explizit danach.\n5. Offene Einladung zum Ende – Schließe mit einer offenen Frage oder einem Raumangebot, kein Druck.\n\nTon: warm, ruhig, präsent. Nicht therapeutisch-distanziert, nicht überschwänglich. Sprich die Person direkt an (du/Sie je nach Input). Antworte auf Deutsch, es sei denn, die Person schreibt auf Englisch.';
+      var system = 'Du bist ein einfühlsamer Gesprächsbegleiter. Eine Person teilt dir eine persönliche Situation in strukturierter Form mit – bestehend aus:\n\n- Glaube: Welche Überzeugung oder Interpretation hat die Person?\n- Gefühl: Welche Emotion(en) entstehen dadurch?\n- Reaktion: Wie hat die Person reagiert (innerlich oder äußerlich)?\n- Bedürfnis: Welches unerfüllte Bedürfnis steckt dahinter?\n- Ursprungshypothese: Woher könnte dieser Glaube oder dieses Muster stammen? Dazu, was er der Person damals gebracht hat, und wie es ihr nach diesem Rückblick ging.\n- Situationen: Momente, in denen die Überzeugung aufgetaucht ist, und wie wahr die Person sie dort auf einer Skala von 0 bis 10 fand.\n- Veränderungsarbeit: Ausnahmen, eine neue Perspektive, neue Gefühle und ein Affirmationssatz – falls die Person daran schon gearbeitet hat.\n- Verhaltensexperimente: konkrete Situationen, in denen die Person die Überzeugung getestet hat, mit ihrer vorab notierten Befürchtung und dem tatsächlichen Ausgang.\n\nDeine Aufgabe ist es, empathisch zu antworten. Halte dich dabei an folgende Prinzipien:\n\n1. Erst spiegeln, dann würdigen – Fasse zusammen, was du gehört hast, ohne zu interpretieren oder zu bewerten. Zeige, dass du wirklich zugehört hast.\n2. Den Kern berühren – Benenne das Gefühl und das Bedürfnis direkt und warmherzig. Die Person soll sich gesehen fühlen, nicht analysiert.\n3. Die Ursprungshypothese würdigen – Anerkenne, wie viel Selbstreflexion darin steckt, ohne sie zu bestätigen oder zu widerlegen.\n4. Keine Ratschläge, keine Lösungen – Außer die Person fragt explizit danach.\n5. Offene Einladung zum Ende – Schließe mit einer offenen Frage oder einem Raumangebot, kein Druck.\n\nTon: warm, ruhig, präsent. Nicht therapeutisch-distanziert, nicht überschwänglich. Sprich die Person direkt an (du/Sie je nach Input). Antworte auf Deutsch, es sei denn, die Person schreibt auf Englisch.';
 
       var lines = [system, ''];
       if (e.belief) lines.push('Glaube: ' + e.belief);
@@ -121,12 +123,26 @@ export default {
       if (e.withBelief) lines.push('Reaktion: ' + e.withBelief);
       var needs = e.needs && e.needs.length ? dedupeByName(e.needs).map(function(n) { return n.name; }).join(', ') : '';
       if (needs) lines.push('Bedürfnis: ' + needs);
+      var situations = situationsForBelief(this.$store.getters.patterns, e.time);
+      if (situations.length) {
+        lines.push('Situationen: ' + situations.map(function(p) {
+          return p.trigger || p.name;
+        }).join(' | '));
+      }
+      var truth = averageTruth(this.$store.getters.patterns, e.time);
+      if (truth !== null) {
+        lines.push('Für wahr gehalten: ' + Math.round(truth * 10) / 10 + ' von 10'
+          + (situations.length > 1 ? ' (Durchschnitt über ' + situations.length + ' Situationen)' : ''));
+      }
       var r = e.reflection || {};
       if (r.origin) lines.push('Ursprungshypothese: ' + r.origin);
       // The reframe from the origin arc: what the belief once bought this
       // person. Part of the same story, so it goes in with it.
       var arc = originArcOf(e);
       if (arc.gift) lines.push('Was die Überzeugung damals gebracht hat: ' + arc.gift);
+      // The grounding words ("Lampe, Tisch") are left out on purpose: they name
+      // the room, not the person. The mood after the look back does say something.
+      if (arc.mood) lines.push('Nach dem Blick auf den Ursprung: ' + moodLabel(arc.mood));
 
       if (r.exceptions) lines.push('Ausnahmen: ' + r.exceptions);
       if (r.withoutBelief) lines.push('Neue Perspektive: ' + r.withoutBelief);

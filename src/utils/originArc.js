@@ -1,4 +1,4 @@
-// The origin phase of the "Überzeugung verstehen" wizard opens childhood
+// The origin phase of the "Überzeugung ergründen" wizard opens childhood
 // material, so it carries its own small state: what the belief once bought the
 // user, what brought them back into the present, and how they feel afterwards.
 //

@@ -11,7 +11,7 @@ export function isBeliefStatus(value) {
 
 export const BELIEF_STATUS_LABELS = {
   open: 'Offen',
-  working: 'Verstanden',
+  working: 'Ergründet',
   done: 'Gewandelt',
   acted: 'Gehandelt',
 };

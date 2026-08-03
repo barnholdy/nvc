@@ -63,6 +63,9 @@
 <script>
 import { dedupeByName } from '@/utils/emotions';
 import { experimentsOf } from '@/utils/experiment';
+import { originArcOf, moodLabel } from '@/utils/originArc';
+import { averageTruth } from '@/utils/beliefTrend';
+import { normalizeTruth } from '@/utils/affirmationTruth';
 const STORAGE_KEY = 'nvc.globalEmpathy';
 
 function hashString(str) {
@@ -103,7 +106,7 @@ export default {
     buildPrompt() {
       const patterns = this.$store.getters.patterns;
       const beliefs = this.$store.getters.beliefs;
-      const system = 'Du bist ein einfühlsamer Gesprächsbegleiter. Eine Person teilt dir ihre persönlichen Muster und Überzeugungen mit – in strukturierter Form. Jedes Muster beschreibt eine Situation und die damit verbundenen Überzeugungen. Jede Überzeugung enthält die Überzeugung selbst, damit verbundene Gefühle, Reaktionen und Bedürfnisse – und, falls vorhanden, die Veränderungsarbeit daran: Ausnahmen, eine neue Perspektive, Affirmationen und Verhaltensexperimente mit vorab notierter Befürchtung und tatsächlichem Ausgang.\n\nDeine Aufgabe ist es, empathisch zu antworten. Halte dich dabei an folgende Prinzipien:\n\n1. Erst spiegeln, dann würdigen – Fasse zusammen, was du gehört hast, ohne zu interpretieren oder zu bewerten. Zeige, dass du wirklich zugehört hast.\n2. Den Kern berühren – Benenne die wiederkehrenden Gefühle und Bedürfnisse direkt und warmherzig. Die Person soll sich gesehen fühlen, nicht analysiert.\n3. Muster erkennen – Wenn sich Themen über mehrere Einträge wiederholen, würdige das behutsam.\n4. Keine Ratschläge, keine Lösungen – Außer die Person fragt explizit danach.\n5. Offene Einladung zum Ende – Schließe mit einer offenen Frage oder einem Raumangebot, kein Druck.\n\nTon: warm, ruhig, präsent. Antworte auf Deutsch.';
+      const system = 'Du bist ein einfühlsamer Gesprächsbegleiter. Eine Person teilt dir ihre persönlichen Muster und Überzeugungen mit – in strukturierter Form. Jedes Muster beschreibt eine Situation und die damit verbundenen Überzeugungen. Jede Überzeugung enthält die Überzeugung selbst, damit verbundene Gefühle, Reaktionen und Bedürfnisse – und, falls vorhanden, die Veränderungsarbeit daran: Ausnahmen, eine neue Perspektive, Affirmationen und Verhaltensexperimente mit vorab notierter Befürchtung und tatsächlichem Ausgang. Wo vorhanden steht dabei, für wie wahr die Person eine Überzeugung hält (0 bis 10) und was diese ihr früher gebracht hat.\n\nDeine Aufgabe ist es, empathisch zu antworten. Halte dich dabei an folgende Prinzipien:\n\n1. Erst spiegeln, dann würdigen – Fasse zusammen, was du gehört hast, ohne zu interpretieren oder zu bewerten. Zeige, dass du wirklich zugehört hast.\n2. Den Kern berühren – Benenne die wiederkehrenden Gefühle und Bedürfnisse direkt und warmherzig. Die Person soll sich gesehen fühlen, nicht analysiert.\n3. Muster erkennen – Wenn sich Themen über mehrere Einträge wiederholen, würdige das behutsam.\n4. Keine Ratschläge, keine Lösungen – Außer die Person fragt explizit danach.\n5. Offene Einladung zum Ende – Schließe mit einer offenen Frage oder einem Raumangebot, kein Druck.\n\nTon: warm, ruhig, präsent. Antworte auf Deutsch.';
       const lines = [system, ''];
       if (patterns.length > 0) {
         lines.push('MUSTER:');
@@ -112,7 +115,14 @@ export default {
           lines.push(`Muster ${i + 1}${p.name ? ` (${p.name})` : ''}:`);
           if (p.trigger) lines.push(`  Situation: ${p.trigger}`);
           const linked = (p.beliefs || []).map(id => beliefs.find(b => b.time === id)).filter(Boolean);
-          if (linked.length) lines.push(`  Glaubenssätze: ${linked.map(b => b.belief).join('; ')}`);
+          if (linked.length) {
+            // With the rating this situation recorded, where there is one.
+            const truths = p.beliefTruths || {};
+            lines.push(`  Glaubenssätze: ${linked.map((b) => {
+              const v = truths[b.time];
+              return typeof v === 'number' ? `${b.belief} (${v}/10 wahr)` : b.belief;
+            }).join('; ')}`);
+          }
         });
       }
       if (beliefs.length > 0) {
@@ -127,21 +137,44 @@ export default {
           if (b.withBelief) lines.push(`  Reaktion: ${b.withBelief}`);
           const needs = b.needs && b.needs.length ? dedupeByName(b.needs).map(n => n.name).join(', ') : '';
           if (needs) lines.push(`  Bedürfnis: ${needs}`);
+          const truth = averageTruth(patterns, b.time);
+          if (truth !== null) lines.push(`  Für wahr gehalten: ${Math.round(truth * 10) / 10} von 10`);
           const r = b.reflection || {};
           if (r.origin) lines.push(`  Ursprungshypothese: ${r.origin}`);
+          const arc = originArcOf(b);
+          if (arc.gift) lines.push(`  Was die Überzeugung damals gebracht hat: ${arc.gift}`);
+          if (arc.mood) lines.push(`  Nach dem Blick auf den Ursprung: ${moodLabel(arc.mood)}`);
           if (r.exceptions) lines.push(`  Ausnahmen: ${r.exceptions}`);
           if (r.withoutBelief) lines.push(`  Neue Perspektive: ${r.withoutBelief}`);
           const newFeelings = r.withoutBeliefFeelings && r.withoutBeliefFeelings.length
             ? r.withoutBeliefFeelings.map(f => f.name).join(', ') : '';
           if (newFeelings) lines.push(`  Neue Gefühle: ${newFeelings}`);
+          if (typeof r.bodyIntensity === 'number') {
+            lines.push(`  Körperempfindung dabei: ${r.bodyIntensity} von 10`);
+          }
           (b.affirmations || []).forEach((a) => {
-            if (a && a.text) lines.push(`  Affirmation: ${a.text}`);
+            if (!a || !a.text) return;
+            const credible = typeof a.resonance === 'number'
+              ? ` (Glaubwürdigkeit ${normalizeTruth(a.resonance)} von 10)` : '';
+            lines.push(`  Affirmation: ${a.text}${credible}`);
           });
           experimentsOf(b).forEach((x) => {
             const parts = [];
             if (x.situation) parts.push(x.situation);
-            if (typeof x.fearExpected === 'number') parts.push(`befürchtet ${x.fearExpected}/100`);
-            if (typeof x.fearActual === 'number') parts.push(`real ${x.fearActual}/100`);
+            // The words matter as much as the numbers: "Sie lachen" against
+            // "Niemand lachte" is the whole point of the experiment.
+            if (x.fear) {
+              parts.push(`Befürchtung: ${x.fear}`
+                + (typeof x.fearExpected === 'number' ? ` (erwartet ${x.fearExpected} von 100)` : ''));
+            } else if (typeof x.fearExpected === 'number') {
+              parts.push(`befürchtet ${x.fearExpected}/100`);
+            }
+            if (x.outcome) {
+              parts.push(`Tatsächlich: ${x.outcome}`
+                + (typeof x.fearActual === 'number' ? ` (real ${x.fearActual} von 100)` : ''));
+            } else if (typeof x.fearActual === 'number') {
+              parts.push(`real ${x.fearActual}/100`);
+            }
             if (x.learning) parts.push(`Erkenntnis: ${x.learning}`);
             if (parts.length) lines.push(`  Verhaltensexperiment: ${parts.join(' | ')}`);
           });
