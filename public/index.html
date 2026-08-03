@@ -45,7 +45,12 @@
       var FLAG = 'nvc.assetReload';
       window.addEventListener('error', function (e) {
         var el = e && e.target;
-        if (!el || (el.tagName !== 'SCRIPT' && el.tagName !== 'LINK')) return;
+        if (!el) return;
+        // Only our own build output. A blocked web font or a missing icon is
+        // not worth a reload — and would fire on every visit while offline.
+        var url = el.tagName === 'SCRIPT' ? el.src
+          : (el.tagName === 'LINK' && el.rel === 'stylesheet' ? el.href : '');
+        if (!url || url.lastIndexOf(location.origin, 0) !== 0) return;
         try {
           if (sessionStorage.getItem(FLAG)) return;
           sessionStorage.setItem(FLAG, '1');
