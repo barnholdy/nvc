@@ -58,6 +58,7 @@
 
 <script>
 import { dedupeByName } from '@/utils/emotions';
+import { originArcOf } from '@/utils/originArc';
 import { experimentsOf } from '@/utils/experiment';
 import { normalizeTruth } from '@/utils/affirmationTruth';
 export default {
@@ -122,6 +123,10 @@ export default {
       if (needs) lines.push('Bedürfnis: ' + needs);
       var r = e.reflection || {};
       if (r.origin) lines.push('Ursprungshypothese: ' + r.origin);
+      // The reframe from the origin arc: what the belief once bought this
+      // person. Part of the same story, so it goes in with it.
+      var arc = originArcOf(e);
+      if (arc.gift) lines.push('Was die Überzeugung damals gebracht hat: ' + arc.gift);
 
       if (r.exceptions) lines.push('Ausnahmen: ' + r.exceptions);
       if (r.withoutBelief) lines.push('Neue Perspektive: ' + r.withoutBelief);

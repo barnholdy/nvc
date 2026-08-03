@@ -115,9 +115,34 @@
               <p class="expand-label mt-3">Bedürfnis</p>
               <feeling-chips :items="entry.needs" type="needs" class="mb-2"></feeling-chips>
             </template>
-            <template v-if="entry.reflection && entry.reflection.origin">
-              <p class="expand-label mt-3">Ursprung</p>
-              <p class="expand-text">{{ entry.reflection.origin }}</p>
+            <!-- Childhood material is reopened by a deliberate tap, never as a
+                 side effect of opening the belief. -->
+            <template v-if="hasOriginContent(entry)">
+              <div class="origin-toggle" @click.stop="isOriginOpen = !isOriginOpen">
+                <span class="origin-toggle-label">
+                  {{ isOriginOpen ? 'Ursprung ausblenden' : 'Ursprung anzeigen' }}
+                </span>
+                <v-icon small class="origin-chevron">
+                  {{ isOriginOpen ? 'expand_more' : 'chevron_right' }}
+                </v-icon>
+              </div>
+              <template v-if="isOriginOpen">
+                <template v-if="entry.reflection.origin">
+                  <p class="expand-text mt-2">{{ entry.reflection.origin }}</p>
+                </template>
+                <template v-if="originArc(entry).gift">
+                  <p class="expand-sub-label mt-3">Kluge Lösung</p>
+                  <p class="expand-text">{{ originArc(entry).gift }}</p>
+                </template>
+                <template v-if="originArc(entry).grounding.length">
+                  <p class="expand-sub-label mt-3">Zurück ins Jetzt</p>
+                  <p class="expand-text">{{ originArc(entry).grounding.join(' · ') }}</p>
+                </template>
+                <template v-if="originArc(entry).mood">
+                  <p class="expand-sub-label mt-3">Danach</p>
+                  <p class="expand-text">{{ moodLabel(originArc(entry).mood) }}</p>
+                </template>
+              </template>
             </template>
             <template v-if="hasChangeData(entry) || (entry.affirmations && entry.affirmations.length)">
               <p class="expand-label mt-3">Veränderung</p>
@@ -258,6 +283,7 @@ import {
   experimentsOf,
 } from '@/utils/experiment';
 import { normalizeTruth } from '@/utils/affirmationTruth';
+import { originArcOf, moodLabel as moodLabelOf } from '@/utils/originArc';
 import {
   loadAffStatusMap,
   affirmationStatusLabel,
@@ -270,6 +296,7 @@ export default {
   data() {
     return {
       openEntry: null,
+      isOriginOpen: false,
       entryToDelete: null,
       isDeleteDialogShowing: false,
       // Saving a belief returns here with the tab it now belongs to.
@@ -279,7 +306,10 @@ export default {
     };
   },
   watch: {
-    tab() { this.sw.openIdx = null; this.sw.openDir = null; this.openEntry = null; },
+    tab() {
+      this.sw.openIdx = null; this.sw.openDir = null;
+      this.openEntry = null; this.isOriginOpen = false;
+    },
   },
   computed: {
     beliefs() {
@@ -307,6 +337,16 @@ export default {
     toggle(time) {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.openEntry = this.openEntry === time ? null : time;
+      // Every belief starts with its origin closed again — a previous tap must
+      // not carry over to the next one.
+      this.isOriginOpen = false;
+    },
+    originArc(entry) { return originArcOf(entry); },
+    moodLabel(mood) { return moodLabelOf(mood); },
+    hasOriginContent(entry) {
+      const r = (entry && entry.reflection) || {};
+      const arc = originArcOf(entry);
+      return !!(r.origin || arc.gift || arc.grounding.length || arc.mood);
     },
     // Still a method: the template calls hasChangeData(entry) directly.
     hasChangeData(entry) { return hasChangeData(entry); },
@@ -559,6 +599,21 @@ export default {
   font-weight: 600;
 }
 .expand-sub-label { font-size: 0.75rem; color: #636366; margin: 0 0 3px; font-style: italic; }
+.origin-toggle {
+  display: flex;
+  align-items: center;
+  margin-top: 14px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.origin-toggle-label {
+  font-size: 0.68rem;
+  color: #8e8e93;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+.origin-chevron { color: #636366 !important; margin-left: 2px; }
 .expand-text { font-size: 0.93rem; color: #ebebf5; margin: 0; line-height: 1.5; }
 .empathy-text { white-space: pre-wrap; }
 .experiment-gap { display: block; font-size: 0.78rem; color: #8e8e93; margin: 2px 0 0; }

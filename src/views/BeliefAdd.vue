@@ -1,7 +1,10 @@
 <template>
   <div>
     <v-toolbar color="white" app>
-      <v-btn v-if="step === 1" icon @click="close">
+      <v-btn v-if="savedState" icon @click="finish">
+        <v-icon>close</v-icon>
+      </v-btn>
+      <v-btn v-else-if="step === 1" icon @click="close">
         <v-icon>close</v-icon>
       </v-btn>
       <v-btn v-else icon @click="prevStep">
@@ -9,73 +12,146 @@
       </v-btn>
       <v-toolbar-title>{{ isEditMode ? 'Überzeugung verstehen' : 'Neue Überzeugung' }}</v-toolbar-title>
       <v-spacer></v-spacer>
-      <span class="grey--text body-1">{{ step }} / {{ totalSteps }}</span>
+      <span v-if="!savedState" class="grey--text body-1">{{ step }} / {{ totalSteps }}</span>
+      <!-- The way out of the origin phase: keeps steps 1-4, drops what was
+           entered here. It sits here rather than on the left so that going back
+           a step stays possible on every screen. -->
+      <v-btn v-if="!savedState && isOriginPhase" icon @click="leaveOriginPhase">
+        <v-icon>close</v-icon>
+      </v-btn>
     </v-toolbar>
     <v-content>
       <v-container class="mb-5">
-        <belief-add-belief
-          v-show="step === 1"
-          :initialValue="belief"
-          @beliefChanged="belief = $event"
-          @focussed="isFooterFixed = false"
-          @blurred="isFooterFixed = true">
-        </belief-add-belief>
+        <template v-if="savedState">
+          <v-layout column>
+            <v-flex class="mt-2">
+              <h1 class="headline font-weight-regular">Gespeichert</h1>
+              <p v-if="savedState === 'withOrigin'" class="body-1 grey--text mt-3">
+                Der Ursprung liegt jetzt bei dieser Überzeugung — eingeklappt. Du entscheidest,
+                wann du ihn wieder anschaust.
+              </p>
+              <p v-else class="body-1 grey--text mt-3">
+                Ohne Ursprung gespeichert. Du kannst ihn jederzeit später ergänzen, wenn es sich
+                stimmig anfühlt.
+              </p>
+            </v-flex>
+          </v-layout>
+        </template>
 
-        <belief-add-reaction
-          v-show="step === 2"
-          :belief="belief"
-          :initialValue="withBelief"
-          @changed="withBelief = $event"
-          @focussed="isFooterFixed = false"
-          @blurred="isFooterFixed = true">
-        </belief-add-reaction>
+        <template v-else>
+          <belief-add-belief
+            v-show="step === 1"
+            :initialValue="belief"
+            @beliefChanged="belief = $event"
+            @focussed="isFooterFixed = false"
+            @blurred="isFooterFixed = true">
+          </belief-add-belief>
 
-        <belief-add-feeling-need
-          v-show="step === 3"
-          mode="feelings"
-          :belief="belief"
-          :taxonomy="taxonomy"
-          :initialFeelings="selectedFeelings"
-          @change="selectedFeelings = $event">
-        </belief-add-feeling-need>
+          <belief-add-reaction
+            v-show="step === 2"
+            :belief="belief"
+            :initialValue="withBelief"
+            @changed="withBelief = $event"
+            @focussed="isFooterFixed = false"
+            @blurred="isFooterFixed = true">
+          </belief-add-reaction>
 
-        <belief-add-feeling-need
-          v-show="step === 4"
-          mode="needs"
-          :belief="belief"
-          :taxonomy="taxonomy"
-          :initialNeeds="selectedNeeds"
-          :contextFeelings="selectedFeelings"
-          @change="selectedNeeds = $event">
-        </belief-add-feeling-need>
+          <belief-add-feeling-need
+            v-show="step === 3"
+            mode="feelings"
+            :belief="belief"
+            :taxonomy="taxonomy"
+            :initialFeelings="selectedFeelings"
+            @change="selectedFeelings = $event">
+          </belief-add-feeling-need>
 
-        <belief-add-hypothese
-          v-show="step === 5"
-          :belief="belief"
-          :initialValue="origin"
-          @changed="origin = $event"
-          @focussed="isFooterFixed = false"
-          @blurred="isFooterFixed = true">
-        </belief-add-hypothese>
+          <belief-add-feeling-need
+            v-show="step === 4"
+            mode="needs"
+            :belief="belief"
+            :taxonomy="taxonomy"
+            :initialNeeds="selectedNeeds"
+            :contextFeelings="selectedFeelings"
+            @change="selectedNeeds = $event">
+          </belief-add-feeling-need>
 
+          <belief-add-readiness v-show="step === 5"></belief-add-readiness>
+
+          <belief-add-origin
+            v-show="step === 6"
+            :belief="belief"
+            :initialValue="origin"
+            @changed="origin = $event"
+            @focussed="isFooterFixed = false"
+            @blurred="isFooterFixed = true">
+          </belief-add-origin>
+
+          <!-- Mounted only once the user opted in, so the chips are built from
+               the needs as they stand at that moment. -->
+          <belief-add-gift
+            v-if="hasEnteredOriginPhase"
+            v-show="step === 7"
+            :belief="belief"
+            :needs="selectedNeeds"
+            :initialValue="gift"
+            @changed="gift = $event">
+          </belief-add-gift>
+
+          <belief-add-grounding
+            v-show="step === 8"
+            :initialValue="grounding"
+            @changed="grounding = $event"
+            @focussed="isFooterFixed = false"
+            @blurred="isFooterFixed = true">
+          </belief-add-grounding>
+
+          <belief-add-check
+            v-show="step === 9"
+            :initialValue="mood"
+            @changed="mood = $event">
+          </belief-add-check>
+        </template>
       </v-container>
 
-      <v-footer :fixed="isFooterFixed" color="white elevation-3" height="44">
-        <v-btn
-          v-if="step < totalSteps"
-          :disabled="!isStepComplete"
-          @click="nextStep"
-          block large color="primary">
-          weiter
-        </v-btn>
-        <v-btn
-          v-else
-          :disabled="!isStepComplete"
-          @click="save"
-          block large color="primary">
-          speichern
-        </v-btn>
+      <v-footer :fixed="isFooterFixed" color="white elevation-3" :height="footerHeight">
+        <div v-if="savedState" class="footer-single">
+          <v-btn @click="finish" block large color="primary">Fertig</v-btn>
+        </div>
+        <div v-else-if="step === READINESS_STEP" class="gate-actions">
+          <v-btn @click="nextStep" block large color="primary">Jetzt anschauen</v-btn>
+          <button type="button" class="later-btn" @click="saveWithoutOrigin">Später</button>
+        </div>
+        <div v-else class="footer-single">
+          <v-btn
+            v-if="step < totalSteps"
+            :disabled="!isStepComplete"
+            @click="nextStep"
+            block large color="primary">
+            {{ step < READINESS_STEP ? 'weiter' : 'Weiter' }}
+          </v-btn>
+          <v-btn
+            v-else
+            :disabled="!isStepComplete"
+            @click="saveWithOrigin"
+            block large color="primary">
+            Speichern
+          </v-btn>
+        </div>
       </v-footer>
+
+      <v-dialog v-model="isDiscardDialogShowing" width="300">
+        <v-card class="confirm-dialog">
+          <v-card-title class="confirm-title">Ursprung verwerfen?</v-card-title>
+          <v-divider></v-divider>
+          <v-card-text class="confirm-text">
+            Was du hier eingetragen hast, geht verloren. Die Überzeugung selbst bleibt gespeichert.
+          </v-card-text>
+          <v-card-actions class="confirm-actions">
+            <v-btn flat @click="isDiscardDialogShowing = false" class="confirm-cancel">Abbrechen</v-btn>
+            <v-btn flat @click="confirmDiscard" class="confirm-delete">Verwerfen</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </v-content>
   </div>
 </template>
@@ -84,9 +160,17 @@
 import BeliefAddBelief from '@/views/BeliefAddBelief.vue';
 import BeliefAddReaction from '@/views/BeliefAddReaction.vue';
 import BeliefAddFeelingNeed from '@/views/BeliefAddFeelingNeed.vue';
-import BeliefAddHypothese from '@/views/BeliefAddHypothese.vue';
+import BeliefAddReadiness from '@/views/BeliefAddReadiness.vue';
+import BeliefAddOrigin from '@/views/BeliefAddOrigin.vue';
+import BeliefAddGift from '@/views/BeliefAddGift.vue';
+import BeliefAddGrounding from '@/views/BeliefAddGrounding.vue';
+import BeliefAddCheck from '@/views/BeliefAddCheck.vue';
 import { beliefStatus } from '@/utils/beliefStatus';
+import { normalizeOriginArc, defaultGift } from '@/utils/originArc';
 import taxonomy from '../assets/taxonomy.json';
+
+const READINESS_STEP = 5;
+const TOTAL_STEPS = 9;
 
 export default {
   name: 'belief-add',
@@ -94,21 +178,40 @@ export default {
     BeliefAddBelief,
     BeliefAddReaction,
     BeliefAddFeelingNeed,
-    BeliefAddHypothese,
+    BeliefAddReadiness,
+    BeliefAddOrigin,
+    BeliefAddGift,
+    BeliefAddGrounding,
+    BeliefAddCheck,
   },
   data() {
     const editEntry = this.$store.getters.beliefs
       .find(function(b) { return b.time === parseInt(this.$route.params.time, 10); }, this);
+    const reflection = (editEntry && editEntry.reflection) || {};
+    const arc = normalizeOriginArc(reflection.originArc);
     return {
       step: 1,
-      totalSteps: 5,
+      totalSteps: TOTAL_STEPS,
+      READINESS_STEP: READINESS_STEP,
       taxonomy: taxonomy,
       editEntry: editEntry || null,
       belief: editEntry ? editEntry.belief : '',
       selectedFeelings: editEntry ? editEntry.feelings || [] : [],
       selectedNeeds: editEntry ? editEntry.needs || [] : [],
       withBelief: editEntry ? editEntry.withBelief || '' : '',
-      origin: editEntry && editEntry.reflection ? editEntry.reflection.origin || '' : '',
+      origin: reflection.origin || '',
+      gift: arc.gift,
+      grounding: arc.grounding,
+      mood: arc.mood,
+      storedArc: arc,
+      storedOrigin: reflection.origin || '',
+      // What the wizard itself pre-selected. A default is not something the
+      // user typed, so it must not trigger the discard prompt.
+      seededGift: arc.gift,
+      hasEnteredOriginPhase: false,
+      savedState: null,
+      savedTab: 'open',
+      isDiscardDialogShowing: false,
       isFooterFixed: true,
     };
   },
@@ -116,13 +219,39 @@ export default {
     isEditMode() {
       return !!this.editEntry;
     },
+    isOriginPhase() {
+      return this.step >= READINESS_STEP;
+    },
     isStepComplete() {
       if (this.step === 1) return this.belief.trim() !== '';
+      // The only hard gate in the whole wizard: saving needs an answer to the
+      // check, because that answer decides whether the signpost was shown.
+      if (this.step === TOTAL_STEPS) return !!this.mood;
       return true;
+    },
+    footerHeight() {
+      return this.step === READINESS_STEP && !this.savedState ? 96 : 44;
+    },
+    // Nothing to warn about when this session added nothing beyond what is
+    // already stored.
+    hasUnsavedOriginInput() {
+      if (this.origin.trim() !== this.storedOrigin.trim()) return true;
+      if (this.gift !== this.storedArc.gift && this.gift !== this.seededGift) return true;
+      if (this.mood !== this.storedArc.mood) return true;
+      return this.grounding.join(' ') !== this.storedArc.grounding.join(' ');
     },
   },
   methods: {
     nextStep() {
+      // Opting in is what creates the arc; the gift chips are seeded from the
+      // needs picked in step 4 the first time the user gets here.
+      if (this.step === READINESS_STEP && !this.hasEnteredOriginPhase) {
+        this.hasEnteredOriginPhase = true;
+        if (!this.gift) {
+          this.gift = defaultGift(this.selectedNeeds);
+          this.seededGift = this.gift;
+        }
+      }
       this.step += 1;
       this.$vuetify.goTo(0, { duration: 0 });
     },
@@ -130,14 +259,47 @@ export default {
       this.step -= 1;
       this.$vuetify.goTo(0, { duration: 0 });
     },
-    save() {
-      var existingReflection = this.editEntry ? (this.editEntry.reflection || {}) : {};
+    leaveOriginPhase() {
+      if (this.hasUnsavedOriginInput) {
+        this.isDiscardDialogShowing = true;
+        return;
+      }
+      this.saveWithoutOrigin();
+    },
+    confirmDiscard() {
+      this.isDiscardDialogShowing = false;
+      this.saveWithoutOrigin();
+    },
+    saveWithOrigin() { this.persist(true); },
+    saveWithoutOrigin() { this.persist(false); },
+    buildReflection(withOrigin) {
+      const existing = this.editEntry ? (this.editEntry.reflection || {}) : {};
+      const base = Object.assign({ withoutBelief: '', turnarounds: [] }, existing);
+      if (withOrigin) {
+        return Object.assign(base, {
+          origin: this.origin,
+          originArc: {
+            gift: this.gift,
+            grounding: this.grounding,
+            mood: this.mood,
+            completedAt: new Date().toISOString(),
+          },
+        });
+      }
+      // Leaving the phase writes none of this session's origin input — but it
+      // must not erase what an earlier run already saved either.
+      return Object.assign(base, {
+        origin: this.storedOrigin,
+        originArc: this.storedArc,
+      });
+    },
+    persist(withOrigin) {
       const payload = {
         belief: this.belief,
         feelings: this.selectedFeelings,
         withBelief: this.withBelief,
         needs: this.selectedNeeds,
-        reflection: Object.assign({ withoutBelief: '', turnarounds: [] }, existingReflection, { origin: this.origin }),
+        reflection: this.buildReflection(withOrigin),
       };
       const saved = this.isEditMode ? Object.assign({}, this.editEntry, payload) : payload;
       if (this.isEditMode) {
@@ -146,7 +308,12 @@ export default {
         this.$store.dispatch('saveBelief', saved);
       }
       // Editing can move the belief to another tab — land on the one it is in now.
-      this.$router.push({ path: '/beliefs', query: { tab: beliefStatus(saved) } });
+      this.savedTab = beliefStatus(saved);
+      this.savedState = withOrigin ? 'withOrigin' : 'later';
+      this.$vuetify.goTo(0, { duration: 0 });
+    },
+    finish() {
+      this.$router.push({ path: '/beliefs', query: { tab: this.savedTab } });
     },
     close() {
       this.$router.push('/beliefs');
@@ -156,4 +323,46 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.footer-single { width: 100%; }
+.gate-actions {
+  width: 100%;
+  padding: 4px 0 6px;
+}
+.later-btn {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  color: #8e8e93;
+  font-size: 0.9rem;
+  padding: 8px 0 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  &:focus-visible {
+    outline: 2px solid #4ade80;
+    outline-offset: 2px;
+  }
+}
+
+.confirm-dialog { background: #2c2c2e !important; border-radius: 14px; }
+.confirm-title {
+  font-size: 1rem !important;
+  color: #fff;
+  justify-content: center;
+  padding: 16px 16px 10px;
+}
+.confirm-text {
+  font-size: 0.85rem;
+  color: #8e8e93;
+  text-align: center;
+  padding: 12px 16px;
+}
+.confirm-actions { padding: 0; }
+.confirm-cancel, .confirm-delete {
+  flex: 1;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+.confirm-cancel { color: #4ade80 !important; }
+.confirm-delete { color: #ff453a !important; }
 </style>

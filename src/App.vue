@@ -33,8 +33,8 @@
                 <strong>Sie ersetzt keine Therapie oder professionelle Begleitung.</strong> Wenn du in einer Krise bist oder professionelle Unterstützung brauchst:
               </p>
               <div class="ob-contact-box">
-                <p class="ob-contact-row">📞 <strong>Telefonseelsorge</strong><br><span class="ob-contact-detail">0800 111 0 111 — kostenlos, 24 h</span></p>
-                <p class="ob-contact-row">🌐 <strong>Online-Beratung</strong><br><span class="ob-contact-detail">online.telefonseelsorge.de</span></p>
+                <p class="ob-contact-row">📞 <strong>{{ support.name }}</strong><br><span class="ob-contact-detail">{{ support.phone }} — {{ support.availability }}</span></p>
+                <p class="ob-contact-row">🌐 <strong>Online-Beratung</strong><br><span class="ob-contact-detail">{{ support.online }}</span></p>
               </div>
             </div>
 
@@ -82,12 +82,15 @@
 </template>
 
 <script>
+import { SUPPORT_RESOURCE } from '@/utils/support';
+
 const ONBOARDING_KEY = 'nvc.onboarded';
 
 export default {
   name: 'app',
   data() {
     return {
+      support: SUPPORT_RESOURCE,
       showOnboarding: !localStorage.getItem(ONBOARDING_KEY),
       obStep: 1,
     };

@@ -83,6 +83,19 @@
         <p v-if="importSuccess" class="feedback-text success-text">Daten erfolgreich importiert.</p>
       </div>
 
+      <!-- Findable in a hard moment, without having to walk through a wizard -->
+      <p class="section-header">Hilfe</p>
+      <div class="settings-group">
+        <a class="settings-row tappable support-row" :href="support.phoneHref">
+          <div class="settings-row-body">
+            <p class="settings-label">Hilfe &amp; Unterstützung</p>
+            <p class="settings-sub">{{ support.name }} · {{ support.phone }}</p>
+            <p class="settings-sub">{{ support.availability }} · {{ support.online }}</p>
+          </div>
+          <v-icon color="#4ade80">phone</v-icon>
+        </a>
+      </div>
+
       <!-- Onboarding -->
       <p class="section-header">Über die App</p>
       <div class="settings-group">
@@ -140,10 +153,13 @@
 </template>
 
 <script>
+import { SUPPORT_RESOURCE } from '@/utils/support';
+
 export default {
   name: 'settings-view',
   data() {
     return {
+      support: SUPPORT_RESOURCE,
       apiKey: localStorage.getItem('nvc.apiKey') || '',
       savedApiKey: localStorage.getItem('nvc.apiKey') || '',
       showResetDialog: false,
@@ -292,6 +308,7 @@ export default {
   }
 }
 .settings-row-body { flex: 1; min-width: 0; }
+.support-row { text-decoration: none; }
 .settings-label {
   font-size: 0.95rem;
   color: #fff;
