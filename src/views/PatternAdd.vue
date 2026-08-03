@@ -25,8 +25,10 @@
           v-show="step === 2"
           :allBeliefs="allBeliefs"
           :selectedBeliefIds="selectedBeliefIds"
+          :initialTruths="beliefTruths"
           :trigger="trigger"
-          @changed="selectedBeliefIds = $event">
+          @changed="selectedBeliefIds = $event"
+          @truthsChanged="beliefTruths = $event">
         </pattern-add-beliefs>
 
         <pattern-add-name
@@ -81,6 +83,7 @@ export default {
       editEntry: editEntry || null,
       trigger: editEntry ? editEntry.trigger || '' : '',
       selectedBeliefIds: editEntry ? editEntry.beliefs || [] : [],
+      beliefTruths: editEntry ? editEntry.beliefTruths || {} : {},
       name: editEntry ? editEntry.name || '' : '',
       isFooterFixed: true,
     };
@@ -116,6 +119,9 @@ export default {
       var payload = {
         trigger: this.trigger,
         beliefs: this.selectedBeliefIds,
+        // How true each belief was held at this point in time. Stored on the
+        // situation, so repeated situations form a trend per belief.
+        beliefTruths: this.beliefTruths,
         name: this.name,
       };
       if (this.isEditMode) {

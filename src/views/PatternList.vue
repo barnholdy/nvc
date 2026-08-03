@@ -73,6 +73,9 @@
                 <div class="belief-row-body">
                   <p class="expand-text">{{ b.belief }}</p>
                   <span class="status-pill" :style="{ color: statusColor(b) }">{{ statusLabel(b) }}</span>
+                  <span v-if="truthOf(entry, b) !== null" class="status-pill truth-pill">
+                    {{ truthOf(entry, b) }}/10 wahr
+                  </span>
                 </div>
                 <v-icon small class="belief-chevron">chevron_right</v-icon>
               </div>
@@ -134,6 +137,12 @@ export default {
     getBeliefs(entry) {
       const beliefs = this.$store.getters.beliefs;
       return (entry.beliefs || []).map(id => beliefs.find(b => b.time === id)).filter(Boolean);
+    },
+    // Recorded on the situation when the belief was added to it.
+    truthOf(entry, belief) {
+      const map = (entry && entry.beliefTruths) || {};
+      const v = map[belief.time];
+      return typeof v === 'number' ? v : null;
     },
     statusLabel(belief) { return beliefStatusLabel(belief); },
     statusColor(belief) { return beliefStatusColor(belief); },
@@ -320,6 +329,7 @@ export default {
   &:active { opacity: 0.6; }
 }
 .belief-row-body { flex: 1; min-width: 0; }
+.truth-pill { color: #8e8e93; margin-left: 6px; }
 .status-pill {
   display: inline-block;
   margin-top: 4px;
