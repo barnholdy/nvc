@@ -23,7 +23,7 @@ Halte den Satz glaubwürdig: der positivste Satz, den du gerade noch als wahr em
         :value="selectedText"
         placeholder="Ich bin..."
         auto-grow
-        rows="2"
+        rows="4"
         hide-details
         @input="setSelectedText"
         @focus="$emit('focussed')"
