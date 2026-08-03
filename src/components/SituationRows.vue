@@ -1,0 +1,32 @@
+<template>
+  <div>
+    <div v-for="p in situations" :key="p.time" class="situation-row">
+      <p class="situation-text">{{ p.trigger || p.name }}</p>
+    </div>
+  </div>
+</template>
+
+<script>
+// Read-only list of the situations a belief appeared in, set apart from each
+// other the same way the belief detail view separates its linked ones.
+export default {
+  name: 'situation-rows',
+  props: {
+    situations: { type: Array, default: function() { return []; } },
+  },
+};
+</script>
+
+<style scoped lang="scss">
+.situation-row {
+  padding: 8px 0;
+  border-top: 1px solid #2c2c2e;
+  &:first-of-type { border-top: none; }
+}
+.situation-text {
+  font-size: 0.95rem;
+  color: #ebebf5;
+  line-height: 1.5;
+  margin: 0;
+}
+</style>

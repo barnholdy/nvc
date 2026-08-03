@@ -1,6 +1,9 @@
 <template>
   <v-app>
-    <router-view/>
+    <!-- Every view reads its route params in data(), so each route must get a
+         fresh instance. Without the key, navigating between two routes that
+         share a component would keep the old params. -->
+    <router-view :key="$route.fullPath"/>
 
     <transition name="ob-fade">
       <div v-if="showOnboarding" class="ob-overlay" @click.self="null">

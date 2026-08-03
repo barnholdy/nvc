@@ -2,12 +2,8 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Situation</h1>
-      <p class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
-      <p class="body-1 grey--text mt-2">
-        In welcher konkreten Situation in den nächsten Tagen könntest du dich so verhalten,
-        als würde diese Überzeugung nicht gelten? Wo, mit wem, wann?
-        Klein, konkret, überprüfbar — ein Moment, kein Lebensthema.
-      </p>
+      <p class="subheading grey--text belief-quote mt-1">„{{ beliefText }}“</p>
+      <action-prompt :belief="entry" class="mt-2"></action-prompt>
     </v-flex>
     <v-flex>
       <v-text-field
@@ -20,18 +16,36 @@
         @blur="$emit('blurred')"
       ></v-text-field>
     </v-flex>
+
+    <!-- Under the field, where it is a reference rather than a question. -->
+    <v-flex v-if="situations.length" class="mt-3">
+      <p class="body-1 white--text mb-2">Hier sind vergangene Situationen zur Referenz:</p>
+      <situation-rows :situations="situations"></situation-rows>
+    </v-flex>
   </v-layout>
 </template>
 
 <script>
+import ActionPrompt from '@/components/ActionPrompt.vue';
+import SituationRows from '@/components/SituationRows.vue';
+
 export default {
   name: 'belief-act-situation',
+  components: { ActionPrompt, SituationRows },
   props: {
-    belief: { type: String, default: '' },
+    // The whole belief, because the prompt names its need, its new feelings and
+    // its affirmation.
+    entry: { type: Object, default: null },
+    situations: { type: Array, default: function() { return []; } },
     initialValue: { type: String, default: '' },
   },
   data() {
     return { text: this.initialValue };
+  },
+  computed: {
+    beliefText() {
+      return this.entry ? this.entry.belief : '';
+    },
   },
   watch: {
     text(val) { this.$emit('changed', val); },

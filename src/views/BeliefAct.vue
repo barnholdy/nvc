@@ -25,7 +25,8 @@
 
         <belief-act-situation
           v-show="step === situationStep"
-          :belief="entry ? entry.belief : ''"
+          :entry="entry"
+          :situations="situations"
           :initialValue="experiment.situation"
           @changed="experiment.situation = $event"
           @focussed="isFooterFixed = false"
@@ -66,6 +67,12 @@ import BeliefActPickBelief from '@/views/BeliefActPickBelief.vue';
 import BeliefActSituation from '@/views/BeliefActSituation.vue';
 import BeliefActFear from '@/views/BeliefActFear.vue';
 import { createExperiment, isPlanned } from '@/utils/experiment';
+import { beliefStatus } from '@/utils/beliefStatus';
+import { situationsForBelief } from '@/utils/patterns';
+
+// "Gewandelt" and "Gehandelt" — the two stages where a behavioural experiment
+// has something to test.
+const ACTIONABLE_STATUSES = ['done', 'acted'];
 
 export default {
   name: 'belief-act',
@@ -101,13 +108,20 @@ export default {
     };
   },
   computed: {
+    // Only beliefs that have been through the change wizard: an experiment
+    // tests a new perspective, and without one there is nothing to act from.
     allBeliefs() {
-      return this.$store.getters.beliefs.slice().sort((a, b) => b.time - a.time);
+      return this.$store.getters.beliefs
+        .filter(b => ACTIONABLE_STATUSES.indexOf(beliefStatus(b)) !== -1)
+        .sort((a, b) => b.time - a.time);
     },
     // Resolved on demand: in pick mode the belief only exists once chosen.
     entry() {
       if (this.beliefTime === null) return null;
       return this.$store.getters.beliefs.find(b => b.time === this.beliefTime) || null;
+    },
+    situations() {
+      return situationsForBelief(this.$store.getters.patterns, this.beliefTime);
     },
     situationStep() { return this.needsBelief ? 2 : 1; },
     fearStep() { return this.needsBelief ? 3 : 2; },

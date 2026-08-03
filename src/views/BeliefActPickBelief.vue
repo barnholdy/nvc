@@ -9,7 +9,8 @@
 
     <v-flex>
       <p v-if="!beliefs.length" class="empty-text">
-        Noch keine Überzeugungen vorhanden. Sie entstehen beim Anlegen einer Situation.
+        Noch keine gewandelte Überzeugung. Wandle zuerst eine Überzeugung — die neue
+        Perspektive ist das, was eine Handlung überprüft.
       </p>
       <button
         v-for="b in beliefs"
