@@ -191,24 +191,11 @@
                   <p class="subheading grey--text situation-quote mt-1">„{{ resultSituation }}"</p>
                 </v-flex>
 
+                <!-- The fear itself, but not the number: seeing the old rating
+                     would anchor the new one. -->
                 <v-flex v-if="resultFear" class="mb-4">
                   <p class="expand-label">Das hattest du befürchtet</p>
                   <p class="recall-text">{{ resultFear }}</p>
-                  <template v-if="resultExpected !== null">
-                    <p class="expand-label mt-3">So stark hast du es erwartet</p>
-                    <div class="slider-row">
-                      <span class="slider-end-label">0</span>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        :value="resultExpected"
-                        class="readonly-slider"
-                        disabled
-                      />
-                      <span class="slider-end-label">100</span>
-                    </div>
-                  </template>
                 </v-flex>
 
                 <v-flex>
