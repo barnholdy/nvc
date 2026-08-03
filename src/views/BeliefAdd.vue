@@ -36,25 +36,21 @@
           @blurred="isFooterFixed = true">
         </belief-add-reaction>
 
-        <belief-add-feeling-need
+        <belief-add-arrive
           v-show="step === 3"
+          :belief="belief"
+          :reaction="withBelief">
+        </belief-add-arrive>
+
+        <belief-add-feeling-need
+          v-show="step === 4"
           mode="feelings"
           :belief="belief"
           :reaction="withBelief"
           :taxonomy="taxonomy"
           :initialFeelings="selectedFeelings"
+          :maxSelections="3"
           @change="selectedFeelings = $event">
-        </belief-add-feeling-need>
-
-        <belief-add-feeling-need
-          v-show="step === 4"
-          mode="needs"
-          :belief="belief"
-          :reaction="withBelief"
-          :taxonomy="taxonomy"
-          :initialNeeds="selectedNeeds"
-          :contextFeelings="selectedFeelings"
-          @change="selectedNeeds = $event">
         </belief-add-feeling-need>
 
         <belief-add-readiness v-show="step === 5"></belief-add-readiness>
@@ -71,18 +67,18 @@
           @blurred="isFooterFixed = true">
         </belief-add-origin>
 
-        <!-- Mounted only once the user opted in, so the chips are built from
-             the needs as they stand at that moment. -->
+        <!-- The need and the reframe are one screen now: mounted when the user
+             opts in, so the list is built from the feelings as they stand. -->
         <belief-add-gift
           v-if="hasEnteredOriginPhase"
           v-show="step === 7"
           :belief="belief"
           :reaction="withBelief"
+          :taxonomy="taxonomy"
           :feelings="selectedFeelings"
-          :needs="selectedNeeds"
           :origin="origin"
-          :initialValue="gift"
-          @changed="gift = $event">
+          :initialNeeds="selectedNeeds"
+          @change="selectedNeeds = $event">
         </belief-add-gift>
 
         <belief-add-grounding v-show="step === 8"></belief-add-grounding>
@@ -137,6 +133,7 @@
 <script>
 import BeliefAddBelief from '@/views/BeliefAddBelief.vue';
 import BeliefAddReaction from '@/views/BeliefAddReaction.vue';
+import BeliefAddArrive from '@/views/BeliefAddArrive.vue';
 import BeliefAddFeelingNeed from '@/views/BeliefAddFeelingNeed.vue';
 import BeliefAddReadiness from '@/views/BeliefAddReadiness.vue';
 import BeliefAddOrigin from '@/views/BeliefAddOrigin.vue';
@@ -144,7 +141,7 @@ import BeliefAddGift from '@/views/BeliefAddGift.vue';
 import BeliefAddGrounding from '@/views/BeliefAddGrounding.vue';
 import BeliefAddCheck from '@/views/BeliefAddCheck.vue';
 import { beliefStatus } from '@/utils/beliefStatus';
-import { normalizeOriginArc, defaultGift } from '@/utils/originArc';
+import { normalizeOriginArc } from '@/utils/originArc';
 import taxonomy from '../assets/taxonomy.json';
 
 const READINESS_STEP = 5;
@@ -155,6 +152,7 @@ export default {
   components: {
     BeliefAddBelief,
     BeliefAddReaction,
+    BeliefAddArrive,
     BeliefAddFeelingNeed,
     BeliefAddReadiness,
     BeliefAddOrigin,
@@ -178,14 +176,13 @@ export default {
       selectedNeeds: editEntry ? editEntry.needs || [] : [],
       withBelief: editEntry ? editEntry.withBelief || '' : '',
       origin: reflection.origin || '',
-      gift: arc.gift,
       grounding: arc.grounding,
       mood: arc.mood,
       storedArc: arc,
       storedOrigin: reflection.origin || '',
-      // What the wizard itself pre-selected. A default is not something the
-      // user typed, so it must not trigger the discard prompt.
-      seededGift: arc.gift,
+      // The need is picked inside the origin phase now, so leaving the phase
+      // has to be able to put back what was saved before.
+      storedNeeds: editEntry ? editEntry.needs || [] : [],
       hasEnteredOriginPhase: false,
       savedTab: 'open',
       isDiscardDialogShowing: false,
@@ -213,26 +210,27 @@ export default {
     footerHeight() {
       return this.step === READINESS_STEP ? 96 : 44;
     },
+    // The chosen need is the gift: one answer to the question of what this
+    // belief once did for you.
+    gift() {
+      const last = this.selectedNeeds[this.selectedNeeds.length - 1];
+      return last ? last.name : null;
+    },
     // Nothing to warn about when this session added nothing beyond what is
     // already stored.
     hasUnsavedOriginInput() {
       if (this.origin.trim() !== this.storedOrigin.trim()) return true;
-      if (this.gift !== this.storedArc.gift && this.gift !== this.seededGift) return true;
       if (this.mood !== this.storedArc.mood) return true;
+      if (this.needsKey(this.selectedNeeds) !== this.needsKey(this.storedNeeds)) return true;
       return this.grounding.join(' ') !== this.storedArc.grounding.join(' ');
     },
   },
   methods: {
+    needsKey(list) {
+      return (list || []).map(n => n.name + '/' + n.emotionId).join('|');
+    },
     nextStep() {
-      // Opting in is what creates the arc; the gift chips are seeded from the
-      // needs picked in step 4 the first time the user gets here.
-      if (this.step === READINESS_STEP && !this.hasEnteredOriginPhase) {
-        this.hasEnteredOriginPhase = true;
-        if (!this.gift) {
-          this.gift = defaultGift(this.selectedNeeds);
-          this.seededGift = this.gift;
-        }
-      }
+      if (this.step === READINESS_STEP) this.hasEnteredOriginPhase = true;
       this.step += 1;
       this.$vuetify.goTo(0, { duration: 0 });
     },
@@ -279,7 +277,8 @@ export default {
         belief: this.belief,
         feelings: this.selectedFeelings,
         withBelief: this.withBelief,
-        needs: this.selectedNeeds,
+        // The need belongs to the origin phase now and is dropped with it.
+        needs: withOrigin ? this.selectedNeeds : this.storedNeeds,
         reflection: this.buildReflection(withOrigin),
       };
       const saved = this.isEditMode ? Object.assign({}, this.editEntry, payload) : payload;

@@ -9,10 +9,12 @@
            easier with the reaction still in view than from memory. -->
       <belief-context
         :reaction="reaction"
-        :feelings="isNeedsMode ? contextFeelings : []">
+        :feelings="isNeedsMode ? contextFeelings : []"
+        :origin="contextOrigin">
       </belief-context>
 
       <p class="body-1 grey--text mt-3">{{ promptText }}</p>
+      <p v-if="limitHint" class="limit-hint">{{ limitHint }}</p>
     </v-flex>
 
     <!-- Optional block between the prompt and the list (unused by the belief wizard) -->
@@ -146,6 +148,10 @@ export default {
     // component is created before anything is selected and a data() copy would
     // never see the selection.
     contextFeelings: { type: Array, default: function() { return []; } },
+    // How many may be picked at once. 0 means no limit.
+    maxSelections: { type: Number, default: 0 },
+    // Shown above the list when the step follows an origin question.
+    contextOrigin: { type: String, default: '' },
   },
   data: function() {
     var self = this;
@@ -167,6 +173,17 @@ export default {
     headlineText: function() {
       if (this.headline) return this.headline;
       return this.isNeedsMode ? 'Bedürfnisse' : 'Gefühle';
+    },
+    // Say the limit out loud, so a pick that pushes out an older one is not a
+    // surprise.
+    limitHint: function() {
+      if (!this.maxSelections) return '';
+      if (this.maxSelections === 1) {
+        return this.isNeedsMode ? 'Wähle ein Bedürfnis.' : 'Wähle ein Gefühl.';
+      }
+      var chosen = this.isNeedsMode ? this.selNeeds.length : this.selFeelings.length;
+      return 'Wähle bis zu ' + this.maxSelections + ' — ' + chosen + ' von '
+        + this.maxSelections + ' gewählt.';
     },
     promptText: function() {
       if (this.prompt) return this.prompt;
@@ -292,6 +309,7 @@ export default {
       if (idx >= 0) {
         this.selFeelings.splice(idx, 1);
       } else {
+        this.makeRoom(this.selFeelings);
         this.selFeelings.push({ name: name, emotionId: emotionId });
       }
       this.emitChange();
@@ -303,9 +321,17 @@ export default {
       if (idx >= 0) {
         this.selNeeds.splice(idx, 1);
       } else {
+        this.makeRoom(this.selNeeds);
         this.selNeeds.push({ name: name, emotionId: emotionId });
       }
       this.emitChange();
+    },
+    // At the limit the oldest pick makes way. Blocking instead would leave the
+    // user tapping a chip that does nothing; with a limit of one this is simply
+    // the usual "pick one" behaviour.
+    makeRoom: function(list) {
+      if (!this.maxSelections) return;
+      while (list.length >= this.maxSelections) list.shift();
     },
     emitChange: function() {
       var self = this;
@@ -367,6 +393,11 @@ export default {
 
 <style scoped lang="scss">
 .belief-quote { font-style: italic; }
+.limit-hint {
+  font-size: 0.8rem;
+  color: #636366;
+  margin: 6px 0 0;
+}
 
 .emotion-card {
   border: 1.5px solid;
