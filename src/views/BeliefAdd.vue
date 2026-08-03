@@ -1,10 +1,7 @@
 <template>
   <div>
     <v-toolbar color="white" app>
-      <v-btn v-if="savedState" icon @click="finish">
-        <v-icon>close</v-icon>
-      </v-btn>
-      <v-btn v-else-if="step === 1" icon @click="close">
+      <v-btn v-if="step === 1" icon @click="close">
         <v-icon>close</v-icon>
       </v-btn>
       <v-btn v-else icon @click="prevStep">
@@ -12,114 +9,95 @@
       </v-btn>
       <v-toolbar-title>{{ isEditMode ? 'Überzeugung verstehen' : 'Neue Überzeugung' }}</v-toolbar-title>
       <v-spacer></v-spacer>
-      <span v-if="!savedState" class="grey--text body-1">{{ step }} / {{ totalSteps }}</span>
+      <span class="grey--text body-1">{{ step }} / {{ totalSteps }}</span>
       <!-- The way out of the origin phase: keeps steps 1-4, drops what was
            entered here. It sits here rather than on the left so that going back
            a step stays possible on every screen. -->
-      <v-btn v-if="!savedState && isOriginPhase" icon @click="leaveOriginPhase">
+      <v-btn v-if="isOriginPhase" icon @click="leaveOriginPhase">
         <v-icon>close</v-icon>
       </v-btn>
     </v-toolbar>
     <v-content>
       <v-container class="mb-5">
-        <template v-if="savedState">
-          <v-layout column>
-            <v-flex class="mt-2">
-              <h1 class="headline font-weight-regular">Gespeichert</h1>
-              <p class="body-1 grey--text mt-3">
-                Ohne Ursprung gespeichert. Du kannst ihn jederzeit später ergänzen, wenn es sich
-                stimmig anfühlt.
-              </p>
-            </v-flex>
-          </v-layout>
-        </template>
+        <belief-add-belief
+          v-show="step === 1"
+          :initialValue="belief"
+          @beliefChanged="belief = $event"
+          @focussed="isFooterFixed = false"
+          @blurred="isFooterFixed = true">
+        </belief-add-belief>
 
-        <template v-else>
-          <belief-add-belief
-            v-show="step === 1"
-            :initialValue="belief"
-            @beliefChanged="belief = $event"
-            @focussed="isFooterFixed = false"
-            @blurred="isFooterFixed = true">
-          </belief-add-belief>
+        <belief-add-reaction
+          v-show="step === 2"
+          :belief="belief"
+          :initialValue="withBelief"
+          @changed="withBelief = $event"
+          @focussed="isFooterFixed = false"
+          @blurred="isFooterFixed = true">
+        </belief-add-reaction>
 
-          <belief-add-reaction
-            v-show="step === 2"
-            :belief="belief"
-            :initialValue="withBelief"
-            @changed="withBelief = $event"
-            @focussed="isFooterFixed = false"
-            @blurred="isFooterFixed = true">
-          </belief-add-reaction>
+        <belief-add-feeling-need
+          v-show="step === 3"
+          mode="feelings"
+          :belief="belief"
+          :reaction="withBelief"
+          :taxonomy="taxonomy"
+          :initialFeelings="selectedFeelings"
+          @change="selectedFeelings = $event">
+        </belief-add-feeling-need>
 
-          <belief-add-feeling-need
-            v-show="step === 3"
-            mode="feelings"
-            :belief="belief"
-            :reaction="withBelief"
-            :taxonomy="taxonomy"
-            :initialFeelings="selectedFeelings"
-            @change="selectedFeelings = $event">
-          </belief-add-feeling-need>
+        <belief-add-feeling-need
+          v-show="step === 4"
+          mode="needs"
+          :belief="belief"
+          :reaction="withBelief"
+          :taxonomy="taxonomy"
+          :initialNeeds="selectedNeeds"
+          :contextFeelings="selectedFeelings"
+          @change="selectedNeeds = $event">
+        </belief-add-feeling-need>
 
-          <belief-add-feeling-need
-            v-show="step === 4"
-            mode="needs"
-            :belief="belief"
-            :reaction="withBelief"
-            :taxonomy="taxonomy"
-            :initialNeeds="selectedNeeds"
-            :contextFeelings="selectedFeelings"
-            @change="selectedNeeds = $event">
-          </belief-add-feeling-need>
+        <belief-add-readiness v-show="step === 5"></belief-add-readiness>
 
-          <belief-add-readiness v-show="step === 5"></belief-add-readiness>
+        <belief-add-origin
+          v-show="step === 6"
+          :belief="belief"
+          :reaction="withBelief"
+          :feelings="selectedFeelings"
+          :needs="selectedNeeds"
+          :initialValue="origin"
+          @changed="origin = $event"
+          @focussed="isFooterFixed = false"
+          @blurred="isFooterFixed = true">
+        </belief-add-origin>
 
-          <belief-add-origin
-            v-show="step === 6"
-            :belief="belief"
-            :reaction="withBelief"
-            :feelings="selectedFeelings"
-            :needs="selectedNeeds"
-            :initialValue="origin"
-            @changed="origin = $event"
-            @focussed="isFooterFixed = false"
-            @blurred="isFooterFixed = true">
-          </belief-add-origin>
+        <!-- Mounted only once the user opted in, so the chips are built from
+             the needs as they stand at that moment. -->
+        <belief-add-gift
+          v-if="hasEnteredOriginPhase"
+          v-show="step === 7"
+          :belief="belief"
+          :reaction="withBelief"
+          :feelings="selectedFeelings"
+          :needs="selectedNeeds"
+          :origin="origin"
+          :initialValue="gift"
+          @changed="gift = $event">
+        </belief-add-gift>
 
-          <!-- Mounted only once the user opted in, so the chips are built from
-               the needs as they stand at that moment. -->
-          <belief-add-gift
-            v-if="hasEnteredOriginPhase"
-            v-show="step === 7"
-            :belief="belief"
-            :reaction="withBelief"
-            :feelings="selectedFeelings"
-            :needs="selectedNeeds"
-            :origin="origin"
-            :initialValue="gift"
-            @changed="gift = $event">
-          </belief-add-gift>
+        <belief-add-grounding v-show="step === 8"></belief-add-grounding>
 
-          <belief-add-grounding v-show="step === 8"></belief-add-grounding>
-
-          <belief-add-check
-            v-show="step === 9"
-            :initialValue="mood"
-            @changed="mood = $event">
-          </belief-add-check>
-        </template>
+        <belief-add-check
+          v-show="step === 9"
+          :initialValue="mood"
+          @changed="mood = $event">
+        </belief-add-check>
       </v-container>
 
       <v-footer :fixed="isFooterFixed" color="white elevation-3" :height="footerHeight">
-        <div v-if="savedState" class="footer-single">
-          <v-btn @click="finish" block large color="primary">Fertig</v-btn>
-        </div>
-        <div v-else-if="step === READINESS_STEP" class="gate-actions">
+        <div v-if="step === READINESS_STEP" class="gate-actions">
           <v-btn @click="nextStep" block large color="primary">Jetzt anschauen</v-btn>
-          <button type="button" class="later-btn" @click="saveWithoutOrigin">
-            speichern und später weitermachen
-          </button>
+          <button type="button" class="later-btn" @click="saveWithoutOrigin">später</button>
         </div>
         <div v-else class="footer-single">
           <v-btn
@@ -127,7 +105,7 @@
             :disabled="!isStepComplete"
             @click="nextStep"
             block large color="primary">
-            {{ step < READINESS_STEP ? 'weiter' : 'Weiter' }}
+            {{ nextLabel }}
           </v-btn>
           <v-btn
             v-else
@@ -209,7 +187,6 @@ export default {
       // user typed, so it must not trigger the discard prompt.
       seededGift: arc.gift,
       hasEnteredOriginPhase: false,
-      savedState: null,
       savedTab: 'open',
       isDiscardDialogShowing: false,
       isFooterFixed: true,
@@ -229,8 +206,12 @@ export default {
       if (this.step === TOTAL_STEPS) return !!this.mood;
       return true;
     },
+    // Steps 1-4 kept their lower-case label; the origin phase uses the spec's.
+    nextLabel() {
+      return this.step < READINESS_STEP ? 'weiter' : 'Weiter';
+    },
     footerHeight() {
-      return this.step === READINESS_STEP && !this.savedState ? 96 : 44;
+      return this.step === READINESS_STEP ? 96 : 44;
     },
     // Nothing to warn about when this session added nothing beyond what is
     // already stored.
@@ -238,7 +219,7 @@ export default {
       if (this.origin.trim() !== this.storedOrigin.trim()) return true;
       if (this.gift !== this.storedArc.gift && this.gift !== this.seededGift) return true;
       if (this.mood !== this.storedArc.mood) return true;
-      return this.grounding.join(' ') !== this.storedArc.grounding.join(' ');
+      return this.grounding.join(' ') !== this.storedArc.grounding.join(' ');
     },
   },
   methods: {
@@ -308,13 +289,9 @@ export default {
         this.$store.dispatch('saveBelief', saved);
       }
       // Editing can move the belief to another tab — land on the one it is in now.
+      // Both ways out land in the list, on the tab the belief now belongs to.
       this.savedTab = beliefStatus(saved);
-      if (withOrigin) {
-        this.finish();
-        return;
-      }
-      this.savedState = 'later';
-      this.$vuetify.goTo(0, { duration: 0 });
+      this.finish();
     },
     finish() {
       this.$router.push({ path: '/beliefs', query: { tab: this.savedTab } });
