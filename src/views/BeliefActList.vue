@@ -14,23 +14,15 @@
             <p class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
           </v-flex>
 
-          <!-- What the work so far produced, so the next step is taken from a
-               felt state rather than from a blank page. -->
-          <v-flex v-if="newFeelings.length" class="mb-3">
-            <p class="body-1 white--text mb-2">Rufe die Gefühle in dir hervor:</p>
-            <feeling-chips :items="newFeelings" type="feelings"></feeling-chips>
-          </v-flex>
-
-          <v-flex v-if="needs.length" class="mb-3">
-            <p class="body-1 white--text mb-2">Vergegenwärtige dir dein Bedürfnis:</p>
-            <feeling-chips :items="needs" type="needs"></feeling-chips>
-          </v-flex>
-
+          <!-- Where this belief has already shown up, so the next step is taken
+               from what happened rather than from a blank page. -->
           <v-flex v-if="situations.length" class="mb-3">
-            <p class="body-1 white--text mb-2">Schaue auf vergangene Situationen:</p>
-            <p v-for="p in situations" :key="p.time" class="situation-text">
-              {{ p.trigger || p.name }}
+            <p class="body-1 white--text mb-2">
+              Schaue auf die Überzeugung und vergangene Situationen:
             </p>
+            <div v-for="p in situations" :key="p.time" class="situation-row">
+              <p class="situation-text">{{ p.trigger || p.name }}</p>
+            </div>
           </v-flex>
 
           <v-flex class="mb-4">
@@ -97,7 +89,6 @@
 </template>
 
 <script>
-import FeelingChips from '@/components/FeelingChips.vue';
 import { beliefStatus } from '@/utils/beliefStatus';
 import {
   createExperiment,
@@ -108,7 +99,6 @@ import {
 
 export default {
   name: 'belief-act-list',
-  components: { FeelingChips },
   data() {
     const entry = this.$store.getters.beliefs
       .find(function(b) { return b.time === parseInt(this.$route.params.time, 10); }, this);
@@ -122,15 +112,6 @@ export default {
   computed: {
     belief() {
       return this.entry ? this.entry.belief : '';
-    },
-    // The feelings from the new perspective, not the ones the belief produces —
-    // this step is about acting from the changed state.
-    newFeelings() {
-      const r = (this.entry && this.entry.reflection) || {};
-      return Array.isArray(r.withoutBeliefFeelings) ? r.withoutBeliefFeelings : [];
-    },
-    needs() {
-      return (this.entry && this.entry.needs) || [];
     },
     situations() {
       if (!this.entry) return [];
@@ -183,11 +164,18 @@ export default {
   letter-spacing: 0.08em;
   margin: 0 0 6px;
 }
+// Set apart from each other the same way the belief detail view separates its
+// linked situations.
+.situation-row {
+  padding: 8px 0;
+  border-top: 1px solid #2c2c2e;
+  &:first-of-type { border-top: none; }
+}
 .situation-text {
   font-size: 0.95rem;
   color: #ebebf5;
   line-height: 1.5;
-  margin: 0 0 4px;
+  margin: 0;
 }
 .empty-text {
   font-size: 0.875rem;
