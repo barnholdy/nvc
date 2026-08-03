@@ -281,7 +281,8 @@ html, body {
 .v-input input, .v-input textarea {
   color: #ebebf5 !important;
   caret-color: #4ade80 !important;
-  font-size: 17px;
+  /* Back to the app's own 16px — 17px sat larger than the prompts above it. */
+  font-size: 16px;
   font-weight: 400;
   line-height: 1.6;
   letter-spacing: -0.02em;
