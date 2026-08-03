@@ -28,16 +28,17 @@ export default {
   background: radial-gradient(
     circle closest-side,
     rgba(74, 222, 128, 0.62) 0%,
-    rgba(74, 222, 128, 0.46) 42%,
-    rgba(74, 222, 128, 0.16) 74%,
+    rgba(74, 222, 128, 0.58) 58%,
+    rgba(74, 222, 128, 0.38) 82%,
     rgba(74, 222, 128, 0) 100%
   );
   animation: breathe 8s ease-in-out infinite;
 }
+// Half to full: the disc doubles in diameter over the in-breath.
 @keyframes breathe {
-  0%   { transform: scale(0.72); opacity: 0.45; }
-  50%  { transform: scale(1);    opacity: 1; }
-  100% { transform: scale(0.72); opacity: 0.45; }
+  0%   { transform: scale(0.5); opacity: 0.45; }
+  50%  { transform: scale(1);   opacity: 1; }
+  100% { transform: scale(0.5); opacity: 0.45; }
 }
 // Anyone who asked their system not to animate things should not get a pulsing
 // circle in a screen about calming down.
