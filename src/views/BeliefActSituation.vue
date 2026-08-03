@@ -6,6 +6,7 @@
       <p class="body-1 grey--text mt-2">
         In welcher konkreten Situation in den nächsten Tagen könntest du dich so verhalten,
         als würde diese Überzeugung nicht gelten? Wo, mit wem, wann?
+        Klein, konkret, überprüfbar — ein Moment, kein Lebensthema.
       </p>
     </v-flex>
     <v-flex>
@@ -18,12 +19,6 @@
         @focus="$emit('focussed')"
         @blur="$emit('blurred')"
       ></v-text-field>
-      <p class="constraint-text mt-2">
-        Klein, konkret, überprüfbar — ein Moment, kein Lebensthema.
-      </p>
-      <p v-if="isVague" class="follow-up-text">
-        Nenne einen einzelnen Moment mit Ort und Person.
-      </p>
     </v-flex>
   </v-layout>
 </template>
@@ -38,12 +33,6 @@ export default {
   data() {
     return { text: this.initialValue };
   },
-  computed: {
-    isVague() {
-      const t = this.text.trim();
-      return t.length > 0 && (t.length < 25 || t.indexOf(' ') === -1);
-    },
-  },
   watch: {
     text(val) { this.$emit('changed', val); },
   },
@@ -52,16 +41,4 @@ export default {
 
 <style scoped lang="scss">
 .belief-quote { font-style: italic; }
-.constraint-text {
-  font-size: 0.8rem;
-  color: #8e8e93;
-  line-height: 1.5;
-  margin: 0;
-}
-.follow-up-text {
-  font-size: 0.8rem;
-  color: #fd9927;
-  line-height: 1.5;
-  margin: 4px 0 0;
-}
 </style>

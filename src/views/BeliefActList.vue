@@ -41,6 +41,7 @@
             <p class="body-1 grey--text mb-2">
               In welcher konkreten Situation in den nächsten Tagen könntest du dich so
               verhalten, als würde diese Überzeugung nicht gelten? Wo, mit wem, wann?
+              Klein, konkret, überprüfbar — ein Moment, kein Lebensthema.
             </p>
             <v-text-field
               placeholder="..."
@@ -51,12 +52,6 @@
               @focus="isFooterFixed = false"
               @blur="isFooterFixed = true"
             ></v-text-field>
-            <p class="constraint-text mt-2">
-              Klein, konkret, überprüfbar — ein Moment, kein Lebensthema.
-            </p>
-            <p v-if="isVague" class="follow-up-text">
-              Nenne einen einzelnen Moment mit Ort und Person.
-            </p>
             <v-btn
               small
               flat
@@ -103,10 +98,6 @@ export default {
   computed: {
     belief() {
       return this.entry ? this.entry.belief : '';
-    },
-    isVague() {
-      const t = this.newSituation.trim();
-      return t.length > 0 && (t.length < 25 || t.indexOf(' ') === -1);
     },
   },
   methods: {
@@ -194,16 +185,4 @@ export default {
   &:active { opacity: 0.6; }
 }
 
-.constraint-text {
-  font-size: 0.8rem;
-  color: #8e8e93;
-  line-height: 1.5;
-  margin: 0;
-}
-.follow-up-text {
-  font-size: 0.8rem;
-  color: #fd9927;
-  line-height: 1.5;
-  margin: 4px 0 0;
-}
 </style>

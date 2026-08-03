@@ -157,7 +157,7 @@
             </v-btn>
             <v-toolbar-title>Ergebnis</v-toolbar-title>
             <v-spacer></v-spacer>
-            <span class="grey--text body-1">{{ resultStep }} / 2</span>
+            <span class="grey--text body-1">{{ resultStep }} / 4</span>
           </v-toolbar>
           <v-content>
             <v-container class="mb-5">
@@ -175,14 +175,37 @@
                 </v-flex>
               </v-layout>
 
+              <!-- The fear is shown again: rating it from memory is guesswork -->
               <v-layout v-show="resultStep === 2" column>
                 <v-flex class="mt-2 mb-3">
                   <h1 class="headline font-weight-regular">Abgleich</h1>
-                  <p class="body-1 grey--text mt-2">
+                  <p class="subheading grey--text situation-quote mt-1">„{{ resultSituation }}"</p>
+                </v-flex>
+
+                <v-flex v-if="resultFear" class="mb-4">
+                  <p class="expand-label">Das hattest du befürchtet</p>
+                  <p class="recall-text">{{ resultFear }}</p>
+                  <template v-if="resultExpected !== null">
+                    <p class="expand-label mt-3">So stark hast du es erwartet</p>
+                    <div class="slider-row">
+                      <span class="slider-end-label">0</span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        :value="resultExpected"
+                        class="readonly-slider"
+                        disabled
+                      />
+                      <span class="slider-end-label">100</span>
+                    </div>
+                  </template>
+                </v-flex>
+
+                <v-flex>
+                  <p class="body-1 grey--text mb-2">
                     Wie stark ist deine Befürchtung tatsächlich eingetreten?
                   </p>
-                </v-flex>
-                <v-flex>
                   <div class="slider-row">
                     <span class="slider-end-label">0</span>
                     <input type="range" min="0" max="100" v-model.number="resultActual" class="fear-slider" />
@@ -194,8 +217,13 @@
                     <span>100 = genau so schlimm wie erwartet</span>
                   </div>
                 </v-flex>
+              </v-layout>
 
-                <v-flex class="mt-4">
+              <v-layout v-show="resultStep === 3" column>
+                <v-flex class="mt-2 mb-3">
+                  <h1 class="headline font-weight-regular">Was sagt dir das?</h1>
+                </v-flex>
+                <v-flex>
                   <div class="gap-box" :style="{ borderColor: gapColor(resultGap) }">
                     <p class="gap-line">
                       Deine Erwartung war
@@ -214,18 +242,74 @@
                     v-model="resultLearning"
                     placeholder="..."
                     auto-grow
-                    rows="3"
+                    rows="4"
                     hide-details
                     class="mt-2"
                   ></v-textarea>
                 </v-flex>
               </v-layout>
+
+              <v-layout v-show="resultStep === 4" column>
+                <v-flex class="mt-2 mb-3">
+                  <h1 class="headline font-weight-regular">Affirmation</h1>
+                  <p class="subheading grey--text situation-quote mt-1">„{{ resultBeliefText }}"</p>
+                  <p class="body-1 grey--text mt-2">
+                    Welcher Satz passt jetzt zu dem, was du erlebt hast? Er ersetzt die
+                    Affirmation dieser Überzeugung. Überspringen ist in Ordnung.
+                  </p>
+                </v-flex>
+
+                <v-flex v-if="resultAffirmation" class="mb-2">
+                  <div class="selected-chips">
+                    <v-chip close class="selected-chip" @input="resultAffirmation = ''">
+                      {{ resultAffirmation }}
+                    </v-chip>
+                  </div>
+                </v-flex>
+
+                <v-flex v-if="affirmationChoices.length" class="mb-2">
+                  <p class="caption grey--text mb-1">
+                    {{ resultAffirmation ? 'Stattdessen wählen:' : 'Auswählen:' }}
+                  </p>
+                  <div class="chip-list">
+                    <v-chip
+                      v-for="a in affirmationChoices"
+                      :key="a.text"
+                      class="available-chip"
+                      @click="resultAffirmation = a.text"
+                    >{{ a.text }}</v-chip>
+                  </div>
+                </v-flex>
+
+                <v-flex>
+                  <p class="caption grey--text mb-1">Neue Affirmation:</p>
+                  <v-text-field
+                    v-model="newAffirmationText"
+                    placeholder="Ich bin..."
+                    single-line
+                    hide-details
+                    class="mb-2"
+                    @keyup.enter="createAffirmation"
+                  ></v-text-field>
+                  <v-btn
+                    small
+                    flat
+                    color="primary"
+                    class="ml-0"
+                    :disabled="!newAffirmationText.trim()"
+                    @click="createAffirmation"
+                  >
+                    <v-icon small left>add</v-icon>
+                    Übernehmen
+                  </v-btn>
+                </v-flex>
+              </v-layout>
             </v-container>
             <v-footer :fixed="true" color="white elevation-3" height="44">
               <v-btn
-                v-if="resultStep === 1"
-                :disabled="!resultOutcome.trim()"
-                @click="resultStep = 2"
+                v-if="resultStep < 4"
+                :disabled="resultStep === 1 && !resultOutcome.trim()"
+                @click="resultStep += 1"
                 block large color="primary"
               >weiter</v-btn>
               <v-btn v-else @click="saveResult" block large color="primary">speichern</v-btn>
@@ -265,6 +349,7 @@
 
 <script>
 import moment from 'moment';
+import { TRUTH_DEFAULT } from '@/utils/affirmationTruth';
 import {
   collectExperiments,
   experimentsOf,
@@ -326,6 +411,8 @@ export default {
       resultOutcome: '',
       resultActual: 50,
       resultLearning: '',
+      resultAffirmation: '',
+      newAffirmationText: '',
       rowToDelete: null,
       isDeleteDialogShowing: false,
       sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
@@ -350,6 +437,25 @@ export default {
     resultExpected() {
       return this.resultRow ? this.resultRow.experiment.fearExpected : null;
     },
+    resultFear() {
+      return this.resultRow ? this.resultRow.experiment.fear : '';
+    },
+    resultBeliefText() {
+      return this.resultRow ? this.resultRow.beliefText : '';
+    },
+    // Every affirmation across all beliefs, minus the one already picked.
+    affirmationChoices() {
+      const seen = {};
+      const out = [];
+      this.$store.getters.beliefs.forEach((b) => {
+        (b.affirmations || []).forEach((a) => {
+          if (!a || !a.text || seen[a.text]) return;
+          seen[a.text] = true;
+          out.push({ text: a.text, resonance: a.resonance });
+        });
+      });
+      return out.filter(a => a.text !== this.resultAffirmation);
+    },
     resultGap() {
       if (this.resultExpected === null) return 0;
       return this.resultExpected - this.resultActual;
@@ -369,7 +475,10 @@ export default {
     },
 
     // Writes the changed experiment back into its belief, matched by id.
-    persist(row, changes) {
+    // beliefChanges rides along in the SAME dispatch: two separate updates would
+    // both build from the same starting belief, and the second would silently
+    // undo the first.
+    persist(row, changes, beliefChanges) {
       const belief = this.$store.getters.beliefs.find(b => b.time === row.beliefTime);
       if (!belief) return;
       const r = belief.reflection || {};
@@ -377,7 +486,7 @@ export default {
         if (x.id !== row.experiment.id) return x;
         return Object.assign({}, x, changes);
       });
-      this.$store.dispatch('updateBelief', Object.assign({}, belief, {
+      this.$store.dispatch('updateBelief', Object.assign({}, belief, beliefChanges || {}, {
         reflection: Object.assign({}, r, { experiments: list }),
       }));
     },
@@ -389,6 +498,9 @@ export default {
       this.resultOutcome = row.experiment.outcome || '';
       this.resultActual = typeof row.experiment.fearActual === 'number' ? row.experiment.fearActual : 50;
       this.resultLearning = row.experiment.learning || '';
+      const current = (this.beliefOf(row) || {}).affirmations || [];
+      this.resultAffirmation = current.length ? current[0].text : '';
+      this.newAffirmationText = '';
       this.isResultDialogShowing = true;
     },
     cancelResult() {
@@ -398,6 +510,17 @@ export default {
       this.resultOutcome = '';
       this.resultActual = 50;
       this.resultLearning = '';
+      this.resultAffirmation = '';
+      this.newAffirmationText = '';
+    },
+    beliefOf(row) {
+      return this.$store.getters.beliefs.find(b => b.time === row.beliefTime);
+    },
+    createAffirmation() {
+      const text = this.newAffirmationText.trim();
+      if (!text) return;
+      this.resultAffirmation = text;
+      this.newAffirmationText = '';
     },
     saveResult() {
       const row = this.resultRow;
@@ -411,9 +534,26 @@ export default {
         doneAt: (row && row.experiment.doneAt) || now,
         completedAt: now,
       };
+      // One affirmation per belief: the choice replaces what was there.
+      let beliefChanges = null;
+      if (row && this.resultAffirmation) {
+        const text = this.resultAffirmation;
+        const existing = (this.beliefOf(row) || {}).affirmations || [];
+        const known = existing.find(a => a && a.text === text)
+          || this.affirmationChoices.find(a => a.text === text);
+        beliefChanges = {
+          affirmations: [{
+            text: text,
+            count: 1,
+            resonance: known && typeof known.resonance === 'number'
+              ? known.resonance
+              : TRUTH_DEFAULT,
+          }],
+        };
+      }
       this.cancelResult();
       if (row) {
-        this.persist(row, changes);
+        this.persist(row, changes, beliefChanges);
         this.tab = 'done';
         triggerConfetti();
       }
@@ -750,6 +890,36 @@ export default {
   font-size: 0.72rem;
   color: #636366;
   margin-top: 2px;
+}
+
+.recall-text {
+  font-size: 0.95rem;
+  color: #ebebf5;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Same chip look as the affirmation step of the change wizard */
+.selected-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.selected-chip {
+  white-space: normal;
+  height: auto !important;
+  padding: 4px 10px !important;
+}
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.available-chip {
+  cursor: pointer;
+  white-space: normal;
+  height: auto !important;
+  padding: 4px 10px !important;
 }
 
 .gap-box {
