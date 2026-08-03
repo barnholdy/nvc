@@ -44,10 +44,6 @@
           <span>0 = gar nicht</span>
           <span>100 = genau so schlimm wie befürchtet</span>
         </div>
-        <p class="anchor-note">
-          Dieser Wert wird beim Speichern festgeschrieben. Er ist der Anker für den
-          späteren Abgleich — ohne ihn gibt es nichts zu messen.
-        </p>
       </template>
 
       <p class="outlook-text mt-4">
@@ -99,12 +95,6 @@ export default {
 
 <style scoped lang="scss">
 .belief-quote { font-style: italic; }
-.anchor-note {
-  font-size: 0.8rem;
-  color: #8e8e93;
-  line-height: 1.5;
-  margin: 10px 0 0;
-}
 .outlook-text {
   font-size: 0.85rem;
   color: #8e8e93;
