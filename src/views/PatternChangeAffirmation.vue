@@ -15,25 +15,22 @@ Halte den Satz glaubwürdig: der positivste Satz, den du gerade noch als wahr em
 
     </v-flex>
 
-    <!-- The chosen sentence sits in a field, so the wording can be worked on
-         here rather than only picked. -->
-    <v-flex v-if="selectedTexts.length" class="mb-2">
+    <!-- Writing is the way in; the lists below only fill this field. -->
+    <v-flex class="mb-2">
       <p class="caption grey--text mb-1">Deine Affirmation:</p>
       <v-textarea
-        :value="selectedText"
+        v-model="text"
         placeholder="Ich bin..."
         auto-grow
         rows="4"
         hide-details
-        @input="setSelectedText"
         @focus="$emit('focussed')"
         @blur="$emit('blurred')"
       ></v-textarea>
-      <v-btn small flat color="grey" class="ml-0 mt-1" @click="removeSelected">Entfernen</v-btn>
     </v-flex>
 
     <!-- Only meaningful once there is a sentence to read aloud -->
-    <v-flex v-if="hasSelectedText" class="mb-4">
+    <v-flex v-if="hasText" class="mb-4">
       <p class="body-1 grey--text mb-2">Lies dir den Satz laut vor. Wie wahr fühlt er sich an?</p>
       <div class="slider-row">
         <span class="slider-end-label">0</span>
@@ -48,40 +45,16 @@ Halte den Satz glaubwürdig: der positivste Satz, den du gerade noch als wahr em
       </div>
     </v-flex>
 
-    <v-flex class="mt-1">
-      <div v-if="unselectedAffirmations.length" class="available-chips mt-2">
-        <p class="caption grey--text mb-1">{{ selectedAffirmations.length ? 'Stattdessen wählen:' : 'Auswählen:' }}</p>
-        <div class="chip-list">
-          <v-chip
-            v-for="a in unselectedAffirmations"
-            :key="a.text"
-            class="available-chip"
-            @click="addAffirmation(a.text)"
-          >{{ a.text }}</v-chip>
-        </div>
+    <v-flex v-if="otherAffirmations.length" class="mt-1">
+      <p class="caption grey--text mb-1">Aus deinen Affirmationen übernehmen:</p>
+      <div class="chip-list">
+        <v-chip
+          v-for="a in otherAffirmations"
+          :key="a.text"
+          class="available-chip"
+          @click="use(a.text)"
+        >{{ a.text }}</v-chip>
       </div>
-
-      <template v-if="showNewInput">
-        <v-text-field
-          v-model="newAffirmationText"
-          label="Neue Affirmation"
-          placeholder="Ich bin..."
-          single-line
-          hide-details
-          class="mb-2"
-          @keyup.enter="createAffirmation"
-          @focus="$emit('focussed')"
-          @blur="$emit('blurred')"
-        ></v-text-field>
-        <v-btn small flat color="primary" :disabled="!newAffirmationText.trim()" @click="createAffirmation">Hinzufügen</v-btn>
-        <v-btn small flat color="grey" @click="cancelNew">Abbrechen</v-btn>
-      </template>
-      <template v-else>
-        <v-btn small flat color="primary" @click="showNewInput = true">
-          <v-icon small left>add</v-icon>
-          Neue Affirmation
-        </v-btn>
-      </template>
     </v-flex>
 
     <v-flex class="mt-3">
@@ -110,14 +83,14 @@ Halte den Satz glaubwürdig: der positivste Satz, den du gerade noch als wahr em
     </v-flex>
 
     <v-flex v-if="suggestions.length" class="mt-2">
-      <p class="caption grey--text mb-1">Tippe auf einen Vorschlag, um ihn hinzuzufügen:</p>
+      <p class="caption grey--text mb-1">Tippe auf einen Vorschlag, um ihn zu übernehmen:</p>
       <div class="suggestions">
         <v-chip
           v-for="(s, i) in suggestions"
           :key="i"
           small
           class="suggestion-chip"
-          @click="acceptSuggestion(s)"
+          @click="use(s)"
         >{{ s }}</v-chip>
       </div>
     </v-flex>
@@ -147,25 +120,21 @@ export default {
     var initial = this.initialAffirmations.slice(0, 1).map(function(a) {
       return { text: a.text, count: a.count || 1, resonance: a.resonance };
     });
-    var selectedTexts = initial.map(function(a) { return a.text; });
-    // merge allAffirmations with initial, deduplicating by text
+    // Everything already written elsewhere, to offer as a starting point.
     var seen = {};
-    var merged = initial.slice();
-    selectedTexts.forEach(function(t) { seen[t] = true; });
+    var pool = [];
+    initial.forEach(function(a) { seen[a.text] = true; });
     this.allAffirmations.forEach(function(a) {
-      if (!seen[a.text]) {
-        seen[a.text] = true;
-        merged.push({ text: a.text, count: a.count || 1 });
-      }
+      if (!a || !a.text || seen[a.text]) return;
+      seen[a.text] = true;
+      pool.push({ text: a.text, count: a.count || 1 });
     });
     return {
-      pool: merged,
-      // The credibility of the selected affirmation, carried on the affirmation
-      // itself so the list's edit dialog reads and writes the same value.
+      pool: pool,
+      // What the field holds — the affirmation itself, however it got there.
+      text: initial.length ? initial[0].text : '',
+      count: initial.length ? initial[0].count : 1,
       truth: normalizeTruth(initial.length ? initial[0].resonance : undefined),
-      selectedTexts: selectedTexts,
-      showNewInput: false,
-      newAffirmationText: '',
       suggestions: [],
       isLoading: false,
       errorMsg: '',
@@ -176,69 +145,29 @@ export default {
   },
   computed: {
     truthHint() { return truthHint(this.truth); },
-    selectedText() { return this.selectedTexts[0] || ''; },
-    hasSelectedText() { return this.selectedText.trim() !== ''; },
-    selectedAffirmations() {
-      var selectedTexts = this.selectedTexts;
-      return this.pool.filter(function(a) { return selectedTexts.indexOf(a.text) !== -1; });
-    },
-    unselectedAffirmations() {
-      var selectedTexts = this.selectedTexts;
-      return this.pool.filter(function(a) { return selectedTexts.indexOf(a.text) === -1; });
+    hasText() { return this.text.trim() !== ''; },
+    // Whatever is in the field is already on screen; the list offers the rest.
+    otherAffirmations() {
+      var current = this.text.trim();
+      return this.pool.filter(function(a) { return a.text !== current; });
     },
   },
   watch: {
-    selectedTexts: function() { this.emitChange(); },
+    text: function() { this.emitChange(); },
     truth: function() { this.emitChange(); },
   },
   methods: {
     emitChange() {
-      var truth = this.truth;
-      // An emptied field means no affirmation, not one without words.
-      this.$emit('changed', this.selectedAffirmations
-        .filter(function(a) { return a.text.trim() !== ''; })
-        .map(function(a) {
-          return { text: a.text.trim(), count: a.count || 1, resonance: truth };
-        }));
+      // An empty field means no affirmation, not one without words.
+      var text = this.text.trim();
+      this.$emit('changed', text
+        ? [{ text: text, count: this.count || 1, resonance: this.truth }]
+        : []);
     },
-    // Editing renames the entry in this wizard's own list; other beliefs keep
-    // the wording they were saved with.
-    setSelectedText(value) {
-      var old = this.selectedTexts[0];
-      var idx = this.pool.findIndex(function(a) { return a.text === old; });
-      if (idx >= 0) {
-        this.$set(this.pool, idx, Object.assign({}, this.pool[idx], { text: value }));
-      }
-      this.selectedTexts = [value];
-    },
-    addAffirmation(text) {
-      // Only one affirmation per belief — picking another replaces it.
-      this.selectedTexts = [text];
-    },
-    removeSelected() {
-      this.selectedTexts = [];
-    },
-    cancelNew() {
-      this.showNewInput = false;
-      this.newAffirmationText = '';
-    },
-    createAffirmation() {
-      var text = this.newAffirmationText.trim();
-      if (!text) return;
-      if (this.pool.every(function(a) { return a.text !== text; })) {
-        this.pool = this.pool.concat([{ text: text, count: 1 }]);
-      }
-      this.selectedTexts = [text];
-      this.newAffirmationText = '';
-      this.showNewInput = false;
-    },
-    acceptSuggestion(s) {
-      if (this.pool.every(function(a) { return a.text !== s; })) {
-        this.pool = this.pool.concat([{ text: s, count: 1 }]);
-      }
-      if (this.selectedTexts.indexOf(s) === -1) {
-        this.selectedTexts = [s];
-      }
+    // Existing affirmations and generated suggestions both land in the field,
+    // where they can still be reworded.
+    use(text) {
+      this.text = text;
     },
     saveApiKey() {
       this.apiKey = this.apiKeyInput;
