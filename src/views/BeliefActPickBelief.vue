@@ -8,10 +8,7 @@
     </v-flex>
 
     <v-flex>
-      <p v-if="!beliefs.length" class="empty-text">
-        Noch keine gewandelte Überzeugung. Wandle zuerst eine Überzeugung — die neue
-        Perspektive ist das, was eine Handlung überprüft.
-      </p>
+      <p v-if="!beliefs.length" class="empty-text">Noch keine gewandelte Überzeugung.</p>
       <button
         v-for="b in beliefs"
         :key="b.time"
@@ -20,6 +17,9 @@
         :class="{ selected: b.time === selected }"
         @click="pick(b.time)"
       >{{ b.belief }}</button>
+
+      <!-- Says why the list is as short as it is. -->
+      <p class="footnote">Wandle Überzeugungen, um sie hier zum Handeln auszuwählen.</p>
     </v-flex>
   </v-layout>
 </template>
@@ -74,5 +74,11 @@ export default {
   font-size: 0.875rem;
   color: #8e8e93;
   margin: 0;
+}
+.footnote {
+  font-size: 0.8rem;
+  color: #636366;
+  line-height: 1.5;
+  margin: 12px 0 0;
 }
 </style>
