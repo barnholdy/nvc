@@ -48,6 +48,18 @@ function pointsByBelief(patterns) {
   return out;
 }
 
+// The 0-10 answers are shown as a percentage — "55% wahr" reads as a degree,
+// where "5,5/10" reads as a score.
+export function truthPercent(value) {
+  if (typeof value !== 'number' || isNaN(value)) return null;
+  return Math.round((value / TRUTH_SCALE_MAX) * 100);
+}
+
+export function truthPercentLabel(value) {
+  const pct = truthPercent(value);
+  return pct === null ? '' : `${pct}% wahr`;
+}
+
 // Every rating one belief has collected across all situations, oldest first.
 export function truthPointsFor(patterns, beliefTime) {
   const points = pointsByBelief(patterns);

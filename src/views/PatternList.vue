@@ -74,7 +74,7 @@
                   <p class="expand-text">{{ b.belief }}</p>
                   <span class="status-pill" :style="{ color: statusColor(b) }">{{ statusLabel(b) }}</span>
                   <span v-if="truthOf(entry, b) !== null" class="status-pill truth-pill">
-                    {{ truthOf(entry, b) }}/10 wahr
+                    {{ truthLabel(entry, b) }}
                   </span>
                 </div>
                 <v-icon small class="belief-chevron">chevron_right</v-icon>
@@ -117,6 +117,7 @@
 <script>
 import moment from 'moment';
 import { beliefStatusLabel, beliefStatusColor } from '@/utils/beliefStatus';
+import { truthPercentLabel } from '@/utils/beliefTrend';
 
 export default {
   name: 'pattern-list',
@@ -139,6 +140,9 @@ export default {
       return (entry.beliefs || []).map(id => beliefs.find(b => b.time === id)).filter(Boolean);
     },
     // Recorded on the situation when the belief was added to it.
+    truthLabel(entry, belief) {
+      return truthPercentLabel(this.truthOf(entry, belief));
+    },
     truthOf(entry, belief) {
       const map = (entry && entry.beliefTruths) || {};
       const v = map[belief.time];

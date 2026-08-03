@@ -37,6 +37,27 @@
   <meta name="msapplication-navbutton-color" content="#000000">
 
   <link href="https://fonts.googleapis.com/css?family=Roboto:100:300,400,500,700,900|Material+Icons" rel="stylesheet">
+  <script>
+    // A page kept in the browser cache points at script files that the next
+    // deploy replaced. Loading it then fails silently and leaves a black screen,
+    // so ask the server for a fresh copy once instead of sitting there.
+    (function () {
+      var FLAG = 'nvc.assetReload';
+      window.addEventListener('error', function (e) {
+        var el = e && e.target;
+        if (!el || (el.tagName !== 'SCRIPT' && el.tagName !== 'LINK')) return;
+        try {
+          if (sessionStorage.getItem(FLAG)) return;
+          sessionStorage.setItem(FLAG, '1');
+        } catch (err) { return; }
+        location.replace(location.pathname + '?v=' + Date.now() + location.hash);
+      }, true);
+      window.addEventListener('load', function () {
+        // Booted fine, so a later failure may try again.
+        try { sessionStorage.removeItem(FLAG); } catch (err) { /* private mode */ }
+      });
+    }());
+  </script>
 </head>
 
 <body>

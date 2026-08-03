@@ -285,7 +285,7 @@ import {
 } from '@/utils/experiment';
 import { normalizeTruth } from '@/utils/affirmationTruth';
 import { originArcOf, moodLabel as moodLabelOf } from '@/utils/originArc';
-import { averageTruth } from '@/utils/beliefTrend';
+import { averageTruth, truthPercentLabel } from '@/utils/beliefTrend';
 import {
   loadAffStatusMap,
   affirmationStatusLabel,
@@ -343,14 +343,10 @@ export default {
       // not carry over to the next one.
       this.isOriginOpen = false;
     },
-    // What the situations say on average. Null while the belief was never rated,
-    // because a pill reading 0/10 would claim an answer nobody gave.
+    // What the situations say on average. Empty while the belief was never rated,
+    // because a pill reading 0% would claim an answer nobody gave.
     truthLabel(entry) {
-      const value = averageTruth(this.$store.getters.patterns, entry && entry.time);
-      if (value === null) return '';
-      const rounded = Math.round(value * 10) / 10;
-      const text = Number.isInteger(rounded) ? String(rounded) : String(rounded).replace('.', ',');
-      return `${text}/10 wahr`;
+      return truthPercentLabel(averageTruth(this.$store.getters.patterns, entry && entry.time));
     },
     originArc(entry) { return originArcOf(entry); },
     moodLabel(mood) { return moodLabelOf(mood); },
