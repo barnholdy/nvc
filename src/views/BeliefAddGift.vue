@@ -18,7 +18,7 @@
         <p class="reframe-text">
           Diese Überzeugung war kein Fehler. Für das Kind, das du warst, war sie eine kluge
           Lösung — sie hat dir damals
-          <span v-if="gift" class="reframe-gift">{{ gift }}</span><span v-else>etwas Wichtiges</span>
+          <span v-if="gift" class="reframe-gift" :style="{ color: needColor }">{{ gift }}</span><span v-else>etwas Wichtiges</span>
           gebracht. Heute darfst du prüfen, ob du sie noch brauchst.
         </p>
       </div>
@@ -28,6 +28,7 @@
 
 <script>
 import BeliefAddFeelingNeed from '@/views/BeliefAddFeelingNeed.vue';
+import { NEED_COLOR } from '@/utils/emotions';
 
 // The need and the gift are the same answer to the same question: what this
 // belief once did for you. So they are picked once, on one screen, and the
@@ -46,6 +47,7 @@ export default {
   data() {
     return {
       needs: this.initialNeeds.slice(),
+      needColor: NEED_COLOR,
       prompt: 'Wenn du die Überzeugung als Strategie betrachtest, '
         + 'welches Bedürfnis hast du dir damit erfüllt?',
     };
@@ -78,8 +80,8 @@ export default {
   line-height: 1.6;
   margin: 0;
 }
+// The colour needs carry everywhere else — the word in this sentence is one.
 .reframe-gift {
-  color: #4ade80;
   font-weight: 600;
 }
 </style>
