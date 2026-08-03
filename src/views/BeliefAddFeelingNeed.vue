@@ -14,11 +14,14 @@
       </belief-context>
 
       <p class="body-1 grey--text mt-3">{{ promptText }}</p>
-      <p v-if="limitHint" class="limit-hint" :class="{ 'over-limit': isOverLimit }">{{ limitHint }}</p>
     </v-flex>
 
-    <!-- Optional block between the prompt and the list (unused by the belief wizard) -->
+    <!-- Optional block between the prompt and the list -->
     <slot name="beforeList"></slot>
+
+    <!-- Directly above the list it belongs to, and so below whatever the slot
+         asked last — in the wandeln wizard that is "Was fühlst du?". -->
+    <p v-if="limitHint" class="limit-hint" :class="{ 'over-limit': isOverLimit }">{{ limitHint }}</p>
 
     <v-flex>
       <p v-if="isNeedsMode && visibleEmotions.length === 0" class="empty-hint">

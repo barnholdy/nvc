@@ -48,6 +48,22 @@ function pointsByBelief(patterns) {
   return out;
 }
 
+// Every rating one belief has collected across all situations, oldest first.
+export function truthPointsFor(patterns, beliefTime) {
+  const points = pointsByBelief(patterns);
+  const list = points[beliefTime] || [];
+  return list.slice().sort((a, b) => a.time - b.time);
+}
+
+// What the belief is held to be worth on average, across every situation it was
+// rated in. Null when it was never rated — a zero would claim something else.
+export function averageTruth(patterns, beliefTime) {
+  const list = truthPointsFor(patterns, beliefTime);
+  if (!list.length) return null;
+  const sum = list.reduce((total, p) => total + p.value, 0);
+  return sum / list.length;
+}
+
 // One row per belief that has at least one rating. Beliefs deleted in the
 // meantime drop out, because the belief text is what makes a row readable.
 export function beliefTrends(patterns, beliefs) {

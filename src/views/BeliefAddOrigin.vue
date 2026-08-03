@@ -12,7 +12,7 @@
 
       <p class="body-1 white--text mt-3">
         Wann hast du diese Überzeugung zum ersten Mal gelernt? Welche frühere Erfahrung hat sie
-        plausibel gemacht?
+        plausibel gemacht? Was hat dir diese Überzeugung damals ermöglicht?
       </p>
     </v-flex>
     <v-flex>

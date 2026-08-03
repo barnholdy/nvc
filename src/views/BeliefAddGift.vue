@@ -2,7 +2,7 @@
   <belief-add-feeling-need
     mode="needs"
     headline="Kluge Lösung"
-    prompt="Was hat dir diese Überzeugung damals gebracht?"
+    :prompt="prompt"
     :belief="belief"
     :reaction="reaction"
     :taxonomy="taxonomy"
@@ -44,7 +44,11 @@ export default {
     initialNeeds: { type: Array, default: () => [] },
   },
   data() {
-    return { needs: this.initialNeeds.slice() };
+    return {
+      needs: this.initialNeeds.slice(),
+      prompt: 'Wenn du die Überzeugung als Strategie betrachtest, '
+        + 'welches Bedürfnis hast du dir damit erfüllt?',
+    };
   },
   computed: {
     gift() {

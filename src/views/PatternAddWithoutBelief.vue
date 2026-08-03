@@ -3,7 +3,7 @@
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Neue Perspektive</h1>
       <p class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
-      <p class="body-1 grey--text mt-2">Stell dir einen Tag vor, an dem diese Überzeugung einfach nicht existiert. Was wärst du ohne sie? Wie würdest du in eine Begegnung gehen? Was würdest du tun oder lassen?</p>
+      <p class="body-1 grey--text mt-2">{{ promptText }}</p>
     </v-flex>
     <v-flex>
       <v-text-field
@@ -19,14 +19,40 @@
 </template>
 
 <script>
+import { dedupeByName } from '@/utils/emotions';
+
 export default {
   name: 'pattern-add-without-belief',
   props: {
     belief: { type: String, default: '' },
+    // The need this belief was a strategy for. Named in the prompt, because
+    // imagining it already met is easier than imagining an absence.
+    needs: { type: Array, default: function() { return []; } },
     initialValue: { type: String, default: '' },
   },
   data() {
     return { text: this.initialValue };
+  },
+  computed: {
+    needNames: function() {
+      return dedupeByName(this.needs).map(function(n) { return n.name; }).filter(Boolean);
+    },
+    // "Sicherheit", "Sicherheit und Nähe", "Sicherheit, Nähe und Ruhe" — beliefs
+    // from before the one-need rule can carry several.
+    needPhrase: function() {
+      var names = this.needNames;
+      if (names.length < 2) return names[0] || '';
+      return names.slice(0, -1).join(', ') + ' und ' + names[names.length - 1];
+    },
+    promptText: function() {
+      var opening = 'Stell dir einen Tag vor, an dem diese Überzeugung einfach nicht existiert. ';
+      var closing = 'Wie würdest du in eine Begegnung gehen? Was würdest du tun oder lassen?';
+      // Without a need there is nothing to name, so the original question stays.
+      var middle = this.needPhrase
+        ? 'Stell dir vor dein Bedürfnis nach ' + this.needPhrase + ' wäre einfach so erfüllt. '
+        : 'Was wärst du ohne sie? ';
+      return opening + middle + closing;
+    },
   },
   watch: {
     text(val) { this.$emit('changed', val); },
