@@ -7,14 +7,10 @@
 
       <!-- What was written a step or two earlier. Picking feelings and needs is
            easier with the reaction still in view than from memory. -->
-      <div v-if="reaction" class="context-block mt-3">
-        <p class="context-label">Reaktion</p>
-        <p class="context-text">{{ reaction }}</p>
-      </div>
-      <div v-if="isNeedsMode && contextFeelings.length" class="context-block mt-3">
-        <p class="context-label">Gefühle</p>
-        <feeling-chips :items="contextFeelings" type="feelings"></feeling-chips>
-      </div>
+      <belief-context
+        :reaction="reaction"
+        :feelings="isNeedsMode ? contextFeelings : []">
+      </belief-context>
 
       <p class="body-1 grey--text mt-3">{{ promptText }}</p>
     </v-flex>
@@ -120,7 +116,7 @@
 </template>
 
 <script>
-import FeelingChips from '@/components/FeelingChips.vue';
+import BeliefContext from '@/views/BeliefContext.vue';
 import {
   emotionColor,
   emotionValence,
@@ -131,7 +127,7 @@ import {
 
 export default {
   name: 'belief-add-feeling-need',
-  components: { FeelingChips },
+  components: { BeliefContext },
   props: {
     belief: { type: String, default: '' },
     // The reaction from the earlier step, shown read-only for context.
@@ -370,21 +366,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.context-block { margin-bottom: 4px; }
-.context-label {
-  font-size: 0.68rem;
-  color: #8e8e93;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 600;
-  margin: 0 0 6px;
-}
-.context-text {
-  font-size: 0.95rem;
-  color: #ebebf5;
-  line-height: 1.5;
-  margin: 0;
-}
 .belief-quote { font-style: italic; }
 
 .emotion-card {

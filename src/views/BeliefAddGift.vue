@@ -3,6 +3,14 @@
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Kluge Lösung</h1>
       <p class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
+
+      <belief-context
+        :reaction="reaction"
+        :feelings="feelings"
+        :needs="needs"
+        :origin="origin">
+      </belief-context>
+
       <p class="body-1 white--text mt-3">Was hat dir diese Überzeugung damals gebracht?</p>
     </v-flex>
 
@@ -33,15 +41,20 @@
 </template>
 
 <script>
+import BeliefContext from '@/views/BeliefContext.vue';
 import { giftChips } from '@/utils/originArc';
 
 // The chips come from the needs the user already picked two steps earlier, so
 // this screen asks for a tap rather than for the same words a second time.
 export default {
   name: 'belief-add-gift',
+  components: { BeliefContext },
   props: {
     belief: { type: String, default: '' },
+    reaction: { type: String, default: '' },
+    feelings: { type: Array, default: () => [] },
     needs: { type: Array, default: () => [] },
+    origin: { type: String, default: '' },
     initialValue: { type: String, default: null },
   },
   data() {

@@ -26,11 +26,7 @@
           <v-layout column>
             <v-flex class="mt-2">
               <h1 class="headline font-weight-regular">Gespeichert</h1>
-              <p v-if="savedState === 'withOrigin'" class="body-1 grey--text mt-3">
-                Der Ursprung liegt jetzt bei dieser Überzeugung — eingeklappt. Du entscheidest,
-                wann du ihn wieder anschaust.
-              </p>
-              <p v-else class="body-1 grey--text mt-3">
+              <p class="body-1 grey--text mt-3">
                 Ohne Ursprung gespeichert. Du kannst ihn jederzeit später ergänzen, wenn es sich
                 stimmig anfühlt.
               </p>
@@ -82,6 +78,9 @@
           <belief-add-origin
             v-show="step === 6"
             :belief="belief"
+            :reaction="withBelief"
+            :feelings="selectedFeelings"
+            :needs="selectedNeeds"
             :initialValue="origin"
             @changed="origin = $event"
             @focussed="isFooterFixed = false"
@@ -94,7 +93,10 @@
             v-if="hasEnteredOriginPhase"
             v-show="step === 7"
             :belief="belief"
+            :reaction="withBelief"
+            :feelings="selectedFeelings"
             :needs="selectedNeeds"
+            :origin="origin"
             :initialValue="gift"
             @changed="gift = $event">
           </belief-add-gift>
@@ -115,7 +117,9 @@
         </div>
         <div v-else-if="step === READINESS_STEP" class="gate-actions">
           <v-btn @click="nextStep" block large color="primary">Jetzt anschauen</v-btn>
-          <button type="button" class="later-btn" @click="saveWithoutOrigin">Später</button>
+          <button type="button" class="later-btn" @click="saveWithoutOrigin">
+            speichern und später weitermachen
+          </button>
         </div>
         <div v-else class="footer-single">
           <v-btn
@@ -305,7 +309,11 @@ export default {
       }
       // Editing can move the belief to another tab — land on the one it is in now.
       this.savedTab = beliefStatus(saved);
-      this.savedState = withOrigin ? 'withOrigin' : 'later';
+      if (withOrigin) {
+        this.finish();
+        return;
+      }
+      this.savedState = 'later';
       this.$vuetify.goTo(0, { duration: 0 });
     },
     finish() {
