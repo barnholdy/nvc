@@ -9,6 +9,10 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 // they line up one-to-one with the tabs in the Handlungen list.
 export const EXPERIMENT_DISPLAY_STATES = ['open', 'planned', 'done'];
 
+export function isExperimentDisplayState(value) {
+  return EXPERIMENT_DISPLAY_STATES.indexOf(value) !== -1;
+}
+
 export const EXPERIMENT_DISPLAY_LABELS = {
   open: 'Offen',
   planned: 'Geplant',

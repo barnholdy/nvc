@@ -45,6 +45,15 @@
                 <v-icon small color="#fff">edit</v-icon>
                 <span>Planen</span>
               </button>
+              <!-- Nothing to compare against until an anchor exists -->
+              <button
+                v-if="!needsPlan(row.experiment)"
+                class="swipe-btn swipe-btn-evaluate"
+                @click.stop="startResult(row)"
+              >
+                <v-icon small color="#fff">assessment</v-icon>
+                <span>Auswerten</span>
+              </button>
             </div>
             <div class="swipe-left-panel">
               <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(row)">
@@ -354,6 +363,7 @@ import {
   collectExperiments,
   experimentsOf,
   experimentDisplayState,
+  isExperimentDisplayState,
   experimentState,
   fearGap,
   fearGapColor,
@@ -401,8 +411,11 @@ export default {
   name: 'action-list',
   data() {
     return {
-      // Planned experiments are the ones waiting on you, so they open first.
-      tab: 'planned',
+      // Planned experiments are the ones waiting on you, so they open first;
+      // a wizard can send you straight to a specific tab with ?tab=.
+      tab: isExperimentDisplayState(this.$route.query.tab)
+        ? this.$route.query.tab
+        : 'planned',
       openIndex: null,
       now: Date.now(),
       isResultDialogShowing: false,
@@ -607,7 +620,7 @@ export default {
         this.sw.isH = Math.abs(dx) >= Math.abs(dy);
       if (!this.sw.isH) return;
       e.preventDefault();
-      this.sw.dx = Math.max(-80, Math.min(dx, 65));
+      this.sw.dx = Math.max(-80, Math.min(dx, this.rightWidth(i)));
       this.sw.drag = true;
     },
     tsEnd(e, i) {
@@ -625,12 +638,18 @@ export default {
       }
       this.sw.touchIdx = null; this.sw.dx = 0; this.sw.drag = false; this.sw.isH = null;
     },
+    // Keep in step with the buttons rendered above: a mismatch makes the row
+    // spring back before the second one can be tapped.
+    rightWidth(i) {
+      const row = this.filteredRows[i];
+      return row && !this.needsPlan(row.experiment) ? 130 : 65;
+    },
     rowSt(i) {
       const s = this.sw;
       const live = s.touchIdx === i && s.drag && s.isH;
       let x = 0;
       if (live) x = s.dx;
-      else if (s.openIdx === i) x = s.openDir === 'left' ? -80 : 65;
+      else if (s.openIdx === i) x = s.openDir === 'left' ? -80 : this.rightWidth(i);
       return { transform: `translateX(${x}px)`, transition: live ? 'none' : 'transform 0.2s ease' };
     },
     deskClick(i) {
@@ -716,6 +735,7 @@ export default {
 }
 .swipe-btn-delete { background: #ff453a; width: 80px; }
 .swipe-btn-edit { background: #636366; }
+.swipe-btn-evaluate { background: #2f7a52; }
 
 .ios-row {
   position: relative;

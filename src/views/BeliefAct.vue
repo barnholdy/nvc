@@ -54,7 +54,6 @@
 <script>
 import BeliefActSituation from '@/views/BeliefActSituation.vue';
 import BeliefActFear from '@/views/BeliefActFear.vue';
-import { beliefStatus } from '@/utils/beliefStatus';
 import { createExperiment, isPlanned } from '@/utils/experiment';
 
 export default {
@@ -120,7 +119,8 @@ export default {
         reflection: Object.assign({}, r, { experiments: this.mergedExperiments() }),
       });
       this.$store.dispatch('updateBelief', saved);
-      this.$router.push({ path: '/beliefs', query: { tab: beliefStatus(saved) } });
+      // The experiment is now planned — show it where it waits to be carried out.
+      this.$router.push({ path: '/actions', query: { tab: 'planned' } });
     },
     close() {
       this.$router.push('/beliefs');
