@@ -82,6 +82,11 @@ export default new Router({
       name: 'profile',
       component: () => import('./views/ProfileView.vue'),
     },
+    {
+      path: '/trends',
+      name: 'trends',
+      component: () => import('./views/TrendsView.vue'),
+    },
     { path: '*', redirect: '/patterns' },
   ],
   scrollBehavior() {
