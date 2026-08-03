@@ -14,7 +14,7 @@
       </belief-context>
 
       <p class="body-1 grey--text mt-3">{{ promptText }}</p>
-      <p v-if="limitHint" class="limit-hint">{{ limitHint }}</p>
+      <p v-if="limitHint" class="limit-hint" :class="{ 'over-limit': isOverLimit }">{{ limitHint }}</p>
     </v-flex>
 
     <!-- Optional block between the prompt and the list (unused by the belief wizard) -->
@@ -63,11 +63,11 @@
               >{{ item.name }}<span class="chip-x">×</span></span>
             </div>
           </div>
-          <v-icon small :color="emotionColor(e.id)">{{ activeEmotionId === e.id ? 'expand_less' : 'expand_more' }}</v-icon>
+          <v-icon small :color="emotionColor(e.id)">{{ isEmotionOpen(e.id) ? 'expand_less' : 'expand_more' }}</v-icon>
         </div>
 
         <!-- Clusters (when emotion is expanded) -->
-        <div v-if="activeEmotionId === e.id" class="emotion-card-body">
+        <div v-if="isEmotionOpen(e.id)" class="emotion-card-body">
           <div v-for="c in visibleClusters(e)" :key="c.id">
 
             <!-- Fill and counter always report selected feelings, in both modes -->
@@ -84,7 +84,7 @@
             </div>
 
             <!-- Selectable items (when cluster is expanded) -->
-            <div v-if="activeClusterId === c.id" class="selection-section">
+            <div v-if="isClusterOpen(c.id)" class="selection-section">
               <!-- In needs mode the feelings picked here are the context for choosing -->
               <div
                 v-if="isNeedsMode && selectedFeelingsInCluster(c).length > 0"
@@ -113,6 +113,9 @@
           </div>
         </div>
       </div>
+
+      <!-- Optional block under the list (the reframe on Kluge Lösung) -->
+      <slot name="afterList"></slot>
     </v-flex>
   </v-layout>
 </template>
@@ -150,6 +153,11 @@ export default {
     contextFeelings: { type: Array, default: function() { return []; } },
     // How many may be picked at once. 0 means no limit.
     maxSelections: { type: Number, default: 0 },
+    // Replace the oldest pick instead of letting the count go over.
+    rotateOnLimit: { type: Boolean, default: false },
+    // Open every Grundemotion and Unterkategorie at once, so the whole list is
+    // there to read instead of behind two taps.
+    expandAll: { type: Boolean, default: false },
     // Shown above the list when the step follows an origin question.
     contextOrigin: { type: String, default: '' },
   },
@@ -174,15 +182,24 @@ export default {
       if (this.headline) return this.headline;
       return this.isNeedsMode ? 'Bedürfnisse' : 'Gefühle';
     },
-    // Say the limit out loud, so a pick that pushes out an older one is not a
-    // surprise.
+    chosenCount: function() {
+      return this.isNeedsMode ? this.selNeeds.length : this.selFeelings.length;
+    },
+    isOverLimit: function() {
+      return !!this.maxSelections && this.chosenCount > this.maxSelections;
+    },
+    // Say the limit out loud, and say it differently once it is exceeded — the
+    // "weiter" button is disabled at that point and needs a reason on screen.
     limitHint: function() {
       if (!this.maxSelections) return '';
       if (this.maxSelections === 1) {
         return this.isNeedsMode ? 'Wähle ein Bedürfnis.' : 'Wähle ein Gefühl.';
       }
-      var chosen = this.isNeedsMode ? this.selNeeds.length : this.selFeelings.length;
-      return 'Wähle bis zu ' + this.maxSelections + ' — ' + chosen + ' von '
+      if (this.isOverLimit) {
+        return this.chosenCount + ' von ' + this.maxSelections
+          + ' gewählt — entferne welche, um weiterzugehen.';
+      }
+      return 'Wähle bis zu ' + this.maxSelections + ' — ' + this.chosenCount + ' von '
         + this.maxSelections + ' gewählt.';
     },
     promptText: function() {
@@ -280,7 +297,14 @@ export default {
     },
 
     /* ── accordion ── */
+    isEmotionOpen: function(id) {
+      return this.expandAll || this.activeEmotionId === id;
+    },
+    isClusterOpen: function(id) {
+      return this.expandAll || this.activeClusterId === id;
+    },
     toggleEmotion: function(id) {
+      if (this.expandAll) return;
       if (this.activeEmotionId === id) {
         this.activeEmotionId = null;
         this.activeClusterId = null;
@@ -290,6 +314,7 @@ export default {
       }
     },
     toggleCluster: function(id) {
+      if (this.expandAll) return;
       this.activeClusterId = this.activeClusterId === id ? null : id;
     },
 
@@ -326,11 +351,11 @@ export default {
       }
       this.emitChange();
     },
-    // At the limit the oldest pick makes way. Blocking instead would leave the
-    // user tapping a chip that does nothing; with a limit of one this is simply
-    // the usual "pick one" behaviour.
+    // Only where the limit is one, so that a tap reads as "pick this one
+    // instead". Where several are allowed, going over is answered by blocking
+    // the way forward rather than by silently dropping someone's choice.
     makeRoom: function(list) {
-      if (!this.maxSelections) return;
+      if (!this.maxSelections || !this.rotateOnLimit) return;
       while (list.length >= this.maxSelections) list.shift();
     },
     emitChange: function() {
@@ -397,6 +422,10 @@ export default {
   font-size: 0.8rem;
   color: #636366;
   margin: 6px 0 0;
+  &.over-limit {
+    color: #fd9927;
+    font-weight: 600;
+  }
 }
 
 .emotion-card {

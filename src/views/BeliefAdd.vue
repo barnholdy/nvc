@@ -49,7 +49,7 @@
           :reaction="withBelief"
           :taxonomy="taxonomy"
           :initialFeelings="selectedFeelings"
-          :maxSelections="3"
+          :maxSelections="MAX_FEELINGS"
           @change="selectedFeelings = $event">
         </belief-add-feeling-need>
 
@@ -60,7 +60,6 @@
           :belief="belief"
           :reaction="withBelief"
           :feelings="selectedFeelings"
-          :needs="selectedNeeds"
           :initialValue="origin"
           @changed="origin = $event"
           @focussed="isFooterFixed = false"
@@ -144,8 +143,10 @@ import { beliefStatus } from '@/utils/beliefStatus';
 import { normalizeOriginArc } from '@/utils/originArc';
 import taxonomy from '../assets/taxonomy.json';
 
+const FEELINGS_STEP = 4;
 const READINESS_STEP = 5;
 const TOTAL_STEPS = 9;
+const MAX_FEELINGS = 5;
 
 export default {
   name: 'belief-add',
@@ -169,6 +170,7 @@ export default {
       step: 1,
       totalSteps: TOTAL_STEPS,
       READINESS_STEP: READINESS_STEP,
+      MAX_FEELINGS: MAX_FEELINGS,
       taxonomy: taxonomy,
       editEntry: editEntry || null,
       belief: editEntry ? editEntry.belief : '',
@@ -198,6 +200,9 @@ export default {
     },
     isStepComplete() {
       if (this.step === 1) return this.belief.trim() !== '';
+      // Beliefs saved before the limit existed can carry more than five
+      // feelings; the way forward opens once they are back within it.
+      if (this.step === FEELINGS_STEP) return this.selectedFeelings.length <= MAX_FEELINGS;
       // The only hard gate in the whole wizard: saving needs an answer to the
       // check, because that answer decides whether the signpost was shown.
       if (this.step === TOTAL_STEPS) return !!this.mood;

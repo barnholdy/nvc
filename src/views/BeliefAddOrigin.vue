@@ -4,10 +4,10 @@
       <h1 class="headline font-weight-regular">Ursprung</h1>
       <p class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
 
+      <!-- No needs here: they are picked later, on Kluge Lösung. -->
       <belief-context
         :reaction="reaction"
-        :feelings="feelings"
-        :needs="needs">
+        :feelings="feelings">
       </belief-context>
 
       <p class="body-1 white--text mt-3">
@@ -42,7 +42,6 @@ export default {
     belief: { type: String, default: '' },
     reaction: { type: String, default: '' },
     feelings: { type: Array, default: () => [] },
-    needs: { type: Array, default: () => [] },
     initialValue: { type: String, default: '' },
   },
   data() {

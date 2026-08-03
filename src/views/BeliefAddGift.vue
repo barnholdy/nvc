@@ -10,9 +10,11 @@
     :contextFeelings="feelings"
     :contextOrigin="origin"
     :maxSelections="1"
+    rotate-on-limit
+    expand-all
     @change="onChange">
-    <template slot="beforeList">
-      <div class="reframe-card">
+    <template slot="afterList">
+      <div class="reframe-card mt-3">
         <p class="reframe-text">
           Diese Überzeugung war kein Fehler. Für das Kind, das du warst, war sie eine kluge
           Lösung — sie hat dir damals
@@ -65,7 +67,6 @@ export default {
   border-left: 3px solid #4ade80;
   border-radius: 8px;
   padding: 14px 16px;
-  margin-bottom: 16px;
 }
 .reframe-text {
   font-size: 0.92rem;

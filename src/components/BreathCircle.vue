@@ -16,20 +16,22 @@ export default {
 .breath-wrap {
   display: flex;
   justify-content: center;
-  padding: 40px 0;
+  padding: 16px 0;
 }
 // A filled disc that dissolves towards its edge instead of a hard ring, so
-// there is nothing to fix the eye on. Growing raises the opacity, which reads
-// as the colour deepening on the in-breath.
+// there is nothing to fix the eye on. At full size the core is solid green; the
+// out-breath fades it back. Nearly the full width of the phone, but never
+// taller than the space left under the text — 40vh keeps it off the footer on
+// short screens. The width is the maximum: the animation starts at half of it.
 .breath-circle {
-  width: 200px;
-  height: 200px;
+  width: min(90vw, 38vh);
+  height: min(90vw, 38vh);
   border-radius: 50%;
   background: radial-gradient(
     circle closest-side,
-    rgba(74, 222, 128, 0.62) 0%,
-    rgba(74, 222, 128, 0.58) 58%,
-    rgba(74, 222, 128, 0.38) 82%,
+    rgba(74, 222, 128, 1) 0%,
+    rgba(74, 222, 128, 0.92) 58%,
+    rgba(74, 222, 128, 0.55) 82%,
     rgba(74, 222, 128, 0) 100%
   );
   animation: breathe 8s ease-in-out infinite;

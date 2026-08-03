@@ -59,6 +59,13 @@ export function colorForFeeling(name) {
   return id ? emotionColor(id) : UNKNOWN_COLOR;
 }
 
+export const EMOTION_ORDER = taxonomy.grundemotionen.map(e => e.id);
+
+export function emotionLabel(id) {
+  const emotion = taxonomy.grundemotionen.find(e => e.id === id);
+  return emotion ? emotion.label : '';
+}
+
 // A need can be picked once per Grundemotion, so a belief may hold the same
 // name several times. Read-only views collapse those to one entry.
 export function dedupeByName(items) {
