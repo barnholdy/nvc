@@ -70,6 +70,14 @@ export function emotionLabel(id) {
   return emotion ? emotion.label : '';
 }
 
+// "Sicherheit", "Sicherheit und Nähe", "Sicherheit, Nähe und Ruhe" — for
+// prompts that name the user's own words inside a sentence.
+export function joinNames(names) {
+  const list = (names || []).filter(Boolean);
+  if (list.length < 2) return list[0] || '';
+  return `${list.slice(0, -1).join(', ')} und ${list[list.length - 1]}`;
+}
+
 // A need can be picked once per Grundemotion, so a belief may hold the same
 // name several times. Read-only views collapse those to one entry.
 export function dedupeByName(items) {

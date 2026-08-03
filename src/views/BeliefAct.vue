@@ -13,8 +13,18 @@
     </v-toolbar>
     <v-content>
       <v-container class="mb-5">
-        <belief-act-situation
+        <!-- Only when the wizard was opened without a belief, from the
+             Handlungen list. -->
+        <belief-act-pick-belief
+          v-if="needsBelief"
           v-show="step === 1"
+          :beliefs="allBeliefs"
+          :initialValue="beliefTime"
+          @changed="beliefTime = $event">
+        </belief-act-pick-belief>
+
+        <belief-act-situation
+          v-show="step === situationStep"
           :belief="entry ? entry.belief : ''"
           :initialValue="experiment.situation"
           @changed="experiment.situation = $event"
@@ -23,7 +33,7 @@
         </belief-act-situation>
 
         <belief-act-fear
-          v-show="step === 2"
+          v-show="step === fearStep"
           :situation="experiment.situation"
           :experiment="experiment"
           @changed="onFearChanged"
@@ -35,7 +45,7 @@
       <v-footer :fixed="isFooterFixed" color="white elevation-3" height="44">
         <v-btn
           v-if="step < totalSteps"
-          :disabled="!experiment.situation.trim()"
+          :disabled="!isStepComplete"
           @click="nextStep"
           block large color="primary">
           weiter
@@ -52,6 +62,7 @@
 </template>
 
 <script>
+import BeliefActPickBelief from '@/views/BeliefActPickBelief.vue';
 import BeliefActSituation from '@/views/BeliefActSituation.vue';
 import BeliefActFear from '@/views/BeliefActFear.vue';
 import { createExperiment, isPlanned } from '@/utils/experiment';
@@ -59,10 +70,14 @@ import { createExperiment, isPlanned } from '@/utils/experiment';
 export default {
   name: 'belief-act',
   components: {
+    BeliefActPickBelief,
     BeliefActSituation,
     BeliefActFear,
   },
   data() {
+    // Without a :time in the route the wizard starts one step earlier and asks
+    // which belief this is about.
+    const needsBelief = !this.$route.params.time;
     const entry = this.$store.getters.beliefs
       .find(function(b) { return b.time === parseInt(this.$route.params.time, 10); }, this);
     const r = (entry && entry.reflection) || {};
@@ -75,14 +90,31 @@ export default {
       ? (r.experiments || []).find(function(x) { return x.id === wanted; })
       : null;
     return {
-      entry: entry || null,
+      needsBelief: needsBelief,
+      beliefTime: entry ? entry.time : null,
       step: 1,
-      totalSteps: 2,
+      totalSteps: needsBelief ? 3 : 2,
       experiment: existing
         ? Object.assign({}, existing)
         : createExperiment(Date.now()),
       isFooterFixed: true,
     };
+  },
+  computed: {
+    allBeliefs() {
+      return this.$store.getters.beliefs.slice().sort((a, b) => b.time - a.time);
+    },
+    // Resolved on demand: in pick mode the belief only exists once chosen.
+    entry() {
+      if (this.beliefTime === null) return null;
+      return this.$store.getters.beliefs.find(b => b.time === this.beliefTime) || null;
+    },
+    situationStep() { return this.needsBelief ? 2 : 1; },
+    fearStep() { return this.needsBelief ? 3 : 2; },
+    isStepComplete() {
+      if (this.needsBelief && this.step === 1) return this.beliefTime !== null;
+      return this.experiment.situation.trim() !== '';
+    },
   },
   methods: {
     onFearChanged(payload) {
@@ -123,7 +155,8 @@ export default {
       this.$router.push({ path: '/actions', query: { tab: 'planned' } });
     },
     close() {
-      this.$router.push('/beliefs');
+      // Back where the wizard was opened from.
+      this.$router.push(this.needsBelief ? '/actions' : '/beliefs');
     },
   },
 };

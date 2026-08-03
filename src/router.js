@@ -53,6 +53,13 @@ export default new Router({
       component: () => import('./views/BeliefAct.vue'),
     },
     {
+      // Same wizard, opened from the Handlungen list: the belief is picked in
+      // an extra first step.
+      path: '/add-action',
+      name: 'add-action',
+      component: () => import('./views/BeliefAct.vue'),
+    },
+    {
       path: '/empathy-belief/:time',
       name: 'empathy-belief',
       component: () => import('./views/BeliefEmpathy.vue'),

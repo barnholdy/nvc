@@ -3,6 +3,9 @@
     <v-toolbar color="#000" dark flat app>
       <v-toolbar-title>Handlungen</v-toolbar-title>
       <v-spacer></v-spacer>
+      <v-btn icon @click="$router.push('/add-action')">
+        <v-icon color="#4ade80">add</v-icon>
+      </v-btn>
       <v-btn icon @click="$router.push('/settings')">
         <v-icon color="#4ade80">settings</v-icon>
       </v-btn>

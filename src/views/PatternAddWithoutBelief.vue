@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { dedupeByName, NEED_COLOR } from '@/utils/emotions';
+import { dedupeByName, joinNames, NEED_COLOR } from '@/utils/emotions';
 
 export default {
   name: 'pattern-add-without-belief',
@@ -46,12 +46,9 @@ export default {
     needNames: function() {
       return dedupeByName(this.needs).map(function(n) { return n.name; }).filter(Boolean);
     },
-    // "Sicherheit", "Sicherheit und Nähe", "Sicherheit, Nähe und Ruhe" — beliefs
-    // from before the one-need rule can carry several.
+    // Beliefs from before the one-need rule can carry several.
     needPhrase: function() {
-      var names = this.needNames;
-      if (names.length < 2) return names[0] || '';
-      return names.slice(0, -1).join(', ') + ' und ' + names[names.length - 1];
+      return joinNames(this.needNames);
     },
   },
   watch: {
