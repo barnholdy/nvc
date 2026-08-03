@@ -198,6 +198,11 @@
                   <p class="recall-text">{{ resultFear }}</p>
                 </v-flex>
 
+                <v-flex v-if="resultOutcome.trim()" class="mb-4">
+                  <p class="expand-label">Das ist passiert</p>
+                  <p class="recall-text">{{ resultOutcome }}</p>
+                </v-flex>
+
                 <v-flex>
                   <p class="body-1 grey--text mb-2">
                     Wie stark ist deine Befürchtung tatsächlich eingetreten?
