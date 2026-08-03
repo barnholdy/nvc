@@ -2,7 +2,7 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Neue Perspektive</h1>
-      <p class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
+      <p class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
       <p class="body-1 grey--text mt-2">Stell dir einen Tag vor, an dem diese Überzeugung einfach nicht existiert. Was wärst du ohne sie? Wie würdest du in eine Begegnung gehen? Was würdest du tun oder lassen?</p>
     </v-flex>
     <v-flex>

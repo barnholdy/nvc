@@ -2,16 +2,16 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Affirmationen</h1>
-      <p v-if="belief" class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
+      <p v-if="belief" class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
       <template v-if="withoutBelief">
-        <p class="subheading grey--text belief-quote mt-1">„{{ withoutBelief }}"</p>
+        <p class="subheading grey--text belief-quote mt-1">„{{ withoutBelief }}“</p>
         <div v-if="withoutBeliefFeelings && withoutBeliefFeelings.length" class="mb-2">
           <feeling-chips :items="withoutBeliefFeelings" type="feelings"></feeling-chips>
         </div>
       </template>
       <p class="body-1 grey--text mt-2 prompt-lines">Formuliere einen Satz, der zu dem passt, was du gerade gespürt hast.
 Er hilft dir, die alte Überzeugung in Richtung der neuen Perspektive zu verschieben.
-Halte den Satz glaubwürdig: Der positivste Satz, den du gerade noch als wahr empfinden kannst.</p>
+Halte den Satz glaubwürdig: der positivste Satz, den du gerade noch als wahr empfinden kannst.</p>
 
     </v-flex>
 

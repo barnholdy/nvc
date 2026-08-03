@@ -70,7 +70,7 @@
                     {{ row.experiment.fearExpected }} → {{ row.experiment.fearActual }}
                   </span>
                 </div>
-                <p class="check-meta">„{{ row.beliefText }}"</p>
+                <p class="check-meta">„{{ row.beliefText }}“</p>
                 <p v-if="isDue(row.experiment)" class="due-hint">Schon durchgeführt?</p>
               </div>
               <button
@@ -88,7 +88,7 @@
 
           <div :key="row.experiment.id + '-expand'" v-if="openIndex === i" class="row-expand">
             <p class="expand-label">Überzeugung</p>
-            <p class="expand-text mb-1">„{{ row.beliefText }}"</p>
+            <p class="expand-text mb-1">„{{ row.beliefText }}“</p>
 
             <p class="expand-label mt-3">Situation</p>
             <p class="expand-text mb-1">{{ row.experiment.situation || '—' }}</p>
@@ -160,21 +160,21 @@
       <!-- Step 4: result and comparison -->
       <v-dialog v-model="isResultDialogShowing" fullscreen>
         <div v-if="isResultDialogShowing" class="wizard-page">
-          <v-toolbar color="#000" dark flat app>
+          <div class="wizard-toolbar">
             <v-btn icon @click="resultStep === 1 ? cancelResult() : resultStep--">
               <v-icon>{{ resultStep === 1 ? 'close' : 'chevron_left' }}</v-icon>
             </v-btn>
-            <v-toolbar-title>Ergebnis</v-toolbar-title>
+            <span class="wizard-title">Ergebnis</span>
             <v-spacer></v-spacer>
             <span class="grey--text body-1">{{ resultStep }} / 4</span>
-          </v-toolbar>
-          <v-content>
+          </div>
+          <div class="wizard-scroll">
             <v-container class="mb-5">
               <!-- Facts first, deliberately before any rating -->
               <v-layout v-show="resultStep === 1" column>
                 <v-flex class="mt-2 mb-3">
                   <h1 class="headline font-weight-regular">Was ist passiert?</h1>
-                  <p class="subheading grey--text situation-quote mt-1">„{{ resultSituation }}"</p>
+                  <p class="subheading grey--text situation-quote mt-1">„{{ resultSituation }}“</p>
                   <p class="body-1 grey--text mt-2">
                     Was ist tatsächlich passiert? Beschreibe es, bevor du es bewertest.
                   </p>
@@ -188,7 +188,7 @@
               <v-layout v-show="resultStep === 2" column>
                 <v-flex class="mt-2 mb-3">
                   <h1 class="headline font-weight-regular">Abgleich</h1>
-                  <p class="subheading grey--text situation-quote mt-1">„{{ resultSituation }}"</p>
+                  <p class="subheading grey--text situation-quote mt-1">„{{ resultSituation }}“</p>
                 </v-flex>
 
                 <!-- The fear itself, but not the number: seeing the old rating
@@ -219,7 +219,7 @@
               <v-layout v-show="resultStep === 3" column>
                 <v-flex class="mt-2 mb-3">
                   <h1 class="headline font-weight-regular">Reflexion</h1>
-                  <p class="subheading grey--text situation-quote mt-1">„{{ resultSituation }}"</p>
+                  <p class="subheading grey--text situation-quote mt-1">„{{ resultSituation }}“</p>
                 </v-flex>
 
                 <experiment-recall
@@ -256,7 +256,7 @@
               <v-layout v-show="resultStep === 4" column>
                 <v-flex class="mt-2 mb-3">
                   <h1 class="headline font-weight-regular">Affirmation</h1>
-                  <p class="subheading grey--text situation-quote mt-1">„{{ resultSituation }}"</p>
+                  <p class="subheading grey--text situation-quote mt-1">„{{ resultSituation }}“</p>
                 </v-flex>
 
                 <experiment-recall
@@ -318,16 +318,16 @@
                 </v-flex>
               </v-layout>
             </v-container>
-            <v-footer :fixed="true" color="white elevation-3" height="44">
-              <v-btn
-                v-if="resultStep < 4"
-                :disabled="resultStep === 1 && !resultOutcome.trim()"
-                @click="resultStep += 1"
-                block large color="primary"
-              >weiter</v-btn>
-              <v-btn v-else @click="saveResult" block large color="primary">speichern</v-btn>
-            </v-footer>
-          </v-content>
+          </div>
+          <div class="wizard-footer-bar">
+            <v-btn
+              v-if="resultStep < 4"
+              :disabled="resultStep === 1 && !resultOutcome.trim()"
+              @click="resultStep += 1"
+              block large color="primary"
+            >weiter</v-btn>
+            <v-btn v-else @click="saveResult" block large color="primary">speichern</v-btn>
+          </div>
         </div>
       </v-dialog>
 
@@ -829,12 +829,39 @@ export default {
 .empty-title { font-size: 1.1rem; color: #fff; font-weight: 600; margin: 0 0 6px; }
 .empty-sub { font-size: 0.875rem; color: #8e8e93; margin: 0; }
 
+// Toolbar and footer stay put, the middle scrolls. Without this the later steps
+// are simply cut off at the bottom of the screen with no way to reach them.
 .wizard-page {
   background: #000;
-  min-height: 100vh;
   position: fixed;
   inset: 0;
   z-index: 200;
+  display: flex;
+  flex-direction: column;
+}
+.wizard-toolbar {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  height: 56px;
+  flex-shrink: 0;
+  background: #000;
+}
+.wizard-title {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #fff;
+  margin-left: 4px;
+}
+.wizard-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.wizard-footer-bar {
+  padding: 0;
+  background: #000;
+  flex-shrink: 0;
 }
 .situation-quote { font-style: italic; }
 

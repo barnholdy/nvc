@@ -2,8 +2,8 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">{{ headlineText }}</h1>
-      <p class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
-      <p v-if="perspective" class="subheading grey--text belief-quote mt-1">„{{ perspective }}"</p>
+      <p class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
+      <p v-if="perspective" class="subheading grey--text belief-quote mt-1">„{{ perspective }}“</p>
       <p class="body-1 grey--text mt-2">{{ promptText }}</p>
     </v-flex>
 

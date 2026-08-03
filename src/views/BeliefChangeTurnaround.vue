@@ -2,7 +2,7 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Umkehrung</h1>
-      <p class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
+      <p class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
       <p class="body-1 grey--text mt-2">Kehre den Gedanken um. Finde mindestens drei echte Beispiele, wie die Umkehrung wahr ist.</p>
     </v-flex>
     <v-flex>

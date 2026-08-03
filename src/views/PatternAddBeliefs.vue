@@ -2,7 +2,7 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Überzeugungen</h1>
-      <p v-if="trigger" class="subheading grey--text situation-quote mt-1">„{{ trigger }}"</p>
+      <p v-if="trigger" class="subheading grey--text situation-quote mt-1">„{{ trigger }}“</p>
       <p class="body-1 grey--text mt-2">Welche tiefer liegenden Überzeugungen sind damit verbunden?</p>
     </v-flex>
 

@@ -17,8 +17,8 @@
 
       <div class="segment-row">
         <button class="seg-tab" :class="{ active: tab === 'open' }" @click="tab = 'open'">Offen</button>
-        <button class="seg-tab" :class="{ active: tab === 'working' }" @click="tab = 'working'">Ausgefüllt</button>
-        <button class="seg-tab" :class="{ active: tab === 'done' }" @click="tab = 'done'">Verändert</button>
+        <button class="seg-tab" :class="{ active: tab === 'working' }" @click="tab = 'working'">Verstanden</button>
+        <button class="seg-tab" :class="{ active: tab === 'done' }" @click="tab = 'done'">Gewandelt</button>
         <button class="seg-tab" :class="{ active: tab === 'acted' }" @click="tab = 'acted'">Gehandelt</button>
       </div>
 
@@ -27,9 +27,9 @@
         <p class="empty-title">Keine Einträge</p>
         <p class="empty-sub">
           <template v-if="tab === 'open'">Überzeugungen entstehen beim Anlegen einer Situation.</template>
-          <template v-else-if="tab === 'working'">Noch keine Überzeugungen in Bearbeitung.</template>
-          <template v-else-if="tab === 'done'">Noch keine veränderten Überzeugungen.</template>
-          <template v-else>Noch keine gehandelten Überzeugungen — plane ein Verhaltensexperiment über „Handeln".</template>
+          <template v-else-if="tab === 'working'">Noch keine verstandenen Überzeugungen.</template>
+          <template v-else-if="tab === 'done'">Noch keine gewandelten Überzeugungen.</template>
+          <template v-else>Noch keine gehandelten Überzeugungen — plane ein Verhaltensexperiment über „Handeln“.</template>
         </p>
       </div>
 
@@ -45,11 +45,11 @@
             <div class="swipe-right-panel">
               <button class="swipe-btn swipe-btn-edit" @click.stop="editEntry(entry)">
                 <v-icon small color="#fff">edit</v-icon>
-                <span>Ausfüllen</span>
+                <span>Verstehen</span>
               </button>
               <button class="swipe-btn swipe-btn-change" @click.stop="changeEntry(entry)">
                 <v-icon small color="#fff">autorenew</v-icon>
-                <span>Verändern</span>
+                <span>Wandeln</span>
               </button>
               <button class="swipe-btn swipe-btn-act" @click.stop="actEntry(entry)">
                 <v-icon small color="#fff">directions_run</v-icon>
@@ -336,8 +336,8 @@ export default {
     // The one step that moves this belief forward from where it stands.
     rowActionLabel(entry) {
       const s = beliefStatus(entry);
-      if (s === 'open') return 'Ausfüllen';
-      if (s === 'working') return 'Verändern';
+      if (s === 'open') return 'Verstehen';
+      if (s === 'working') return 'Wandeln';
       if (s === 'done') return 'Handeln';
       return '';
     },

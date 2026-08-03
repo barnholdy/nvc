@@ -11,8 +11,8 @@ export function isBeliefStatus(value) {
 
 export const BELIEF_STATUS_LABELS = {
   open: 'Offen',
-  working: 'Ausgefüllt',
-  done: 'Verändert',
+  working: 'Verstanden',
+  done: 'Gewandelt',
   acted: 'Gehandelt',
 };
 
@@ -21,7 +21,7 @@ export const BELIEF_STATUS_COLORS = {
   open: '#636366',
   working: '#fd9927',
   done: '#4ade80',
-  // A rung above "Verändert" — green is taken, violet reads as beyond it.
+  // A rung above "Gewandelt" — green is taken, violet reads as beyond it.
   acted: '#c084fc',
 };
 
@@ -45,7 +45,7 @@ export function hasChangeData(belief) {
   );
 }
 
-// Every field the "Überzeugung verändern" wizard collects. bodyIntensity is left
+// Every field the "Überzeugung wandeln" wizard collects. bodyIntensity is left
 // out on purpose: the slider always carries a value, so it cannot be "unfilled".
 // Experiments moved to their own wizard, so they no longer count here.
 export function hasCompleteChange(belief) {

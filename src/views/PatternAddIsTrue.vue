@@ -2,7 +2,7 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Ist es wahr?</h1>
-      <p class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
+      <p class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
     </v-flex>
     <v-flex>
       <v-layout row>

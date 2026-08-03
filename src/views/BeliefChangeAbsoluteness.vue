@@ -2,7 +2,7 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Absolutheit prüfen</h1>
-      <p class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
+      <p class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
       <p class="body-1 grey--text mt-2">Stimmt diese Überzeugung wirklich in jeder Situation? Nenne 2–3 konkrete Momente, in denen das nicht der Fall war.</p>
     </v-flex>
     <v-flex>

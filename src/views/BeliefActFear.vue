@@ -2,7 +2,7 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Befürchtung</h1>
-      <p class="subheading grey--text belief-quote mt-1">„{{ situation }}"</p>
+      <p class="subheading grey--text belief-quote mt-1">„{{ situation }}“</p>
       <p class="body-1 grey--text mt-2">
         Was genau befürchtest du, wenn du das tust? Sei präzise: Wer reagiert wie?
       </p>
@@ -48,8 +48,8 @@
 
       <p class="outlook-text mt-4">
         Danach führst du genau das aus — nicht mehr, nicht weniger. Der Impuls, im letzten
-        Moment doch ins alte Muster zu kippen, ist die Überzeugung selbst. Bemerk ihn,
-        folg ihm nicht. Das Ergebnis trägst du später unter „Handlungen" ein.
+        Moment doch ins alte Muster zu kippen, ist die Überzeugung selbst. Bemerke ihn,
+        folge ihm nicht. Das Ergebnis trägst du später unter „Handlungen“ ein.
       </p>
     </v-flex>
   </v-layout>

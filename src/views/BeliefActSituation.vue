@@ -2,7 +2,7 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Situation</h1>
-      <p class="subheading grey--text belief-quote mt-1">„{{ belief }}"</p>
+      <p class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
       <p class="body-1 grey--text mt-2">
         In welcher konkreten Situation in den nächsten Tagen könntest du dich so verhalten,
         als würde diese Überzeugung nicht gelten? Wo, mit wem, wann?

@@ -26,8 +26,8 @@
         <p class="empty-title">Keine Einträge</p>
         <p class="empty-sub">
           <template v-if="tab === 'open'">Füge Affirmationen zu deinen Überzeugungen hinzu.</template>
-          <template v-else-if="tab === 'dabei'">Noch keine Affirmationen als „Dabei" markiert.</template>
-          <template v-else>Noch keine Affirmationen als „Verinnerlicht" markiert.</template>
+          <template v-else-if="tab === 'dabei'">Noch keine Affirmationen als „Dabei“ markiert.</template>
+          <template v-else>Noch keine Affirmationen als „Verinnerlicht“ markiert.</template>
         </p>
       </div>
 
@@ -76,7 +76,7 @@
           </div>
           <div :key="item.text + '-expand'" v-if="openIndex === i" class="row-expand">
             <p class="expand-label">Überzeugungen</p>
-            <p v-for="(s, j) in item.sources" :key="j" class="expand-text mb-1">„{{ s.beliefText }}"</p>
+            <p v-for="(s, j) in item.sources" :key="j" class="expand-text mb-1">„{{ s.beliefText }}“</p>
           </div>
           <div :key="item.text + '-sep'" class="ios-sep" v-if="i < filteredAffirmations.length - 1 && openIndex !== i"></div>
         </template>
@@ -108,7 +108,7 @@
               <v-layout v-show="editStep === 2" column>
                 <v-flex class="mt-2 mb-3">
                   <h1 class="headline font-weight-regular">Wie fühlt sich das an?</h1>
-                  <p class="subheading grey--text belief-quote mt-1">„{{ editText }}"</p>
+                  <p class="subheading grey--text belief-quote mt-1">„{{ editText }}“</p>
                   <p class="body-1 grey--text mt-2">Lies dir den Satz laut vor. Wie wahr fühlt er sich an?</p>
                 </v-flex>
                 <v-flex class="mt-1">
@@ -148,7 +148,7 @@
               <v-layout v-show="editStep === 3" column>
                 <v-flex class="mt-2 mb-3">
                   <h1 class="headline font-weight-regular">Überzeugungen</h1>
-                  <p class="subheading grey--text belief-quote mt-1">„{{ editText }}"</p>
+                  <p class="subheading grey--text belief-quote mt-1">„{{ editText }}“</p>
                   <p class="body-1 grey--text mt-2">Verknüpfe diese Affirmation mit deinen Überzeugungen.</p>
                 </v-flex>
                 <v-flex v-if="currentEditAffirmation">
@@ -224,7 +224,7 @@ import {
 
 const AMEN_KEY = 'nvc.amen';
 // Fortschritt der Affirmation — bewusst getrennt vom Resonanz-Wert
-// („Wie wahr fühlt sich diese Affirmation gerade an?"), analog zu den Handlungen.
+// („Wie wahr fühlt sich diese Affirmation gerade an?“), analog zu den Handlungen.
 const AFF_PROGRESS_KEY = 'nvc.affirmationProgress';
 
 function triggerConfetti() {
@@ -400,7 +400,7 @@ export default {
       this.bridgeError = '';
       this.bridgeVersions = [];
       var self = this;
-      var prompt = 'Du hilfst dabei, Affirmationen in glaubwürdigere "Brücken-Versionen" umzuformulieren.\n\nEine Brücken-Version vermeidet den behauptenden Endzustand („Ich bin…", „Ich werde…") und beschreibt stattdessen den Weg dorthin – sie klingt dadurch schon jetzt wahr.\n\nBeispiele:\n„Ich bin sicher und geborgen." → „Ich übe, mich sicherer zu fühlen."\n„Ich werde geliebt, auch wenn ich nichts leiste." → „Ich bin offen für die Möglichkeit, auch ohne Leistung zu genügen."\n„Ich stehe selbstsicher zu mir." → „Ich lerne, für mich einzustehen."\n\nAffirmation: „' + this.editText.trim() + '"\n\nGeneriere genau 3 Brücken-Versionen. Nur die 3 Sätze, einer pro Zeile, ohne Nummerierung.';
+      var prompt = 'Du hilfst dabei, Affirmationen in glaubwürdigere "Brücken-Versionen" umzuformulieren.\n\nEine Brücken-Version vermeidet den behauptenden Endzustand („Ich bin…“, „Ich werde…“) und beschreibt stattdessen den Weg dorthin – sie klingt dadurch schon jetzt wahr.\n\nBeispiele:\n„Ich bin sicher und geborgen.“ → „Ich übe, mich sicherer zu fühlen.“\n„Ich werde geliebt, auch wenn ich nichts leiste.“ → „Ich bin offen für die Möglichkeit, auch ohne Leistung zu genügen.“\n„Ich stehe selbstsicher zu mir.“ → „Ich lerne, für mich einzustehen.“\n\nAffirmation: „' + this.editText.trim() + '“\n\nGeneriere genau 3 Brücken-Versionen. Nur die 3 Sätze, einer pro Zeile, ohne Nummerierung.';
       fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
@@ -753,8 +753,10 @@ export default {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
+// No horizontal padding: the button runs edge to edge, like the fixed v-footer
+// in every other wizard.
 .wizard-footer-bar {
-  padding: 12px 16px;
+  padding: 0;
   background: #000;
   flex-shrink: 0;
 }

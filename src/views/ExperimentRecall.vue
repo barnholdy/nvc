@@ -3,7 +3,7 @@
     <div v-if="fear" class="recall-block">
       <p class="expand-label">Das hattest du befürchtet</p>
       <p class="recall-text">{{ fear }}</p>
-      <p v-if="belief" class="recall-belief">„{{ belief }}"</p>
+      <p v-if="belief" class="recall-belief">„{{ belief }}“</p>
     </div>
 
     <div v-if="outcome" class="recall-block">

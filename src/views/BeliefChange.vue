@@ -7,7 +7,7 @@
       <v-btn v-else icon @click="prevStep">
         <v-icon>chevron_left</v-icon>
       </v-btn>
-      <v-toolbar-title>Überzeugung verändern</v-toolbar-title>
+      <v-toolbar-title>Überzeugung wandeln</v-toolbar-title>
       <v-spacer></v-spacer>
       <span class="grey--text body-1">{{ step }} / {{ totalSteps }}</span>
     </v-toolbar>
@@ -51,7 +51,7 @@
             <p class="slider-value-label">{{ bodyIntensity }}</p>
             <div v-if="bodyIntensity < INTENSITY_THRESHOLD" class="intensity-hint">
               <p class="intensity-hint-text">
-                Noch zu weit weg. Gehen wir kleiner: Wo kannst du die Perspektive ändern,
+                Noch zu weit weg. Gehen wir kleiner: Wo kannst du die Perspektive so ändern,
                 dass sie greifbarer für dich wird?
               </p>
               <v-btn small flat color="primary" class="ml-0" @click="goToStep(2)">
@@ -178,7 +178,7 @@ export default {
         },
       });
       this.$store.dispatch('updateBelief', saved);
-      // This flow usually moves the belief to "Verändert" — open that tab.
+      // This flow usually moves the belief to "Gewandelt" — open that tab.
       this.$router.push({ path: '/beliefs', query: { tab: beliefStatus(saved) } });
     },
     close() {
