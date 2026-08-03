@@ -193,15 +193,11 @@
 
                 <!-- The fear itself, but not the number: seeing the old rating
                      would anchor the new one. -->
-                <v-flex v-if="resultFear" class="mb-4">
-                  <p class="expand-label">Das hattest du befürchtet</p>
-                  <p class="recall-text">{{ resultFear }}</p>
-                </v-flex>
-
-                <v-flex v-if="resultOutcome.trim()" class="mb-4">
-                  <p class="expand-label">Das ist passiert</p>
-                  <p class="recall-text">{{ resultOutcome }}</p>
-                </v-flex>
+                <experiment-recall
+                  :belief="resultBeliefText"
+                  :fear="resultFear"
+                  :outcome="resultOutcome"
+                ></experiment-recall>
 
                 <v-flex>
                   <p class="body-1 grey--text mb-2">
@@ -226,15 +222,11 @@
                   <p class="subheading grey--text situation-quote mt-1">„{{ resultSituation }}"</p>
                 </v-flex>
 
-                <v-flex v-if="resultFear" class="mb-4">
-                  <p class="expand-label">Das hattest du befürchtet</p>
-                  <p class="recall-text">{{ resultFear }}</p>
-                </v-flex>
-
-                <v-flex v-if="resultOutcome.trim()" class="mb-4">
-                  <p class="expand-label">Das ist passiert</p>
-                  <p class="recall-text">{{ resultOutcome }}</p>
-                </v-flex>
+                <experiment-recall
+                  :belief="resultBeliefText"
+                  :fear="resultFear"
+                  :outcome="resultOutcome"
+                ></experiment-recall>
 
                 <v-flex>
                   <div class="gap-box" :style="{ borderColor: gapColor(resultGap) }">
@@ -250,7 +242,7 @@
                       <template v-else>{{ Math.abs(resultGap) }} Punkte schlimmer als befürchtet</template>
                     </p>
                   </div>
-                  <p class="gap-question">Was sagt dir das?</p>
+                  <p class="body-1 grey--text mt-4 mb-2">Was sagt dir das?</p>
                   <v-textarea
                     v-model="resultLearning"
                     placeholder="..."
@@ -264,10 +256,19 @@
               <v-layout v-show="resultStep === 4" column>
                 <v-flex class="mt-2 mb-3">
                   <h1 class="headline font-weight-regular">Affirmation</h1>
-                  <p class="subheading grey--text situation-quote mt-1">„{{ resultBeliefText }}"</p>
-                  <p class="body-1 grey--text mt-2">
+                  <p class="subheading grey--text situation-quote mt-1">„{{ resultSituation }}"</p>
+                </v-flex>
+
+                <experiment-recall
+                  :belief="resultBeliefText"
+                  :fear="resultFear"
+                  :outcome="resultOutcome"
+                ></experiment-recall>
+
+                <v-flex class="mb-3">
+                  <p class="body-1 grey--text">
                     Welcher Satz passt jetzt zu dem, was du erlebt hast? Er ersetzt die
-                    Affirmation dieser Überzeugung. Überspringen ist in Ordnung.
+                    Affirmation dieser Überzeugung.
                   </p>
                 </v-flex>
 
@@ -361,6 +362,7 @@
 
 <script>
 import moment from 'moment';
+import ExperimentRecall from '@/views/ExperimentRecall.vue';
 import { TRUTH_DEFAULT } from '@/utils/affirmationTruth';
 import {
   collectExperiments,
@@ -412,6 +414,7 @@ function triggerConfetti() {
 
 export default {
   name: 'action-list',
+  components: { ExperimentRecall },
   data() {
     return {
       // Planned experiments are the ones waiting on you, so they open first;
@@ -915,13 +918,6 @@ export default {
   margin-top: 2px;
 }
 
-.recall-text {
-  font-size: 0.95rem;
-  color: #ebebf5;
-  line-height: 1.5;
-  margin: 0;
-}
-
 /* Same chip look as the affirmation step of the change wizard */
 .selected-chips {
   display: flex;
@@ -954,7 +950,6 @@ export default {
 .gap-line { font-size: 0.95rem; color: #ebebf5; margin: 0; line-height: 1.5; }
 .gap-num { font-weight: 700; }
 .gap-delta { font-size: 0.875rem; font-weight: 600; margin: 6px 0 0; }
-.gap-question { font-size: 0.95rem; color: #fff; font-weight: 600; margin: 14px 0 6px; }
 
 .confirm-dialog { border-radius: 14px !important; overflow: hidden; }
 .confirm-title {
