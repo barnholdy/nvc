@@ -12,9 +12,31 @@
           <v-flex class="mt-2 mb-3">
             <h1 class="headline font-weight-regular">Handeln</h1>
             <p class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
-            <p class="body-1 grey--text mt-2">
-              Welche Situationen willst du nutzen, um diese Überzeugung an der Realität zu
-              testen? Die Befürchtung trägst du später ein, wenn du die Handlung planst.
+          </v-flex>
+
+          <!-- What the work so far produced, so the next step is taken from a
+               felt state rather than from a blank page. -->
+          <v-flex v-if="newFeelings.length" class="mb-3">
+            <p class="body-1 white--text mb-2">Rufe die Gefühle in dir hervor:</p>
+            <feeling-chips :items="newFeelings" type="feelings"></feeling-chips>
+          </v-flex>
+
+          <v-flex v-if="needs.length" class="mb-3">
+            <p class="body-1 white--text mb-2">Vergegenwärtige dir dein Bedürfnis:</p>
+            <feeling-chips :items="needs" type="needs"></feeling-chips>
+          </v-flex>
+
+          <v-flex v-if="situations.length" class="mb-3">
+            <p class="body-1 white--text mb-2">Schaue auf vergangene Situationen:</p>
+            <p v-for="p in situations" :key="p.time" class="situation-text">
+              {{ p.trigger || p.name }}
+            </p>
+          </v-flex>
+
+          <v-flex class="mb-4">
+            <p class="body-1 grey--text">
+              Welche neuen Situationen willst du nutzen, um deine Überzeugung an der Realität
+              zu testen? Die Befürchtung trägst du später ein, wenn du die Handlung planst.
             </p>
           </v-flex>
 
@@ -75,6 +97,7 @@
 </template>
 
 <script>
+import FeelingChips from '@/components/FeelingChips.vue';
 import { beliefStatus } from '@/utils/beliefStatus';
 import {
   createExperiment,
@@ -85,6 +108,7 @@ import {
 
 export default {
   name: 'belief-act-list',
+  components: { FeelingChips },
   data() {
     const entry = this.$store.getters.beliefs
       .find(function(b) { return b.time === parseInt(this.$route.params.time, 10); }, this);
@@ -98,6 +122,21 @@ export default {
   computed: {
     belief() {
       return this.entry ? this.entry.belief : '';
+    },
+    // The feelings from the new perspective, not the ones the belief produces —
+    // this step is about acting from the changed state.
+    newFeelings() {
+      const r = (this.entry && this.entry.reflection) || {};
+      return Array.isArray(r.withoutBeliefFeelings) ? r.withoutBeliefFeelings : [];
+    },
+    needs() {
+      return (this.entry && this.entry.needs) || [];
+    },
+    situations() {
+      if (!this.entry) return [];
+      const time = this.entry.time;
+      return this.$store.getters.patterns
+        .filter(p => (p.beliefs || []).indexOf(time) !== -1);
     },
   },
   methods: {
@@ -143,6 +182,12 @@ export default {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin: 0 0 6px;
+}
+.situation-text {
+  font-size: 0.95rem;
+  color: #ebebf5;
+  line-height: 1.5;
+  margin: 0 0 4px;
 }
 .empty-text {
   font-size: 0.875rem;

@@ -421,10 +421,12 @@ export default {
 
 <style scoped lang="scss">
 .belief-quote { font-style: italic; }
+// It sits between whatever came last and the list itself, so it carries its own
+// spacing on both sides — the container it used to live in provided that.
 .limit-hint {
   font-size: 0.8rem;
   color: #636366;
-  margin: 6px 0 0;
+  margin: 10px 0 12px;
   &.over-limit {
     color: #fd9927;
     font-weight: 600;
