@@ -4,7 +4,19 @@
       <h1 class="headline font-weight-regular">{{ headlineText }}</h1>
       <p class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
       <p v-if="perspective" class="subheading grey--text belief-quote mt-1">„{{ perspective }}“</p>
-      <p class="body-1 grey--text mt-2">{{ promptText }}</p>
+
+      <!-- What was written a step or two earlier. Picking feelings and needs is
+           easier with the reaction still in view than from memory. -->
+      <div v-if="reaction" class="context-block mt-3">
+        <p class="context-label">Reaktion</p>
+        <p class="context-text">{{ reaction }}</p>
+      </div>
+      <div v-if="isNeedsMode && contextFeelings.length" class="context-block mt-3">
+        <p class="context-label">Gefühle</p>
+        <feeling-chips :items="contextFeelings" type="feelings"></feeling-chips>
+      </div>
+
+      <p class="body-1 grey--text mt-3">{{ promptText }}</p>
     </v-flex>
 
     <!-- Optional block between the prompt and the list (unused by the belief wizard) -->
@@ -108,6 +120,7 @@
 </template>
 
 <script>
+import FeelingChips from '@/components/FeelingChips.vue';
 import {
   emotionColor,
   emotionValence,
@@ -118,8 +131,11 @@ import {
 
 export default {
   name: 'belief-add-feeling-need',
+  components: { FeelingChips },
   props: {
     belief: { type: String, default: '' },
+    // The reaction from the earlier step, shown read-only for context.
+    reaction: { type: String, default: '' },
     taxonomy: { type: Object, required: true },
     mode: { type: String, default: 'feelings' },
     headline: { type: String, default: '' },
@@ -354,6 +370,21 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.context-block { margin-bottom: 4px; }
+.context-label {
+  font-size: 0.68rem;
+  color: #8e8e93;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+.context-text {
+  font-size: 0.95rem;
+  color: #ebebf5;
+  line-height: 1.5;
+  margin: 0;
+}
 .belief-quote { font-style: italic; }
 
 .emotion-card {

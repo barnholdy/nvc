@@ -41,8 +41,6 @@ export function needsSignpost(mood) {
   return mood === 'aufgewuehlt';
 }
 
-export const GROUNDING_SLOTS = 3;
-
 export function createOriginArc() {
   return { gift: null, grounding: [], mood: null, completedAt: null };
 }

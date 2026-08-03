@@ -5,13 +5,17 @@
       <p class="body-1 grey--text mt-2">Was ist deine Überzeugung, die du für wahr hältst?</p>
     </v-flex>
     <v-flex>
-      <v-text-field
+      <!-- Same size as the affirmation field: a belief is a sentence, not a
+           label, and the box should say so. -->
+      <v-textarea
         placeholder="..."
         v-model="belief"
-        single-line
+        auto-grow
+        rows="4"
+        hide-details
         @focus="$emit('focussed')"
         @blur="$emit('blurred')"
-      ></v-text-field>
+      ></v-textarea>
     </v-flex>
   </v-layout>
 </template>

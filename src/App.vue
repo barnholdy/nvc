@@ -254,19 +254,51 @@ html, body {
 .v-chip .v-icon { color: #8e8e93 !important; }
 
 /* ─── Text inputs ─── */
-.v-input input, .v-input textarea {
-  color: #fff !important;
-  caret-color: #4ade80 !important;
-}
-.v-input .v-label { color: #8e8e93 !important; }
+/* One field everywhere: a filled surface with a hairline border and a green
+   ring on focus. Colours and radius are the app's own — #1c1c1e like the cards,
+   #2c2c2e for the hairline, #4ade80 for the accent. */
 .v-text-field .v-input__slot {
   background: #1c1c1e !important;
+  border: 1px solid #2c2c2e;
+  border-radius: 12px;
+  padding: 12px 16px;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease;
 }
-.v-text-field--outline .v-input__slot {
-  border-color: #3a3a3c !important;
+/* Vuetify's underline has no job left on a bordered box. */
+.v-text-field > .v-input__control > .v-input__slot:before,
+.v-text-field > .v-input__control > .v-input__slot:after {
+  display: none !important;
 }
-.v-textarea textarea { color: #fff !important; }
+.v-text-field.v-input--is-focused .v-input__slot {
+  border-color: #4ade80;
+  box-shadow:
+    0 0 0 1px rgba(74, 222, 128, 0.2),
+    0 0 20px rgba(74, 222, 128, 0.08);
+}
+.v-input input, .v-input textarea {
+  color: #ebebf5 !important;
+  caret-color: #4ade80 !important;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: -0.02em;
+}
+.v-input textarea { resize: none; }
+.v-input input::placeholder,
+.v-input textarea::placeholder {
+  color: #8e8e93 !important;
+  opacity: 1;
+}
+.v-input .v-label { color: #8e8e93 !important; }
 .v-text-field__slot { background: transparent !important; }
+/* The API key fields sit on a card of the same colour, so they take the next
+   surface up to stay visible against it. */
+.v-text-field.dark-input .v-input__slot {
+  background: #2c2c2e !important;
+}
 
 /* ─── Buttons ─── */
 .v-btn.primary {

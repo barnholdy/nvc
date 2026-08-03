@@ -257,10 +257,9 @@ export default {
   font-weight: 600;
   margin: 0 0 8px 4px;
 }
+/* The field brings its own surface now — no box inside a box. */
 .input-row {
-  background: #1c1c1e;
-  border-radius: 12px;
-  padding: 4px 12px;
+  padding: 0;
 }
 .generate-row {
   display: flex;

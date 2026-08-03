@@ -60,6 +60,7 @@
             v-show="step === 3"
             mode="feelings"
             :belief="belief"
+            :reaction="withBelief"
             :taxonomy="taxonomy"
             :initialFeelings="selectedFeelings"
             @change="selectedFeelings = $event">
@@ -69,6 +70,7 @@
             v-show="step === 4"
             mode="needs"
             :belief="belief"
+            :reaction="withBelief"
             :taxonomy="taxonomy"
             :initialNeeds="selectedNeeds"
             :contextFeelings="selectedFeelings"
@@ -97,13 +99,7 @@
             @changed="gift = $event">
           </belief-add-gift>
 
-          <belief-add-grounding
-            v-show="step === 8"
-            :initialValue="grounding"
-            @changed="grounding = $event"
-            @focussed="isFooterFixed = false"
-            @blurred="isFooterFixed = true">
-          </belief-add-grounding>
+          <belief-add-grounding v-show="step === 8"></belief-add-grounding>
 
           <belief-add-check
             v-show="step === 9"
