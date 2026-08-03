@@ -185,7 +185,7 @@
                   v-for="(a, i) in entry.affirmations"
                   :key="'aff-' + i"
                   class="linked-row"
-                  @click.stop="editAffirmation(a)"
+                  @click.stop="openAffirmations()"
                 >
                   <div class="linked-row-body">
                     <p class="expand-text">{{ a.text }}</p>
@@ -367,9 +367,11 @@ export default {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.$router.push(`/edit-pattern/${p.time}`);
     },
-    editAffirmation(a) {
+    // Editing an affirmation lives in the wandeln wizard now; from here the
+    // row just opens the list it belongs to.
+    openAffirmations() {
       this.sw.openIdx = null; this.sw.openDir = null;
-      this.$router.push({ path: '/affirmations', query: { edit: a.text } });
+      this.$router.push('/affirmations');
     },
     editExperiment(entry, x) {
       this.sw.openIdx = null; this.sw.openDir = null;

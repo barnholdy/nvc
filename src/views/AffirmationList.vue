@@ -41,10 +41,6 @@
             @touchend="tsEnd($event, i)"
           >
             <div class="swipe-right-panel">
-              <button class="swipe-btn swipe-btn-edit" @click.stop="startEdit(item)">
-                <v-icon small color="#fff">edit</v-icon>
-                <span>Bearb.</span>
-              </button>
               <button
                 v-for="s in otherStatuses(item.text)"
                 :key="s.key"
@@ -82,107 +78,6 @@
         </template>
       </div>
 
-      <!-- Edit dialog -->
-      <v-dialog v-model="isEditDialogShowing" fullscreen>
-        <div v-if="isEditDialogShowing" class="wizard-page">
-          <div class="wizard-toolbar">
-            <v-btn icon @click="editStep === 1 ? cancelEdit() : prevEditStep()">
-              <v-icon>{{ editStep === 1 ? 'close' : 'chevron_left' }}</v-icon>
-            </v-btn>
-            <span class="wizard-title">Affirmation bearbeiten</span>
-            <v-spacer></v-spacer>
-            <span class="grey--text body-1">{{ editStep }} / 3</span>
-          </div>
-          <div class="wizard-scroll">
-            <v-container class="mb-5">
-              <v-layout v-show="editStep === 1" column>
-                <v-flex class="mt-2 mb-3">
-                  <h1 class="headline font-weight-regular">Affirmation</h1>
-                  <p class="body-1 grey--text mt-2">Formuliere eine positive, kraftvolle Aussage im Präsens.</p>
-                </v-flex>
-                <v-flex>
-                  <v-textarea v-model="editText" placeholder="..." auto-grow rows="4" hide-details></v-textarea>
-                </v-flex>
-              </v-layout>
-
-              <v-layout v-show="editStep === 2" column>
-                <v-flex class="mt-2 mb-3">
-                  <h1 class="headline font-weight-regular">Wie fühlt sich das an?</h1>
-                  <p class="subheading grey--text belief-quote mt-1">„{{ editText }}“</p>
-                  <p class="body-1 grey--text mt-2">Lies dir den Satz laut vor. Wie wahr fühlt er sich an?</p>
-                </v-flex>
-                <v-flex class="mt-1">
-                  <div class="slider-row">
-                    <span class="slider-end-label">0</span>
-                    <input type="range" min="0" max="10" v-model.number="editSlider" class="resonance-slider" />
-                    <span class="slider-end-label">10</span>
-                  </div>
-                  <p class="slider-value-label" :style="{ color: truthHint.color }">{{ editSlider }}</p>
-                  <p class="truth-target">Ziel: 6–8</p>
-                  <div class="truth-hint" :style="{ borderColor: truthHint.color }">
-                    <p class="truth-hint-title" :style="{ color: truthHint.color }">{{ truthHint.title }}</p>
-                    <p class="truth-hint-text">{{ truthHint.text }}</p>
-                  </div>
-                </v-flex>
-                <v-flex v-if="editSlider < 5" class="mt-4">
-                  <p class="body-1 grey--text">Klingt das noch weit weg? Probiere eine Brücken-Version.</p>
-                  <v-btn small flat color="primary" :loading="isBridgeLoading" @click="generateBridgeVersions">
-                    <v-icon small left>auto_awesome</v-icon>
-                    Brücken-Version generieren
-                  </v-btn>
-                  <p v-if="bridgeError" class="caption red--text mt-1">{{ bridgeError }}</p>
-                  <div v-if="bridgeVersions.length" class="mt-3">
-                    <p class="caption grey--text mb-1">Wähle eine Version, um sie zu übernehmen:</p>
-                    <div class="chip-list">
-                      <v-chip
-                        v-for="(b, i) in bridgeVersions"
-                        :key="i"
-                        class="available-chip bridge-chip"
-                        @click="selectBridge(b)"
-                      >{{ b }}</v-chip>
-                    </div>
-                  </div>
-                </v-flex>
-              </v-layout>
-
-              <v-layout v-show="editStep === 3" column>
-                <v-flex class="mt-2 mb-3">
-                  <h1 class="headline font-weight-regular">Überzeugungen</h1>
-                  <p class="subheading grey--text belief-quote mt-1">„{{ editText }}“</p>
-                  <p class="body-1 grey--text mt-2">Verknüpfe diese Affirmation mit deinen Überzeugungen.</p>
-                </v-flex>
-                <v-flex v-if="currentEditAffirmation">
-                  <div class="belief-chips mb-2">
-                    <v-chip
-                      v-for="(s, j) in currentEditAffirmation.sources"
-                      :key="j"
-                      close
-                      class="mb-1 mr-1"
-                      @input="removeBeliefFromAffirmation(editOriginalText, s.beliefTime)"
-                    >{{ s.beliefText }}</v-chip>
-                  </div>
-                  <div v-if="unlinkedBeliefsForEdit.length" class="available-chips mt-2">
-                    <p class="caption grey--text mb-1">Hinzufügen:</p>
-                    <div class="chip-list">
-                      <v-chip
-                        v-for="b in unlinkedBeliefsForEdit"
-                        :key="b.time"
-                        class="available-chip"
-                        @click="addBeliefToAffirmation(editOriginalText, b)"
-                      >{{ b.belief }}</v-chip>
-                    </div>
-                  </div>
-                </v-flex>
-              </v-layout>
-            </v-container>
-          </div>
-          <div class="wizard-footer-bar">
-            <v-btn v-if="editStep < 3" :disabled="editStep === 1 && !editText.trim()" @click="nextEditStep" block large color="primary">weiter</v-btn>
-            <v-btn v-else @click="saveEdit" block large color="primary">speichern</v-btn>
-          </div>
-        </div>
-      </v-dialog>
-
       <v-dialog v-model="isDeleteDialogShowing" width="300">
         <v-card class="confirm-dialog">
           <v-card-title class="confirm-title">Affirmation löschen?</v-card-title>
@@ -214,7 +109,6 @@
 
 <script>
 import moment from 'moment';
-import { normalizeTruth, truthHint, TRUTH_DEFAULT } from '@/utils/affirmationTruth';
 import {
   AFF_STATUS_KEY,
   AFFIRMATION_STATUSES,
@@ -275,14 +169,6 @@ export default {
     return {
       tab: 'dabei',
       openIndex: null,
-      isEditDialogShowing: false,
-      editStep: 1,
-      editOriginalText: '',
-      editText: '',
-      editSlider: TRUTH_DEFAULT,
-      bridgeVersions: [],
-      isBridgeLoading: false,
-      bridgeError: '',
       itemToDelete: null,
       isDeleteDialogShowing: false,
       amenMap: loadAhoMap(),
@@ -294,16 +180,7 @@ export default {
   watch: {
     tab() { this.sw.openIdx = null; this.sw.openDir = null; this.openIndex = null; },
   },
-  mounted() {
-    // ?edit=<text> jumps straight into this affirmation's wizard, used by the
-    // belief list.
-    const wanted = this.$route.query.edit;
-    if (!wanted) return;
-    const item = this.affirmations.find(a => a.text === wanted);
-    if (item) this.startEdit(item);
-  },
   computed: {
-    truthHint() { return truthHint(this.editSlider); },
     filteredAffirmations() {
       var sm = this.statusMap;
       return this.affirmations.filter(function(item) {
@@ -366,85 +243,6 @@ export default {
       if (!ts) return 'Noch nicht gesagt';
       moment.locale('de');
       return moment(ts).fromNow();
-    },
-    startEdit(item) {
-      this.sw.openIdx = null; this.sw.openDir = null;
-      this.editOriginalText = item.text;
-      this.editText = item.text;
-      this.editStep = 1;
-      var savedResonance = null;
-      this.$store.getters.beliefs.forEach(function(belief) {
-        if (savedResonance !== null) return;
-        var aff = (belief.affirmations || []).find(function(a) { return a.text === item.text && a.resonance != null; });
-        if (aff) savedResonance = aff.resonance;
-      });
-      this.editSlider = normalizeTruth(savedResonance === null ? undefined : savedResonance);
-      this.bridgeVersions = [];
-      this.bridgeError = '';
-      this.isEditDialogShowing = true;
-    },
-    nextEditStep() { this.editStep = Math.min(this.editStep + 1, 3); },
-    prevEditStep() { this.editStep = Math.max(this.editStep - 1, 1); },
-    cancelEdit() {
-      this.isEditDialogShowing = false;
-      this.editOriginalText = ''; this.editText = ''; this.editStep = 1;
-      this.editSlider = TRUTH_DEFAULT; this.bridgeVersions = []; this.bridgeError = '';
-    },
-    generateBridgeVersions() {
-      var apiKey = localStorage.getItem('nvc.apiKey') || '';
-      if (!apiKey) {
-        this.bridgeError = 'Kein API Key gefunden. Bitte in den Einstellungen hinterlegen.';
-        return;
-      }
-      this.isBridgeLoading = true;
-      this.bridgeError = '';
-      this.bridgeVersions = [];
-      var self = this;
-      var prompt = 'Du hilfst dabei, Affirmationen in glaubwürdigere "Brücken-Versionen" umzuformulieren.\n\nEine Brücken-Version vermeidet den behauptenden Endzustand („Ich bin…“, „Ich werde…“) und beschreibt stattdessen den Weg dorthin – sie klingt dadurch schon jetzt wahr.\n\nBeispiele:\n„Ich bin sicher und geborgen.“ → „Ich übe, mich sicherer zu fühlen.“\n„Ich werde geliebt, auch wenn ich nichts leiste.“ → „Ich bin offen für die Möglichkeit, auch ohne Leistung zu genügen.“\n„Ich stehe selbstsicher zu mir.“ → „Ich lerne, für mich einzustehen.“\n\nAffirmation: „' + this.editText.trim() + '“\n\nGeneriere genau 3 Brücken-Versionen. Nur die 3 Sätze, einer pro Zeile, ohne Nummerierung.';
-      fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'content-type': 'application/json',
-          'anthropic-dangerous-direct-browser-access': 'true',
-        },
-        body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 200,
-          messages: [{ role: 'user', content: prompt }],
-        }),
-      }).then(function(res) {
-        if (!res.ok) return res.json().catch(function() { return {}; }).then(function(err) { throw new Error((err.error && err.error.message) || 'Fehler ' + res.status); });
-        return res.json();
-      }).then(function(data) {
-        self.bridgeVersions = data.content[0].text.split('\n').map(function(s) { return s.trim(); }).filter(function(s) { return s.length > 0; }).slice(0, 3);
-      }).catch(function(e) {
-        self.bridgeError = e.message || 'Brücken-Versionen konnten nicht geladen werden.';
-      }).then(function() {
-        self.isBridgeLoading = false;
-      });
-    },
-    selectBridge(text) {
-      this.editText = text;
-      this.bridgeVersions = [];
-      this.editSlider = TRUTH_DEFAULT;
-    },
-    saveEdit() {
-      const oldText = this.editOriginalText;
-      const newText = this.editText.trim();
-      const resonance = this.editSlider;
-      this.isEditDialogShowing = false;
-      this.editOriginalText = ''; this.editText = ''; this.editStep = 1;
-      this.editSlider = TRUTH_DEFAULT; this.bridgeVersions = []; this.bridgeError = '';
-      if (!newText) return;
-      this.$store.getters.beliefs.forEach((belief) => {
-        if (!belief.affirmations || !belief.affirmations.length) return;
-        if (belief.affirmations.some(a => a.text === oldText)) {
-          const updated = belief.affirmations.map(a => (a.text === oldText ? Object.assign({}, a, { text: newText, resonance }) : a));
-          this.$store.dispatch('updateBelief', Object.assign({}, belief, { affirmations: updated }));
-        }
-      });
     },
     addBeliefToAffirmation(text, belief) {
       // One affirmation per belief — linking replaces whatever was there.
@@ -725,128 +523,6 @@ export default {
 .empty-icon { font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 16px; }
 .empty-title { font-size: 1.1rem; color: #fff; font-weight: 600; margin: 0 0 6px; }
 .empty-sub { font-size: 0.875rem; color: #8e8e93; margin: 0; }
-
-.wizard-page {
-  background: #000;
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  display: flex;
-  flex-direction: column;
-}
-.wizard-toolbar {
-  display: flex;
-  align-items: center;
-  padding: 0 8px;
-  height: 56px;
-  flex-shrink: 0;
-  background: #000;
-}
-.wizard-title {
-  font-size: 1.45rem;
-  font-weight: 700;
-  color: #fff;
-  margin-left: 4px;
-}
-.wizard-scroll {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-// No horizontal padding: the button runs edge to edge, like the fixed v-footer
-// in every other wizard.
-.wizard-footer-bar {
-  padding: 0;
-  background: #000;
-  flex-shrink: 0;
-}
-.available-chips { margin-top: 8px; }
-.chip-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.available-chip {
-  white-space: normal;
-  height: auto !important;
-  padding: 4px 10px !important;
-  cursor: pointer;
-}
-.bridge-chip { white-space: normal; height: auto !important; padding: 6px 12px !important; line-height: 1.5; }
-.slider-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 4px;
-}
-.slider-end-label {
-  font-size: 0.78rem;
-  color: #8e8e93;
-  flex-shrink: 0;
-}
-.resonance-slider {
-  flex: 1;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 4px;
-  border-radius: 2px;
-  background: #3a3a3c;
-  outline: none;
-  cursor: pointer;
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background: #4ade80;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-  }
-  &::-moz-range-thumb {
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background: #4ade80;
-    cursor: pointer;
-    border: none;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-  }
-}
-.truth-target {
-  text-align: center;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: #636366;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin: 2px 0 10px;
-}
-.truth-hint {
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: 1.5px solid;
-  transition: border-color 0.2s ease;
-}
-.truth-hint-title {
-  font-size: 0.875rem;
-  font-weight: 600;
-  margin: 0 0 2px;
-}
-.truth-hint-text {
-  font-size: 0.8rem;
-  color: #8e8e93;
-  line-height: 1.5;
-  margin: 0;
-}
-.slider-value-label {
-  text-align: center;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #fff;
-  margin: 12px 0 0;
-}
-.belief-quote { font-style: italic; }
 
 .confirm-dialog { border-radius: 14px !important; overflow: hidden; }
 .confirm-title {

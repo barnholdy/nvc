@@ -15,20 +15,25 @@ Halte den Satz glaubwürdig: der positivste Satz, den du gerade noch als wahr em
 
     </v-flex>
 
-    <v-flex v-if="selectedAffirmations.length" class="mb-2">
-      <div class="selected-chips">
-        <v-chip
-          v-for="a in selectedAffirmations"
-          :key="a.text"
-          close
-          class="selected-chip"
-          @input="removeSelected(a.text)"
-        >{{ a.text }}</v-chip>
-      </div>
+    <!-- The chosen sentence sits in a field, so the wording can be worked on
+         here rather than only picked. -->
+    <v-flex v-if="selectedTexts.length" class="mb-2">
+      <p class="caption grey--text mb-1">Deine Affirmation:</p>
+      <v-textarea
+        :value="selectedText"
+        placeholder="Ich bin..."
+        auto-grow
+        rows="2"
+        hide-details
+        @input="setSelectedText"
+        @focus="$emit('focussed')"
+        @blur="$emit('blurred')"
+      ></v-textarea>
+      <v-btn small flat color="grey" class="ml-0 mt-1" @click="removeSelected">Entfernen</v-btn>
     </v-flex>
 
     <!-- Only meaningful once there is a sentence to read aloud -->
-    <v-flex v-if="selectedAffirmations.length" class="mb-4">
+    <v-flex v-if="hasSelectedText" class="mb-4">
       <p class="body-1 grey--text mb-2">Lies dir den Satz laut vor. Wie wahr fühlt er sich an?</p>
       <div class="slider-row">
         <span class="slider-end-label">0</span>
@@ -171,6 +176,8 @@ export default {
   },
   computed: {
     truthHint() { return truthHint(this.truth); },
+    selectedText() { return this.selectedTexts[0] || ''; },
+    hasSelectedText() { return this.selectedText.trim() !== ''; },
     selectedAffirmations() {
       var selectedTexts = this.selectedTexts;
       return this.pool.filter(function(a) { return selectedTexts.indexOf(a.text) !== -1; });
@@ -187,9 +194,22 @@ export default {
   methods: {
     emitChange() {
       var truth = this.truth;
-      this.$emit('changed', this.selectedAffirmations.map(function(a) {
-        return { text: a.text, count: a.count || 1, resonance: truth };
-      }));
+      // An emptied field means no affirmation, not one without words.
+      this.$emit('changed', this.selectedAffirmations
+        .filter(function(a) { return a.text.trim() !== ''; })
+        .map(function(a) {
+          return { text: a.text.trim(), count: a.count || 1, resonance: truth };
+        }));
+    },
+    // Editing renames the entry in this wizard's own list; other beliefs keep
+    // the wording they were saved with.
+    setSelectedText(value) {
+      var old = this.selectedTexts[0];
+      var idx = this.pool.findIndex(function(a) { return a.text === old; });
+      if (idx >= 0) {
+        this.$set(this.pool, idx, Object.assign({}, this.pool[idx], { text: value }));
+      }
+      this.selectedTexts = [value];
     },
     addAffirmation(text) {
       // Only one affirmation per belief — picking another replaces it.
@@ -359,16 +379,6 @@ export default {
   color: #8e8e93;
   line-height: 1.5;
   margin: 0;
-}
-.selected-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.selected-chip {
-  white-space: normal;
-  height: auto !important;
-  padding: 4px 10px !important;
 }
 .suggestions {
   display: flex;
