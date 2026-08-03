@@ -59,6 +59,10 @@ export function colorForFeeling(name) {
   return id ? emotionColor(id) : UNKNOWN_COLOR;
 }
 
+// How many feelings may be picked at once. Naming twenty says nothing in
+// particular; five is a description. Shared by both wizards that ask.
+export const MAX_FEELINGS = 5;
+
 export const EMOTION_ORDER = taxonomy.grundemotionen.map(e => e.id);
 
 export function emotionLabel(id) {

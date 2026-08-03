@@ -141,12 +141,12 @@ import BeliefAddGrounding from '@/views/BeliefAddGrounding.vue';
 import BeliefAddCheck from '@/views/BeliefAddCheck.vue';
 import { beliefStatus } from '@/utils/beliefStatus';
 import { normalizeOriginArc } from '@/utils/originArc';
+import { MAX_FEELINGS } from '@/utils/emotions';
 import taxonomy from '../assets/taxonomy.json';
 
 const FEELINGS_STEP = 4;
 const READINESS_STEP = 5;
 const TOTAL_STEPS = 9;
-const MAX_FEELINGS = 5;
 
 export default {
   name: 'belief-add',

@@ -40,6 +40,7 @@
           :perspective="withoutBelief"
           :taxonomy="taxonomy"
           :initialFeelings="withoutBeliefFeelings"
+          :maxSelections="MAX_FEELINGS"
           @change="withoutBeliefFeelings = $event">
           <v-flex slot="beforeList" class="mb-4">
             <p class="body-1 grey--text mb-2">Wie stark ist diese Empfindung gerade? 0 = nichts, 10 = deutlich.</p>
@@ -79,12 +80,14 @@
       <v-footer :fixed="isFooterFixed" color="white elevation-3" height="44">
         <v-btn
           v-if="step < totalSteps"
+          :disabled="!isStepComplete"
           @click="nextStep"
           block large color="primary">
           weiter
         </v-btn>
         <v-btn
           v-else
+          :disabled="!isStepComplete"
           @click="save"
           block large color="primary">
           speichern
@@ -98,6 +101,7 @@
 import BeliefChangeAbsoluteness from '@/views/BeliefChangeAbsoluteness.vue';
 import PatternAddWithoutBelief from '@/views/PatternAddWithoutBelief.vue';
 import BeliefAddFeelingNeed from '@/views/BeliefAddFeelingNeed.vue';
+import { MAX_FEELINGS } from '@/utils/emotions';
 import PatternChangeAffirmation from '@/views/PatternChangeAffirmation.vue';
 import { beliefStatus } from '@/utils/beliefStatus';
 import taxonomy from '../assets/taxonomy.json';
@@ -105,6 +109,8 @@ import taxonomy from '../assets/taxonomy.json';
 // Below this the body sensation counts as "not there yet" and the wizard offers
 // a way back to reshape the new perspective.
 const INTENSITY_THRESHOLD = 4;
+
+const FEELINGS_STEP = 3;
 
 export default {
   name: 'belief-change',
@@ -134,6 +140,15 @@ export default {
   },
   computed: {
     INTENSITY_THRESHOLD() { return INTENSITY_THRESHOLD; },
+    MAX_FEELINGS() { return MAX_FEELINGS; },
+    // Beliefs worked on before the limit existed can hold more than five new
+    // feelings; the way forward opens once they are back within it.
+    isStepComplete() {
+      if (this.step === FEELINGS_STEP) {
+        return this.withoutBeliefFeelings.length <= MAX_FEELINGS;
+      }
+      return true;
+    },
     allAffirmations() {
       var seen = {};
       var result = [];
