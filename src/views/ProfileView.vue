@@ -9,24 +9,32 @@
 
     <v-content>
 
-      <!-- Kernmuster -->
+      <!-- Kernmuster: what holds a group together and what dissolves it, side
+           by side — listing the titles twice said the same thing twice. -->
       <template v-if="kernmuster.length">
-        <p class="section-header">Muster</p>
+        <p class="section-header">Muster &amp; Auflösung</p>
         <div class="settings-group">
           <template v-for="(k, i) in kernmuster">
             <div :key="i" class="pattern-item">
               <p class="pattern-title">{{ k.title }}</p>
-              <p class="pattern-beliefs">{{ k.beliefs.join(' · ') }}</p>
-            </div>
-            <div :key="'s'+i" v-if="i < kernmuster.length - 1" class="settings-sep"></div>
-          </template>
-        </div>
-        <p class="section-header">Auflösungen</p>
-        <div class="settings-group">
-          <template v-for="(k, i) in kernmuster">
-            <div :key="i" class="pattern-item">
-              <p class="pattern-title">{{ k.title }}</p>
-              <p class="pattern-beliefs">{{ (k.aufloesungen || []).join(' · ') }}</p>
+              <div class="pattern-grid">
+                <div>
+                  <p class="col-label">Überzeugungen</p>
+                  <p
+                    v-for="(b, j) in (k.beliefs || [])"
+                    :key="'b' + j"
+                    class="pattern-line"
+                  >{{ b }}</p>
+                </div>
+                <div>
+                  <p class="col-label">Affirmationen</p>
+                  <p
+                    v-for="(a, j) in (k.aufloesungen || [])"
+                    :key="'a' + j"
+                    class="pattern-line"
+                  >{{ a }}</p>
+                </div>
+              </div>
             </div>
             <div :key="'s'+i" v-if="i < kernmuster.length - 1" class="settings-sep"></div>
           </template>
@@ -88,7 +96,7 @@
       <!-- Affektprofil -->
       <div class="affect-grid">
         <div>
-          <p class="affect-col-label">Überzeugung</p>
+          <p class="col-label">Überzeugung</p>
           <div class="settings-group">
             <template v-if="topFeelings.length">
               <div v-for="(f, i) in topFeelings" :key="f.name">
@@ -111,7 +119,7 @@
         </div>
 
         <div>
-          <p class="affect-col-label">Neue Perspektive</p>
+          <p class="col-label">Neue Perspektive</p>
           <div class="settings-group">
             <template v-if="topChangeProcessFeelings.length">
               <div v-for="(f, i) in topChangeProcessFeelings" :key="f.name">
@@ -359,11 +367,17 @@ export default {
   font-weight: 600;
   margin: 0 0 4px;
 }
-.pattern-beliefs {
+.pattern-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.pattern-line {
   font-size: 0.75rem;
   color: #8e8e93;
-  margin: 0;
-  line-height: 1.5;
+  margin: 0 0 4px;
+  line-height: 1.45;
+  &:last-child { margin-bottom: 0; }
 }
 
 /* Loading / info */
@@ -399,7 +413,7 @@ export default {
   margin: 20px 16px 0;
   .settings-group { margin: 0; }
 }
-.affect-col-label {
+.col-label {
   font-size: 0.7rem;
   color: #8e8e93;
   font-weight: 600;

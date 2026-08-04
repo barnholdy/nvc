@@ -55,7 +55,7 @@
                 <span>Löschen</span>
               </button>
             </div>
-            <div class="reminder-row" :style="rowSt(i, 195)" @click="deskClick()">
+            <div class="reminder-row" :style="rowSt(i, 195)" @click="deskClick(i)">
               <div class="reminder-row-body">
                 <p class="reminder-text">{{ item.text }}</p>
                 <div class="row-badges">
@@ -64,14 +64,22 @@
                     <span class="progress-label">{{ item.progress }} %</span>
                   </span>
                 </div>
-                <!-- The belief itself, the way the Handlungen list names it. -->
-                <p v-for="(s, j) in item.sources" :key="j" class="check-meta">„{{ s.beliefText }}“</p>
                 <p class="reminder-meta">{{ amenLabel(item.text) }}</p>
               </div>
               <button class="amen-btn" @click.stop="primaryAction(item.text)">{{ primaryLabel(item.text) }}</button>
             </div>
           </div>
-          <div :key="item.text + '-sep'" class="ios-sep" v-if="i < filteredAffirmations.length - 1"></div>
+          <!-- Where the affirmation comes from — behind a tap, because the
+               list is about the sentence, not about its origin. -->
+          <div :key="item.text + '-expand'" v-if="openIndex === i" class="row-expand">
+            <p class="expand-label">Überzeugungen</p>
+            <p v-for="(s, j) in item.sources" :key="j" class="expand-text">„{{ s.beliefText }}“</p>
+          </div>
+          <div
+            :key="item.text + '-sep'"
+            class="ios-sep"
+            v-if="i < filteredAffirmations.length - 1 && openIndex !== i"
+          ></div>
         </template>
       </div>
 
@@ -165,6 +173,7 @@ export default {
   data() {
     return {
       tab: 'dabei',
+      openIndex: null,
       itemToDelete: null,
       isDeleteDialogShowing: false,
       amenMap: loadAhoMap(),
@@ -174,7 +183,7 @@ export default {
     };
   },
   watch: {
-    tab() { this.sw.openIdx = null; this.sw.openDir = null; },
+    tab() { this.sw.openIdx = null; this.sw.openDir = null; this.openIndex = null; },
   },
   computed: {
     filteredAffirmations() {
@@ -216,6 +225,10 @@ export default {
     },
   },
   methods: {
+    toggle(i) {
+      this.sw.openIdx = null; this.sw.openDir = null;
+      this.openIndex = this.openIndex === i ? null : i;
+    },
     sayAho(text) {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.amenMap = Object.assign({}, this.amenMap, { [text]: Date.now() });
@@ -260,6 +273,7 @@ export default {
           this.$store.dispatch('updateBelief', Object.assign({}, belief, { affirmations: updated }));
         }
       });
+      this.openIndex = null;
     },
     tsStart(e, i) {
       if (e.target && e.target.closest && (e.target.closest('.amen-btn') || e.target.closest('.swipe-btn'))) return;
@@ -284,10 +298,12 @@ export default {
       if (!wasVert) e.preventDefault();
       if (!this.sw.drag && !wasVert) {
         if (this.sw.openIdx !== null) { this.sw.openIdx = null; this.sw.openDir = null; }
+        else { this.toggle(i); }
       } else if (this.sw.drag) {
         if (this.sw.dx < -40) { this.sw.openIdx = i; this.sw.openDir = 'left'; }
         else if (this.sw.dx > 40) { this.sw.openIdx = i; this.sw.openDir = 'right'; }
         else { this.sw.openIdx = null; this.sw.openDir = null; }
+        this.openIndex = null;
       }
       this.sw.touchIdx = null; this.sw.dx = 0; this.sw.drag = false; this.sw.isH = null;
     },
@@ -299,9 +315,9 @@ export default {
       else if (s.openIdx === i) x = s.openDir === 'left' ? -80 : rw;
       return { transform: `translateX(${x}px)`, transition: live ? 'none' : 'transform 0.2s ease' };
     },
-    // A tap only closes an open swipe panel; there is nothing to unfold.
-    deskClick() {
-      if (this.sw.openIdx !== null) { this.sw.openIdx = null; this.sw.openDir = null; }
+    deskClick(i) {
+      if (this.sw.openIdx !== null) { this.sw.openIdx = null; this.sw.openDir = null; return; }
+      this.toggle(i);
     },
     otherStatuses(text) {
       var current = affirmationStatus(text, this.statusMap);
@@ -324,6 +340,8 @@ export default {
       localStorage.setItem(AFF_STATUS_KEY, JSON.stringify(this.statusMap));
       this.sw.openIdx = null;
       this.sw.openDir = null;
+      // The row leaves this tab, so the index it was open at means nothing now.
+      this.openIndex = null;
     },
   },
 };
@@ -433,12 +451,6 @@ export default {
   line-height: 1.4;
 }
 .row-badges { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.check-meta {
-  font-size: 0.75rem;
-  color: #8e8e93;
-  margin: 4px 0 0;
-  font-style: italic;
-}
 .reminder-meta {
   font-size: 0.75rem;
   color: #8e8e93;
@@ -486,6 +498,27 @@ export default {
 }
 
 .ios-sep { height: 1px; background: #2c2c2e; margin-left: 20px; }
+
+.row-expand {
+  background: #141416;
+  padding: 14px 20px 16px;
+  border-top: 1px solid #2c2c2e;
+}
+.expand-label {
+  font-size: 0.68rem;
+  color: #8e8e93;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+.expand-text {
+  font-size: 0.93rem;
+  color: #ebebf5;
+  margin: 0 0 4px;
+  line-height: 1.5;
+  font-style: italic;
+}
 
 .empty-state {
   display: flex; flex-direction: column; align-items: center;

@@ -311,11 +311,15 @@
                   </p>
                 </v-flex>
 
-                <!-- The old sentence against the new one, as one scale. -->
+                <!-- The old sentence against the new one, as one scale. The
+                     sentences are the ends of it, so they carry no label of
+                     their own — and no colour, which would name a winner
+                     before the question is answered. A full sentence does not
+                     fit beside a slider on a phone, so the two ends stand
+                     above and below it; their alignment says which is which. -->
                 <v-flex v-if="resultAffirmationText">
                   <p class="pole pole-belief">{{ resultBeliefText }}</p>
                   <div class="slider-row">
-                    <span class="slider-end-label">Überzeugung</span>
                     <input
                       type="range"
                       min="0"
@@ -323,7 +327,6 @@
                       v-model.number="resultBodyTruth"
                       class="fear-slider"
                     />
-                    <span class="slider-end-label">Affirmation</span>
                   </div>
                   <p class="pole pole-affirmation">{{ resultAffirmationText }}</p>
                 </v-flex>
@@ -841,8 +844,8 @@ export default {
   line-height: 1.5;
   margin: 0;
 }
-.pole-belief { color: #8e8e93; margin-bottom: 10px; }
-.pole-affirmation { color: #4ade80; font-weight: 600; margin-top: 10px; }
+.pole-belief { color: #ebebf5; margin-bottom: 10px; text-align: left; }
+.pole-affirmation { color: #ebebf5; margin-top: 10px; text-align: right; }
 .empty-hint {
   font-size: 0.875rem;
   color: #8e8e93;
