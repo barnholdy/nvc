@@ -69,19 +69,25 @@
                   <span v-if="patternCount(entry.time) > 0" class="badge-pill">
                     {{ patternCount(entry.time) }} {{ patternCount(entry.time) === 1 ? 'Situation' : 'Situationen' }}
                   </span>
-                  <!-- The filled pill of the Affirmationen list; the word it
-                       measures stands next to it, not inside. -->
-                  <template v-if="truthPercent(entry) !== null">
-                    <span class="progress-pill">
-                      <span
-                        class="progress-fill"
-                        :style="{ width: truthPercent(entry) + '%', background: truthColor(entry) }"
-                      ></span>
-                      <span class="progress-label">{{ truthPercent(entry) }} %</span>
-                    </span>
-                    <span class="pill-caption">wahr</span>
-                  </template>
                 </div>
+                <!-- Everything that was ever recorded about this belief, on the
+                     scale it was recorded on. -->
+                <template v-if="credibility(entry) !== null">
+                  <p class="expand-label mt-2">Glaubwürdigkeit</p>
+                  <div class="slider-row">
+                    <span class="slider-end-label">0</span>
+                    <input
+                      type="range"
+                      min="0"
+                      max="10"
+                      step="0.1"
+                      :value="credibility(entry)"
+                      class="readonly-slider"
+                      disabled
+                    />
+                    <span class="slider-end-label">10</span>
+                  </div>
+                </template>
               </div>
               <button
                 v-if="rowActionLabel(entry)"
@@ -301,11 +307,7 @@ import {
 } from '@/utils/experiment';
 import { normalizeTruth } from '@/utils/affirmationTruth';
 import { originArcOf, moodLabel as moodLabelOf } from '@/utils/originArc';
-import {
-  averageTruth,
-  truthPercent as truthPercentOf,
-  truthColor as truthColorOf,
-} from '@/utils/beliefTrend';
+import { beliefCredibility } from '@/utils/credibility';
 import {
   loadAffStatusMap,
   affirmationStatusLabel,
@@ -365,15 +367,11 @@ export default {
       this.isOriginOpen = false;
       this.isEmpathyOpen = false;
     },
-    // What the situations say on average. Null while the belief was never rated,
-    // because a pill reading 0% would claim an answer nobody gave.
-    truthPercent(entry) {
-      return truthPercentOf(averageTruth(this.$store.getters.patterns, entry && entry.time));
-    },
-    // Low is the goal here, so the scale runs green at the bottom — the
-    // opposite of the affirmation pill, which shares only its shape.
-    truthColor(entry) {
-      return truthColorOf(averageTruth(this.$store.getters.patterns, entry && entry.time));
+    // The average across every situation and every evaluated experiment. Null
+    // while nothing was ever rated, because a slider at zero would claim an
+    // answer nobody gave.
+    credibility(entry) {
+      return beliefCredibility(this.$store.getters.patterns, entry);
     },
     originArc(entry) { return originArcOf(entry); },
     moodLabel(mood) { return moodLabelOf(mood); },
@@ -592,38 +590,6 @@ export default {
   background: #2c2c2e;
   border-radius: 20px;
   padding: 1px 6px;
-}
-/* Same pill as in the Affirmationen list — the bar carries the number, the
-   word next to it says what the number is about. */
-.progress-pill {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  height: 18px;
-  border-radius: 20px;
-  overflow: hidden;
-  background: #2c2c2e;
-  min-width: 48px;
-}
-.progress-fill {
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  border-radius: 20px;
-  opacity: 0.35;
-}
-.progress-label {
-  position: relative;
-  font-size: 0.68rem;
-  font-weight: 600;
-  color: #fff;
-  padding: 0 7px;
-  z-index: 1;
-  white-space: nowrap;
-}
-.pill-caption {
-  font-size: 0.7rem;
-  color: #8e8e93;
-  margin-left: -2px;
 }
 .row-action-btn {
   background: #4ade80;

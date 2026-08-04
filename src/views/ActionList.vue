@@ -612,6 +612,8 @@ export default {
         // How credible each sentence is after the experiment, on its own scale.
         beliefTruth: this.resultBeliefTruth,
         affirmationTruth: this.resultAffirmationTruth,
+        // Which affirmation was rated — the belief's may be replaced later.
+        affirmationText: this.resultAffirmationText,
       };
       this.cancelResult();
       if (row) {

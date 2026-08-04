@@ -64,7 +64,7 @@
 import { dedupeByName } from '@/utils/emotions';
 import { experimentsOf } from '@/utils/experiment';
 import { originArcOf, moodLabel } from '@/utils/originArc';
-import { averageTruth } from '@/utils/beliefTrend';
+import { beliefCredibility } from '@/utils/credibility';
 import { normalizeTruth } from '@/utils/affirmationTruth';
 const STORAGE_KEY = 'nvc.globalEmpathy';
 
@@ -137,8 +137,8 @@ export default {
           if (b.withBelief) lines.push(`  Reaktion: ${b.withBelief}`);
           const needs = b.needs && b.needs.length ? dedupeByName(b.needs).map(n => n.name).join(', ') : '';
           if (needs) lines.push(`  Bedürfnis: ${needs}`);
-          const truth = averageTruth(patterns, b.time);
-          if (truth !== null) lines.push(`  Für wahr gehalten: ${Math.round(truth * 10) / 10} von 10`);
+          const truth = beliefCredibility(patterns, b);
+          if (truth !== null) lines.push(`  Für glaubwürdig gehalten: ${Math.round(truth * 10) / 10} von 10`);
           const r = b.reflection || {};
           if (r.origin) lines.push(`  Ursprungshypothese: ${r.origin}`);
           const arc = originArcOf(b);

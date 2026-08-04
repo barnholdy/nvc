@@ -33,7 +33,7 @@
 import { dedupeByName } from '@/utils/emotions';
 import { originArcOf, moodLabel } from '@/utils/originArc';
 import { situationsForBelief } from '@/utils/patterns';
-import { averageTruth } from '@/utils/beliefTrend';
+import { beliefCredibility } from '@/utils/credibility';
 import { experimentsOf } from '@/utils/experiment';
 import { normalizeTruth } from '@/utils/affirmationTruth';
 
@@ -106,10 +106,10 @@ export default {
           return p.trigger || p.name;
         }).join(' | '));
       }
-      var truth = averageTruth(this.$store.getters.patterns, e.time);
+      var truth = beliefCredibility(this.$store.getters.patterns, e);
       if (truth !== null) {
-        lines.push('Für wahr gehalten: ' + Math.round(truth * 10) / 10 + ' von 10'
-          + (situations.length > 1 ? ' (Durchschnitt über ' + situations.length + ' Situationen)' : ''));
+        lines.push('Für glaubwürdig gehalten: ' + Math.round(truth * 10) / 10 + ' von 10 '
+          + '(Durchschnitt über Situationen und ausgewertete Handlungen)');
       }
       var r = e.reflection || {};
       if (r.origin) lines.push('Ursprungshypothese: ' + r.origin);

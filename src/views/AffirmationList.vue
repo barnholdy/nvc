@@ -58,12 +58,24 @@
             <div class="reminder-row" :style="rowSt(i, 195)" @click="deskClick(i)">
               <div class="reminder-row-body">
                 <p class="reminder-text">{{ item.text }}</p>
-                <div class="row-badges">
-                  <span class="progress-pill">
-                    <span class="progress-fill" :style="{ width: item.progress + '%', background: progressColor(item.progress) }"></span>
-                    <span class="progress-label">{{ item.progress }} %</span>
-                  </span>
-                </div>
+                <!-- Every reading this sentence has collected: from wandeln
+                     and from the experiments it was tested in. -->
+                <template v-if="item.credibility !== null">
+                  <p class="expand-label mt-2">Glaubwürdigkeit</p>
+                  <div class="slider-row">
+                    <span class="slider-end-label">0</span>
+                    <input
+                      type="range"
+                      min="0"
+                      max="10"
+                      step="0.1"
+                      :value="item.credibility"
+                      class="readonly-slider"
+                      disabled
+                    />
+                    <span class="slider-end-label">10</span>
+                  </div>
+                </template>
                 <p class="reminder-meta">{{ amenLabel(item.text) }}</p>
               </div>
               <button class="amen-btn" @click.stop="primaryAction(item.text)">{{ primaryLabel(item.text) }}</button>
@@ -120,11 +132,9 @@ import {
   loadAffStatusMap,
   affirmationStatus,
 } from '@/utils/affirmationStatus';
+import { affirmationCredibility } from '@/utils/credibility';
 
 const AMEN_KEY = 'nvc.amen';
-// Fortschritt der Affirmation — bewusst getrennt vom Resonanz-Wert
-// („Wie wahr fühlt sich diese Affirmation gerade an?“), analog zu den Handlungen.
-const AFF_PROGRESS_KEY = 'nvc.affirmationProgress';
 
 function triggerConfetti() {
   var canvas = document.createElement('canvas');
@@ -164,9 +174,6 @@ function triggerConfetti() {
 function loadAhoMap() {
   try { return JSON.parse(localStorage.getItem(AMEN_KEY)) || {}; } catch (e) { return {}; }
 }
-function loadAffProgressMap() {
-  try { return JSON.parse(localStorage.getItem(AFF_PROGRESS_KEY)) || {}; } catch (e) { return {}; }
-}
 
 export default {
   name: 'affirmation-list',
@@ -178,7 +185,6 @@ export default {
       isDeleteDialogShowing: false,
       amenMap: loadAhoMap(),
       statusMap: loadAffStatusMap(),
-      progressMap: loadAffProgressMap(),
       sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
   },
@@ -198,19 +204,18 @@ export default {
     },
     affirmations() {
       const map = {};
-      this.$store.getters.beliefs.forEach((belief) => {
+      const beliefs = this.$store.getters.beliefs;
+      beliefs.forEach((belief) => {
         if (!belief.affirmations || !belief.affirmations.length) return;
         belief.affirmations.forEach((a) => {
           if (!a.text) return;
-          if (!map[a.text]) map[a.text] = { text: a.text, beliefCount: 0, sources: [], resonance: null };
+          if (!map[a.text]) map[a.text] = { text: a.text, beliefCount: 0, sources: [] };
           map[a.text].beliefCount += 1;
           map[a.text].sources.push({ beliefTime: belief.time, beliefText: belief.belief });
-          if (map[a.text].resonance === null && a.resonance != null) map[a.text].resonance = a.resonance;
         });
       });
-      const pm = this.progressMap;
       return Object.values(map).map(item => Object.assign({}, item, {
-        progress: pm[item.text] != null ? pm[item.text] : 0,
+        credibility: affirmationCredibility(beliefs, item.text),
       })).sort((a, b) => b.beliefCount - a.beliefCount);
     },
     currentEditAffirmation() {
@@ -229,19 +234,13 @@ export default {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.openIndex = this.openIndex === i ? null : i;
     },
+    // Saying it out loud is worth marking, not worth scoring — the only value
+    // this sentence carries is the credibility it was actually rated with.
     sayAho(text) {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.amenMap = Object.assign({}, this.amenMap, { [text]: Date.now() });
       localStorage.setItem(AMEN_KEY, JSON.stringify(this.amenMap));
-      var current = this.progressMap[text] != null ? this.progressMap[text] : 0;
-      this.progressMap = Object.assign({}, this.progressMap, { [text]: Math.min(100, current + 1) });
-      localStorage.setItem(AFF_PROGRESS_KEY, JSON.stringify(this.progressMap));
       triggerConfetti();
-    },
-    progressColor(v) {
-      if (v >= 75) return '#4ade80';
-      if (v >= 50) return '#fbbf24';
-      return '#f87171';
     },
     amenLabel(text) {
       const ts = this.amenMap[text];
@@ -450,36 +449,48 @@ export default {
   word-break: break-word;
   line-height: 1.4;
 }
-.row-badges { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .reminder-meta {
   font-size: 0.75rem;
   color: #8e8e93;
   margin: 4px 0 0;
 }
-.progress-pill {
-  position: relative;
-  display: inline-flex;
+/* Shows a recorded value — deliberately not interactive. */
+.slider-row {
+  display: flex;
   align-items: center;
-  height: 18px;
-  border-radius: 20px;
-  overflow: hidden;
-  background: #2c2c2e;
-  min-width: 48px;
+  gap: 10px;
+  padding: 2px 4px 0;
 }
-.progress-fill {
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  border-radius: 20px;
-  opacity: 0.35;
+.slider-end-label {
+  font-size: 0.72rem;
+  color: #636366;
+  flex-shrink: 0;
 }
-.progress-label {
-  position: relative;
-  font-size: 0.68rem;
-  font-weight: 600;
-  color: #fff;
-  padding: 0 7px;
-  z-index: 1;
-  white-space: nowrap;
+.readonly-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: #3a3a3c;
+  outline: none;
+  opacity: 1;
+  pointer-events: none;
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #4ade80;
+  }
+  &::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border: none;
+    border-radius: 50%;
+    background: #4ade80;
+  }
 }
 
 .amen-btn {

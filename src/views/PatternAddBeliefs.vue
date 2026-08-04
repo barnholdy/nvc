@@ -14,7 +14,7 @@
             <v-icon small color="#ff453a">close</v-icon>
           </button>
         </div>
-        <p class="truth-question">Für wie wahr hältst du die Überzeugung?</p>
+        <p class="truth-question">Für wie glaubwürdig hältst du die Überzeugung?</p>
         <div class="slider-row">
           <span class="slider-end-label">0</span>
           <input

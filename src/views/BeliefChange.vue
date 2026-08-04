@@ -104,7 +104,7 @@ import BeliefChangeAbsoluteness from '@/views/BeliefChangeAbsoluteness.vue';
 import PatternAddWithoutBelief from '@/views/PatternAddWithoutBelief.vue';
 import BeliefAddFeelingNeed from '@/views/BeliefAddFeelingNeed.vue';
 import { MAX_FEELINGS } from '@/utils/emotions';
-import { averageTruth } from '@/utils/beliefTrend';
+import { beliefCredibility } from '@/utils/credibility';
 import PatternChangeAffirmation from '@/views/PatternChangeAffirmation.vue';
 import { beliefStatus } from '@/utils/beliefStatus';
 import taxonomy from '../assets/taxonomy.json';
@@ -146,10 +146,10 @@ export default {
   computed: {
     INTENSITY_THRESHOLD() { return INTENSITY_THRESHOLD; },
     MAX_FEELINGS() { return MAX_FEELINGS; },
-    // How true the situations say this belief is, averaged over all of them.
+    // Every reading this belief has collected, averaged — the situations it
+    // was rated in and the experiments that were evaluated.
     situationTruth() {
-      if (!this.entry) return null;
-      return averageTruth(this.$store.getters.patterns, this.entry.time);
+      return beliefCredibility(this.$store.getters.patterns, this.entry);
     },
     // Beliefs worked on before the limit existed can hold more than five new
     // feelings; the way forward opens once they are back within it.

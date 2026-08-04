@@ -10,28 +10,34 @@
     <v-content>
       <div class="intro-card">
         <span class="intro-icon">📉</span>
-        <p class="intro-title">Für wie wahr hältst du sie?</p>
-        <p class="intro-text">
-          Jedes Mal, wenn du eine Überzeugung zu einer Situation hinzufügst, hältst du fest,
-          für wie wahr du sie gerade hältst. Nebeneinander gestellt wird sichtbar, was sich
-          bewegt — nach unten ist die Richtung, in die du arbeitest.
-        </p>
+        <p class="intro-title">Für wie glaubwürdig hältst du sie?</p>
+        <p class="intro-text">{{ introText }}</p>
+      </div>
+
+      <div class="segment-row">
+        <button
+          class="seg-tab"
+          :class="{ active: tab === 'beliefs' }"
+          @click="tab = 'beliefs'"
+        >Überzeugungen</button>
+        <button
+          class="seg-tab"
+          :class="{ active: tab === 'affirmations' }"
+          @click="tab = 'affirmations'"
+        >Affirmationen</button>
       </div>
 
       <div v-if="!rows.length" class="empty-state">
         <span class="empty-icon">📉</span>
         <p class="empty-title">Noch keine Bewertungen</p>
-        <p class="empty-sub">
-          Lege eine Situation an und bewerte dort deine Überzeugungen — ab der zweiten
-          Bewertung derselben Überzeugung entsteht ein Verlauf.
-        </p>
+        <p class="empty-sub">{{ emptyText }}</p>
       </div>
 
       <template v-else>
         <p class="section-header">{{ trendCount }} mit Verlauf · {{ rows.length }} bewertet</p>
 
-        <div v-for="row in rows" :key="row.beliefTime" class="trend-card">
-          <p class="trend-belief">{{ row.beliefText }}</p>
+        <div v-for="row in rows" :key="row.key" class="trend-card">
+          <p class="trend-belief">{{ row.text }}</p>
 
           <div class="trend-badges">
             <span class="badge-pill">
@@ -53,23 +59,24 @@
             <div class="chart-scroll">
               <div class="chart">
                 <div v-for="(p, i) in row.points" :key="i" class="bar-col">
-                  <span class="bar-value" :style="{ color: truthColor(p.value) }">{{ p.value }}</span>
+                  <span class="bar-value" :style="{ color: barColor(p.value) }">{{ p.value }}</span>
                   <div class="bar-track">
                     <div class="bar-mid"></div>
                     <div
                       class="bar-fill"
-                      :style="{ height: barHeight(p.value), background: truthColor(p.value) }"
+                      :style="{ height: barHeight(p.value), background: barColor(p.value) }"
                     ></div>
                   </div>
                   <span class="bar-date">{{ shortDate(p.time) }}</span>
+                  <!-- Where the reading was taken; the same scale is filled in
+                       three different places. -->
+                  <span class="bar-source">{{ sourceLabel(p.source) }}</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <p v-if="!row.hasTrend" class="trend-hint">
-            Eine zweite Bewertung in einer späteren Situation zeigt, ob sich etwas bewegt.
-          </p>
+          <p v-if="!row.hasTrend" class="trend-hint">{{ hintText }}</p>
         </div>
       </template>
 
@@ -80,27 +87,65 @@
 
 <script>
 import moment from 'moment';
-import {
-  beliefTrends,
-  truthColor,
-  deltaColor,
-  deltaLabel,
-  TRUTH_SCALE_MAX,
-} from '@/utils/beliefTrend';
+import { truthColor, deltaColor, deltaLabel, TRUTH_SCALE_MAX } from '@/utils/beliefTrend';
+import { beliefRows, affirmationRows } from '@/utils/credibility';
+
+// Which side a reading came from — the same 0-10 question is asked in three
+// different places, and a bar means something else depending on where.
+const SOURCES = {
+  situation: 'Situation',
+  wandeln: 'Wandeln',
+  action: 'Handlung',
+};
 
 export default {
   name: 'trends-view',
+  data() {
+    return { tab: 'beliefs' };
+  },
   computed: {
+    isBeliefs() { return this.tab === 'beliefs'; },
     rows() {
-      return beliefTrends(this.$store.getters.patterns, this.$store.getters.beliefs);
+      const store = this.$store.getters;
+      return this.isBeliefs
+        ? beliefRows(store.patterns, store.beliefs)
+        : affirmationRows(store.beliefs);
     },
     trendCount() {
       return this.rows.filter(r => r.hasTrend).length;
     },
+    introText() {
+      return this.isBeliefs
+        ? 'Jedes Mal, wenn du eine Überzeugung zu einer Situation hinzufügst oder eine '
+          + 'Handlung auswertest, hältst du fest, für wie glaubwürdig du sie gerade hältst. '
+          + 'Nebeneinander gestellt wird sichtbar, was sich bewegt — nach unten ist die '
+          + 'Richtung, in die du arbeitest.'
+        : 'Beim Wandeln und beim Auswerten einer Handlung hältst du fest, für wie '
+          + 'glaubwürdig sich eine Affirmation anfühlt. Hier stehen diese Werte '
+          + 'nebeneinander — nach oben ist die Richtung, in die du arbeitest.';
+    },
+    emptyText() {
+      return this.isBeliefs
+        ? 'Lege eine Situation an und bewerte dort deine Überzeugungen — ab der zweiten '
+          + 'Bewertung derselben Überzeugung entsteht ein Verlauf.'
+        : 'Wandle eine Überzeugung und bewerte dort die Affirmation — ab der zweiten '
+          + 'Bewertung desselben Satzes entsteht ein Verlauf.';
+    },
+    hintText() {
+      return this.isBeliefs
+        ? 'Eine zweite Bewertung in einer späteren Situation zeigt, ob sich etwas bewegt.'
+        : 'Eine zweite Bewertung — beim Wandeln oder nach einer Handlung — zeigt, ob sich '
+          + 'etwas bewegt.';
+    },
   },
   methods: {
-    truthColor(value) { return truthColor(value); },
-    deltaColor(delta) { return deltaColor(delta); },
+    sourceLabel(source) { return SOURCES[source] || ''; },
+    // A belief is worth less the higher it stands, an affirmation is worth
+    // more — so the same colour scale would say the opposite thing.
+    barColor(value) {
+      return this.isBeliefs ? truthColor(value) : truthColor(TRUTH_SCALE_MAX - value);
+    },
+    deltaColor(delta) { return this.isBeliefs ? deltaColor(delta) : deltaColor(-delta); },
     deltaLabel(delta) { return deltaLabel(delta); },
     // A zero would otherwise be invisible, and "kaum noch wahr" is exactly the
     // result worth seeing.
@@ -250,6 +295,42 @@ export default {
   margin-top: 6px;
   height: 14px;
   white-space: nowrap;
+}
+.bar-source {
+  font-size: 0.58rem;
+  color: #48484a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  height: 12px;
+  white-space: nowrap;
+}
+
+.segment-row {
+  display: flex;
+  padding: 0 16px 16px;
+  border-bottom: 1px solid #2c2c2e;
+  margin-bottom: 4px;
+}
+.seg-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 8px 2px;
+  font-size: 0.85rem;
+  color: #8e8e93;
+  cursor: pointer;
+  position: relative;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 2px;
+    background: transparent;
+    border-radius: 2px;
+  }
+  &.active { color: #fff; font-weight: 600; &::after { background: #4ade80; } }
 }
 
 .trend-hint {

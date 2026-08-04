@@ -32,7 +32,7 @@
 
     <!-- Only meaningful once there is a sentence to read aloud -->
     <v-flex v-if="hasText" class="mb-4">
-      <p class="body-1 grey--text mb-2">Lies dir den Satz laut vor. Wie wahr fühlt er sich an?</p>
+      <p class="body-1 grey--text mb-2">Lies dir den Satz laut vor. Wie glaubwürdig fühlt er sich an?</p>
       <div class="slider-row">
         <span class="slider-end-label">0</span>
         <input type="range" min="0" max="10" v-model.number="truth" class="truth-slider" />
@@ -169,7 +169,8 @@ export default {
       // An empty field means no affirmation, not one without words.
       var text = this.text.trim();
       this.$emit('changed', text
-        ? [{ text: text, count: this.count || 1, resonance: this.truth }]
+        // Stamped so the credibility history knows when this reading was taken.
+        ? [{ text: text, count: this.count || 1, resonance: this.truth, ratedAt: Date.now() }]
         : []);
     },
     // Existing affirmations and generated suggestions both land in the field,

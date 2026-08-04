@@ -1,6 +1,5 @@
-// How true a belief is held is recorded on the situation (`beliefTruths`), not
-// on the belief. That is what makes a trend possible at all: the same belief
-// rated again in a later situation gives a second point on the same line.
+// The shared 0-10 credibility scale: its bounds, its colours, and how a change
+// on it reads. Where the readings come from is `credibility.js`.
 
 export const TRUTH_SCALE_MAX = 10;
 
@@ -26,82 +25,8 @@ export function deltaLabel(delta) {
   return 'unverändert';
 }
 
-// All ratings of one belief, oldest first, each tagged with the situation it was
-// given in.
-function pointsByBelief(patterns) {
-  const out = {};
-  (Array.isArray(patterns) ? patterns : []).forEach((p) => {
-    if (!p || typeof p !== 'object') return;
-    const map = p.beliefTruths;
-    if (!map || typeof map !== 'object') return;
-    Object.keys(map).forEach((key) => {
-      const value = map[key];
-      if (typeof value !== 'number' || isNaN(value)) return;
-      if (!out[key]) out[key] = [];
-      out[key].push({
-        time: p.time,
-        value: value,
-        situation: p.name || p.trigger || '',
-      });
-    });
-  });
-  return out;
-}
-
-// The 0-10 answers are shown as a percentage — "55% wahr" reads as a degree,
-// where "5,5/10" reads as a score.
+// The 0-10 answer as a percentage, where a degree reads better than a score.
 export function truthPercent(value) {
   if (typeof value !== 'number' || isNaN(value)) return null;
   return Math.round((value / TRUTH_SCALE_MAX) * 100);
-}
-
-export function truthPercentLabel(value) {
-  const pct = truthPercent(value);
-  return pct === null ? '' : `${pct}% wahr`;
-}
-
-// Every rating one belief has collected across all situations, oldest first.
-export function truthPointsFor(patterns, beliefTime) {
-  const points = pointsByBelief(patterns);
-  const list = points[beliefTime] || [];
-  return list.slice().sort((a, b) => a.time - b.time);
-}
-
-// What the belief is held to be worth on average, across every situation it was
-// rated in. Null when it was never rated — a zero would claim something else.
-export function averageTruth(patterns, beliefTime) {
-  const list = truthPointsFor(patterns, beliefTime);
-  if (!list.length) return null;
-  const sum = list.reduce((total, p) => total + p.value, 0);
-  return sum / list.length;
-}
-
-// One row per belief that has at least one rating. Beliefs deleted in the
-// meantime drop out, because the belief text is what makes a row readable.
-export function beliefTrends(patterns, beliefs) {
-  const points = pointsByBelief(patterns);
-  const rows = [];
-  (Array.isArray(beliefs) ? beliefs : []).forEach((b) => {
-    if (!b || typeof b !== 'object') return;
-    const list = (points[b.time] || []).slice().sort((x, y) => x.time - y.time);
-    if (!list.length) return;
-    const first = list[0].value;
-    const last = list[list.length - 1].value;
-    rows.push({
-      beliefTime: b.time,
-      beliefText: b.belief,
-      points: list,
-      first: first,
-      last: last,
-      delta: last - first,
-      // Only a second rating turns a value into a trend.
-      hasTrend: list.length > 1,
-    });
-  });
-  // Beliefs with an actual trend first, then the most recently rated ones —
-  // a single measurement has nothing to say yet.
-  return rows.sort((a, b) => {
-    if (a.hasTrend !== b.hasTrend) return a.hasTrend ? -1 : 1;
-    return b.points[b.points.length - 1].time - a.points[a.points.length - 1].time;
-  });
 }
