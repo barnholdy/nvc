@@ -60,11 +60,6 @@ export default new Router({
       component: () => import('./views/BeliefAct.vue'),
     },
     {
-      path: '/empathy-belief/:time',
-      name: 'empathy-belief',
-      component: () => import('./views/BeliefEmpathy.vue'),
-    },
-    {
       path: '/affirmations',
       name: 'affirmations',
       component: () => import('./views/AffirmationList.vue'),

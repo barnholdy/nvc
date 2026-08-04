@@ -15,28 +15,21 @@
     expand-all
     @change="onChange">
     <template slot="afterList">
-      <div class="reframe-card mt-3">
-        <p class="reframe-text">
-          Diese Überzeugung war kein Fehler. Für das Kind, das du warst, war sie eine kluge
-          Lösung — sie hat dir damals
-          <span v-if="gift" class="reframe-gift" :style="{ color: needColor }">{{ gift }}</span><span v-else>etwas Wichtiges</span>
-          gebracht. Heute darfst du prüfen, ob du sie noch brauchst.
-        </p>
-      </div>
+      <reframe-card :gift="gift" class="mt-3"></reframe-card>
     </template>
   </belief-add-feeling-need>
 </template>
 
 <script>
 import BeliefAddFeelingNeed from '@/views/BeliefAddFeelingNeed.vue';
-import { NEED_COLOR } from '@/utils/emotions';
+import ReframeCard from '@/components/ReframeCard.vue';
 
 // The need and the gift are the same answer to the same question: what this
 // belief once did for you. So they are picked once, on one screen, and the
 // reframe says the chosen word back.
 export default {
   name: 'belief-add-gift',
-  components: { BeliefAddFeelingNeed },
+  components: { BeliefAddFeelingNeed, ReframeCard },
   props: {
     belief: { type: String, default: '' },
     reaction: { type: String, default: '' },
@@ -48,7 +41,6 @@ export default {
   data() {
     return {
       needs: this.initialNeeds.slice(),
-      needColor: NEED_COLOR,
       prompt: 'Wenn du die Überzeugung als Strategie betrachtest, '
         + 'welches Bedürfnis hast du dir damit erfüllt?',
     };
@@ -69,20 +61,4 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.reframe-card {
-  background: #1c1c1e;
-  border-left: 3px solid #4ade80;
-  border-radius: 8px;
-  padding: 14px 16px;
-}
-.reframe-text {
-  font-size: 0.92rem;
-  color: #ebebf5;
-  line-height: 1.6;
-  margin: 0;
-}
-// The colour needs carry everywhere else — the word in this sentence is one.
-.reframe-gift {
-  font-weight: 600;
-}
 </style>

@@ -55,10 +55,6 @@
                 <v-icon small color="#fff">directions_run</v-icon>
                 <span>Handeln</span>
               </button>
-              <button class="swipe-btn swipe-btn-empathy" @click.stop="empathyEntry(entry)">
-                <v-icon small color="#fff">favorite</v-icon>
-                <span>Empathie</span>
-              </button>
             </div>
             <div class="swipe-left-panel">
               <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">
@@ -66,7 +62,7 @@
                 <span>Löschen</span>
               </button>
             </div>
-            <div class="ios-row" :style="rowSt(idx, 260)" @click="deskClick(idx)">
+            <div class="ios-row" :style="rowSt(idx, 195)" @click="deskClick(idx)">
               <div class="row-body">
                 <p class="row-title">{{ entry.belief }}</p>
                 <div class="row-badges">
@@ -379,7 +375,6 @@ export default {
     },
     gapColor(gap) { return fearGapColor(gap); },
     experimentStateLabel(x) { return stateLabelOf(x); },
-    empathyEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/empathy-belief/${entry.time}`); },
     changeEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/change-belief/${entry.time}`); },
     actEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/act-belief/${entry.time}`); },
     // The one step that moves this belief forward from where it stands.
@@ -419,7 +414,7 @@ export default {
         this.sw.isH = Math.abs(dx) >= Math.abs(dy);
       if (!this.sw.isH) return;
       e.preventDefault();
-      this.sw.dx = Math.max(-80, Math.min(dx, 260));
+      this.sw.dx = Math.max(-80, Math.min(dx, 195));
       this.sw.drag = true;
     },
     tsEnd(e, i) {
@@ -534,7 +529,6 @@ export default {
 }
 .swipe-btn-delete { background: #ff453a; width: 80px; }
 .swipe-btn-edit { background: #636366; }
-.swipe-btn-empathy { background: #2f7a52; }
 .swipe-btn-change { background: #1a5fa8; }
 .swipe-btn-act { background: #7c3aed; }
 

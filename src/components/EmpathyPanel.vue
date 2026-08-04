@@ -1,58 +1,31 @@
 <template>
   <div>
-    <v-toolbar color="white" app>
-      <v-btn icon @click="close">
-        <v-icon>close</v-icon>
+    <template v-if="showApiKeyInput">
+      <p class="caption grey--text mb-1">Anthropic API Key eingeben, um Empathie zu generieren:</p>
+      <v-text-field
+        v-model="apiKeyInput"
+        label="API Key"
+        type="password"
+        single-line
+        hide-details
+        class="mb-2"
+      ></v-text-field>
+      <v-btn small flat color="primary" :disabled="!apiKeyInput" @click="saveApiKey">Speichern &amp; generieren</v-btn>
+      <v-btn small flat color="grey" @click="showApiKeyInput = false">Abbrechen</v-btn>
+    </template>
+    <template v-else>
+      <v-btn flat color="primary" :loading="isLoading" @click="generate">
+        <v-icon left>favorite_border</v-icon>
+        Empathie bekommen
       </v-btn>
-      <v-toolbar-title>Empathie bekommen</v-toolbar-title>
-    </v-toolbar>
-    <v-content>
-      <v-container class="mb-5">
-        <v-layout column>
-          <v-flex class="mt-2 mb-3">
-            <p class="subheading grey--text belief-quote mt-1">„{{ entry ? entry.belief : '' }}“</p>
-            <p class="body-1 grey--text mt-2">Lass dir einfühlsam spiegeln, was du gerade erlebst.</p>
-          </v-flex>
+      <v-btn v-if="apiKey" small flat icon @click="showApiKeyInput = true" title="API Key ändern">
+        <v-icon small color="grey lighten-1">settings</v-icon>
+      </v-btn>
+    </template>
 
-          <v-flex class="mt-1">
-            <template v-if="showApiKeyInput">
-              <p class="caption grey--text mb-1">Anthropic API Key eingeben, um Empathie zu generieren:</p>
-              <v-text-field
-                v-model="apiKeyInput"
-                label="API Key"
-                type="password"
-                single-line
-                hide-details
-                class="mb-2"
-              ></v-text-field>
-              <v-btn small flat color="primary" :disabled="!apiKeyInput" @click="saveApiKey">Speichern & generieren</v-btn>
-              <v-btn small flat color="grey" @click="showApiKeyInput = false">Abbrechen</v-btn>
-            </template>
-            <template v-else>
-              <v-btn flat color="primary" :loading="isLoading" @click="generate">
-                <v-icon left>favorite_border</v-icon>
-                Empathie generieren
-              </v-btn>
-              <v-btn v-if="apiKey" small flat icon @click="showApiKeyInput = true" title="API Key ändern">
-                <v-icon small color="grey lighten-1">settings</v-icon>
-              </v-btn>
-            </template>
-          </v-flex>
+    <p v-if="errorMsg" class="caption red--text mt-1">{{ errorMsg }}</p>
 
-          <v-flex v-if="errorMsg" class="mt-1">
-            <p class="caption red--text">{{ errorMsg }}</p>
-          </v-flex>
-
-          <v-flex v-if="text !== null" class="mt-3">
-            <div class="empathy-rendered md-content" v-html="renderMd(text)"></div>
-          </v-flex>
-        </v-layout>
-      </v-container>
-
-      <v-footer v-if="text !== null" :fixed="isFooterFixed" color="white elevation-3" height="44">
-        <v-btn @click="save" block large color="primary">speichern</v-btn>
-      </v-footer>
-    </v-content>
+    <div v-if="text !== null" class="empathy-rendered md-content mt-3" v-html="renderMd(text)"></div>
   </div>
 </template>
 
@@ -63,20 +36,24 @@ import { situationsForBelief } from '@/utils/patterns';
 import { averageTruth } from '@/utils/beliefTrend';
 import { experimentsOf } from '@/utils/experiment';
 import { normalizeTruth } from '@/utils/affirmationTruth';
+
+// The empathy request and its rendering, so the wizard step and anything else
+// that offers it ask in exactly the same way.
 export default {
-  name: 'belief-empathy',
+  name: 'empathy-panel',
+  props: {
+    // The belief to reflect on, as stored.
+    entry: { type: Object, default: null },
+    initialText: { type: String, default: '' },
+  },
   data() {
-    const entry = this.$store.getters.beliefs
-      .find(function(b) { return b.time === parseInt(this.$route.params.time, 10); }, this);
     return {
-      entry: entry || null,
-      text: entry && entry.empathy ? entry.empathy : null,
+      text: this.initialText || null,
       isLoading: false,
       errorMsg: '',
       showApiKeyInput: false,
       apiKeyInput: '',
       apiKey: localStorage.getItem('nvc.apiKey') || '',
-      isFooterFixed: true,
     };
   },
   methods: {
@@ -210,15 +187,12 @@ export default {
         return res.json();
       }).then(function(data) {
         self.text = data.content[0].text.trim();
+        self.$emit('changed', self.text);
       }).catch(function(e) {
         self.errorMsg = e.message || 'Empathie konnte nicht geladen werden.';
       }).then(function() {
         self.isLoading = false;
       });
-    },
-    save() {
-      this.$store.dispatch('updateBelief', Object.assign({}, this.entry, { empathy: this.text }));
-      this.$router.push('/beliefs');
     },
     close() {
       this.$router.push('/beliefs');
@@ -228,9 +202,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.belief-quote {
-  font-style: italic;
-}
 .empathy-rendered {
   font-size: 0.95rem;
   color: #ebebf5;

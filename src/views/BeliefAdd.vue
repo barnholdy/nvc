@@ -80,10 +80,25 @@
           @change="selectedNeeds = $event">
         </belief-add-gift>
 
-        <belief-add-grounding v-show="step === 8"></belief-add-grounding>
+        <!-- Mounted with the phase, so the request carries this run's answers. -->
+        <belief-add-empathy
+          v-if="hasEnteredOriginPhase"
+          v-show="step === 8"
+          :entry="editEntry"
+          :belief="belief"
+          :reaction="withBelief"
+          :feelings="selectedFeelings"
+          :needs="selectedNeeds"
+          :origin="origin"
+          :gift="gift || ''"
+          :initialValue="empathy"
+          @changed="empathy = $event">
+        </belief-add-empathy>
+
+        <belief-add-grounding v-show="step === 9"></belief-add-grounding>
 
         <belief-add-check
-          v-show="step === 9"
+          v-show="step === 10"
           :initialValue="mood"
           @changed="mood = $event">
         </belief-add-check>
@@ -137,6 +152,7 @@ import BeliefAddFeelingNeed from '@/views/BeliefAddFeelingNeed.vue';
 import BeliefAddReadiness from '@/views/BeliefAddReadiness.vue';
 import BeliefAddOrigin from '@/views/BeliefAddOrigin.vue';
 import BeliefAddGift from '@/views/BeliefAddGift.vue';
+import BeliefAddEmpathy from '@/views/BeliefAddEmpathy.vue';
 import BeliefAddGrounding from '@/views/BeliefAddGrounding.vue';
 import BeliefAddCheck from '@/views/BeliefAddCheck.vue';
 import { beliefStatus } from '@/utils/beliefStatus';
@@ -146,7 +162,7 @@ import taxonomy from '../assets/taxonomy.json';
 
 const FEELINGS_STEP = 4;
 const READINESS_STEP = 5;
-const TOTAL_STEPS = 9;
+const TOTAL_STEPS = 10;
 
 export default {
   name: 'belief-add',
@@ -158,6 +174,7 @@ export default {
     BeliefAddReadiness,
     BeliefAddOrigin,
     BeliefAddGift,
+    BeliefAddEmpathy,
     BeliefAddGrounding,
     BeliefAddCheck,
   },
@@ -182,6 +199,7 @@ export default {
       mood: arc.mood,
       storedArc: arc,
       storedOrigin: reflection.origin || '',
+      empathy: editEntry ? editEntry.empathy || '' : '',
       // The need is picked inside the origin phase now, so leaving the phase
       // has to be able to put back what was saved before.
       storedNeeds: editEntry ? editEntry.needs || [] : [],
@@ -284,6 +302,8 @@ export default {
         withBelief: this.withBelief,
         // The need belongs to the origin phase now and is dropped with it.
         needs: withOrigin ? this.selectedNeeds : this.storedNeeds,
+        // Generated inside the origin phase, so it is kept with it.
+        empathy: withOrigin ? this.empathy : (this.editEntry ? this.editEntry.empathy || '' : ''),
         reflection: this.buildReflection(withOrigin),
       };
       const saved = this.isEditMode ? Object.assign({}, this.editEntry, payload) : payload;
