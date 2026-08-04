@@ -2,7 +2,9 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Situation</h1>
-      <p class="subheading grey--text belief-quote mt-1">„{{ beliefText }}“</p>
+      <!-- The affirmation is what this action is meant to practise, so it
+           stands where the belief used to. -->
+      <p v-if="affirmationText" class="affirmation-lead mt-1">{{ affirmationText }}</p>
       <action-prompt :belief="entry" class="mt-2"></action-prompt>
     </v-flex>
     <v-flex>
@@ -43,8 +45,9 @@ export default {
     return { text: this.initialValue };
   },
   computed: {
-    beliefText() {
-      return this.entry ? this.entry.belief : '';
+    affirmationText() {
+      const list = (this.entry && this.entry.affirmations) || [];
+      return list.map(a => a && a.text).filter(Boolean).join(' · ');
     },
   },
   watch: {
@@ -54,5 +57,11 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.belief-quote { font-style: italic; }
+.affirmation-lead {
+  font-size: 1.05rem;
+  color: #4ade80;
+  font-weight: 600;
+  line-height: 1.5;
+  margin: 0;
+}
 </style>

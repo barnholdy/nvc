@@ -37,6 +37,8 @@ export function createExperiment(id) {
     outcome: '',
     fearActual: null,
     learning: '',
+    // 0 = the old belief still holds, 100 = the affirmation does.
+    bodyTruth: null,
     completedAt: null,
   };
 }

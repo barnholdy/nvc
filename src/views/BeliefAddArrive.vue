@@ -6,7 +6,7 @@
 
       <belief-context :reaction="reaction"></belief-context>
 
-      <p class="body-1 white--text mt-3">
+      <p class="body-1 white--text mt-3 wizard-prompt">
         Atme ruhig mit dem Kreis mit. Lass es auf dich wirken. Versuche in deinem Körper
         anzukommen.
       </p>

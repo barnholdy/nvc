@@ -2,7 +2,7 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Zurück ins Jetzt</h1>
-      <p class="body-1 white--text mt-3">
+      <p class="body-1 white--text mt-3 wizard-prompt">
         Bevor du speicherst: einen Moment zurück ins Jetzt. Atme ruhig mit dem Kreis mit.
       </p>
     </v-flex>

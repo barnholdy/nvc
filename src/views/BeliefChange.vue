@@ -45,7 +45,7 @@
           :maxSelections="MAX_FEELINGS"
           @change="withoutBeliefFeelings = $event">
           <v-flex slot="beforeList" class="mb-4">
-            <p class="body-1 grey--text mb-2">Wie stark ist diese Empfindung gerade? 0 = nichts, 10 = deutlich.</p>
+            <p class="body-1 grey--text mb-2 wizard-prompt">Wie stark ist diese Empfindung gerade? 0 = nichts, 10 = deutlich.</p>
             <div class="slider-row">
               <span class="slider-end-label">0</span>
               <input type="range" min="0" max="10" v-model.number="bodyIntensity" class="intensity-slider" />
@@ -62,7 +62,7 @@
                 Zurück zur neuen Perspektive
               </v-btn>
             </div>
-            <p class="body-1 grey--text mt-4 mb-0">Was fühlst du?</p>
+            <p class="body-1 grey--text mt-4 mb-0 wizard-prompt">Was fühlst du?</p>
           </v-flex>
         </belief-add-feeling-need>
 

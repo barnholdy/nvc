@@ -1,5 +1,13 @@
 <template>
   <div>
+    <div v-if="situation" class="context-block">
+      <p class="context-label">Situation</p>
+      <p class="context-text">{{ situation }}</p>
+    </div>
+    <div v-if="perspective" class="context-block">
+      <p class="context-label">Neue Perspektive</p>
+      <p class="context-text">{{ perspective }}</p>
+    </div>
     <div v-if="reaction" class="context-block">
       <p class="context-label">Reaktion</p>
       <p class="context-text">{{ reaction }}</p>
@@ -28,6 +36,8 @@ export default {
   name: 'belief-context',
   components: { FeelingChips },
   props: {
+    situation: { type: String, default: '' },
+    perspective: { type: String, default: '' },
     reaction: { type: String, default: '' },
     feelings: { type: Array, default: () => [] },
     needs: { type: Array, default: () => [] },

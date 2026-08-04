@@ -2,8 +2,8 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Befürchtung</h1>
-      <p class="subheading grey--text belief-quote mt-1">„{{ situation }}“</p>
-      <p class="body-1 grey--text mt-2">
+      <belief-context :situation="situation"></belief-context>
+      <p class="body-1 grey--text mt-2 wizard-prompt">
         Was genau befürchtest du, wenn du das tust? Sei präzise: Wer reagiert wie?
       </p>
     </v-flex>
@@ -20,7 +20,7 @@
         @blur="$emit('blurred')"
       ></v-text-field>
 
-      <p class="body-1 grey--text mt-4 mb-2">
+      <p class="body-1 grey--text mt-4 mb-2 wizard-prompt">
         Wie stark erwartest du, dass diese Befürchtung eintritt?
       </p>
 
@@ -57,9 +57,11 @@
 
 <script>
 import moment from 'moment';
+import BeliefContext from '@/views/BeliefContext.vue';
 
 export default {
   name: 'belief-act-fear',
+  components: { BeliefContext },
   props: {
     situation: { type: String, default: '' },
     experiment: { type: Object, required: true },
@@ -94,7 +96,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.belief-quote { font-style: italic; }
 .outlook-text {
   font-size: 0.85rem;
   color: #8e8e93;

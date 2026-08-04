@@ -2,7 +2,7 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Situation</h1>
-      <p class="body-1 grey--text mt-1">Was ist äußerlich passiert? Welche Gedanken denkst du? Was fürchtest du, wie andere dich sehen oder erleben? Wofür verteidigst du dich? Welchen Groll hegst du? Welche Widerstände hast du?</p>
+      <p class="body-1 grey--text mt-1 wizard-prompt">Was ist äußerlich passiert? Welche Gedanken denkst du? Was fürchtest du, wie andere dich sehen oder erleben? Wofür verteidigst du dich? Welchen Groll hegst du? Welche Widerstände hast du?</p>
     </v-flex>
     <v-flex>
       <v-text-field

@@ -3,17 +3,24 @@
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">{{ headlineText }}</h1>
       <p class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
-      <p v-if="perspective" class="subheading grey--text belief-quote mt-1">„{{ perspective }}“</p>
 
       <!-- What was written a step or two earlier. Picking feelings and needs is
            easier with the reaction still in view than from memory. -->
       <belief-context
+        :perspective="perspective"
         :reaction="reaction"
-        :feelings="isNeedsMode ? contextFeelings : []"
+        :feelings="isNeedsMode && !feelingsAsSentence ? contextFeelings : []"
         :origin="contextOrigin">
       </belief-context>
+      <feeling-words
+        v-if="feelingsAsSentence && contextFeelings.length"
+        class="context-sentence"
+        :feelings="contextFeelings"
+        prefix="Ich fühlte mich "
+        suffix=".">
+      </feeling-words>
 
-      <p class="body-1 grey--text mt-3">{{ promptText }}</p>
+      <p class="body-1 grey--text mt-3 wizard-prompt">{{ promptText }}</p>
     </v-flex>
 
     <!-- Optional block between the prompt and the list -->
@@ -125,6 +132,7 @@
 
 <script>
 import BeliefContext from '@/views/BeliefContext.vue';
+import FeelingWords from '@/components/FeelingWords.vue';
 import {
   emotionColor,
   emotionValence,
@@ -135,7 +143,7 @@ import {
 
 export default {
   name: 'belief-add-feeling-need',
-  components: { BeliefContext },
+  components: { BeliefContext, FeelingWords },
   props: {
     belief: { type: String, default: '' },
     // The reaction from the earlier step, shown read-only for context.
@@ -161,6 +169,8 @@ export default {
     // Open every Grundemotion and Unterkategorie at once, so the whole list is
     // there to read instead of behind two taps.
     expandAll: { type: Boolean, default: false },
+    // Say the feelings in a sentence rather than listing them as chips.
+    feelingsAsSentence: { type: Boolean, default: false },
     // Shown above the list when the step follows an origin question.
     contextOrigin: { type: String, default: '' },
   },
@@ -423,6 +433,12 @@ export default {
 .belief-quote { font-style: italic; }
 // It sits between whatever came last and the list itself, so it carries its own
 // spacing on both sides — the container it used to live in provided that.
+.context-sentence {
+  font-size: 0.95rem;
+  color: #ebebf5;
+  line-height: 1.5;
+  margin-top: 14px;
+}
 .limit-hint {
   font-size: 0.8rem;
   color: #636366;

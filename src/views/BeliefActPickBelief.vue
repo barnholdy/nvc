@@ -2,7 +2,7 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Überzeugung</h1>
-      <p class="body-1 grey--text mt-2">
+      <p class="body-1 grey--text mt-2 wizard-prompt">
         Welche Überzeugung willst du mit dieser Handlung an der Realität testen?
       </p>
     </v-flex>

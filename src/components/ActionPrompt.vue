@@ -2,10 +2,7 @@
   <div>
     <!-- Assembled in JS so the coloured words sit inside the sentence without
          the template's whitespace handling eating the spaces around them. -->
-    <p class="body-1 grey--text mb-2"><span v-for="(seg, i) in segments" :key="i" :style="seg.color ? { color: seg.color, fontWeight: 600 } : null">{{ seg.text }}</span></p>
-    <p v-if="affirmationText" class="affirmation-line">
-      Denke an deine Affirmation: <span class="affirmation-text">{{ affirmationText }}</span>
-    </p>
+    <p class="body-1 grey--text mb-2 wizard-prompt"><span v-for="(seg, i) in segments" :key="i" :style="seg.color ? { color: seg.color, fontWeight: 600 } : null">{{ seg.text }}</span></p>
   </div>
 </template>
 
@@ -30,10 +27,6 @@ export default {
       const r = (this.belief && this.belief.reflection) || {};
       const list = Array.isArray(r.withoutBeliefFeelings) ? r.withoutBeliefFeelings : [];
       return dedupeByName(list);
-    },
-    affirmationText() {
-      const list = (this.belief && this.belief.affirmations) || [];
-      return list.map(a => a && a.text).filter(Boolean).join(' · ');
     },
     segments() {
       const parts = [{
@@ -74,11 +67,4 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.affirmation-line {
-  font-size: 0.875rem;
-  color: #8e8e93;
-  line-height: 1.5;
-  margin: 0;
-}
-.affirmation-text { color: #4ade80; font-weight: 600; }
 </style>

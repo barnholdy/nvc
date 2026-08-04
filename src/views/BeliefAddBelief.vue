@@ -2,7 +2,7 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Überzeugung</h1>
-      <p class="body-1 grey--text mt-2">Was ist deine Überzeugung, die du für wahr hältst?</p>
+      <p class="body-1 grey--text mt-2 wizard-prompt">Was ist deine Überzeugung, die du für wahr hältst?</p>
     </v-flex>
     <v-flex>
       <!-- Same size as the affirmation field: a belief is a sentence, not a

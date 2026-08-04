@@ -3,15 +3,16 @@
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Affirmationen</h1>
       <p v-if="belief" class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
-      <template v-if="withoutBelief">
-        <p class="subheading grey--text belief-quote mt-1">„{{ withoutBelief }}“</p>
-        <div v-if="withoutBeliefFeelings && withoutBeliefFeelings.length" class="mb-2">
-          <feeling-chips :items="withoutBeliefFeelings" type="feelings"></feeling-chips>
-        </div>
-      </template>
-      <p class="body-1 grey--text mt-2 prompt-lines">Formuliere einen Satz, der zu dem passt, was du gerade gespürt hast.
-Er hilft dir, die alte Überzeugung in Richtung der neuen Perspektive zu verschieben.
-Halte den Satz glaubwürdig: der positivste Satz, den du gerade noch als wahr empfinden kannst.</p>
+      <belief-context :perspective="withoutBelief"></belief-context>
+
+      <!-- The feelings are named in the question now, not listed above it. -->
+      <feeling-words
+        class="body-1 grey--text mt-3 wizard-prompt"
+        :feelings="withoutBeliefFeelings"
+        prefix="Diese neue Perspektive lässt dich "
+        :suffix="' fühlen. ' + ASK"
+        :fallback="ASK">
+      </feeling-words>
 
     </v-flex>
 
@@ -102,12 +103,18 @@ Halte den Satz glaubwürdig: der positivste Satz, den du gerade noch als wahr em
 </template>
 
 <script>
-import FeelingChips from '@/components/FeelingChips.vue';
+import BeliefContext from '@/views/BeliefContext.vue';
+import FeelingWords from '@/components/FeelingWords.vue';
 import { normalizeTruth, truthHint } from '@/utils/affirmationTruth';
+
+const ASK = 'Formuliere einen Satz, der zu dieser gefühlten neuen Perspektive passt. '
+  + 'Er hilft dir, die alte Überzeugung in diese Richtung zu verschieben. '
+  + 'Halte den Satz glaubwürdig: Der positivste Satz, den du gerade noch als wahr '
+  + 'empfinden kannst.';
 
 export default {
   name: 'pattern-change-affirmation',
-  components: { FeelingChips },
+  components: { BeliefContext, FeelingWords },
   props: {
     belief: { type: String, default: '' },
     withoutBelief: { type: String, default: '' },
@@ -144,6 +151,7 @@ export default {
     };
   },
   computed: {
+    ASK() { return ASK; },
     truthHint() { return truthHint(this.truth); },
     hasText() { return this.text.trim() !== ''; },
     // Whatever is in the field is already on screen; the list offers the rest.
@@ -232,12 +240,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.belief-quote {
-  font-style: italic;
-}
-.prompt-lines {
-  white-space: pre-line;
-}
+.belief-quote { font-style: italic; }
 .slider-row {
   display: flex;
   align-items: center;

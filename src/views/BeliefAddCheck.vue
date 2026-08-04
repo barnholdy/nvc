@@ -2,7 +2,7 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Wie geht's dir gerade?</h1>
-      <p class="body-1 white--text mt-3">Kurz gespürt — dann bist du fertig.</p>
+      <p class="body-1 white--text mt-3 wizard-prompt">Kurz gespürt — dann bist du fertig.</p>
     </v-flex>
 
     <v-flex>

@@ -8,6 +8,7 @@
     :taxonomy="taxonomy"
     :initialNeeds="initialNeeds"
     :contextFeelings="feelings"
+    feelings-as-sentence
     :contextOrigin="origin"
     :maxSelections="1"
     rotate-on-limit

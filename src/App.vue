@@ -256,6 +256,9 @@ html, body {
 }
 .v-chip .v-icon { color: #8e8e93 !important; }
 
+/* The question a wizard step asks, wherever it is asked. */
+.wizard-prompt { font-weight: 600 !important; }
+
 /* ─── Text inputs ─── */
 /* One field everywhere: a filled surface with a hairline border and a green
    ring on focus. Colours and radius are the app's own — #1c1c1e like the cards,

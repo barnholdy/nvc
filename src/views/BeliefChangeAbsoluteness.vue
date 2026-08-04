@@ -26,7 +26,7 @@
         </div>
       </template>
 
-      <p class="body-1 grey--text mt-3">Stimmt diese Überzeugung wirklich in jeder Situation? Nenne 2–3 konkrete Momente, in denen das nicht der Fall war.</p>
+      <p class="body-1 grey--text mt-3 wizard-prompt">Stimmt diese Überzeugung wirklich in jeder Situation? Nenne 2–3 konkrete Momente, in denen das nicht der Fall war.</p>
     </v-flex>
     <v-flex>
       <v-text-field

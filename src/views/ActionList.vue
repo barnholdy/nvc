@@ -149,6 +149,21 @@
               <p class="expand-label mt-3">Was sagt dir das?</p>
               <p class="expand-text mb-1">{{ row.experiment.learning }}</p>
             </template>
+            <template v-if="typeof row.experiment.bodyTruth === 'number'">
+              <p class="expand-label mt-3">Was sich mehr wahr anfühlt</p>
+              <div class="slider-row">
+                <span class="slider-end-label">alt</span>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  :value="row.experiment.bodyTruth"
+                  class="readonly-slider"
+                  disabled
+                />
+                <span class="slider-end-label">neu</span>
+              </div>
+            </template>
 
             <p class="expand-label mt-3">Verlauf</p>
             <p class="expand-meta">Geplant: {{ dateLabel(row.experiment.plannedAt) }}</p>
@@ -177,8 +192,8 @@
               <v-layout v-show="resultStep === 1" column>
                 <v-flex class="mt-2 mb-3">
                   <h1 class="headline font-weight-regular">Was ist passiert?</h1>
-                  <p class="subheading grey--text situation-quote mt-1">„{{ resultSituation }}“</p>
-                  <p class="body-1 grey--text mt-2">
+                  <belief-context :situation="resultSituation"></belief-context>
+                  <p class="body-1 grey--text mt-2 wizard-prompt">
                     Was ist tatsächlich passiert? Beschreibe es, bevor du es bewertest.
                   </p>
                 </v-flex>
@@ -191,19 +206,18 @@
               <v-layout v-show="resultStep === 2" column>
                 <v-flex class="mt-2 mb-3">
                   <h1 class="headline font-weight-regular">Abgleich</h1>
-                  <p class="subheading grey--text situation-quote mt-1">„{{ resultSituation }}“</p>
+                  <belief-context :situation="resultSituation"></belief-context>
                 </v-flex>
 
                 <!-- The fear itself, but not the number: seeing the old rating
                      would anchor the new one. -->
                 <experiment-recall
-                  :belief="resultBeliefText"
                   :fear="resultFear"
                   :outcome="resultOutcome"
                 ></experiment-recall>
 
                 <v-flex>
-                  <p class="body-1 grey--text mb-2">
+                  <p class="body-1 grey--text mb-2 wizard-prompt">
                     Wie stark ist deine Befürchtung tatsächlich eingetreten?
                   </p>
                   <div class="slider-row">
@@ -222,11 +236,10 @@
               <v-layout v-show="resultStep === 3" column>
                 <v-flex class="mt-2 mb-3">
                   <h1 class="headline font-weight-regular">Reflexion</h1>
-                  <p class="subheading grey--text situation-quote mt-1">„{{ resultSituation }}“</p>
+                  <belief-context :situation="resultSituation"></belief-context>
                 </v-flex>
 
                 <experiment-recall
-                  :belief="resultBeliefText"
                   :fear="resultFear"
                   :outcome="resultOutcome"
                 ></experiment-recall>
@@ -245,7 +258,7 @@
                       <template v-else>{{ Math.abs(resultGap) }} Punkte schlimmer als befürchtet</template>
                     </p>
                   </div>
-                  <p class="body-1 grey--text mt-4 mb-2">Was sagt dir das?</p>
+                  <p class="body-1 grey--text mt-4 mb-2 wizard-prompt">Was sagt dir das?</p>
                   <v-textarea
                     v-model="resultLearning"
                     placeholder="..."
@@ -259,66 +272,45 @@
               <v-layout v-show="resultStep === 4" column>
                 <v-flex class="mt-2 mb-3">
                   <h1 class="headline font-weight-regular">Affirmation</h1>
-                  <p class="subheading grey--text situation-quote mt-1">„{{ resultSituation }}“</p>
+                  <belief-context :situation="resultSituation"></belief-context>
                 </v-flex>
 
                 <experiment-recall
-                  :belief="resultBeliefText"
                   :fear="resultFear"
                   :outcome="resultOutcome"
                 ></experiment-recall>
 
                 <v-flex class="mb-3">
-                  <p class="body-1 grey--text">
-                    Welcher Satz passt jetzt zu dem, was du erlebt hast? Er ersetzt die
-                    Affirmation dieser Überzeugung.
+                  <p class="body-1 grey--text wizard-prompt">
+                    Fühle in dich hinein. Was hält dein Körper nach dieser Erfahrung für
+                    mehr wahr?
                   </p>
                 </v-flex>
 
-                <v-flex v-if="resultAffirmation" class="mb-2">
-                  <div class="selected-chips">
-                    <v-chip close class="selected-chip" @input="resultAffirmation = ''">
-                      {{ resultAffirmation }}
-                    </v-chip>
+                <!-- The old sentence against the new one, as one scale. -->
+                <v-flex v-if="resultAffirmationText">
+                  <p class="pole pole-belief">{{ resultBeliefText }}</p>
+                  <div class="slider-row">
+                    <span class="slider-end-label">alt</span>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      v-model.number="resultBodyTruth"
+                      class="fear-slider"
+                    />
+                    <span class="slider-end-label">neu</span>
                   </div>
+                  <p class="pole-value">{{ resultBodyTruth }} % Affirmation</p>
+                  <p class="pole pole-affirmation">{{ resultAffirmationText }}</p>
                 </v-flex>
-
-                <v-flex v-if="affirmationChoices.length" class="mb-2">
-                  <p class="caption grey--text mb-1">
-                    {{ resultAffirmation ? 'Stattdessen wählen:' : 'Auswählen:' }}
+                <v-flex v-else>
+                  <p class="empty-hint">
+                    Diese Überzeugung hat noch keine Affirmation — du findest sie im Wizard
+                    „Überzeugung wandeln“.
                   </p>
-                  <div class="chip-list">
-                    <v-chip
-                      v-for="a in affirmationChoices"
-                      :key="a.text"
-                      class="available-chip"
-                      @click="resultAffirmation = a.text"
-                    >{{ a.text }}</v-chip>
-                  </div>
                 </v-flex>
 
-                <v-flex>
-                  <p class="caption grey--text mb-1">Neue Affirmation:</p>
-                  <v-text-field
-                    v-model="newAffirmationText"
-                    placeholder="Ich bin..."
-                    single-line
-                    hide-details
-                    class="mb-2"
-                    @keyup.enter="createAffirmation"
-                  ></v-text-field>
-                  <v-btn
-                    small
-                    flat
-                    color="primary"
-                    class="ml-0"
-                    :disabled="!newAffirmationText.trim()"
-                    @click="createAffirmation"
-                  >
-                    <v-icon small left>add</v-icon>
-                    Übernehmen
-                  </v-btn>
-                </v-flex>
               </v-layout>
             </v-container>
           </div>
@@ -366,7 +358,7 @@
 <script>
 import moment from 'moment';
 import ExperimentRecall from '@/views/ExperimentRecall.vue';
-import { TRUTH_DEFAULT } from '@/utils/affirmationTruth';
+import BeliefContext from '@/views/BeliefContext.vue';
 import {
   collectExperiments,
   experimentsOf,
@@ -417,7 +409,7 @@ function triggerConfetti() {
 
 export default {
   name: 'action-list',
-  components: { ExperimentRecall },
+  components: { ExperimentRecall, BeliefContext },
   data() {
     return {
       // Planned experiments are the ones waiting on you, so they open first;
@@ -433,8 +425,8 @@ export default {
       resultOutcome: '',
       resultActual: 50,
       resultLearning: '',
-      resultAffirmation: '',
-      newAffirmationText: '',
+      // 0 = the old belief still holds, 100 = the affirmation does.
+      resultBodyTruth: 50,
       rowToDelete: null,
       isDeleteDialogShowing: false,
       sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
@@ -462,21 +454,13 @@ export default {
     resultFear() {
       return this.resultRow ? this.resultRow.experiment.fear : '';
     },
+    // The belief's own affirmation — the other end of the scale.
+    resultAffirmationText() {
+      const list = (this.resultRow ? (this.beliefOf(this.resultRow) || {}).affirmations : []) || [];
+      return list.map(a => a && a.text).filter(Boolean).join(' · ');
+    },
     resultBeliefText() {
       return this.resultRow ? this.resultRow.beliefText : '';
-    },
-    // Every affirmation across all beliefs, minus the one already picked.
-    affirmationChoices() {
-      const seen = {};
-      const out = [];
-      this.$store.getters.beliefs.forEach((b) => {
-        (b.affirmations || []).forEach((a) => {
-          if (!a || !a.text || seen[a.text]) return;
-          seen[a.text] = true;
-          out.push({ text: a.text, resonance: a.resonance });
-        });
-      });
-      return out.filter(a => a.text !== this.resultAffirmation);
     },
     resultGap() {
       if (this.resultExpected === null) return 0;
@@ -520,9 +504,9 @@ export default {
       this.resultOutcome = row.experiment.outcome || '';
       this.resultActual = typeof row.experiment.fearActual === 'number' ? row.experiment.fearActual : 50;
       this.resultLearning = row.experiment.learning || '';
-      const current = (this.beliefOf(row) || {}).affirmations || [];
-      this.resultAffirmation = current.length ? current[0].text : '';
-      this.newAffirmationText = '';
+      this.resultBodyTruth = typeof row.experiment.bodyTruth === 'number'
+        ? row.experiment.bodyTruth
+        : 50;
       this.isResultDialogShowing = true;
     },
     cancelResult() {
@@ -532,17 +516,10 @@ export default {
       this.resultOutcome = '';
       this.resultActual = 50;
       this.resultLearning = '';
-      this.resultAffirmation = '';
-      this.newAffirmationText = '';
+      this.resultBodyTruth = 50;
     },
     beliefOf(row) {
       return this.$store.getters.beliefs.find(b => b.time === row.beliefTime);
-    },
-    createAffirmation() {
-      const text = this.newAffirmationText.trim();
-      if (!text) return;
-      this.resultAffirmation = text;
-      this.newAffirmationText = '';
     },
     saveResult() {
       const row = this.resultRow;
@@ -555,27 +532,12 @@ export default {
         // never reach "Gehandelt", which keys off doneAt.
         doneAt: (row && row.experiment.doneAt) || now,
         completedAt: now,
+        // Where the body put itself between the old belief and the affirmation.
+        bodyTruth: this.resultBodyTruth,
       };
-      // One affirmation per belief: the choice replaces what was there.
-      let beliefChanges = null;
-      if (row && this.resultAffirmation) {
-        const text = this.resultAffirmation;
-        const existing = (this.beliefOf(row) || {}).affirmations || [];
-        const known = existing.find(a => a && a.text === text)
-          || this.affirmationChoices.find(a => a.text === text);
-        beliefChanges = {
-          affirmations: [{
-            text: text,
-            count: 1,
-            resonance: known && typeof known.resonance === 'number'
-              ? known.resonance
-              : TRUTH_DEFAULT,
-          }],
-        };
-      }
       this.cancelResult();
       if (row) {
-        this.persist(row, changes, beliefChanges);
+        this.persist(row, changes);
         this.tab = 'done';
         triggerConfetti();
       }
@@ -866,8 +828,26 @@ export default {
   background: #000;
   flex-shrink: 0;
 }
-.situation-quote { font-style: italic; }
 
+.pole {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+}
+.pole-belief { color: #8e8e93; margin-bottom: 10px; }
+.pole-affirmation { color: #4ade80; font-weight: 600; margin-top: 10px; }
+.pole-value {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #636366;
+  margin: 6px 0 0;
+}
+.empty-hint {
+  font-size: 0.875rem;
+  color: #8e8e93;
+  line-height: 1.5;
+  margin: 0;
+}
 .slider-row {
   display: flex;
   align-items: center;
