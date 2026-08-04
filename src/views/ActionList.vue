@@ -152,7 +152,7 @@
             <template v-if="typeof row.experiment.bodyTruth === 'number'">
               <p class="expand-label mt-3">Was sich mehr wahr anfühlt</p>
               <div class="slider-row">
-                <span class="slider-end-label">alt</span>
+                <span class="slider-end-label">Überzeugung</span>
                 <input
                   type="range"
                   min="0"
@@ -161,7 +161,7 @@
                   class="readonly-slider"
                   disabled
                 />
-                <span class="slider-end-label">neu</span>
+                <span class="slider-end-label">Affirmation</span>
               </div>
             </template>
 
@@ -178,14 +178,16 @@
       <!-- Step 4: result and comparison -->
       <v-dialog v-model="isResultDialogShowing" fullscreen>
         <div v-if="isResultDialogShowing" class="wizard-page">
-          <div class="wizard-toolbar">
+          <!-- A real toolbar, minus the `app` prop: inside a dialog that would
+               register with the page layout behind it. -->
+          <v-toolbar color="#000" dark flat class="wizard-bar">
             <v-btn icon @click="resultStep === 1 ? cancelResult() : resultStep--">
               <v-icon>{{ resultStep === 1 ? 'close' : 'chevron_left' }}</v-icon>
             </v-btn>
-            <span class="wizard-title">Ergebnis</span>
+            <v-toolbar-title>Handlung auswerten</v-toolbar-title>
             <v-spacer></v-spacer>
             <span class="grey--text body-1">{{ resultStep }} / 4</span>
-          </div>
+          </v-toolbar>
           <div class="wizard-scroll">
             <v-container class="mb-5">
               <!-- Facts first, deliberately before any rating -->
@@ -280,6 +282,28 @@
                   :outcome="resultOutcome"
                 ></experiment-recall>
 
+                <!-- The measurement and what it meant, before asking what the
+                     body makes of it. -->
+                <v-flex class="mb-3">
+                  <div class="gap-box" :style="{ borderColor: gapColor(resultGap) }">
+                    <p class="gap-line">
+                      Deine Erwartung war
+                      <span class="gap-num">{{ resultExpected }}</span>,
+                      real waren es
+                      <span class="gap-num" :style="{ color: gapColor(resultGap) }">{{ resultActual }}</span>.
+                    </p>
+                    <p class="gap-delta" :style="{ color: gapColor(resultGap) }">
+                      <template v-if="resultGap > 0">{{ resultGap }} Punkte weniger schlimm als befürchtet</template>
+                      <template v-else-if="resultGap === 0">Genau wie befürchtet</template>
+                      <template v-else>{{ Math.abs(resultGap) }} Punkte schlimmer als befürchtet</template>
+                    </p>
+                  </div>
+                  <template v-if="resultLearning.trim()">
+                    <p class="expand-label mt-3">Das sagt mir</p>
+                    <p class="recall-text">{{ resultLearning }}</p>
+                  </template>
+                </v-flex>
+
                 <v-flex class="mb-3">
                   <p class="body-1 grey--text wizard-prompt">
                     Fühle in dich hinein. Was hält dein Körper nach dieser Erfahrung für
@@ -291,7 +315,7 @@
                 <v-flex v-if="resultAffirmationText">
                   <p class="pole pole-belief">{{ resultBeliefText }}</p>
                   <div class="slider-row">
-                    <span class="slider-end-label">alt</span>
+                    <span class="slider-end-label">Überzeugung</span>
                     <input
                       type="range"
                       min="0"
@@ -299,9 +323,8 @@
                       v-model.number="resultBodyTruth"
                       class="fear-slider"
                     />
-                    <span class="slider-end-label">neu</span>
+                    <span class="slider-end-label">Affirmation</span>
                   </div>
-                  <p class="pole-value">{{ resultBodyTruth }} % Affirmation</p>
                   <p class="pole pole-affirmation">{{ resultAffirmationText }}</p>
                 </v-flex>
                 <v-flex v-else>
@@ -314,7 +337,7 @@
               </v-layout>
             </v-container>
           </div>
-          <div class="wizard-footer-bar">
+          <v-footer color="white elevation-3" height="44" class="wizard-footer">
             <v-btn
               v-if="resultStep < 4"
               :disabled="resultStep === 1 && !resultOutcome.trim()"
@@ -322,7 +345,7 @@
               block large color="primary"
             >weiter</v-btn>
             <v-btn v-else @click="saveResult" block large color="primary">speichern</v-btn>
-          </div>
+          </v-footer>
         </div>
       </v-dialog>
 
@@ -804,30 +827,14 @@ export default {
   display: flex;
   flex-direction: column;
 }
-.wizard-toolbar {
-  display: flex;
-  align-items: center;
-  padding: 0 8px;
-  height: 56px;
-  flex-shrink: 0;
-  background: #000;
-}
-.wizard-title {
-  font-size: 1.25rem;
-  font-weight: 500;
-  color: #fff;
-  margin-left: 4px;
-}
+// Neither may shrink: the middle scrolls, these two stay put.
+.wizard-bar { flex-shrink: 0; }
 .wizard-scroll {
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
-.wizard-footer-bar {
-  padding: 0;
-  background: #000;
-  flex-shrink: 0;
-}
+.wizard-footer { flex-shrink: 0; }
 
 .pole {
   font-size: 0.95rem;
@@ -836,12 +843,6 @@ export default {
 }
 .pole-belief { color: #8e8e93; margin-bottom: 10px; }
 .pole-affirmation { color: #4ade80; font-weight: 600; margin-top: 10px; }
-.pole-value {
-  text-align: center;
-  font-size: 0.8rem;
-  color: #636366;
-  margin: 6px 0 0;
-}
 .empty-hint {
   font-size: 0.875rem;
   color: #8e8e93;

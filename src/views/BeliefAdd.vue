@@ -10,12 +10,6 @@
       <v-toolbar-title>{{ isEditMode ? 'Überzeugung ergründen' : 'Neue Überzeugung' }}</v-toolbar-title>
       <v-spacer></v-spacer>
       <span class="grey--text body-1">{{ step }} / {{ totalSteps }}</span>
-      <!-- The way out of the origin phase: keeps steps 1-4, drops what was
-           entered here. It sits here rather than on the left so that going back
-           a step stays possible on every screen. -->
-      <v-btn v-if="isOriginPhase" icon @click="leaveOriginPhase">
-        <v-icon>close</v-icon>
-      </v-btn>
     </v-toolbar>
     <v-content>
       <v-container class="mb-5">
@@ -127,19 +121,6 @@
         </div>
       </v-footer>
 
-      <v-dialog v-model="isDiscardDialogShowing" width="300">
-        <v-card class="confirm-dialog">
-          <v-card-title class="confirm-title">Ursprung verwerfen?</v-card-title>
-          <v-divider></v-divider>
-          <v-card-text class="confirm-text">
-            Was du hier eingetragen hast, geht verloren. Die Überzeugung selbst bleibt gespeichert.
-          </v-card-text>
-          <v-card-actions class="confirm-actions">
-            <v-btn flat @click="isDiscardDialogShowing = false" class="confirm-cancel">Abbrechen</v-btn>
-            <v-btn flat @click="confirmDiscard" class="confirm-delete">Verwerfen</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
     </v-content>
   </div>
 </template>
@@ -205,16 +186,12 @@ export default {
       storedNeeds: editEntry ? editEntry.needs || [] : [],
       hasEnteredOriginPhase: false,
       savedTab: 'open',
-      isDiscardDialogShowing: false,
       isFooterFixed: true,
     };
   },
   computed: {
     isEditMode() {
       return !!this.editEntry;
-    },
-    isOriginPhase() {
-      return this.step >= READINESS_STEP;
     },
     isStepComplete() {
       if (this.step === 1) return this.belief.trim() !== '';
@@ -239,19 +216,8 @@ export default {
       const last = this.selectedNeeds[this.selectedNeeds.length - 1];
       return last ? last.name : null;
     },
-    // Nothing to warn about when this session added nothing beyond what is
-    // already stored.
-    hasUnsavedOriginInput() {
-      if (this.origin.trim() !== this.storedOrigin.trim()) return true;
-      if (this.mood !== this.storedArc.mood) return true;
-      if (this.needsKey(this.selectedNeeds) !== this.needsKey(this.storedNeeds)) return true;
-      return this.grounding.join(' ') !== this.storedArc.grounding.join(' ');
-    },
   },
   methods: {
-    needsKey(list) {
-      return (list || []).map(n => n.name + '/' + n.emotionId).join('|');
-    },
     nextStep() {
       if (this.step === READINESS_STEP) this.hasEnteredOriginPhase = true;
       this.step += 1;
@@ -260,17 +226,6 @@ export default {
     prevStep() {
       this.step -= 1;
       this.$vuetify.goTo(0, { duration: 0 });
-    },
-    leaveOriginPhase() {
-      if (this.hasUnsavedOriginInput) {
-        this.isDiscardDialogShowing = true;
-        return;
-      }
-      this.saveWithoutOrigin();
-    },
-    confirmDiscard() {
-      this.isDiscardDialogShowing = false;
-      this.saveWithoutOrigin();
     },
     saveWithOrigin() { this.persist(true); },
     saveWithoutOrigin() { this.persist(false); },
@@ -349,25 +304,4 @@ export default {
   }
 }
 
-.confirm-dialog { background: #2c2c2e !important; border-radius: 14px; }
-.confirm-title {
-  font-size: 1rem !important;
-  color: #fff;
-  justify-content: center;
-  padding: 16px 16px 10px;
-}
-.confirm-text {
-  font-size: 0.85rem;
-  color: #8e8e93;
-  text-align: center;
-  padding: 12px 16px;
-}
-.confirm-actions { padding: 0; }
-.confirm-cancel, .confirm-delete {
-  flex: 1;
-  margin: 0 !important;
-  border-radius: 0 !important;
-}
-.confirm-cancel { color: #4ade80 !important; }
-.confirm-delete { color: #ff453a !important; }
 </style>

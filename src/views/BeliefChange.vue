@@ -137,7 +137,9 @@ export default {
       bodyIntensity: typeof r.bodyIntensity === 'number' ? r.bodyIntensity : 5,
       withoutBelief: r.withoutBelief || '',
       withoutBeliefFeelings: r.withoutBeliefFeelings || [],
-      affirmations: entry ? entry.affirmations || [] : [],
+      // One affirmation per belief. Older entries can carry more; the wizard
+      // only ever shows the first, so saving must not write the rest back.
+      affirmations: entry ? (entry.affirmations || []).slice(0, 1) : [],
       isFooterFixed: true,
     };
   },

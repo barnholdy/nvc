@@ -3,8 +3,10 @@
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Situation</h1>
       <!-- The affirmation is what this action is meant to practise, so it
-           stands where the belief used to. -->
-      <p v-if="affirmationText" class="affirmation-lead mt-1">{{ affirmationText }}</p>
+           stands where the belief used to — quoted the same way. -->
+      <p v-if="affirmationText" class="subheading grey--text belief-quote mt-1">
+        „{{ affirmationText }}“
+      </p>
       <action-prompt :belief="entry" class="mt-2"></action-prompt>
     </v-flex>
     <v-flex>
@@ -57,11 +59,5 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.affirmation-lead {
-  font-size: 1.05rem;
-  color: #4ade80;
-  font-weight: 600;
-  line-height: 1.5;
-  margin: 0;
-}
+.belief-quote { font-style: italic; }
 </style>

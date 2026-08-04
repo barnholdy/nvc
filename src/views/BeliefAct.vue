@@ -7,7 +7,7 @@
       <v-btn v-else icon @click="prevStep">
         <v-icon>chevron_left</v-icon>
       </v-btn>
-      <v-toolbar-title>Handeln</v-toolbar-title>
+      <v-toolbar-title>Handlung planen</v-toolbar-title>
       <v-spacer></v-spacer>
       <span class="grey--text body-1">{{ step }} / {{ totalSteps }}</span>
     </v-toolbar>

@@ -69,7 +69,18 @@
                   <span v-if="patternCount(entry.time) > 0" class="badge-pill">
                     {{ patternCount(entry.time) }} {{ patternCount(entry.time) === 1 ? 'Situation' : 'Situationen' }}
                   </span>
-                  <span v-if="truthLabel(entry)" class="badge-pill">{{ truthLabel(entry) }}</span>
+                  <!-- The filled pill of the Affirmationen list; the word it
+                       measures stands next to it, not inside. -->
+                  <template v-if="truthPercent(entry) !== null">
+                    <span class="progress-pill">
+                      <span
+                        class="progress-fill"
+                        :style="{ width: truthPercent(entry) + '%', background: truthColor(entry) }"
+                      ></span>
+                      <span class="progress-label">{{ truthPercent(entry) }} %</span>
+                    </span>
+                    <span class="pill-caption">wahr</span>
+                  </template>
                 </div>
               </div>
               <button
@@ -115,11 +126,11 @@
             <!-- Childhood material is reopened by a deliberate tap, never as a
                  side effect of opening the belief. -->
             <template v-if="hasOriginContent(entry)">
-              <div class="origin-toggle" @click.stop="isOriginOpen = !isOriginOpen">
-                <span class="origin-toggle-label">
+              <div class="section-toggle" @click.stop="isOriginOpen = !isOriginOpen">
+                <span class="section-toggle-label">
                   {{ isOriginOpen ? 'Ursprung ausblenden' : 'Ursprung anzeigen' }}
                 </span>
-                <v-icon small class="origin-chevron">
+                <v-icon small class="section-chevron">
                   {{ isOriginOpen ? 'expand_more' : 'chevron_right' }}
                 </v-icon>
               </div>
@@ -128,32 +139,46 @@
                   <p class="expand-text mt-2">{{ entry.reflection.origin }}</p>
                 </template>
                 <template v-if="originArc(entry).gift">
-                  <p class="expand-sub-label mt-3">Kluge Lösung</p>
+                  <p class="expand-label mt-3">Kluge Lösung</p>
                   <p class="expand-text">{{ originArc(entry).gift }}</p>
                 </template>
                 <template v-if="originArc(entry).grounding.length">
-                  <p class="expand-sub-label mt-3">Zurück ins Jetzt</p>
+                  <p class="expand-label mt-3">Zurück ins Jetzt</p>
                   <p class="expand-text">{{ originArc(entry).grounding.join(' · ') }}</p>
                 </template>
                 <template v-if="originArc(entry).mood">
-                  <p class="expand-sub-label mt-3">Danach</p>
+                  <p class="expand-label mt-3">Danach</p>
                   <p class="expand-text">{{ moodLabel(originArc(entry).mood) }}</p>
                 </template>
               </template>
             </template>
+
+            <!-- Next to the origin, because that is the material it mirrors —
+                 and folded away, because it is the longest text here. -->
+            <template v-if="entry.empathy">
+              <div class="section-toggle" @click.stop="isEmpathyOpen = !isEmpathyOpen">
+                <span class="section-toggle-label">
+                  {{ isEmpathyOpen ? 'Empathie ausblenden' : 'Empathie anzeigen' }}
+                </span>
+                <v-icon small class="section-chevron">
+                  {{ isEmpathyOpen ? 'expand_more' : 'chevron_right' }}
+                </v-icon>
+              </div>
+              <p v-if="isEmpathyOpen" class="expand-text empathy-text mt-2">{{ entry.empathy }}</p>
+            </template>
+
             <template v-if="hasChangeData(entry) || (entry.affirmations && entry.affirmations.length)">
-              <p class="expand-label mt-3">Veränderung</p>
               <template v-if="entry.reflection && entry.reflection.exceptions">
-                <p class="expand-sub-label">Ausnahmen</p>
+                <p class="expand-label mt-3">Ausnahmen</p>
                 <p class="expand-text">{{ entry.reflection.exceptions }}</p>
               </template>
               <template v-if="entry.reflection && entry.reflection.withoutBelief">
-                <p class="expand-sub-label mt-2">Neue Perspektive</p>
+                <p class="expand-label mt-3">Neue Perspektive</p>
                 <p class="expand-text">{{ entry.reflection.withoutBelief }}</p>
               </template>
               <template v-if="entry.reflection && entry.reflection.withoutBeliefFeelings
                 && entry.reflection.withoutBeliefFeelings.length">
-                <p class="expand-sub-label mt-2">Neue Gefühle</p>
+                <p class="expand-label mt-3">Neue Gefühle</p>
                 <feeling-chips
                   :items="entry.reflection.withoutBeliefFeelings"
                   type="feelings"
@@ -161,7 +186,7 @@
                 ></feeling-chips>
               </template>
               <template v-if="entry.reflection && typeof entry.reflection.bodyIntensity === 'number'">
-                <p class="expand-sub-label mt-2">Körperempfindung</p>
+                <p class="expand-label mt-3">Körperempfindung</p>
                 <div class="slider-row">
                   <span class="slider-end-label">0</span>
                   <input
@@ -176,7 +201,7 @@
                 </div>
               </template>
               <template v-if="entry.affirmations && entry.affirmations.length">
-                <p class="expand-sub-label mt-2">Affirmationen</p>
+                <p class="expand-label mt-3">Affirmation</p>
                 <div
                   v-for="(a, i) in entry.affirmations"
                   :key="'aff-' + i"
@@ -188,7 +213,7 @@
                     <span class="status-pill" :style="{ color: affStatusColor(a.text) }">
                       {{ affStatusLabel(a.text) }}
                     </span>
-                    <p class="expand-sub-label mt-2">Glaubwürdigkeit</p>
+                    <p class="expand-label mt-2">Glaubwürdigkeit</p>
                     <div class="slider-row">
                       <span class="slider-end-label">0</span>
                       <input
@@ -206,7 +231,7 @@
                 </div>
               </template>
               <template v-if="experimentsOf(entry).length">
-                <p class="expand-sub-label mt-2">Verhaltensexperimente</p>
+                <p class="expand-label mt-3">Verhaltensexperimente</p>
                 <div
                   v-for="x in experimentsOf(entry)"
                   :key="x.id"
@@ -228,11 +253,6 @@
                   <v-icon small class="linked-chevron">chevron_right</v-icon>
                 </div>
               </template>
-            </template>
-
-            <template v-if="entry.empathy">
-              <p class="expand-label mt-3">Empathie</p>
-              <p class="expand-text empathy-text">{{ entry.empathy }}</p>
             </template>
           </div>
 
@@ -281,7 +301,11 @@ import {
 } from '@/utils/experiment';
 import { normalizeTruth } from '@/utils/affirmationTruth';
 import { originArcOf, moodLabel as moodLabelOf } from '@/utils/originArc';
-import { averageTruth, truthPercentLabel } from '@/utils/beliefTrend';
+import {
+  averageTruth,
+  truthPercent as truthPercentOf,
+  truthColor as truthColorOf,
+} from '@/utils/beliefTrend';
 import {
   loadAffStatusMap,
   affirmationStatusLabel,
@@ -295,6 +319,7 @@ export default {
     return {
       openEntry: null,
       isOriginOpen: false,
+      isEmpathyOpen: false,
       entryToDelete: null,
       isDeleteDialogShowing: false,
       // Saving a belief returns here with the tab it now belongs to.
@@ -306,7 +331,7 @@ export default {
   watch: {
     tab() {
       this.sw.openIdx = null; this.sw.openDir = null;
-      this.openEntry = null; this.isOriginOpen = false;
+      this.openEntry = null; this.isOriginOpen = false; this.isEmpathyOpen = false;
     },
   },
   computed: {
@@ -335,14 +360,20 @@ export default {
     toggle(time) {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.openEntry = this.openEntry === time ? null : time;
-      // Every belief starts with its origin closed again — a previous tap must
-      // not carry over to the next one.
+      // Every belief starts with its folded sections closed again — a previous
+      // tap must not carry over to the next one.
       this.isOriginOpen = false;
+      this.isEmpathyOpen = false;
     },
-    // What the situations say on average. Empty while the belief was never rated,
+    // What the situations say on average. Null while the belief was never rated,
     // because a pill reading 0% would claim an answer nobody gave.
-    truthLabel(entry) {
-      return truthPercentLabel(averageTruth(this.$store.getters.patterns, entry && entry.time));
+    truthPercent(entry) {
+      return truthPercentOf(averageTruth(this.$store.getters.patterns, entry && entry.time));
+    },
+    // Low is the goal here, so the scale runs green at the bottom — the
+    // opposite of the affirmation pill, which shares only its shape.
+    truthColor(entry) {
+      return truthColorOf(averageTruth(this.$store.getters.patterns, entry && entry.time));
     },
     originArc(entry) { return originArcOf(entry); },
     moodLabel(mood) { return moodLabelOf(mood); },
@@ -562,6 +593,38 @@ export default {
   border-radius: 20px;
   padding: 1px 6px;
 }
+/* Same pill as in the Affirmationen list — the bar carries the number, the
+   word next to it says what the number is about. */
+.progress-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #2c2c2e;
+  min-width: 48px;
+}
+.progress-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  border-radius: 20px;
+  opacity: 0.35;
+}
+.progress-label {
+  position: relative;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #fff;
+  padding: 0 7px;
+  z-index: 1;
+  white-space: nowrap;
+}
+.pill-caption {
+  font-size: 0.7rem;
+  color: #8e8e93;
+  margin-left: -2px;
+}
 .row-action-btn {
   background: #4ade80;
   color: #000;
@@ -601,22 +664,23 @@ export default {
   margin: 0 0 4px;
   font-weight: 600;
 }
-.expand-sub-label { font-size: 0.75rem; color: #636366; margin: 0 0 3px; font-style: italic; }
-.origin-toggle {
+/* Folded sections carry the same label as the open ones — only the chevron
+   says that there is more behind it. */
+.section-toggle {
   display: flex;
   align-items: center;
   margin-top: 14px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.origin-toggle-label {
+.section-toggle-label {
   font-size: 0.68rem;
   color: #8e8e93;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-weight: 600;
 }
-.origin-chevron { color: #636366 !important; margin-left: 2px; }
+.section-chevron { color: #636366 !important; margin-left: 2px; }
 .expand-text { font-size: 0.93rem; color: #ebebf5; margin: 0; line-height: 1.5; }
 .empathy-text { white-space: pre-wrap; }
 .experiment-gap { display: block; font-size: 0.78rem; color: #8e8e93; margin: 2px 0 0; }
