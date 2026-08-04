@@ -5,26 +5,12 @@
       <p class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
 
       <!-- What the situations say, before the step asks you to doubt it. Only
-           when there is something to say — a slider at zero would claim a
-           rating that was never given. -->
-      <template v-if="truth !== null">
-        <p class="body-1 white--text mt-3">
-          Basierend auf den Situationen hältst du die Überzeugung für so wahr:
-        </p>
-        <div class="slider-row">
-          <span class="slider-end-label">0</span>
-          <input
-            type="range"
-            min="0"
-            max="10"
-            step="0.1"
-            :value="truth"
-            class="readonly-slider"
-            disabled
-          />
-          <span class="slider-end-label">10</span>
-        </div>
-      </template>
+           when there is something to say — a number without a rating behind it
+           would claim an answer nobody gave. -->
+      <p v-if="percent !== null" class="body-1 white--text mt-3">
+        Basierend auf vergangenen Situationen hältst du die Überzeugung für
+        {{ percent }} % glaubwürdig.
+      </p>
 
       <p class="body-1 grey--text mt-3 wizard-prompt">Stimmt diese Überzeugung wirklich in jeder Situation? Nenne 2–3 konkrete Momente, in denen das nicht der Fall war.</p>
     </v-flex>
@@ -42,6 +28,8 @@
 </template>
 
 <script>
+import { truthPercent } from '@/utils/beliefTrend';
+
 export default {
   name: 'belief-change-absoluteness',
   props: {
@@ -54,6 +42,9 @@ export default {
   data() {
     return { text: this.initialValue };
   },
+  computed: {
+    percent() { return truthPercent(this.truth); },
+  },
   watch: {
     text(val) { this.$emit('changed', val); },
   },
@@ -63,42 +54,5 @@ export default {
 <style scoped lang="scss">
 .belief-quote {
   font-style: italic;
-}
-.slider-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 4px 4px 0;
-}
-.slider-end-label {
-  font-size: 0.78rem;
-  color: #8e8e93;
-  flex-shrink: 0;
-}
-.readonly-slider {
-  flex: 1;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 4px;
-  border-radius: 2px;
-  background: #3a3a3c;
-  outline: none;
-  opacity: 1;
-  pointer-events: none;
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: #4ade80;
-  }
-  &::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    border: none;
-    border-radius: 50%;
-    background: #4ade80;
-  }
 }
 </style>

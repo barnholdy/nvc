@@ -73,9 +73,23 @@
                 <div class="belief-row-body">
                   <p class="expand-text">{{ b.belief }}</p>
                   <span class="status-pill" :style="{ color: statusColor(b) }">{{ statusLabel(b) }}</span>
-                  <span v-if="truthOf(entry, b) !== null" class="status-pill truth-pill">
-                    {{ truthLabel(entry, b) }}
-                  </span>
+                  <!-- What was recorded here, on the same scale it was given
+                       on — a percentage hid which end of it that was. -->
+                  <template v-if="truthOf(entry, b) !== null">
+                    <p class="expand-label mt-2">Glaubwürdigkeit</p>
+                    <div class="slider-row">
+                      <span class="slider-end-label">0</span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="10"
+                        :value="truthOf(entry, b)"
+                        class="readonly-slider"
+                        disabled
+                      />
+                      <span class="slider-end-label">10</span>
+                    </div>
+                  </template>
                 </div>
                 <v-icon small class="belief-chevron">chevron_right</v-icon>
               </div>
@@ -117,7 +131,6 @@
 <script>
 import moment from 'moment';
 import { beliefStatusLabel, beliefStatusColor } from '@/utils/beliefStatus';
-import { truthPercentLabel } from '@/utils/beliefTrend';
 
 export default {
   name: 'pattern-list',
@@ -140,9 +153,6 @@ export default {
       return (entry.beliefs || []).map(id => beliefs.find(b => b.time === id)).filter(Boolean);
     },
     // Recorded on the situation when the belief was added to it.
-    truthLabel(entry, belief) {
-      return truthPercentLabel(this.truthOf(entry, belief));
-    },
     truthOf(entry, belief) {
       const map = (entry && entry.beliefTruths) || {};
       const v = map[belief.time];
@@ -333,7 +343,44 @@ export default {
   &:active { opacity: 0.6; }
 }
 .belief-row-body { flex: 1; min-width: 0; }
-.truth-pill { color: #8e8e93; margin-left: 6px; }
+/* Shows a recorded value — deliberately not interactive. */
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 4px 0;
+}
+.slider-end-label {
+  font-size: 0.72rem;
+  color: #636366;
+  flex-shrink: 0;
+}
+.readonly-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: #3a3a3c;
+  outline: none;
+  opacity: 1;
+  pointer-events: none;
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #4ade80;
+  }
+  &::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border: none;
+    border-radius: 50%;
+    background: #4ade80;
+  }
+}
 .status-pill {
   display: inline-block;
   margin-top: 4px;

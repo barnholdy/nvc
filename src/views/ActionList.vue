@@ -149,7 +149,39 @@
               <p class="expand-label mt-3">Was sagt dir das?</p>
               <p class="expand-text mb-1">{{ row.experiment.learning }}</p>
             </template>
-            <template v-if="typeof row.experiment.bodyTruth === 'number'">
+            <template v-if="typeof row.experiment.beliefTruth === 'number'">
+              <p class="expand-label mt-3">Glaubwürdigkeit Überzeugung</p>
+              <div class="slider-row">
+                <span class="slider-end-label">0</span>
+                <input
+                  type="range"
+                  min="0"
+                  max="10"
+                  :value="row.experiment.beliefTruth"
+                  class="readonly-slider"
+                  disabled
+                />
+                <span class="slider-end-label">10</span>
+              </div>
+            </template>
+            <template v-if="typeof row.experiment.affirmationTruth === 'number'">
+              <p class="expand-label mt-3">Glaubwürdigkeit Affirmation</p>
+              <div class="slider-row">
+                <span class="slider-end-label">0</span>
+                <input
+                  type="range"
+                  min="0"
+                  max="10"
+                  :value="row.experiment.affirmationTruth"
+                  class="readonly-slider"
+                  disabled
+                />
+                <span class="slider-end-label">10</span>
+              </div>
+            </template>
+            <!-- Evaluations from before the scale was split kept one value
+                 between the two sentences. Still shown, never written again. -->
+            <template v-else-if="typeof row.experiment.bodyTruth === 'number'">
               <p class="expand-label mt-3">Was sich mehr wahr anfühlt</p>
               <div class="slider-row">
                 <span class="slider-end-label">Überzeugung</span>
@@ -306,30 +338,43 @@
 
                 <v-flex class="mb-3">
                   <p class="body-1 grey--text wizard-prompt">
-                    Fühle in dich hinein. Was hält dein Körper nach dieser Erfahrung für
-                    mehr wahr?
+                    Fühle in dich hinein. Für wie glaubwürdig hält dein Körper die Sätze?
                   </p>
                 </v-flex>
 
-                <!-- The old sentence against the new one, as one scale. The
-                     sentences are the ends of it, so they carry no label of
-                     their own — and no colour, which would name a winner
-                     before the question is answered. They sit under the slider
-                     in two columns, each aligned to the end it belongs to. -->
-                <v-flex v-if="resultAffirmationText">
+                <!-- Two scales, not one: the old sentence can lose credibility
+                     without the new one gaining any, and a single slider
+                     between them could not say that. -->
+                <v-flex v-if="resultAffirmationText" class="mb-3">
+                  <p class="expand-label">Glaubwürdigkeit Überzeugung</p>
+                  <p class="pole">{{ resultBeliefText }}</p>
                   <div class="slider-row">
+                    <span class="slider-end-label">0</span>
                     <input
                       type="range"
                       min="0"
-                      max="100"
-                      v-model.number="resultBodyTruth"
+                      max="10"
+                      v-model.number="resultBeliefTruth"
                       class="fear-slider"
                     />
+                    <span class="slider-end-label">10</span>
                   </div>
-                  <div class="pole-grid">
-                    <p class="pole pole-belief">{{ resultBeliefText }}</p>
-                    <p class="pole pole-affirmation">{{ resultAffirmationText }}</p>
+                  <p class="slider-value-label">{{ resultBeliefTruth }}</p>
+
+                  <p class="expand-label mt-3">Glaubwürdigkeit Affirmation</p>
+                  <p class="pole">{{ resultAffirmationText }}</p>
+                  <div class="slider-row">
+                    <span class="slider-end-label">0</span>
+                    <input
+                      type="range"
+                      min="0"
+                      max="10"
+                      v-model.number="resultAffirmationTruth"
+                      class="fear-slider"
+                    />
+                    <span class="slider-end-label">10</span>
                   </div>
+                  <p class="slider-value-label">{{ resultAffirmationTruth }}</p>
                 </v-flex>
                 <v-flex v-else>
                   <p class="empty-hint">
@@ -453,7 +498,8 @@ export default {
       resultActual: 50,
       resultLearning: '',
       // 0 = the old belief still holds, 100 = the affirmation does.
-      resultBodyTruth: 50,
+      resultBeliefTruth: 5,
+      resultAffirmationTruth: 5,
       rowToDelete: null,
       isDeleteDialogShowing: false,
       sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
@@ -531,9 +577,12 @@ export default {
       this.resultOutcome = row.experiment.outcome || '';
       this.resultActual = typeof row.experiment.fearActual === 'number' ? row.experiment.fearActual : 50;
       this.resultLearning = row.experiment.learning || '';
-      this.resultBodyTruth = typeof row.experiment.bodyTruth === 'number'
-        ? row.experiment.bodyTruth
-        : 50;
+      this.resultBeliefTruth = typeof row.experiment.beliefTruth === 'number'
+        ? row.experiment.beliefTruth
+        : 5;
+      this.resultAffirmationTruth = typeof row.experiment.affirmationTruth === 'number'
+        ? row.experiment.affirmationTruth
+        : 5;
       this.isResultDialogShowing = true;
     },
     cancelResult() {
@@ -543,7 +592,8 @@ export default {
       this.resultOutcome = '';
       this.resultActual = 50;
       this.resultLearning = '';
-      this.resultBodyTruth = 50;
+      this.resultBeliefTruth = 5;
+      this.resultAffirmationTruth = 5;
     },
     beliefOf(row) {
       return this.$store.getters.beliefs.find(b => b.time === row.beliefTime);
@@ -559,8 +609,9 @@ export default {
         // never reach "Gehandelt", which keys off doneAt.
         doneAt: (row && row.experiment.doneAt) || now,
         completedAt: now,
-        // Where the body put itself between the old belief and the affirmation.
-        bodyTruth: this.resultBodyTruth,
+        // How credible each sentence is after the experiment, on its own scale.
+        beliefTruth: this.resultBeliefTruth,
+        affirmationTruth: this.resultAffirmationTruth,
       };
       this.cancelResult();
       if (row) {
@@ -843,16 +894,9 @@ export default {
 .pole {
   font-size: 0.95rem;
   line-height: 1.5;
-  margin: 0;
+  color: #ebebf5;
+  margin: 0 0 6px;
 }
-.pole-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-top: 12px;
-}
-.pole-belief { color: #ebebf5; text-align: left; }
-.pole-affirmation { color: #ebebf5; text-align: right; }
 .empty-hint {
   font-size: 0.875rem;
   color: #8e8e93;
