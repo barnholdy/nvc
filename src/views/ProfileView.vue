@@ -11,17 +11,17 @@
 
       <!-- Kernmuster: what holds a group together and what dissolves it, side
            by side — listing the titles twice said the same thing twice. -->
-      <template v-if="kernmuster.length">
+      <template v-if="patternGroups.length">
         <p class="section-header">Muster &amp; Auflösung</p>
         <div class="settings-group">
-          <template v-for="(k, i) in kernmuster">
+          <template v-for="(k, i) in patternGroups">
             <div :key="i" class="pattern-item">
               <p class="pattern-title">{{ k.title }}</p>
               <div class="pattern-grid">
                 <div>
                   <p class="col-label">Überzeugungen</p>
                   <p
-                    v-for="(b, j) in (k.beliefs || [])"
+                    v-for="(b, j) in k.beliefs"
                     :key="'b' + j"
                     class="pattern-line"
                   >{{ b }}</p>
@@ -29,14 +29,17 @@
                 <div>
                   <p class="col-label">Affirmationen</p>
                   <p
-                    v-for="(a, j) in (k.aufloesungen || [])"
+                    v-for="(a, j) in k.affirmations"
                     :key="'a' + j"
                     class="pattern-line"
                   >{{ a }}</p>
+                  <!-- Nothing here means nothing was wandelt yet in this
+                       group — an honest gap, not a missing feature. -->
+                  <p v-if="!k.affirmations.length" class="pattern-line pattern-empty">–</p>
                 </div>
               </div>
             </div>
-            <div :key="'s'+i" v-if="i < kernmuster.length - 1" class="settings-sep"></div>
+            <div :key="'s'+i" v-if="i < patternGroups.length - 1" class="settings-sep"></div>
           </template>
         </div>
       </template>
@@ -150,6 +153,17 @@
 <script>
 import { colorForFeeling, NEED_COLOR } from '@/utils/emotions';
 
+// Quotes, case, spacing and a trailing period are all the analysis is likely to
+// change when it repeats a belief back — none of them make it a different one.
+function normalizeBelief(text) {
+  return String(text || '')
+    .replace(/[„“"‚‘’']/g, '')
+    .replace(/\s+/g, ' ')
+    .replace(/[.!?]+$/, '')
+    .trim()
+    .toLowerCase();
+}
+
 export default {
   name: 'profile-view',
   data() {
@@ -172,6 +186,33 @@ export default {
     },
     dataChanged() {
       return this.kernmuster.length > 0 && this.currentSnapshot !== this.kernmusterSnapshot;
+    },
+    // The affirmations shown next to a group are the ones actually saved on its
+    // beliefs — not generated text. A group with none stays empty, which is the
+    // point: it shows where the work has not happened yet.
+    patternGroups() {
+      var byText = {};
+      this.beliefs.forEach(function(b) {
+        if (b && b.belief) byText[normalizeBelief(b.belief)] = b;
+      });
+      return this.kernmuster.map(function(k) {
+        var texts = (k && k.beliefs) || [];
+        var seen = {};
+        var affirmations = [];
+        texts.forEach(function(text) {
+          // The analysis echoes the belief back, so the text is the only key
+          // there is — matched loosely, because it comes back retyped.
+          var belief = byText[normalizeBelief(text)];
+          if (!belief) return;
+          (belief.affirmations || []).forEach(function(a) {
+            if (a && a.text && !seen[a.text]) {
+              seen[a.text] = true;
+              affirmations.push(a.text);
+            }
+          });
+        });
+        return { title: k.title, beliefs: texts, affirmations: affirmations };
+      });
     },
     topNeeds() {
       var counts = {};
@@ -245,33 +286,15 @@ export default {
         return (i + 1) + '. ' + b.belief;
       }).join('\n');
 
-      var affirmationTexts = [];
-      var actionTexts = [];
-      this.beliefs.forEach(function(b) {
-        (b.affirmations || []).forEach(function(a) {
-          if (a.text && affirmationTexts.indexOf(a.text) === -1) affirmationTexts.push(a.text);
-        });
-        var experiments = (b.reflection && b.reflection.experiments) || [];
-        experiments.forEach(function(x) {
-          var act = x && x.situation;
-          if (act && actionTexts.indexOf(act) === -1) actionTexts.push(act);
-        });
-      });
-
+      // Grouping is the whole job now. The resolutions used to be generated
+      // here too, but the column that showed them names the affirmations the
+      // user actually wrote — so asking for invented ones only cost tokens.
       var prompt = 'Analysiere diese Glaubenssätze und gruppiere sie in 3–5 Kernmuster (Cluster).\n' +
         'Jedes Cluster erhält einen prägnanten deutschen Namen und listet die dazugehörigen Glaubenssätze auf.\n' +
-        'Generiere außerdem für jedes Cluster 2–3 konkrete Auflösungen – Affirmationen, Handlungen oder Umdeutungen, die das Muster transformieren.\n\n' +
-        'Glaubenssätze:\n' + beliefTexts + '\n\n';
-
-      if (affirmationTexts.length) {
-        prompt += 'Vorhandene Affirmationen (als Inspiration für Auflösungen):\n' + affirmationTexts.join('\n') + '\n\n';
-      }
-      if (actionTexts.length) {
-        prompt += 'Vorhandene Handlungen (als Inspiration für Auflösungen):\n' + actionTexts.join('\n') + '\n\n';
-      }
-
-      prompt += 'Antworte ausschließlich mit einem JSON-Array (kein Markdown, kein Text davor oder danach):\n' +
-        '[{"title":"Clustername","beliefs":["Glaube 1","Glaube 2"],"aufloesungen":["Auflösung 1","Auflösung 2"]},...]';
+        'Gib jeden Glaubenssatz genau so zurück, wie er dasteht.\n\n' +
+        'Glaubenssätze:\n' + beliefTexts + '\n\n' +
+        'Antworte ausschließlich mit einem JSON-Array (kein Markdown, kein Text davor oder danach):\n' +
+        '[{"title":"Clustername","beliefs":["Glaube 1","Glaube 2"]},...]';
 
       try {
         const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -379,6 +402,7 @@ export default {
   line-height: 1.45;
   &:last-child { margin-bottom: 0; }
 }
+.pattern-empty { color: #636366; }
 
 /* Loading / info */
 .loading-row {
