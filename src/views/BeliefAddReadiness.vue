@@ -5,7 +5,7 @@
       <p class="body-1 white--text mt-3 wizard-prompt">
         Dieser Schritt schaut auf den Ursprung — das kann Altes berühren.
       </p>
-      <p class="body-1 grey--text mt-2">
+      <p class="body-1 grey--text mt-2 wizard-prompt">
         Geh nur so weit, wie sich stimmig anfühlt. Du schaust drauf, du gehst nicht wieder hinein.
       </p>
     </v-flex>

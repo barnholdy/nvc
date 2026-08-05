@@ -151,8 +151,10 @@ export default {
   },
   computed: {
     limitHint: function() {
-      if (this.maxSelections !== 1) return '';
-      return 'Wähle ein Bedürfnis.';
+      if (!this.maxSelections) return '';
+      if (this.maxSelections === 1) return 'Wähle ein Bedürfnis.';
+      return 'Wähle bis zu ' + this.maxSelections + ' Bedürfnisse — '
+        + this.selected.length + ' von ' + this.maxSelections + ' gewählt.';
     },
   },
   methods: {
@@ -192,8 +194,8 @@ export default {
       if (idx >= 0) {
         this.selected.splice(idx, 1);
       } else {
-        // At a limit of one a tap reads as "this one instead", so the oldest
-        // pick makes way rather than the tap being refused.
+        // Once the limit is full, a tap reads as "this one instead of the
+        // oldest" rather than being refused.
         while (this.maxSelections && this.selected.length >= this.maxSelections) {
           this.selected.shift();
         }

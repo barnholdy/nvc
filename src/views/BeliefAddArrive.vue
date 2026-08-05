@@ -10,7 +10,7 @@
         Atme ruhig mit dem Kreis mit. Lass es auf dich wirken. Versuche in deinem Körper
         anzukommen.
       </p>
-      <p class="body-1 grey--text mt-2">Gehe weiter, wenn du dich danach fühlst.</p>
+      <p class="body-1 grey--text mt-2 wizard-prompt">Gehe weiter, wenn du dich danach fühlst.</p>
     </v-flex>
 
     <breath-circle></breath-circle>

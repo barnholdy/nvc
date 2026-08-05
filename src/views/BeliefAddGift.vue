@@ -17,7 +17,7 @@
 
     <need-picker
       :initialNeeds="initialNeeds"
-      :maxSelections="1"
+      :maxSelections="3"
       :belief="belief"
       :reaction="reaction"
       :origin="origin"
@@ -36,6 +36,7 @@ import BeliefContext from '@/views/BeliefContext.vue';
 import FeelingWords from '@/components/FeelingWords.vue';
 import NeedPicker from '@/components/NeedPicker.vue';
 import ReframeCard from '@/components/ReframeCard.vue';
+import { joinNames } from '@/utils/emotions';
 
 // What the reframe says back, before it is said: the belief made sense at the
 // time, and the feelings it left behind point at what was actually wanted.
@@ -47,9 +48,9 @@ const PROMPT_SUFFIX = ' leiten. Wonach hast du dich gesehnt?';
 const PROMPT_FALLBACK = 'Diese Überzeugung hatte damals einen guten Grund. Sie war dein Weg, '
   + 'etwas zu bekommen, das dir gefehlt hat. Wonach hast du dich gesehnt?';
 
-// The need and the gift are the same answer to the same question: what this
-// belief once did for you. So it is picked once, on one screen, and the reframe
-// says the chosen word back.
+// The needs and the gift are the same answer to the same question: what this
+// belief once did for you — which can be more than one thing. So they are
+// picked once, on one screen, and the reframe says the chosen words back.
 export default {
   name: 'belief-add-gift',
   components: { BeliefContext, FeelingWords, NeedPicker, ReframeCard },
@@ -70,8 +71,7 @@ export default {
     PROMPT_SUFFIX() { return PROMPT_SUFFIX; },
     PROMPT_FALLBACK() { return PROMPT_FALLBACK; },
     gift() {
-      const last = this.needs[this.needs.length - 1];
-      return last ? last.name : null;
+      return joinNames(this.needs.map(n => n.name)) || null;
     },
   },
   methods: {

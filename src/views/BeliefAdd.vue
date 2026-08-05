@@ -136,7 +136,7 @@ import BeliefAddGrounding from '@/views/BeliefAddGrounding.vue';
 import BeliefAddCheck from '@/views/BeliefAddCheck.vue';
 import { beliefStatus } from '@/utils/beliefStatus';
 import { normalizeOriginArc } from '@/utils/originArc';
-import { MAX_FEELINGS } from '@/utils/emotions';
+import { MAX_FEELINGS, joinNames } from '@/utils/emotions';
 import taxonomy from '../assets/taxonomy.json';
 
 const FEELINGS_STEP = 4;
@@ -208,11 +208,10 @@ export default {
     footerHeight() {
       return this.step === READINESS_STEP ? 96 : 44;
     },
-    // The chosen need is the gift: one answer to the question of what this
-    // belief once did for you.
+    // The chosen needs are the gift: the answer to what this belief once did
+    // for you, which can be more than one thing.
     gift() {
-      const last = this.selectedNeeds[this.selectedNeeds.length - 1];
-      return last ? last.name : null;
+      return joinNames(this.selectedNeeds.map(n => n.name)) || null;
     },
   },
   methods: {
