@@ -7,7 +7,9 @@
 </template>
 
 <script>
-import { colorForFeeling, dedupeByName, joinNames, NEED_COLOR } from '@/utils/emotions';
+import {
+  colorForFeeling, dedupeByName, joinNames, sortByEmotion, NEED_COLOR,
+} from '@/utils/emotions';
 
 // The question every new experiment starts from, shown both in the Handeln list
 // and in the planning wizard. One component, so the two cannot drift apart.
@@ -26,19 +28,20 @@ export default {
     changeFeelings() {
       const r = (this.belief && this.belief.reflection) || {};
       const list = Array.isArray(r.withoutBeliefFeelings) ? r.withoutBeliefFeelings : [];
-      return dedupeByName(list);
+      // Named in taxonomy order, like every other sentence that lists feelings.
+      return sortByEmotion(dedupeByName(list));
     },
     segments() {
       const parts = [{
         text: 'In welcher konkreten Situation in den nächsten Tagen könntest du dich so '
-          + 'verhalten, als würde diese Überzeugung nicht gelten? ',
+          + 'verhalten, als würde diese Affirmation gelten? ',
       }];
 
       const need = this.needPhrase;
       const feelings = this.changeFeelings;
       // Without either of them there is nothing to name, so the question is left out.
       if (need || feelings.length) {
-        parts.push({ text: 'Welche andere Strategie findest du, um ' });
+        parts.push({ text: 'Welche neue Strategie findest du, um ' });
         if (need) {
           parts.push({ text: 'dein Bedürfnis nach ' });
           parts.push({ text: need, color: NEED_COLOR });
