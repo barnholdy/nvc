@@ -28,7 +28,8 @@
 </template>
 
 <script>
-import { dedupeByName, joinNames, NEED_COLOR } from '@/utils/emotions';
+import { dedupeByName, joinNames } from '@/utils/emotions';
+import { colorForNeed, UNKNOWN_NEED_COLOR } from '@/utils/needs';
 
 export default {
   name: 'pattern-add-without-belief',
@@ -40,7 +41,7 @@ export default {
     initialValue: { type: String, default: '' },
   },
   data() {
-    return { text: this.initialValue, needColor: NEED_COLOR };
+    return { text: this.initialValue };
   },
   computed: {
     needNames: function() {
@@ -49,6 +50,13 @@ export default {
     // Beliefs from before the one-need rule can carry several.
     needPhrase: function() {
       return joinNames(this.needNames);
+    },
+    // One need is named in its own colour. Several would need several colours,
+    // so the phrase falls back to the neutral one rather than picking a side.
+    needColor: function() {
+      return this.needNames.length === 1
+        ? colorForNeed(this.needNames[0])
+        : UNKNOWN_NEED_COLOR;
     },
   },
   watch: {

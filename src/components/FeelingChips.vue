@@ -1,7 +1,7 @@
 <template>
   <div class="feeling-chips">
     <div v-for="group in groups" :key="group.id || 'unknown'" class="chip-group">
-      <span v-if="group.label" class="group-label" :style="{ color: emotionColor(group.id) }">
+      <span v-if="group.label" class="group-label" :style="{ color: groupColor(group.id) }">
         {{ group.label }}
       </span>
       <div class="chip-row">
@@ -24,13 +24,20 @@ import {
   emotionIdForFeeling,
   emotionLabel,
   EMOTION_ORDER,
-  NEED_COLOR,
 } from '@/utils/emotions';
+import {
+  colorForNeed,
+  categoryIdForNeed,
+  needCategories,
+  needCategoryColor,
+  needCategoryLabel,
+  sortNeeds,
+} from '@/utils/needs';
 
 // Read-only display of feelings or needs, styled exactly like the chips in the
-// selection menu so the two never drift apart. Feelings are grouped under their
-// Grundemotion, in the taxonomy's own order, so a row of chips reads the same
-// way it was put together.
+// selection menu so the two never drift apart. Both are grouped under their top
+// category — Grundemotion for feelings, Grundkategorie for needs — in the
+// taxonomy's own order, so a row of chips reads the way it was put together.
 export default {
   name: 'feeling-chips',
   props: {
@@ -38,7 +45,7 @@ export default {
     type: { type: String, default: 'feelings' },
   },
   computed: {
-    // A need can be chosen once per Grundemotion; show it once here.
+    // A belief carries one need, but older ones can hold several; show each once.
     uniqueItems: function() {
       return dedupeByName(this.items);
     },
@@ -46,9 +53,7 @@ export default {
       return this.type === 'needs';
     },
     groups: function() {
-      // Needs are ochre wherever they sit, so grouping them by Grundemotion
-      // would draw a line nothing else in the app follows.
-      if (this.isNeeds) return [{ id: null, label: '', items: this.uniqueItems }];
+      if (this.isNeeds) return this.needGroups;
 
       var buckets = {};
       var keys = [];
@@ -72,13 +77,32 @@ export default {
           return ia - ib;
         });
     },
+    needGroups: function() {
+      var order = needCategories.map(function(c) { return c.id; });
+      var buckets = {};
+      var keys = [];
+      sortNeeds(this.uniqueItems).forEach(function(item) {
+        var id = categoryIdForNeed(item.name);
+        var key = id || 'unknown';
+        if (!buckets[key]) {
+          buckets[key] = { id: id, label: id ? needCategoryLabel(id) : '', items: [] };
+          keys.push(key);
+        }
+        buckets[key].items.push(item);
+      });
+      return keys.map(function(key) { return buckets[key]; }).sort(function(a, b) {
+        var ia = a.id ? order.indexOf(a.id) : order.length;
+        var ib = b.id ? order.indexOf(b.id) : order.length;
+        return ia - ib;
+      });
+    },
   },
   methods: {
     chipColor: function(name) {
-      return this.isNeeds ? NEED_COLOR : colorForFeeling(name);
+      return this.isNeeds ? colorForNeed(name) : colorForFeeling(name);
     },
-    emotionColor: function(id) {
-      return emotionColor(id);
+    groupColor: function(id) {
+      return this.isNeeds ? needCategoryColor(id) : emotionColor(id);
     },
   },
 };

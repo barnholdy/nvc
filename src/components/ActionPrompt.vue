@@ -8,8 +8,9 @@
 
 <script>
 import {
-  colorForFeeling, dedupeByName, joinNames, sortByEmotion, NEED_COLOR,
+  colorForFeeling, dedupeByName, joinNames, sortByEmotion,
 } from '@/utils/emotions';
+import { colorForNeed } from '@/utils/needs';
 
 // The question every new experiment starts from, shown both in the Handeln list
 // and in the planning wizard. One component, so the two cannot drift apart.
@@ -44,7 +45,7 @@ export default {
         parts.push({ text: 'Welche neue Strategie findest du, um ' });
         if (need) {
           parts.push({ text: 'dein Bedürfnis nach ' });
-          parts.push({ text: need, color: NEED_COLOR });
+          parts.push({ text: need, color: colorForNeed(need) });
           parts.push({ text: ' zu erfüllen' });
         }
         if (need && feelings.length) parts.push({ text: ' und ' });

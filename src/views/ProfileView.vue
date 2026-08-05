@@ -85,7 +85,7 @@
                 <span class="stat-count">{{ n.count }}×</span>
               </div>
               <div class="stat-bar-bg">
-                <div class="stat-bar-fill" :style="{ width: pct(n.count, topNeeds[0].count), background: NEED_COLOR }"></div>
+                <div class="stat-bar-fill" :style="{ width: pct(n.count, topNeeds[0].count), background: needColor(n.name) }"></div>
               </div>
             </div>
             <div v-if="i < topNeeds.length - 1" class="settings-sep"></div>
@@ -151,7 +151,8 @@
 </template>
 
 <script>
-import { colorForFeeling, NEED_COLOR } from '@/utils/emotions';
+import { colorForFeeling } from '@/utils/emotions';
+import { colorForNeed } from '@/utils/needs';
 
 // Quotes, case, spacing and a trailing period are all the analysis is likely to
 // change when it repeats a belief back — none of them make it a different one.
@@ -177,7 +178,6 @@ export default {
     };
   },
   computed: {
-    NEED_COLOR() { return NEED_COLOR; },
     beliefs() {
       return this.$store.getters.beliefs;
     },
@@ -268,6 +268,9 @@ export default {
     },
     feelingColor(name) {
       return colorForFeeling(name);
+    },
+    needColor(name) {
+      return colorForNeed(name);
     },
     async generateKernmuster() {
       if (!this.apiKey) {

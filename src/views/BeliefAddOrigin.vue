@@ -4,7 +4,7 @@
       <h1 class="headline font-weight-regular">Ursprung</h1>
       <p class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
 
-      <!-- No needs here: they are picked later, on Kluge Lösung. The feelings
+      <!-- No needs here: they are picked on the next step. The feelings
            are named in the question itself rather than listed above it. -->
       <belief-context :reaction="reaction"></belief-context>
 

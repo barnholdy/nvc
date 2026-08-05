@@ -4,21 +4,13 @@
       <h1 class="headline font-weight-regular">{{ headlineText }}</h1>
       <p class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
 
-      <!-- What was written a step or two earlier. Picking feelings and needs is
-           easier with the reaction still in view than from memory. -->
+      <!-- What was written a step or two earlier. Picking feelings is easier
+           with the reaction still in view than from memory. -->
       <belief-context
         :perspective="perspective"
         :reaction="reaction"
-        :feelings="isNeedsMode && !feelingsAsSentence ? contextFeelings : []"
         :origin="contextOrigin">
       </belief-context>
-      <feeling-words
-        v-if="feelingsAsSentence && contextFeelings.length"
-        class="context-sentence"
-        :feelings="contextFeelings"
-        prefix="Ich fühlte mich "
-        suffix=".">
-      </feeling-words>
 
       <p class="body-1 grey--text mt-3 wizard-prompt">{{ promptText }}</p>
     </v-flex>
@@ -31,13 +23,8 @@
     <p v-if="limitHint" class="limit-hint" :class="{ 'over-limit': isOverLimit }">{{ limitHint }}</p>
 
     <v-flex>
-      <p v-if="isNeedsMode && visibleEmotions.length === 0" class="empty-hint">
-        Wähle im vorigen Schritt Gefühle aus — dann erscheinen hier die passenden
-        Bedürfnisse.
-      </p>
-
       <div
-        v-for="e in visibleEmotions"
+        v-for="e in taxonomy.grundemotionen"
         :key="e.id"
         class="emotion-card mb-2"
         :style="{ borderColor: emotionColor(e.id) }"
@@ -48,28 +35,13 @@
           <div class="emotion-row-body">
             <span class="emotion-row-label" :style="{ color: emotionColor(e.id) }">{{ e.label }}</span>
             <span class="emotion-row-desc">{{ e.beschreibung }}</span>
-            <div
-              v-if="!isNeedsMode && displayedFeelingsFor(e.id).length > 0"
-              class="emotion-selections"
-            >
+            <div v-if="selectedFeelingsFor(e.id).length > 0" class="emotion-selections">
               <span
-                v-for="item in displayedFeelingsFor(e.id)"
+                v-for="item in selectedFeelingsFor(e.id)"
                 :key="'f-' + item.name"
                 class="emotion-sel-chip emotion-sel-chip--removable"
                 :style="{ backgroundColor: emotionColor(e.id), color: '#000' }"
-                @click.stop="removeSelection(item)"
-              >{{ item.name }}<span class="chip-x">×</span></span>
-            </div>
-            <div
-              v-if="isNeedsMode && selectedNeedsFor(e.id).length > 0"
-              class="emotion-selections"
-            >
-              <span
-                v-for="item in selectedNeedsFor(e.id)"
-                :key="'n-' + item.name"
-                class="emotion-sel-chip emotion-sel-chip--removable"
-                :style="{ backgroundColor: needColor(), color: '#000' }"
-                @click.stop="removeSelection(item)"
+                @click.stop="toggleFeeling(item.name, item.emotionId)"
               >{{ item.name }}<span class="chip-x">×</span></span>
             </div>
           </div>
@@ -78,9 +50,8 @@
 
         <!-- Clusters (when emotion is expanded) -->
         <div v-if="isEmotionOpen(e.id)" class="emotion-card-body">
-          <div v-for="c in visibleClusters(e)" :key="c.id">
+          <div v-for="c in e.unterkategorien" :key="c.id">
 
-            <!-- Fill and counter always report selected feelings, in both modes -->
             <div class="cluster-row" @click.stop="toggleCluster(c.id)">
               <span
                 v-if="clusterFeelingCount(c) > 0"
@@ -95,27 +66,15 @@
 
             <!-- Selectable items (when cluster is expanded) -->
             <div v-if="isClusterOpen(c.id)" class="selection-section">
-              <!-- In needs mode the feelings picked here are the context for choosing -->
-              <div
-                v-if="isNeedsMode && selectedFeelingsInCluster(c).length > 0"
-                class="cluster-feelings"
-              >
-                <span
-                  v-for="item in selectedFeelingsInCluster(c)"
-                  :key="'cf-' + item.name"
-                  class="emotion-sel-chip"
-                  :style="{ backgroundColor: emotionColor(e.id), color: '#000' }"
-                >{{ item.name }}</span>
-              </div>
               <div class="chips-wrap">
                 <span
-                  v-for="item in itemsFor(c)"
+                  v-for="item in (c.gefuehle || [])"
                   :key="item.name"
                   class="my-chip"
-                  :style="isSelectedItem(item.name, e.id)
-                    ? { backgroundColor: itemColor(e.id), color: '#000' }
-                    : { backgroundColor: '#3a3a3c', color: itemColor(e.id) }"
-                  @click.stop="toggleItem(item.name, e.id)"
+                  :style="isSelectedFeeling(item.name)
+                    ? { backgroundColor: emotionColor(e.id), color: '#000' }
+                    : { backgroundColor: '#3a3a3c', color: emotionColor(e.id) }"
+                  @click.stop="toggleFeeling(item.name, e.id)"
                 >{{ item.name }}</span>
               </div>
             </div>
@@ -124,79 +83,51 @@
         </div>
       </div>
 
-      <!-- Optional block under the list (the reframe on Kluge Lösung) -->
-      <slot name="afterList"></slot>
     </v-flex>
   </v-layout>
 </template>
 
 <script>
 import BeliefContext from '@/views/BeliefContext.vue';
-import FeelingWords from '@/components/FeelingWords.vue';
-import {
-  emotionColor,
-  emotionValence,
-  emotionIdForFeeling,
-  emotionIdsForNeed,
-  NEED_COLOR,
-} from '@/utils/emotions';
+import { emotionColor, emotionValence, emotionIdForFeeling } from '@/utils/emotions';
 
+// The Gefühl tree. Bedürfnisse used to be picked here too, through the same
+// component in a second mode — they have their own tree and their own picker
+// now, so this one only does one thing.
 export default {
   name: 'belief-add-feeling-need',
-  components: { BeliefContext, FeelingWords },
+  components: { BeliefContext },
   props: {
     belief: { type: String, default: '' },
     // The reaction from the earlier step, shown read-only for context.
     reaction: { type: String, default: '' },
     taxonomy: { type: Object, required: true },
-    mode: { type: String, default: 'feelings' },
     headline: { type: String, default: '' },
     prompt: { type: String, default: '' },
     // Optional second quote under the belief — the change wizard shows the new
     // perspective the feelings are meant to refer to.
     perspective: { type: String, default: '' },
     initialFeelings: { type: Array, default: function() { return []; } },
-    initialNeeds: { type: Array, default: function() { return []; } },
-    // Read-only context for needs mode: the feelings picked in the previous step.
-    // Must stay a prop — both wizard steps are rendered with v-show, so this
-    // component is created before anything is selected and a data() copy would
-    // never see the selection.
-    contextFeelings: { type: Array, default: function() { return []; } },
     // How many may be picked at once. 0 means no limit.
     maxSelections: { type: Number, default: 0 },
-    // Replace the oldest pick instead of letting the count go over.
-    rotateOnLimit: { type: Boolean, default: false },
-    // Open every Grundemotion and Unterkategorie at once, so the whole list is
-    // there to read instead of behind two taps.
-    expandAll: { type: Boolean, default: false },
-    // Say the feelings in a sentence rather than listing them as chips.
-    feelingsAsSentence: { type: Boolean, default: false },
     // Shown above the list when the step follows an origin question.
     contextOrigin: { type: String, default: '' },
   },
   data: function() {
-    var self = this;
     return {
       activeEmotionId: null,
       activeClusterId: null,
       selFeelings: this.initialFeelings.map(function(f) {
-        return { name: f.name, emotionId: self.findEmotionForFeeling(f.name) };
-      }),
-      selNeeds: this.initialNeeds.map(function(n) {
-        return { name: n.name, emotionId: n.emotionId || self.findEmotionForNeed(n.name) };
+        return { name: f.name, emotionId: emotionIdForFeeling(f.name) };
       }),
     };
   },
   computed: {
-    isNeedsMode: function() {
-      return this.mode === 'needs';
-    },
     headlineText: function() {
-      if (this.headline) return this.headline;
-      return this.isNeedsMode ? 'Bedürfnisse' : 'Gefühle';
+      return this.headline || 'Gefühle';
     },
     chosenCount: function() {
-      return this.isNeedsMode ? this.selNeeds.length : this.selFeelings.length;
+      return this.selFeelings.length;
     },
     isOverLimit: function() {
       return !!this.maxSelections && this.chosenCount > this.maxSelections;
@@ -205,9 +136,7 @@ export default {
     // "weiter" button is disabled at that point and needs a reason on screen.
     limitHint: function() {
       if (!this.maxSelections) return '';
-      if (this.maxSelections === 1) {
-        return this.isNeedsMode ? 'Wähle ein Bedürfnis.' : 'Wähle ein Gefühl.';
-      }
+      if (this.maxSelections === 1) return 'Wähle ein Gefühl.';
       if (this.isOverLimit) {
         return this.chosenCount + ' von ' + this.maxSelections
           + ' gewählt — entferne welche, um weiterzugehen.';
@@ -216,92 +145,25 @@ export default {
         + this.maxSelections + ' gewählt.';
     },
     promptText: function() {
-      if (this.prompt) return this.prompt;
-      return this.isNeedsMode
-        ? 'Was will dir diese Überzeugung über deine Bedürfnisse sagen? Was brauchst du eigentlich?'
-        : 'Was fühlst du, wenn die Überzeugung wahr ist?';
-    },
-    allSelections: function() {
-      return this.isNeedsMode ? this.selNeeds : this.selFeelings;
-    },
-    // O(1) lookup so cluster filtering doesn't scan the selection per cluster.
-    contextNames: function() {
-      var map = {};
-      this.contextFeelings.forEach(function(f) { map[f.name] = true; });
-      return map;
-    },
-    // Needs mode only shows the Grundemotionen the user actually felt something in.
-    visibleEmotions: function() {
-      if (!this.isNeedsMode) return this.taxonomy.grundemotionen;
-      var self = this;
-      return this.taxonomy.grundemotionen.filter(function(e) {
-        return self.displayedFeelingsFor(e.id).length > 0;
-      });
+      return this.prompt || 'Was fühlst du, wenn die Überzeugung wahr ist?';
     },
   },
   methods: {
-    /* ── mode-aware helpers ── */
-    itemsFor: function(cluster) {
-      return (this.isNeedsMode ? cluster.beduerfnisse : cluster.gefuehle) || [];
-    },
-    isSelectedItem: function(name, emotionId) {
-      return this.isNeedsMode
-        ? this.isSelectedNeed(name, emotionId)
-        : this.isSelectedFeeling(name);
-    },
-    toggleItem: function(name, emotionId) {
-      if (this.isNeedsMode) this.toggleNeed(name, emotionId);
-      else this.toggleFeeling(name, emotionId);
-    },
-    itemColor: function(emotionId) {
-      return this.isNeedsMode ? NEED_COLOR : this.emotionColor(emotionId);
-    },
-    needColor: function() {
-      return NEED_COLOR;
-    },
-    // Remove straight from the overview chips, without hunting the item down in
-    // its cluster. Both toggles remove when the entry is already selected.
-    removeSelection: function(item) {
-      if (this.isNeedsMode) this.toggleNeed(item.name, item.emotionId);
-      else this.toggleFeeling(item.name, item.emotionId);
-    },
-    // In needs mode only the clusters the user picked a feeling in are offered.
-    visibleClusters: function(emotion) {
-      if (!this.isNeedsMode) return emotion.unterkategorien;
-      var self = this;
-      return emotion.unterkategorien.filter(function(c) {
-        return self.clusterFeelingCount(c) > 0;
+    // Feeling chips on the card header, so a pick can be undone without
+    // hunting it down in its cluster again.
+    selectedFeelingsFor: function(emotionId) {
+      return this.selFeelings.filter(function(item) {
+        return (item.emotionId || emotionIdForFeeling(item.name)) === emotionId;
       });
     },
-    // Feeling chips on the card header: the live edit state in feelings mode,
-    // the previous step's selection in needs mode.
-    displayedFeelingsFor: function(emotionId) {
-      var list = this.isNeedsMode ? this.contextFeelings : this.selFeelings;
-      return list.filter(function(item) {
-        var id = item.emotionId || emotionIdForFeeling(item.name);
-        return id === emotionId;
-      });
-    },
-    selectedNeedsFor: function(emotionId) {
-      return this.selNeeds.filter(function(n) { return n.emotionId === emotionId; });
-    },
-    // Is this feeling selected? Needs mode reads the previous step's selection.
-    isFeelingChosen: function(name) {
-      return this.isNeedsMode ? !!this.contextNames[name] : this.isSelectedFeeling(name);
-    },
-    selectedFeelingsInCluster: function(cluster) {
-      var self = this;
-      return (cluster.gefuehle || []).filter(function(f) {
-        return self.isFeelingChosen(f.name);
-      });
-    },
-    // The cluster bar and counter always report selected feelings — in the needs
-    // step too, so it keeps saying the same thing as in the feelings step.
     clusterFeelingTotal: function(cluster) {
       return (cluster.gefuehle || []).length;
     },
     clusterFeelingCount: function(cluster) {
-      return this.selectedFeelingsInCluster(cluster).length;
+      var self = this;
+      return (cluster.gefuehle || []).filter(function(f) {
+        return self.isSelectedFeeling(f.name);
+      }).length;
     },
     clusterPct: function(cluster) {
       var total = this.clusterFeelingTotal(cluster);
@@ -311,13 +173,12 @@ export default {
 
     /* ── accordion ── */
     isEmotionOpen: function(id) {
-      return this.expandAll || this.activeEmotionId === id;
+      return this.activeEmotionId === id;
     },
     isClusterOpen: function(id) {
-      return this.expandAll || this.activeClusterId === id;
+      return this.activeClusterId === id;
     },
     toggleEmotion: function(id) {
-      if (this.expandAll) return;
       if (this.activeEmotionId === id) {
         this.activeEmotionId = null;
         this.activeClusterId = null;
@@ -327,7 +188,6 @@ export default {
       }
     },
     toggleCluster: function(id) {
-      if (this.expandAll) return;
       this.activeClusterId = this.activeClusterId === id ? null : id;
     },
 
@@ -335,82 +195,27 @@ export default {
     isSelectedFeeling: function(name) {
       return this.selFeelings.some(function(f) { return f.name === name; });
     },
-    // Scoped to the Grundemotion: the same need may be chosen under several of
-    // them and removing it from one must leave the others alone.
-    isSelectedNeed: function(name, emotionId) {
-      return this.selNeeds.some(function(n) {
-        return n.name === name && n.emotionId === emotionId;
-      });
-    },
     toggleFeeling: function(name, emotionId) {
       var idx = this.selFeelings.findIndex(function(f) { return f.name === name; });
       if (idx >= 0) {
         this.selFeelings.splice(idx, 1);
       } else {
-        this.makeRoom(this.selFeelings);
         this.selFeelings.push({ name: name, emotionId: emotionId });
       }
       this.emitChange();
     },
-    toggleNeed: function(name, emotionId) {
-      var idx = this.selNeeds.findIndex(function(n) {
-        return n.name === name && n.emotionId === emotionId;
-      });
-      if (idx >= 0) {
-        this.selNeeds.splice(idx, 1);
-      } else {
-        this.makeRoom(this.selNeeds);
-        this.selNeeds.push({ name: name, emotionId: emotionId });
-      }
-      this.emitChange();
-    },
-    // Only where the limit is one, so that a tap reads as "pick this one
-    // instead". Where several are allowed, going over is answered by blocking
-    // the way forward rather than by silently dropping someone's choice.
-    makeRoom: function(list) {
-      if (!this.maxSelections || !this.rotateOnLimit) return;
-      while (list.length >= this.maxSelections) list.shift();
-    },
     emitChange: function() {
-      var self = this;
-      this.$emit('change', this.allSelections.map(function(x) {
+      this.$emit('change', this.selFeelings.map(function(x) {
         return {
           name: x.name,
-          valence: self.valenceFor(x.emotionId),
+          // Numeric valence kept for the profile statistics, derived from the
+          // Grundemotion's `valenz` in the taxonomy.
+          valence: emotionValence(x.emotionId),
           emotionId: x.emotionId,
         };
       }));
     },
-    // Numeric valence kept for the profile statistics, derived from the
-    // Grundemotion's `valenz` in the taxonomy.
-    valenceFor: function(emotionId) {
-      return emotionValence(emotionId);
-    },
 
-    /* ── taxonomy lookups ── */
-    findEmotionForFeeling: function(name) {
-      return emotionIdForFeeling(name);
-    },
-    // A need can sit under several Grundemotionen. Prefer one the user actually
-    // has a feeling in, otherwise a restored need would be filed under a
-    // Grundemotion that needs mode hides — making it invisible.
-    findEmotionForNeed: function(name) {
-      var ids = emotionIdsForNeed(name);
-      if (!ids.length) return null;
-      // Reads contextFeelings (a prop), not the contextNames computed: this runs
-      // from data(), where computeds do not exist yet.
-      var names = {};
-      this.contextFeelings.forEach(function(f) { names[f.name] = true; });
-      var emotions = this.taxonomy.grundemotionen;
-      var withFeeling = ids.filter(function(id) {
-        var emotion = emotions.find(function(e) { return e.id === id; });
-        if (!emotion) return false;
-        return emotion.unterkategorien.some(function(c) {
-          return (c.gefuehle || []).some(function(f) { return names[f.name]; });
-        });
-      })[0];
-      return withFeeling || ids[0];
-    },
     emotionColor: function(id) {
       return emotionColor(id);
     },
@@ -431,14 +236,6 @@ export default {
 
 <style scoped lang="scss">
 .belief-quote { font-style: italic; }
-// It sits between whatever came last and the list itself, so it carries its own
-// spacing on both sides — the container it used to live in provided that.
-.context-sentence {
-  font-size: 0.95rem;
-  color: #ebebf5;
-  line-height: 1.5;
-  margin-top: 14px;
-}
 .limit-hint {
   font-size: 0.8rem;
   color: #636366;
@@ -477,19 +274,6 @@ export default {
 .emotion-row-desc { display: block; font-size: 0.78rem; color: #8e8e93; margin-top: 2px; }
 .emotion-selections { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
 
-.cluster-feelings {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-bottom: 10px;
-}
-
-.empty-hint {
-  font-size: 0.875rem;
-  color: #8e8e93;
-  line-height: 1.5;
-  margin: 4px 2px 0;
-}
 .emotion-sel-chip {
   display: inline-block;
   padding: 2px 8px;

@@ -145,7 +145,7 @@
                   <p class="expand-text mt-2">{{ entry.reflection.origin }}</p>
                 </template>
                 <template v-if="originArc(entry).gift">
-                  <p class="expand-label mt-3">Kluge Lösung</p>
+                  <p class="expand-label mt-3">Bedürfnis</p>
                   <p class="expand-text">{{ originArc(entry).gift }}</p>
                 </template>
                 <template v-if="originArc(entry).grounding.length">

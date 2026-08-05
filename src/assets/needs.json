@@ -1,0 +1,428 @@
+{
+  "titel": "Bedürfnistaxonomie",
+  "modell": "3 Ebenen: Grundkategorie -> Cluster -> Bedürfnis. Eigenständiger Baum; jedes Bedürfnis genau einmal.",
+  "beduerfnis_grundkategorien": [
+    {
+      "id": "koerper",
+      "ebene": 1,
+      "label": "Körperliches Wohl & Existenz",
+      "cluster": [
+        {
+          "id": "koerper.versorgung",
+          "ebene": 2,
+          "label": "Versorgung",
+          "beduerfnisse": [
+            "Nahrung",
+            "Unterkunft",
+            "Sättigung",
+            "Geburt"
+          ]
+        },
+        {
+          "id": "koerper.vitalitaet",
+          "ebene": 2,
+          "label": "Vitalität & Bewegung",
+          "beduerfnisse": [
+            "Bewegung",
+            "Fitness",
+            "Vitalität",
+            "Lebendigkeit"
+          ]
+        },
+        {
+          "id": "koerper.erholung",
+          "ebene": 2,
+          "label": "Erholung & Ruhe",
+          "beduerfnisse": [
+            "Entspannung",
+            "Erholung",
+            "Ruhe",
+            "Stille",
+            "Rhythmus",
+            "Zeit für Integration"
+          ]
+        },
+        {
+          "id": "koerper.beruehrung",
+          "ebene": 2,
+          "label": "Berührung & Sinnlichkeit",
+          "beduerfnisse": [
+            "Berührung",
+            "Zärtlichkeit",
+            "Sexualität"
+          ]
+        },
+        {
+          "id": "koerper.wohlbefinden",
+          "ebene": 2,
+          "label": "Gesundheit & Wohlbefinden",
+          "beduerfnisse": [
+            "Gesundheit",
+            "Komfort",
+            "Heilung"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sicherheit",
+      "ebene": 1,
+      "label": "Sicherheit & Halt",
+      "cluster": [
+        {
+          "id": "sicherheit.schutz",
+          "ebene": 2,
+          "label": "Schutz & Geborgenheit",
+          "beduerfnisse": [
+            "Sicherheit",
+            "Geborgenheit",
+            "Schutz",
+            "Trost",
+            "Unterstützung",
+            "Hilfe"
+          ]
+        },
+        {
+          "id": "sicherheit.bestaendigkeit",
+          "ebene": 2,
+          "label": "Beständigkeit & Verlässlichkeit",
+          "beduerfnisse": [
+            "Beständigkeit",
+            "Dauerhaftigkeit",
+            "Kontinuität",
+            "Verbindlichkeit",
+            "Rituale",
+            "Berechenbarkeit",
+            "Stabilität"
+          ]
+        },
+        {
+          "id": "sicherheit.vertrauen",
+          "ebene": 2,
+          "label": "Vertrauen & Vertraulichkeit",
+          "beduerfnisse": [
+            "Vertrauen",
+            "Vertraulichkeit",
+            "Diskretion",
+            "Treue"
+          ]
+        },
+        {
+          "id": "sicherheit.gleichgewicht",
+          "ebene": 2,
+          "label": "Gleichgewicht & Frieden",
+          "beduerfnisse": [
+            "Ausgeglichenheit",
+            "Ausgewogenheit",
+            "Gleichgewicht",
+            "Ganzheit",
+            "Frieden",
+            "Harmonie"
+          ]
+        },
+        {
+          "id": "sicherheit.orientierung",
+          "ebene": 2,
+          "label": "Klarheit & Orientierung",
+          "beduerfnisse": [
+            "Klarheit",
+            "Ordnung",
+            "Orientierung",
+            "Struktur",
+            "Genauigkeit"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "verbindung",
+      "ebene": 1,
+      "label": "Verbindung & Zugehörigkeit",
+      "cluster": [
+        {
+          "id": "verbindung.naehe",
+          "ebene": 2,
+          "label": "Nähe & Intimität",
+          "beduerfnisse": [
+            "Nähe",
+            "Wärme",
+            "Intimität",
+            "Tiefe",
+            "Zuneigung",
+            "Liebe",
+            "Pflege"
+          ]
+        },
+        {
+          "id": "verbindung.empathie",
+          "ebene": 2,
+          "label": "Empathie & Gesehen-werden",
+          "beduerfnisse": [
+            "Empathie",
+            "Mitgefühl",
+            "Einfühlsamkeit",
+            "Wahrgenommen werden",
+            "Aufmerksamkeit",
+            "Einbezogen sein",
+            "Menschlichkeit"
+          ]
+        },
+        {
+          "id": "verbindung.gemeinschaft",
+          "ebene": 2,
+          "label": "Gemeinschaft & Zusammenspiel",
+          "beduerfnisse": [
+            "Gemeinschaft",
+            "Gemeinsamkeit",
+            "Gesellschaft",
+            "Freundschaft",
+            "Kontakt",
+            "Zusammenarbeit",
+            "Wechselbeziehung",
+            "Verbundenheit",
+            "Teilnahme",
+            "Zugehörigkeit"
+          ]
+        },
+        {
+          "id": "verbindung.austausch",
+          "ebene": 2,
+          "label": "Austausch & Ausdruck",
+          "beduerfnisse": [
+            "Kommunikation",
+            "Austausch",
+            "Mitteilung",
+            "Verbindung",
+            "Ausdruck",
+            "Transparenz"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "authentizitaet",
+      "ebene": 1,
+      "label": "Authentizität & Integrität",
+      "cluster": [
+        {
+          "id": "authentizitaet.echtheit",
+          "ebene": 2,
+          "label": "Echtheit & Kongruenz",
+          "beduerfnisse": [
+            "Authentizität",
+            "Aufrichtigkeit",
+            "Ehrlichkeit",
+            "Wahrhaftigkeit",
+            "Kongruenz",
+            "Integrität",
+            "Stimmigkeit"
+          ]
+        },
+        {
+          "id": "authentizitaet.selbstwert",
+          "ebene": 2,
+          "label": "Selbstwert & Anerkennung",
+          "beduerfnisse": [
+            "Selbstwertgefühl",
+            "Selbstwertschätzung",
+            "Anerkennung",
+            "Bestätigung",
+            "Würdigung",
+            "Zuspruch",
+            "Wertschätzung"
+          ]
+        },
+        {
+          "id": "authentizitaet.achtung",
+          "ebene": 2,
+          "label": "Achtung & Fairness",
+          "beduerfnisse": [
+            "Würde",
+            "Respekt",
+            "Selbstrespekt",
+            "Gleichwertigkeit",
+            "Gerechtigkeit"
+          ]
+        },
+        {
+          "id": "authentizitaet.akzeptanz",
+          "ebene": 2,
+          "label": "Akzeptanz & Annahme",
+          "beduerfnisse": [
+            "Akzeptanz",
+            "Annahme",
+            "Toleranz"
+          ]
+        },
+        {
+          "id": "authentizitaet.verantwortung",
+          "ebene": 2,
+          "label": "Gewissen & Verantwortung",
+          "beduerfnisse": [
+            "Gewissen",
+            "Selbstverantwortung",
+            "Verantwortung",
+            "Ernst"
+          ]
+        },
+        {
+          "id": "authentizitaet.praesenz",
+          "ebene": 2,
+          "label": "Präsenz & Selbsterkenntnis",
+          "beduerfnisse": [
+            "Präsenz",
+            "Sein",
+            "Bewusstsein",
+            "Selbsterkenntnis",
+            "Einsicht",
+            "Achtsamkeit"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "autonomie",
+      "ebene": 1,
+      "label": "Autonomie & Raum",
+      "cluster": [
+        {
+          "id": "autonomie.freiraum",
+          "ebene": 2,
+          "label": "Freiraum & Rückzug",
+          "beduerfnisse": [
+            "Alleinsein",
+            "Privatsphäre",
+            "Einfachheit",
+            "Loslassen"
+          ]
+        },
+        {
+          "id": "autonomie.selbstbestimmung",
+          "ebene": 2,
+          "label": "Selbstbestimmung & Freiheit",
+          "beduerfnisse": [
+            "Individualität",
+            "Freiheit",
+            "Unabhängigkeit",
+            "Selbstbestimmung",
+            "Autonomie",
+            "Wahlmöglichkeit"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "wirksamkeit",
+      "ebene": 1,
+      "label": "Wirksamkeit & Wachstum",
+      "cluster": [
+        {
+          "id": "wirksamkeit.kompetenz",
+          "ebene": 2,
+          "label": "Kompetenz & Meisterschaft",
+          "beduerfnisse": [
+            "Meisterschaft",
+            "Effektivität"
+          ]
+        },
+        {
+          "id": "wirksamkeit.lernen",
+          "ebene": 2,
+          "label": "Lernen & Erkenntnis",
+          "beduerfnisse": [
+            "Wissen",
+            "Information",
+            "Erfahrung",
+            "Anregung",
+            "Herausforderung",
+            "Stimulation",
+            "Offenheit",
+            "Verständnis"
+          ]
+        },
+        {
+          "id": "wirksamkeit.entfaltung",
+          "ebene": 2,
+          "label": "Entfaltung & Kreativität",
+          "beduerfnisse": [
+            "Wachstum",
+            "Entwicklung",
+            "Entfaltung",
+            "Selbstentfaltung",
+            "Selbstverwirklichung",
+            "Aktualisierung",
+            "Kreativität",
+            "Inspiration"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sinn",
+      "ebene": 1,
+      "label": "Sinn & Ausrichtung",
+      "cluster": [
+        {
+          "id": "sinn.zweck",
+          "ebene": 2,
+          "label": "Sinn & Zweck",
+          "beduerfnisse": [
+            "Sinn",
+            "Zweckbestimmung",
+            "Beitrag",
+            "Hoffnung",
+            "Zuversicht"
+          ]
+        },
+        {
+          "id": "sinn.wertschaetzung",
+          "ebene": 2,
+          "label": "Wertschätzung, Feiern & Trauern",
+          "beduerfnisse": [
+            "Dankbarkeit",
+            "Feiern",
+            "Trauer"
+          ]
+        },
+        {
+          "id": "sinn.transzendenz",
+          "ebene": 2,
+          "label": "Schönheit & Transzendenz",
+          "beduerfnisse": [
+            "Ehrfurcht",
+            "Schönheit",
+            "Ästhetik",
+            "Spiritualität"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "spiel",
+      "ebene": 1,
+      "label": "Spiel & Leichtigkeit",
+      "cluster": [
+        {
+          "id": "spiel.spiel",
+          "ebene": 2,
+          "label": "Spiel & Humor",
+          "beduerfnisse": [
+            "Spiel",
+            "Spaß",
+            "Humor"
+          ]
+        },
+        {
+          "id": "spiel.freude",
+          "ebene": 2,
+          "label": "Freude & Intensität",
+          "beduerfnisse": [
+            "Freude",
+            "Glück",
+            "Intensität"
+          ]
+        }
+      ]
+    }
+  ]
+}

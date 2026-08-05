@@ -10,17 +10,18 @@
 </template>
 
 <script>
-import { NEED_COLOR } from '@/utils/emotions';
+import { colorForNeed } from '@/utils/needs';
 
-// Shown on Kluge Lösung and again when asking for empathy, so the sentence
+// Shown on Bedürfnis and again when asking for empathy, so the sentence
 // cannot drift between the two.
 export default {
   name: 'reframe-card',
   props: {
     gift: { type: String, default: '' },
   },
-  data() {
-    return { needColor: NEED_COLOR };
+  computed: {
+    // The need's own Grundkategorie colour, the same one the picker showed it in.
+    needColor() { return colorForNeed(this.gift); },
   },
 };
 </script>

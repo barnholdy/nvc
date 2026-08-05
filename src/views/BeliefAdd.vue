@@ -38,7 +38,6 @@
 
         <belief-add-feeling-need
           v-show="step === 4"
-          mode="feelings"
           :belief="belief"
           :reaction="withBelief"
           :taxonomy="taxonomy"
@@ -67,7 +66,6 @@
           v-show="step === 7"
           :belief="belief"
           :reaction="withBelief"
-          :taxonomy="taxonomy"
           :feelings="selectedFeelings"
           :origin="origin"
           :initialNeeds="selectedNeeds"
