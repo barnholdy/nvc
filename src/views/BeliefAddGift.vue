@@ -7,19 +7,21 @@
       <belief-context :reaction="reaction" :origin="origin"></belief-context>
 
       <feeling-words
-        v-if="feelings.length"
-        class="context-sentence"
+        class="body-1 white--text mt-3 wizard-prompt"
         :feelings="feelings"
-        prefix="Ich fühlte mich "
-        suffix=".">
+        :prefix="PROMPT_PREFIX"
+        :suffix="PROMPT_SUFFIX"
+        :fallback="PROMPT_FALLBACK">
       </feeling-words>
-
-      <p class="body-1 grey--text mt-3 wizard-prompt">{{ prompt }}</p>
     </v-flex>
 
     <need-picker
       :initialNeeds="initialNeeds"
       :maxSelections="1"
+      :belief="belief"
+      :reaction="reaction"
+      :origin="origin"
+      :feelings="feelings"
       @change="onChange">
     </need-picker>
 
@@ -34,6 +36,16 @@ import BeliefContext from '@/views/BeliefContext.vue';
 import FeelingWords from '@/components/FeelingWords.vue';
 import NeedPicker from '@/components/NeedPicker.vue';
 import ReframeCard from '@/components/ReframeCard.vue';
+
+// What the reframe says back, before it is said: the belief made sense at the
+// time, and the feelings it left behind point at what was actually wanted.
+const PROMPT_PREFIX = 'Diese Überzeugung hatte damals einen guten Grund. Sie war dein Weg, '
+  + 'etwas zu bekommen, das dir gefehlt hat. Lasse dich von deinen Gefühlen ';
+const PROMPT_SUFFIX = ' leiten. Wonach hast du dich gesehnt?';
+// Without feelings there is nothing to be led by, so the clause naming them is
+// dropped rather than shown empty.
+const PROMPT_FALLBACK = 'Diese Überzeugung hatte damals einen guten Grund. Sie war dein Weg, '
+  + 'etwas zu bekommen, das dir gefehlt hat. Wonach hast du dich gesehnt?';
 
 // The need and the gift are the same answer to the same question: what this
 // belief once did for you. So it is picked once, on one screen, and the reframe
@@ -51,11 +63,12 @@ export default {
   data() {
     return {
       needs: this.initialNeeds.slice(),
-      prompt: 'Wenn du die Überzeugung als Strategie betrachtest, '
-        + 'welches Bedürfnis hast du dir damit erfüllt?',
     };
   },
   computed: {
+    PROMPT_PREFIX() { return PROMPT_PREFIX; },
+    PROMPT_SUFFIX() { return PROMPT_SUFFIX; },
+    PROMPT_FALLBACK() { return PROMPT_FALLBACK; },
     gift() {
       const last = this.needs[this.needs.length - 1];
       return last ? last.name : null;
@@ -72,10 +85,4 @@ export default {
 
 <style scoped lang="scss">
 .belief-quote { font-style: italic; }
-.context-sentence {
-  font-size: 0.95rem;
-  color: #ebebf5;
-  line-height: 1.5;
-  margin-top: 14px;
-}
 </style>

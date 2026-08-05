@@ -54,6 +54,10 @@ export function categoryIdForNeed(name) {
   return entry ? entry.categoryId : null;
 }
 
+// The full 156 names, flat — for offering the tree to something that has to
+// pick from all of it at once, such as an AI suggestion prompt.
+export const ALL_NEED_NAMES = Object.keys(index);
+
 export function colorForNeed(name) {
   const id = categoryIdForNeed(name);
   return (id && NEED_CATEGORY_COLORS[id]) || UNKNOWN_NEED_COLOR;

@@ -2,6 +2,52 @@
   <v-flex>
     <p v-if="limitHint" class="limit-hint">{{ limitHint }}</p>
 
+    <!-- What the belief itself points at, before the full tree is offered. -->
+    <div class="suggest-row">
+      <template v-if="showApiKeyInput">
+        <p class="caption grey--text mb-1">Anthropic API Key eingeben, um Vorschläge zu generieren:</p>
+        <v-text-field
+          v-model="apiKeyInput"
+          label="API Key"
+          type="password"
+          single-line
+          hide-details
+          class="mb-2"
+        ></v-text-field>
+        <v-btn small flat color="primary" :disabled="!apiKeyInput" @click="saveApiKey">Speichern & generieren</v-btn>
+        <v-btn small flat color="grey" @click="showApiKeyInput = false">Abbrechen</v-btn>
+      </template>
+      <template v-else>
+        <v-btn small flat color="primary" class="ml-0" :loading="isLoading" @click="generateSuggestions">
+          <v-icon small left>lightbulb_outline</v-icon>
+          Vorschläge
+        </v-btn>
+        <v-btn v-if="apiKey" small flat icon @click="showApiKeyInput = true" title="API Key ändern">
+          <v-icon small color="grey lighten-1">settings</v-icon>
+        </v-btn>
+      </template>
+    </div>
+
+    <template v-if="suggestedNeeds.length">
+      <p class="caption grey--text mb-1">Passend zu deiner Überzeugung:</p>
+      <div class="chips-wrap mb-1">
+        <span
+          v-for="name in suggestedNeeds"
+          :key="'sugg-' + name"
+          class="my-chip"
+          :style="isSelected(name)
+            ? { backgroundColor: categoryColor(categoryIdFor(name)), color: '#000' }
+            : { backgroundColor: '#3a3a3c', color: categoryColor(categoryIdFor(name)) }"
+          @click="toggle(name)"
+        >{{ name }}</span>
+      </div>
+      <p class="suggest-hint">
+        Nicht das Richtige dabei? Wähle unten aus der vollständigen Liste.
+      </p>
+    </template>
+
+    <p v-if="errorMsg" class="caption error-text">{{ errorMsg }}</p>
+
     <div
       v-for="cat in categories"
       :key="cat.id"
@@ -69,6 +115,7 @@ import {
   needCategoryEmoji,
   categoryIdForNeed,
   sortNeeds,
+  ALL_NEED_NAMES,
 } from '@/utils/needs';
 
 // The Bedürfnis tree, drawn like the Gefühl tree: a card per Grundkategorie,
@@ -80,6 +127,12 @@ export default {
     initialNeeds: { type: Array, default: function() { return []; } },
     // How many may be picked at once. 0 means no limit.
     maxSelections: { type: Number, default: 0 },
+    // Context for the AI suggestion prompt only — nothing here changes what
+    // can be picked or how.
+    belief: { type: String, default: '' },
+    reaction: { type: String, default: '' },
+    origin: { type: String, default: '' },
+    feelings: { type: Array, default: function() { return []; } },
   },
   data: function() {
     return {
@@ -88,6 +141,12 @@ export default {
       selected: sortNeeds(this.initialNeeds.filter(function(n) { return n && n.name; })
         .map(function(n) { return { name: n.name, categoryId: categoryIdForNeed(n.name) }; })),
       categories: needCategories,
+      suggestedNeeds: [],
+      isLoading: false,
+      errorMsg: '',
+      showApiKeyInput: false,
+      apiKeyInput: '',
+      apiKey: localStorage.getItem('nvc.apiKey') || '',
     };
   },
   computed: {
@@ -98,6 +157,7 @@ export default {
   },
   methods: {
     categoryColor: function(id) { return needCategoryColor(id); },
+    categoryIdFor: function(name) { return categoryIdForNeed(name); },
     categoryEmoji: function(id) { return needCategoryEmoji(id); },
     isCategoryOpen: function(id) { return this.activeCategoryId === id; },
     isClusterOpen: function(id) { return this.activeClusterId === id; },
@@ -143,6 +203,69 @@ export default {
         return { name: n.name, categoryId: n.categoryId };
       }));
     },
+    saveApiKey: function() {
+      this.apiKey = this.apiKeyInput;
+      localStorage.setItem('nvc.apiKey', this.apiKey);
+      this.apiKeyInput = '';
+      this.showApiKeyInput = false;
+      this.generateSuggestions();
+    },
+    buildSuggestionsPrompt: function() {
+      var lines = ['Du hilfst dabei, das Bedürfnis hinter einer Überzeugung zu erkennen.'];
+      lines.push('Glaubenssatz: "' + this.belief + '"');
+      if (this.reaction) lines.push('Reaktion darauf: "' + this.reaction + '"');
+      if (this.origin) lines.push('Ursprung: "' + this.origin + '"');
+      var feelingNames = (this.feelings || [])
+        .map(function(f) { return f && f.name; })
+        .filter(Boolean)
+        .join(', ');
+      if (feelingNames) lines.push('Gefühle dabei: ' + feelingNames);
+      lines.push('Wähle genau 5 Bedürfnisse aus der folgenden Liste, die am ehesten erklären, '
+        + 'was diese Überzeugung dem Menschen damals erfüllt haben könnte:');
+      lines.push(ALL_NEED_NAMES.join(', '));
+      lines.push('Antworte ausschließlich mit diesen 5 Begriffen, exakt wie in der Liste geschrieben, '
+        + 'einer pro Zeile, ohne Nummerierung und ohne weiteren Text.');
+      return lines.join('\n');
+    },
+    async generateSuggestions() {
+      if (!this.apiKey) {
+        this.showApiKeyInput = true;
+        return;
+      }
+      this.isLoading = true;
+      this.errorMsg = '';
+      this.suggestedNeeds = [];
+      try {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'x-api-key': this.apiKey,
+            'anthropic-version': '2023-06-01',
+            'content-type': 'application/json',
+            'anthropic-dangerous-direct-browser-access': 'true',
+          },
+          body: JSON.stringify({
+            model: 'claude-haiku-4-5-20251001',
+            max_tokens: 200,
+            messages: [{ role: 'user', content: this.buildSuggestionsPrompt() }],
+          }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error((err.error && err.error.message) || `Fehler ${res.status}`);
+        }
+        const data = await res.json();
+        const lines = data.content[0].text.split('\n').map(s => s.trim()).filter(Boolean);
+        // Only real needs — a model can misspell or invent one that isn't in
+        // the tree, and a suggestion nobody can click is worse than none.
+        this.suggestedNeeds = lines.filter(name => ALL_NEED_NAMES.indexOf(name) !== -1).slice(0, 5);
+        if (!this.suggestedNeeds.length) throw new Error('Keine passenden Vorschläge erhalten.');
+      } catch (e) {
+        this.errorMsg = e.message || 'Vorschläge konnten nicht geladen werden.';
+      } finally {
+        this.isLoading = false;
+      }
+    },
   },
 };
 </script>
@@ -153,6 +276,13 @@ export default {
   color: #636366;
   margin: 10px 0 12px;
 }
+.suggest-row { margin-bottom: 4px; }
+.suggest-hint {
+  font-size: 0.78rem;
+  color: #8e8e93;
+  margin: 2px 0 14px;
+}
+.error-text { color: #ff453a; }
 
 .need-card {
   border: 1.5px solid;
