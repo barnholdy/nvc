@@ -46,6 +46,30 @@ taxonomy.grundemotionen.forEach((e) => {
   });
 });
 
+// Where a feeling sits in the tree, so a list of them can be put back into the
+// order the selection menu offers them in: Grundemotion, then Unterkategorie,
+// then the feeling itself.
+const feelingPlace = {};
+taxonomy.grundemotionen.forEach((e, ei) => {
+  e.unterkategorien.forEach((c, ci) => {
+    (c.gefuehle || []).forEach((f, fi) => {
+      feelingPlace[f.name] = [ei, ci, fi];
+    });
+  });
+});
+
+// Feelings saved before the taxonomy existed have no place in it; they keep
+// their own order and follow the ones that do.
+const UNPLACED = [Infinity, Infinity, Infinity];
+
+export function sortByEmotion(items) {
+  return (items || []).slice().sort((a, b) => {
+    const x = feelingPlace[a && a.name] || UNPLACED;
+    const y = feelingPlace[b && b.name] || UNPLACED;
+    return (x[0] - y[0]) || (x[1] - y[1]) || (x[2] - y[2]) || 0;
+  });
+}
+
 export function emotionIdForFeeling(name) {
   return feelingIndex[name] || null;
 }

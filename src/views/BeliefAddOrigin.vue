@@ -21,7 +21,7 @@
         placeholder="..."
         v-model="text"
         auto-grow
-        rows="6"
+        rows="9"
         hide-details
         @focus="$emit('focussed')"
         @blur="$emit('blurred')"

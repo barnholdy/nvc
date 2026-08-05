@@ -293,7 +293,14 @@ html, body {
   line-height: 1.6;
   letter-spacing: -0.02em;
 }
-.v-input textarea { resize: none; }
+/* Auto-grow makes a field follow its text, but a long answer would otherwise
+   push the question off the screen. It grows to about half the viewport and
+   scrolls inside itself from there. */
+.v-input textarea {
+  resize: none;
+  max-height: 40vh;
+  overflow-y: auto !important;
+}
 .v-input input::placeholder,
 .v-input textarea::placeholder {
   color: #8e8e93 !important;

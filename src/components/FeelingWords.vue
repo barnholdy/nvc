@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import { colorForFeeling, dedupeByName, joinNames } from '@/utils/emotions';
+import { colorForFeeling, dedupeByName, joinNames, sortByEmotion } from '@/utils/emotions';
 
 // Feelings named inside a sentence, each in its Grundemotion's colour. The
 // whole line is built in JS: with coloured spans between words, the template's
@@ -22,8 +22,12 @@ export default {
     fallback: { type: String, default: '' },
   },
   computed: {
+    // Named in the order the taxonomy holds them, so feelings from the same
+    // Grundemotion stand together instead of in the order they were tapped.
     items: function() {
-      return dedupeByName(this.feelings).filter(function(f) { return f && f.name; });
+      return sortByEmotion(
+        dedupeByName(this.feelings).filter(function(f) { return f && f.name; })
+      );
     },
     segments: function() {
       if (!this.items.length) return this.fallback ? [{ text: this.fallback }] : [];
