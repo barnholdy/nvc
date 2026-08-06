@@ -82,7 +82,6 @@
           :feelings="selectedFeelings"
           :needs="selectedNeeds"
           :origin="origin"
-          :gift="gift || ''"
           :initialValue="empathy"
           @changed="empathy = $event">
         </belief-add-empathy>

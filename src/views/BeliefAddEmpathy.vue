@@ -54,7 +54,6 @@ export default {
     feelings: { type: Array, default: () => [] },
     needs: { type: Array, default: () => [] },
     origin: { type: String, default: '' },
-    gift: { type: String, default: '' },
     initialValue: { type: String, default: '' },
   },
   computed: {
@@ -101,12 +100,12 @@ export default {
       parts.push({ text: ' gebracht. Heute darfst du prüfen, ob du sie noch brauchst.' });
       return parts;
     },
+    // Only what the request actually asks for reaches the panel: Überzeugung,
+    // Situation (read from `time` via the store), Reaktion, Gefühle, Ursprung,
+    // Bedürfnisse. `time` comes through from `base` unchanged.
     entryForPrompt() {
       const base = this.entry || {};
-      const reflection = Object.assign({}, base.reflection || {}, {
-        origin: this.origin,
-        originArc: Object.assign({}, (base.reflection || {}).originArc || {}, { gift: this.gift }),
-      });
+      const reflection = Object.assign({}, base.reflection || {}, { origin: this.origin });
       return Object.assign({}, base, {
         belief: this.belief,
         feelings: this.feelings,
