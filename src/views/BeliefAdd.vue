@@ -136,10 +136,12 @@ import BeliefAddCheck from '@/views/BeliefAddCheck.vue';
 import { beliefStatus } from '@/utils/beliefStatus';
 import { normalizeOriginArc } from '@/utils/originArc';
 import { MAX_FEELINGS, joinNames } from '@/utils/emotions';
+import { MAX_NEEDS } from '@/utils/needs';
 import taxonomy from '../assets/taxonomy.json';
 
 const FEELINGS_STEP = 4;
 const READINESS_STEP = 5;
+const NEEDS_STEP = 7;
 const TOTAL_STEPS = 10;
 
 export default {
@@ -195,6 +197,9 @@ export default {
       // Beliefs saved before the limit existed can carry more than five
       // feelings; the way forward opens once they are back within it.
       if (this.step === FEELINGS_STEP) return this.selectedFeelings.length <= MAX_FEELINGS;
+      // Same rule for the needs: any number can be picked, but naming more
+      // than a few says nothing in particular, so the way forward waits.
+      if (this.step === NEEDS_STEP) return this.selectedNeeds.length <= MAX_NEEDS;
       // The only hard gate in the whole wizard: saving needs an answer to the
       // check, because that answer decides whether the signpost was shown.
       if (this.step === TOTAL_STEPS) return !!this.mood;

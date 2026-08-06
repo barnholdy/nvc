@@ -1,8 +1,9 @@
 <template>
   <v-flex>
-    <p v-if="limitHint" class="limit-hint">{{ limitHint }}</p>
+    <p v-if="limitHint" class="limit-hint" :class="{ 'over-limit': isOverLimit }">{{ limitHint }}</p>
 
-    <!-- What the belief itself points at, before the full tree is offered. -->
+    <!-- Suggestions land as selections in the tree below rather than as a
+         separate strip, so there is only ever one place a need is chosen. -->
     <div class="suggest-row">
       <template v-if="showApiKeyInput">
         <p class="caption grey--text mb-1">Anthropic API Key eingeben, um Vorschläge zu generieren:</p>
@@ -28,23 +29,7 @@
       </template>
     </div>
 
-    <template v-if="suggestedNeeds.length">
-      <p class="caption grey--text mb-1">Passend zu deiner Überzeugung:</p>
-      <div class="chips-wrap mb-1">
-        <span
-          v-for="name in suggestedNeeds"
-          :key="'sugg-' + name"
-          class="my-chip"
-          :style="isSelected(name)
-            ? { backgroundColor: categoryColor(categoryIdFor(name)), color: '#000' }
-            : { backgroundColor: '#3a3a3c', color: categoryColor(categoryIdFor(name)) }"
-          @click="toggle(name)"
-        >{{ name }}</span>
-      </div>
-      <p class="suggest-hint">
-        Nicht das Richtige dabei? Wähle unten aus der vollständigen Liste.
-      </p>
-    </template>
+    <p v-if="suggestNote" class="suggest-hint">{{ suggestNote }}</p>
 
     <p v-if="errorMsg" class="caption error-text">{{ errorMsg }}</p>
 
@@ -125,7 +110,9 @@ export default {
   name: 'need-picker',
   props: {
     initialNeeds: { type: Array, default: function() { return []; } },
-    // How many may be picked at once. 0 means no limit.
+    // How many are recommended. Picking more is allowed — it is answered with
+    // a warning and a blocked way forward, not by refusing the tap. 0 means no
+    // recommendation.
     maxSelections: { type: Number, default: 0 },
     // Context for the AI suggestion prompt only — nothing here changes what
     // can be picked or how.
@@ -141,7 +128,7 @@ export default {
       selected: sortNeeds(this.initialNeeds.filter(function(n) { return n && n.name; })
         .map(function(n) { return { name: n.name, categoryId: categoryIdForNeed(n.name) }; })),
       categories: needCategories,
-      suggestedNeeds: [],
+      suggestNote: '',
       isLoading: false,
       errorMsg: '',
       showApiKeyInput: false,
@@ -150,8 +137,18 @@ export default {
     };
   },
   computed: {
+    isOverLimit: function() {
+      return !!this.maxSelections && this.selected.length > this.maxSelections;
+    },
+    // Says the recommendation out loud, and says it differently once it is
+    // exceeded — the way forward is blocked at that point and needs a reason
+    // on screen.
     limitHint: function() {
       if (!this.maxSelections) return '';
+      if (this.isOverLimit) {
+        return this.selected.length + ' von ' + this.maxSelections
+          + ' gewählt — entferne welche, um weiterzugehen.';
+      }
       if (this.maxSelections === 1) return 'Wähle ein Bedürfnis.';
       return 'Wähle bis zu ' + this.maxSelections + ' Bedürfnisse — '
         + this.selected.length + ' von ' + this.maxSelections + ' gewählt.';
@@ -159,7 +156,6 @@ export default {
   },
   methods: {
     categoryColor: function(id) { return needCategoryColor(id); },
-    categoryIdFor: function(name) { return categoryIdForNeed(name); },
     categoryEmoji: function(id) { return needCategoryEmoji(id); },
     isCategoryOpen: function(id) { return this.activeCategoryId === id; },
     isClusterOpen: function(id) { return this.activeClusterId === id; },
@@ -189,18 +185,16 @@ export default {
       if (!total) return 0;
       return Math.round((this.countIn(cluster) / total) * 100);
     },
+    // Any number may be picked; going over the recommendation is answered by
+    // the hint above and the blocked footer, never by dropping someone's
+    // earlier choice.
     toggle: function(name) {
       var idx = this.selected.findIndex(function(n) { return n.name === name; });
-      if (idx >= 0) {
-        this.selected.splice(idx, 1);
-      } else {
-        // Once the limit is full, a tap reads as "this one instead of the
-        // oldest" rather than being refused.
-        while (this.maxSelections && this.selected.length >= this.maxSelections) {
-          this.selected.shift();
-        }
-        this.selected.push({ name: name, categoryId: categoryIdForNeed(name) });
-      }
+      if (idx >= 0) this.selected.splice(idx, 1);
+      else this.selected.push({ name: name, categoryId: categoryIdForNeed(name) });
+      this.emitChange();
+    },
+    emitChange: function() {
       this.$emit('change', sortNeeds(this.selected).map(function(n) {
         return { name: n.name, categoryId: n.categoryId };
       }));
@@ -236,7 +230,7 @@ export default {
       }
       this.isLoading = true;
       this.errorMsg = '';
-      this.suggestedNeeds = [];
+      this.suggestNote = '';
       try {
         const res = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
@@ -259,9 +253,21 @@ export default {
         const data = await res.json();
         const lines = data.content[0].text.split('\n').map(s => s.trim()).filter(Boolean);
         // Only real needs — a model can misspell or invent one that isn't in
-        // the tree, and a suggestion nobody can click is worse than none.
-        this.suggestedNeeds = lines.filter(name => ALL_NEED_NAMES.indexOf(name) !== -1).slice(0, 5);
-        if (!this.suggestedNeeds.length) throw new Error('Keine passenden Vorschläge erhalten.');
+        // the tree, and a suggestion that selects nothing is worse than none.
+        const suggested = lines.filter(name => ALL_NEED_NAMES.indexOf(name) !== -1).slice(0, 5);
+        if (!suggested.length) throw new Error('Keine passenden Vorschläge erhalten.');
+        // Purely additive: what was already picked by hand stays, and stays
+        // where it is. Only genuinely new names are added.
+        const added = suggested.filter(name => !this.isSelected(name));
+        added.forEach((name) => {
+          this.selected.push({ name: name, categoryId: categoryIdForNeed(name) });
+        });
+        // No need to unfold anything: a category header already lists what is
+        // selected inside it, so the new picks are visible where they landed.
+        this.emitChange();
+        this.suggestNote = added.length
+          ? `${added.length} ${added.length === 1 ? 'Vorschlag' : 'Vorschläge'} in der Liste ausgewählt.`
+          : 'Alle Vorschläge waren schon ausgewählt.';
       } catch (e) {
         this.errorMsg = e.message || 'Vorschläge konnten nicht geladen werden.';
       } finally {
@@ -277,6 +283,10 @@ export default {
   font-size: 0.8rem;
   color: #636366;
   margin: 10px 0 12px;
+  &.over-limit {
+    color: #fd9927;
+    font-weight: 600;
+  }
 }
 .suggest-row { margin-bottom: 4px; }
 .suggest-hint {

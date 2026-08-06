@@ -36,6 +36,11 @@ const CATEGORY_EMOJI = {
 // app's old single need colour rather than being mis-filed under a category.
 export const UNKNOWN_NEED_COLOR = '#c8963e';
 
+// How many needs the wizard recommends naming. More can be picked — the step
+// warns and holds the way forward rather than refusing the tap — but naming a
+// dozen says nothing in particular.
+export const MAX_NEEDS = 3;
+
 export const needCategories = taxonomy.beduerfnis_grundkategorien;
 
 // name -> { categoryId, place } indexed once at module load. Every need appears
