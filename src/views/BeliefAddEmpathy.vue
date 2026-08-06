@@ -8,20 +8,15 @@
            recalled from memory before asking for a mirror. -->
       <belief-context :reaction="reaction" :origin="origin"></belief-context>
 
-      <p class="context-sentence">Diese Überzeugung war kein Fehler.</p>
-
-      <!-- Assembled in JS, like every other sentence naming feelings or needs:
-           coloured spans need to sit inside the sentence without the
-           template's whitespace handling eating the spaces around them. -->
-      <p class="context-sentence"><span
+      <!-- The reframe and the ask are one block: the sentence only lands if it
+           is read in one go. Assembled in JS, like every other sentence naming
+           feelings or needs — the template's whitespace handling would eat the
+           spaces around the coloured spans. -->
+      <p class="body-1 white--text mt-4 wizard-prompt"><span
         v-for="(seg, i) in reframeSegments"
         :key="i"
         :style="seg.color ? { color: seg.color, fontWeight: 600 } : null"
       >{{ seg.text }}</span></p>
-
-      <p class="body-1 white--text mt-4 wizard-prompt">
-        Lass dir einfühlsam spiegeln, was du gerade erlebst.
-      </p>
     </v-flex>
 
     <v-flex>
@@ -64,12 +59,12 @@ export default {
     sortedNeeds() {
       return sortNeeds(dedupeByName(this.needs).filter(n => n && n.name));
     },
-    // "Du fühltest dich X, Y und Z. …sie hat dir damals A und B gebracht. …" —
-    // one sentence, two coloured lists. Built in JS like ActionPrompt.vue for
-    // the same reason: a template's whitespace handling would eat the spaces
-    // around coloured spans placed mid-sentence.
+    // The whole block, from "kein Fehler" to the ask, with two coloured lists
+    // woven through it. Built in JS like ActionPrompt.vue for the same reason:
+    // a template's whitespace handling would eat the spaces around coloured
+    // spans placed mid-sentence.
     reframeSegments() {
-      const parts = [];
+      const parts = [{ text: 'Diese Überzeugung war kein Fehler. ' }];
       const feelings = this.sortedFeelings;
       const needs = this.sortedNeeds;
       // Without feelings there is nothing to name, so the leading clause is
@@ -97,7 +92,10 @@ export default {
       } else {
         parts.push({ text: 'etwas Wichtiges' });
       }
-      parts.push({ text: ' gebracht. Heute darfst du prüfen, ob du sie noch brauchst.' });
+      parts.push({
+        text: ' gebracht. Heute darfst du prüfen, ob du sie noch brauchst.'
+          + ' Lass dir einfühlsam spiegeln, was du gerade erlebst.',
+      });
       return parts;
     },
     // Only what the request actually asks for reaches the panel: Überzeugung,
@@ -120,10 +118,4 @@ export default {
 
 <style scoped lang="scss">
 .belief-quote { font-style: italic; }
-.context-sentence {
-  font-size: 0.95rem;
-  color: #ebebf5;
-  line-height: 1.5;
-  margin-top: 14px;
-}
 </style>

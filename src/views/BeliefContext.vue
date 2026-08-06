@@ -8,9 +8,18 @@
       <p class="context-label">Neue Perspektive</p>
       <p class="context-text">{{ perspective }}</p>
     </div>
+    <!-- Folded by default: it is free text from an earlier step, and the
+         question this screen actually asks belongs above the fold. -->
     <div v-if="reaction" class="context-block">
-      <p class="context-label">Reaktion</p>
-      <p class="context-text">{{ reaction }}</p>
+      <div class="context-toggle" @click="isReactionOpen = !isReactionOpen">
+        <span class="context-label toggle-label">
+          {{ isReactionOpen ? 'Reaktion ausblenden' : 'Reaktion anzeigen' }}
+        </span>
+        <v-icon small class="context-chevron">
+          {{ isReactionOpen ? 'expand_more' : 'chevron_right' }}
+        </v-icon>
+      </div>
+      <p v-if="isReactionOpen" class="context-text mt-1">{{ reaction }}</p>
     </div>
     <div v-if="feelings.length" class="context-block">
       <p class="context-label">Gefühle</p>
@@ -21,8 +30,15 @@
       <feeling-chips :items="needs" type="needs"></feeling-chips>
     </div>
     <div v-if="origin" class="context-block">
-      <p class="context-label">Ursprung</p>
-      <p class="context-text">{{ origin }}</p>
+      <div class="context-toggle" @click="isOriginOpen = !isOriginOpen">
+        <span class="context-label toggle-label">
+          {{ isOriginOpen ? 'Ursprung ausblenden' : 'Ursprung anzeigen' }}
+        </span>
+        <v-icon small class="context-chevron">
+          {{ isOriginOpen ? 'expand_more' : 'chevron_right' }}
+        </v-icon>
+      </div>
+      <p v-if="isOriginOpen" class="context-text mt-1">{{ origin }}</p>
     </div>
   </div>
 </template>
@@ -43,6 +59,9 @@ export default {
     needs: { type: Array, default: () => [] },
     origin: { type: String, default: '' },
   },
+  data() {
+    return { isReactionOpen: false, isOriginOpen: false };
+  },
 };
 </script>
 
@@ -62,4 +81,15 @@ export default {
   line-height: 1.5;
   margin: 0;
 }
+.context-toggle {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+// The label carries the tap, so its bottom margin would space the collapsed
+// block out for nothing.
+.toggle-label { margin: 0; }
+.context-chevron { color: #636366 !important; margin-left: 2px; }
+.mt-1 { margin-top: 6px !important; }
 </style>
