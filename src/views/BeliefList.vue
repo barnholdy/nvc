@@ -142,6 +142,109 @@
               <p class="expand-label mt-3">Bedürfnisse</p>
               <feeling-chips :items="entry.needs" type="needs" class="mb-2"></feeling-chips>
             </template>
+
+            <!-- Below the six the wizard collects, and folded away, because it
+                 is the longest text here. -->
+            <template v-if="entry.empathy">
+              <div class="section-toggle" @click.stop="isEmpathyOpen = !isEmpathyOpen">
+                <span class="section-toggle-label">
+                  {{ isEmpathyOpen ? 'Empathie ausblenden' : 'Empathie anzeigen' }}
+                </span>
+                <v-icon small class="section-chevron">
+                  {{ isEmpathyOpen ? 'expand_more' : 'chevron_right' }}
+                </v-icon>
+              </div>
+              <p v-if="isEmpathyOpen" class="expand-text empathy-text mt-2">{{ entry.empathy }}</p>
+            </template>
+
+            <!-- What wandeln and handeln added afterwards. -->
+            <template v-if="hasChangeData(entry) || (entry.affirmations && entry.affirmations.length)">
+              <template v-if="entry.reflection && entry.reflection.exceptions">
+                <p class="expand-label mt-3">Ausnahmen</p>
+                <p class="expand-text">{{ entry.reflection.exceptions }}</p>
+              </template>
+              <template v-if="entry.reflection && entry.reflection.withoutBelief">
+                <p class="expand-label mt-3">Neue Perspektive</p>
+                <p class="expand-text">{{ entry.reflection.withoutBelief }}</p>
+              </template>
+              <template v-if="entry.reflection && entry.reflection.withoutBeliefFeelings
+                && entry.reflection.withoutBeliefFeelings.length">
+                <p class="expand-label mt-3">Neue Gefühle</p>
+                <feeling-chips
+                  :items="entry.reflection.withoutBeliefFeelings"
+                  type="feelings"
+                  class="mb-1"
+                ></feeling-chips>
+              </template>
+              <template v-if="entry.reflection && typeof entry.reflection.bodyIntensity === 'number'">
+                <p class="expand-label mt-3">Körperempfindung</p>
+                <div class="slider-row">
+                  <span class="slider-end-label">0</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="10"
+                    :value="entry.reflection.bodyIntensity"
+                    class="readonly-slider"
+                    disabled
+                  />
+                  <span class="slider-end-label">10</span>
+                </div>
+              </template>
+              <template v-if="entry.affirmations && entry.affirmations.length">
+                <p class="expand-label mt-3">Affirmation</p>
+                <div
+                  v-for="(a, i) in entry.affirmations"
+                  :key="'aff-' + i"
+                  class="linked-row"
+                  @click.stop="openAffirmations()"
+                >
+                  <div class="linked-row-body">
+                    <p class="expand-text">{{ a.text }}</p>
+                    <span class="status-pill" :style="{ color: affStatusColor(a.text) }">
+                      {{ affStatusLabel(a.text) }}
+                    </span>
+                    <p class="expand-label mt-2">Glaubwürdigkeit</p>
+                    <div class="slider-row">
+                      <span class="slider-end-label">0</span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="10"
+                        :value="truthOf(a)"
+                        class="readonly-slider"
+                        disabled
+                      />
+                      <span class="slider-end-label">10</span>
+                    </div>
+                  </div>
+                  <v-icon small class="linked-chevron">chevron_right</v-icon>
+                </div>
+              </template>
+              <template v-if="experimentsOf(entry).length">
+                <p class="expand-label mt-3">Verhaltensexperimente</p>
+                <div
+                  v-for="x in experimentsOf(entry)"
+                  :key="x.id"
+                  class="linked-row"
+                  @click.stop="editExperiment(entry, x)"
+                >
+                  <div class="linked-row-body">
+                    <p class="expand-text">{{ x.situation }}</p>
+                    <span class="status-pill" :style="{ color: experimentStateColor(x) }">
+                      {{ experimentStateLabel(x) }}
+                    </span>
+                    <span v-if="experimentGap(x) !== null" class="experiment-gap">
+                      Erwartet {{ x.fearExpected }} → real {{ x.fearActual }}
+                      <span :style="{ color: gapColor(experimentGap(x)) }">
+                        ({{ experimentGap(x) > 0 ? '−' : '+' }}{{ Math.abs(experimentGap(x)) }})
+                      </span>
+                    </span>
+                  </div>
+                  <v-icon small class="linked-chevron">chevron_right</v-icon>
+                </div>
+              </template>
+            </template>
           </div>
 
           <div :key="entry.time + '-sep'" class="ios-sep" v-if="idx < filteredBeliefs.length - 1"></div>
@@ -179,8 +282,21 @@
 
 <script>
 import FeelingChips from '@/components/FeelingChips.vue';
-import { beliefStatus, isBeliefStatus } from '@/utils/beliefStatus';
+import { beliefStatus, hasChangeData, isBeliefStatus } from '@/utils/beliefStatus';
+import {
+  fearGap,
+  fearGapColor,
+  experimentStateLabel as stateLabelOf,
+  experimentStateColor as stateColorOf,
+  experimentsOf,
+} from '@/utils/experiment';
+import { normalizeTruth } from '@/utils/affirmationTruth';
 import { beliefCredibility } from '@/utils/credibility';
+import {
+  loadAffStatusMap,
+  affirmationStatusLabel,
+  affirmationStatusColor,
+} from '@/utils/affirmationStatus';
 
 export default {
   name: 'belief-list',
@@ -189,17 +305,19 @@ export default {
     return {
       openEntry: null,
       isOriginOpen: false,
+      isEmpathyOpen: false,
       entryToDelete: null,
       isDeleteDialogShowing: false,
       // Saving a belief returns here with the tab it now belongs to.
       tab: isBeliefStatus(this.$route.query.tab) ? this.$route.query.tab : 'open',
+      affStatusMap: loadAffStatusMap(),
       sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
   },
   watch: {
     tab() {
       this.sw.openIdx = null; this.sw.openDir = null;
-      this.openEntry = null; this.isOriginOpen = false;
+      this.openEntry = null; this.isOriginOpen = false; this.isEmpathyOpen = false;
     },
   },
   computed: {
@@ -231,6 +349,7 @@ export default {
       // Every belief starts with its folded sections closed again — a previous
       // tap must not carry over to the next one.
       this.isOriginOpen = false;
+      this.isEmpathyOpen = false;
     },
     // The average across every situation and every evaluated experiment. Null
     // while nothing was ever rated, because a slider at zero would claim an
@@ -238,9 +357,29 @@ export default {
     credibility(entry) {
       return beliefCredibility(this.$store.getters.patterns, entry);
     },
+    // Still a method: the template calls hasChangeData(entry) directly.
+    hasChangeData(entry) { return hasChangeData(entry); },
+    experimentsOf(entry) { return experimentsOf(entry); },
+    experimentGap(x) { return fearGap(x); },
+    experimentStateColor(x) { return stateColorOf(x); },
+    experimentStateLabel(x) { return stateLabelOf(x); },
+    gapColor(gap) { return fearGapColor(gap); },
+    truthOf(a) { return normalizeTruth(a.resonance); },
+    affStatusLabel(text) { return affirmationStatusLabel(text, this.affStatusMap); },
+    affStatusColor(text) { return affirmationStatusColor(text, this.affStatusMap); },
     editPattern(p) {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.$router.push(`/edit-pattern/${p.time}`);
+    },
+    // Editing an affirmation lives in the wandeln wizard now; from here the
+    // row just opens the list it belongs to.
+    openAffirmations() {
+      this.sw.openIdx = null; this.sw.openDir = null;
+      this.$router.push('/affirmations');
+    },
+    editExperiment(entry, x) {
+      this.sw.openIdx = null; this.sw.openDir = null;
+      this.$router.push(`/act-belief/${entry.time}/${x.id}`);
     },
     changeEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/change-belief/${entry.time}`); },
     actEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/act-belief/${entry.time}`); },
@@ -486,6 +625,8 @@ export default {
 }
 .section-chevron { color: #636366 !important; margin-left: 2px; }
 .expand-text { font-size: 0.93rem; color: #ebebf5; margin: 0; line-height: 1.5; }
+.empathy-text { white-space: pre-wrap; }
+.experiment-gap { display: block; font-size: 0.78rem; color: #8e8e93; margin: 2px 0 0; }
 
 /* Shows a recorded value — deliberately not interactive. */
 .slider-row {
@@ -537,6 +678,15 @@ export default {
   &:active { opacity: 0.6; }
 }
 .linked-row-body { flex: 1; min-width: 0; }
+.status-pill {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: #2c2c2e;
+  border-radius: 20px;
+  padding: 1px 8px;
+}
 .linked-chevron {
   color: #636366 !important;
   font-size: 1.1rem !important;
