@@ -4,9 +4,9 @@
       <p class="context-label">Situation</p>
       <p class="context-text">{{ situation }}</p>
     </div>
-    <!-- Folded by default, like every other block here: it is free text from
-         an earlier step, and the question this screen actually asks belongs
-         above the fold. -->
+    <!-- Every block of free text carried in from an earlier step is folded by
+         default: the question this screen actually asks belongs above the
+         fold, not below whatever was written before it. -->
     <div v-if="exceptions" class="context-block">
       <div class="context-toggle" @click="isExceptionsOpen = !isExceptionsOpen">
         <span class="context-label toggle-label">
@@ -19,8 +19,15 @@
       <p v-if="isExceptionsOpen" class="context-text mt-1">{{ exceptions }}</p>
     </div>
     <div v-if="perspective" class="context-block">
-      <p class="context-label">Neue Reaktion</p>
-      <p class="context-text">{{ perspective }}</p>
+      <div class="context-toggle" @click="isPerspectiveOpen = !isPerspectiveOpen">
+        <span class="context-label toggle-label">
+          {{ isPerspectiveOpen ? 'Neue Reaktion ausblenden' : 'Neue Reaktion anzeigen' }}
+        </span>
+        <v-icon small class="context-chevron">
+          {{ isPerspectiveOpen ? 'expand_more' : 'chevron_right' }}
+        </v-icon>
+      </div>
+      <p v-if="isPerspectiveOpen" class="context-text mt-1">{{ perspective }}</p>
     </div>
     <div v-if="reaction" class="context-block">
       <div class="context-toggle" @click="isReactionOpen = !isReactionOpen">
@@ -73,7 +80,12 @@ export default {
     origin: { type: String, default: '' },
   },
   data() {
-    return { isExceptionsOpen: false, isReactionOpen: false, isOriginOpen: false };
+    return {
+      isExceptionsOpen: false,
+      isPerspectiveOpen: false,
+      isReactionOpen: false,
+      isOriginOpen: false,
+    };
   },
 };
 </script>
