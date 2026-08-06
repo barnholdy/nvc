@@ -39,15 +39,22 @@ function byTime(points) {
   return points.slice().sort((a, b) => a.time - b.time);
 }
 
+// What one belief was rated at in one situation, recorded when it was added
+// there. Null when that situation never rated it.
+export function beliefTruthIn(pattern, belief) {
+  const map = pattern && pattern.beliefTruths;
+  if (!map || typeof map !== 'object' || !belief) return null;
+  const value = map[belief.time];
+  return isRating(value) ? value : null;
+}
+
 // Every reading one belief has collected, oldest first.
 export function beliefPoints(patterns, belief) {
   if (!belief) return [];
   const points = [];
   list(patterns).forEach((p) => {
-    const map = p && p.beliefTruths;
-    if (!map || typeof map !== 'object') return;
-    const value = map[belief.time];
-    if (!isRating(value)) return;
+    const value = beliefTruthIn(p, belief);
+    if (value === null) return;
     points.push({
       time: p.time,
       value: value,

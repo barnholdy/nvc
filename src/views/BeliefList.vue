@@ -113,6 +113,23 @@
               >
                 <div class="linked-row-body">
                   <p class="expand-text">{{ p.trigger || p.name }}</p>
+                  <!-- What this belief was rated at in this situation, on the
+                       scale it was rated on. -->
+                  <template v-if="situationTruth(p, entry) !== null">
+                    <p class="expand-label mt-2">Glaubwürdigkeit</p>
+                    <div class="slider-row">
+                      <span class="slider-end-label">0</span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="10"
+                        :value="situationTruth(p, entry)"
+                        class="readonly-slider"
+                        disabled
+                      />
+                      <span class="slider-end-label">10</span>
+                    </div>
+                  </template>
                 </div>
                 <v-icon small class="linked-chevron">chevron_right</v-icon>
               </div>
@@ -240,6 +257,39 @@
                         ({{ experimentGap(x) > 0 ? '−' : '+' }}{{ Math.abs(experimentGap(x)) }})
                       </span>
                     </span>
+                    <!-- Both readings the evaluation took, each on its own
+                         scale — an experiment can lower the belief without
+                         raising the affirmation. -->
+                    <template v-if="typeof x.beliefTruth === 'number'">
+                      <p class="expand-label mt-2">Glaubwürdigkeit Überzeugung</p>
+                      <div class="slider-row">
+                        <span class="slider-end-label">0</span>
+                        <input
+                          type="range"
+                          min="0"
+                          max="10"
+                          :value="x.beliefTruth"
+                          class="readonly-slider"
+                          disabled
+                        />
+                        <span class="slider-end-label">10</span>
+                      </div>
+                    </template>
+                    <template v-if="typeof x.affirmationTruth === 'number'">
+                      <p class="expand-label mt-2">Glaubwürdigkeit Affirmation</p>
+                      <div class="slider-row">
+                        <span class="slider-end-label">0</span>
+                        <input
+                          type="range"
+                          min="0"
+                          max="10"
+                          :value="x.affirmationTruth"
+                          class="readonly-slider"
+                          disabled
+                        />
+                        <span class="slider-end-label">10</span>
+                      </div>
+                    </template>
                   </div>
                   <v-icon small class="linked-chevron">chevron_right</v-icon>
                 </div>
@@ -291,7 +341,7 @@ import {
   experimentsOf,
 } from '@/utils/experiment';
 import { normalizeTruth } from '@/utils/affirmationTruth';
-import { beliefCredibility } from '@/utils/credibility';
+import { beliefCredibility, beliefTruthIn } from '@/utils/credibility';
 import {
   loadAffStatusMap,
   affirmationStatusLabel,
@@ -357,6 +407,8 @@ export default {
     credibility(entry) {
       return beliefCredibility(this.$store.getters.patterns, entry);
     },
+    // What this one situation recorded, as opposed to the average above.
+    situationTruth(pattern, entry) { return beliefTruthIn(pattern, entry); },
     // Still a method: the template calls hasChangeData(entry) directly.
     hasChangeData(entry) { return hasChangeData(entry); },
     experimentsOf(entry) { return experimentsOf(entry); },

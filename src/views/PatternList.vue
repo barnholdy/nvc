@@ -131,6 +131,7 @@
 <script>
 import moment from 'moment';
 import { beliefStatusLabel, beliefStatusColor } from '@/utils/beliefStatus';
+import { beliefTruthIn } from '@/utils/credibility';
 
 export default {
   name: 'pattern-list',
@@ -153,11 +154,7 @@ export default {
       return (entry.beliefs || []).map(id => beliefs.find(b => b.time === id)).filter(Boolean);
     },
     // Recorded on the situation when the belief was added to it.
-    truthOf(entry, belief) {
-      const map = (entry && entry.beliefTruths) || {};
-      const v = map[belief.time];
-      return typeof v === 'number' ? v : null;
-    },
+    truthOf(entry, belief) { return beliefTruthIn(entry, belief); },
     statusLabel(belief) { return beliefStatusLabel(belief); },
     statusColor(belief) { return beliefStatusColor(belief); },
     editBelief(belief) {
