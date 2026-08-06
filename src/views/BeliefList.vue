@@ -126,7 +126,7 @@
               <p class="expand-text">{{ entry.withBelief }}</p>
             </template>
             <template v-if="entry.needs && entry.needs.length">
-              <p class="expand-label mt-3">Bedürfnis</p>
+              <p class="expand-label mt-3">Bedürfnisse</p>
               <feeling-chips :items="entry.needs" type="needs" class="mb-2"></feeling-chips>
             </template>
             <!-- Childhood material is reopened by a deliberate tap, never as a
@@ -145,7 +145,7 @@
                   <p class="expand-text mt-2">{{ entry.reflection.origin }}</p>
                 </template>
                 <template v-if="originArc(entry).gift">
-                  <p class="expand-label mt-3">Bedürfnis</p>
+                  <p class="expand-label mt-3">Bedürfnisse</p>
                   <p class="expand-text">{{ originArc(entry).gift }}</p>
                 </template>
                 <template v-if="originArc(entry).grounding.length">
