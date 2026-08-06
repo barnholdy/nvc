@@ -135,7 +135,7 @@ export default new Vuex.Store({
                 },
               };
               migratedBeliefs.push(belief);
-              return { time: p.time, trigger: p.trigger || '', beliefs: [belief.time], name: p.name || '' };
+              return { time: p.time, trigger: p.trigger || '', beliefs: [belief.time] };
             }
             return p;
           });
@@ -144,6 +144,21 @@ export default new Vuex.Store({
             const existingBeliefs = existingBeliefsJson ? JSON.parse(existingBeliefsJson) : [];
             const allBeliefs = existingBeliefs.concat(migratedBeliefs);
             localStorage.setItem(BELIEFS_STORAGE_KEY, JSON.stringify(allBeliefs));
+            localStorage.setItem(PATTERNS_STORAGE_KEY, JSON.stringify(patterns));
+          }
+          // The wizard no longer asks for a name — the situation text is what
+          // the row shows. Where a situation only ever had a name, that name is
+          // the only description it has, so it becomes the text rather than
+          // being thrown away.
+          let droppedName = false;
+          patterns = patterns.map(function(p) {
+            if (typeof p.name === 'undefined') return p;
+            droppedName = true;
+            const cleaned = Object.assign({}, p, { trigger: p.trigger || p.name || '' });
+            delete cleaned.name;
+            return cleaned;
+          });
+          if (droppedName) {
             localStorage.setItem(PATTERNS_STORAGE_KEY, JSON.stringify(patterns));
           }
           commit('setPatterns', patterns);

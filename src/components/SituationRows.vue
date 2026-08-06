@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-for="p in situations" :key="p.time" class="situation-row">
-      <p class="situation-text">{{ p.trigger || p.name }}</p>
+      <p class="situation-text">{{ p.trigger }}</p>
     </div>
   </div>
 </template>

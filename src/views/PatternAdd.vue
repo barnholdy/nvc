@@ -30,16 +30,6 @@
           @changed="selectedBeliefIds = $event"
           @truthsChanged="beliefTruths = $event">
         </pattern-add-beliefs>
-
-        <pattern-add-name
-          v-show="step === 3"
-          :beliefs="selectedBeliefObjects"
-          :trigger="trigger"
-          :initialValue="name"
-          @changed="name = $event"
-          @focussed="isFooterFixed = false"
-          @blurred="isFooterFixed = true">
-        </pattern-add-name>
       </v-container>
 
       <v-footer :fixed="isFooterFixed" color="white elevation-3" height="44">
@@ -65,26 +55,23 @@
 <script>
 import PatternAddTrigger from '@/views/PatternAddTrigger.vue';
 import PatternAddBeliefs from '@/views/PatternAddBeliefs.vue';
-import PatternAddName from '@/views/PatternAddName.vue';
 
 export default {
   name: 'pattern-add',
   components: {
     PatternAddTrigger,
     PatternAddBeliefs,
-    PatternAddName,
   },
   data() {
     var editEntry = this.$store.getters.patterns
       .find(function(p) { return p.time === parseInt(this.$route.params.time, 10); }, this);
     return {
       step: 1,
-      totalSteps: 3,
+      totalSteps: 2,
       editEntry: editEntry || null,
       trigger: editEntry ? editEntry.trigger || '' : '',
       selectedBeliefIds: editEntry ? editEntry.beliefs || [] : [],
       beliefTruths: editEntry ? editEntry.beliefTruths || {} : {},
-      name: editEntry ? editEntry.name || '' : '',
       isFooterFixed: true,
     };
   },
@@ -94,12 +81,6 @@ export default {
     },
     allBeliefs() {
       return this.$store.getters.beliefs;
-    },
-    selectedBeliefObjects() {
-      var beliefs = this.$store.getters.beliefs;
-      return this.selectedBeliefIds.map(function(id) {
-        return beliefs.find(function(b) { return b.time === id; });
-      }).filter(Boolean);
     },
     isStepComplete() {
       if (this.step === 2) return this.selectedBeliefIds.length > 0;
@@ -122,7 +103,6 @@ export default {
         // How true each belief was held at this point in time. Stored on the
         // situation, so repeated situations form a trend per belief.
         beliefTruths: this.beliefTruths,
-        name: this.name,
       };
       if (this.isEditMode) {
         this.$store.dispatch('updatePattern', Object.assign({}, this.editEntry, payload));

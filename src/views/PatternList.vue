@@ -47,7 +47,7 @@
             </div>
             <div class="ios-row" :style="rowSt(idx, 65)" @click="deskClick(idx)">
               <div class="row-body">
-                <p class="row-title">{{ entry.name }}</p>
+                <p class="row-title">{{ entry.trigger }}</p>
                 <p class="row-meta">{{ formatTime(entry.time) }}</p>
               </div>
               <v-icon class="row-chevron" :class="{ rotated: openEntry === entry.time }">chevron_right</v-icon>
@@ -58,12 +58,10 @@
             :key="entry.time + '-expand'"
             class="row-expand"
           >
-            <template v-if="entry.trigger">
-              <p class="expand-label">Situation</p>
-              <p class="expand-text">{{ entry.trigger }}</p>
-            </template>
+            <!-- The row itself is the situation text now, so repeating it here
+                 would only say the same thing twice. -->
             <template v-if="getBeliefs(entry).length">
-              <p class="expand-label" :class="entry.trigger ? 'mt-3' : ''">Überzeugungen</p>
+              <p class="expand-label">Überzeugungen</p>
               <div
                 v-for="b in getBeliefs(entry)"
                 :key="b.time"

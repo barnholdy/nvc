@@ -112,7 +112,7 @@
                 @click.stop="editPattern(p)"
               >
                 <div class="linked-row-body">
-                  <p class="expand-text">{{ p.trigger || p.name }}</p>
+                  <p class="expand-text">{{ p.trigger }}</p>
                   <!-- What this belief was rated at in this situation, on the
                        scale it was rated on. -->
                   <template v-if="situationTruth(p, entry) !== null">

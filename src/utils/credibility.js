@@ -59,7 +59,7 @@ export function beliefPoints(patterns, belief) {
       time: p.time,
       value: value,
       source: 'situation',
-      label: p.name || p.trigger || '',
+      label: p.trigger || '',
     });
   });
   return byTime(points.concat(experimentPoints(belief, 'beliefTruth')));

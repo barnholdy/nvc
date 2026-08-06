@@ -154,6 +154,7 @@
 
 <script>
 import { SUPPORT_RESOURCE } from '@/utils/support';
+import { reloadFresh } from '@/utils/appUpdate';
 
 export default {
   name: 'settings-view',
@@ -245,8 +246,11 @@ export default {
       localStorage.removeItem('nvc.onboarded');
       this.$root.$emit('show-onboarding');
     },
+    // reload(true) has not forced anything since the forceReload argument was
+    // dropped from the standard, so this button could re-serve the very page
+    // it was pressed to replace. A URL the cache has no entry for does work.
     reloadApp() {
-      window.location.reload(true);
+      reloadFresh();
     },
     resetData() {
       this.showResetDialog = false;

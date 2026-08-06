@@ -112,7 +112,7 @@ export default {
         lines.push('MUSTER:');
         patterns.forEach((p, i) => {
           lines.push('');
-          lines.push(`Muster ${i + 1}${p.name ? ` (${p.name})` : ''}:`);
+          lines.push(`Muster ${i + 1}${p.trigger ? ` (${p.trigger})` : ''}:`);
           if (p.trigger) lines.push(`  Situation: ${p.trigger}`);
           const linked = (p.beliefs || []).map(id => beliefs.find(b => b.time === id)).filter(Boolean);
           if (linked.length) {
