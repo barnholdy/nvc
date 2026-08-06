@@ -2,12 +2,17 @@
 
 # Publish dist/ to the gh-pages branch.
 #
-# The new build is laid *on top of* what is already published rather than
-# replacing it. Every build gives its files new hashed names, so a page still
-# sitting in a browser cache asks for the previous build's files — and if the
-# deploy deleted them, every script 404s and the app comes up black. Keeping the
-# old files costs a few hundred KB per deploy and lets a stale page keep working
-# until it picks up the new index.html.
+# This replaces what was published rather than adding to it. Overlaying was the
+# first answer to a cached page asking for files a deploy had deleted — every
+# script 404s and the app comes up black — but it never removes anything, and
+# after a few dozen deploys the branch had grown to 26 MB across 618 files,
+# which is a lot for Pages to build and hand over on every push.
+#
+# Two things make replacing safe now. index.html carries a guard that reloads
+# under a fresh URL when one of its own scripts fails to load, so a stale page
+# repairs itself instead of sitting there black. And the running app compares
+# its build stamp against build.json on start, so it picks up a new deploy
+# without being asked.
 
 # abort on errors
 set -e
@@ -19,16 +24,10 @@ BRANCH="gh-pages"
 npm run build
 
 WORK="$(mktemp -d)"
+mkdir -p "$WORK/live"
 
-# Start from what is published today, if anything is.
-if git clone -q --depth 1 --branch "$BRANCH" "$REPO" "$WORK/live" 2>/dev/null; then
-  rm -rf "$WORK/live/.git"
-else
-  mkdir -p "$WORK/live"
-fi
-
-# Overlay: index.html, manifest and favicons are overwritten, hashed assets
-# simply join the ones already there.
+# Just this build. .nojekyll rides along from public/, so Pages hands the files
+# over as they are instead of running them through Jekyll first.
 cp -R dist/. "$WORK/live/"
 
 cd "$WORK/live"
