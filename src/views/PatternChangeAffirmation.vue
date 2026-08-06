@@ -1,15 +1,15 @@
 <template>
   <v-layout column>
     <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">Affirmationen</h1>
+      <h1 class="headline font-weight-regular">Affirmation</h1>
       <p v-if="belief" class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
-      <belief-context :perspective="withoutBelief"></belief-context>
+      <belief-context :exceptions="exceptions" :perspective="withoutBelief"></belief-context>
 
       <!-- The feelings are named in the question now, not listed above it. -->
       <feeling-words
         class="body-1 grey--text mt-3 wizard-prompt"
         :feelings="withoutBeliefFeelings"
-        prefix="Diese neue Perspektive lässt dich "
+        prefix="Diese neue Reaktion lässt dich "
         :suffix="' fühlen. ' + ASK"
         :fallback="ASK">
       </feeling-words>
@@ -18,7 +18,6 @@
 
     <!-- Writing is the way in; the lists below only fill this field. -->
     <v-flex class="mb-2">
-      <p class="caption grey--text mb-1">Deine Affirmation:</p>
       <v-textarea
         v-model="text"
         placeholder="Ich bin..."
@@ -32,7 +31,9 @@
 
     <!-- Only meaningful once there is a sentence to read aloud -->
     <v-flex v-if="hasText" class="mb-4">
-      <p class="body-1 grey--text mb-2">Lies dir den Satz laut vor. Wie glaubwürdig fühlt er sich an?</p>
+      <p class="body-1 grey--text mt-4 mb-3 wizard-prompt">
+        Lies dir den Satz laut vor. Wie glaubwürdig fühlt er sich an?
+      </p>
       <div class="slider-row">
         <span class="slider-end-label">0</span>
         <input type="range" min="0" max="10" v-model.number="truth" class="truth-slider" />
@@ -107,7 +108,7 @@ import BeliefContext from '@/views/BeliefContext.vue';
 import FeelingWords from '@/components/FeelingWords.vue';
 import { normalizeTruth, truthHint } from '@/utils/affirmationTruth';
 
-const ASK = 'Formuliere einen Satz, der zu dieser gefühlten neuen Perspektive passt. '
+const ASK = 'Formuliere einen Satz, der zu dieser gefühlten neuen Reaktion passt. '
   + 'Er hilft dir, die alte Überzeugung in diese Richtung zu verschieben. '
   + 'Halte den Satz glaubwürdig: Der positivste Satz, den du gerade noch als wahr '
   + 'empfinden kannst.';
@@ -117,6 +118,8 @@ export default {
   components: { BeliefContext, FeelingWords },
   props: {
     belief: { type: String, default: '' },
+    // Written in the wizard's first step, carried forward as context.
+    exceptions: { type: String, default: '' },
     withoutBelief: { type: String, default: '' },
     withoutBeliefFeelings: { type: Array, default: function() { return []; } },
     initialAffirmations: { type: Array, default: function() { return []; } },
@@ -188,13 +191,13 @@ export default {
     buildSuggestionsPrompt() {
       var lines = ['Du hilfst dabei, positive Affirmationen zu formulieren.'];
       if (this.withoutBelief) {
-        lines.push('Neue Perspektive: "' + this.withoutBelief + '"');
+        lines.push('Neue Reaktion: "' + this.withoutBelief + '"');
       } else {
         lines.push('Glaubenssatz: "' + this.belief + '"');
       }
       var feelingNames = (this.withoutBeliefFeelings || []).map(function(f) { return f.name; }).join(', ');
       if (feelingNames) lines.push('Gefühle dabei: ' + feelingNames);
-      lines.push('Generiere genau 5 kurze positive Affirmationen (je max. 12 Wörter) als Ich-Aussagen im Präsens. Inspirierend, konkret, auf die neue Perspektive bezogen.\nNur die 5 Sätze, einer pro Zeile, ohne Nummerierung.');
+      lines.push('Generiere genau 5 kurze positive Affirmationen (je max. 12 Wörter) als Ich-Aussagen im Präsens. Inspirierend, konkret, auf die neue Reaktion bezogen.\nNur die 5 Sätze, einer pro Zeile, ohne Nummerierung.');
       return lines.join('\n');
     },
     async generateSuggestions() {

@@ -7,6 +7,7 @@
       <!-- What was written a step or two earlier. Picking feelings is easier
            with the reaction still in view than from memory. -->
       <belief-context
+        :exceptions="exceptions"
         :perspective="perspective"
         :reaction="reaction"
         :origin="contextOrigin">
@@ -104,8 +105,10 @@ export default {
     taxonomy: { type: Object, required: true },
     headline: { type: String, default: '' },
     prompt: { type: String, default: '' },
+    // Written in the change wizard's first step, carried forward as context.
+    exceptions: { type: String, default: '' },
     // Optional second quote under the belief — the change wizard shows the new
-    // perspective the feelings are meant to refer to.
+    // reaction the feelings are meant to refer to.
     perspective: { type: String, default: '' },
     initialFeelings: { type: Array, default: function() { return []; } },
     // How many may be picked at once. 0 means no limit.

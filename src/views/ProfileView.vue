@@ -122,7 +122,7 @@
         </div>
 
         <div>
-          <p class="col-label">Neue Perspektive</p>
+          <p class="col-label">Neue Reaktion</p>
           <div class="settings-group">
             <template v-if="topChangeProcessFeelings.length">
               <div v-for="(f, i) in topChangeProcessFeelings" :key="f.name">

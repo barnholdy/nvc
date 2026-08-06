@@ -27,6 +27,7 @@
           v-show="step === 2"
           :belief="entry ? entry.belief : ''"
           :needs="entry ? entry.needs || [] : []"
+          :exceptions="exceptions"
           :initialValue="withoutBelief"
           @changed="withoutBelief = $event"
           @focussed="isFooterFixed = false"
@@ -38,6 +39,7 @@
           headline="Neue Gefühle"
           prompt="Bleib einen Moment in dieser Vorstellung. Was passiert im Körper? Wird etwas leichter, weiter, wärmer — oder bleibt es gleich?"
           :belief="entry ? entry.belief : ''"
+          :exceptions="exceptions"
           :perspective="withoutBelief"
           :taxonomy="taxonomy"
           :initialFeelings="withoutBeliefFeelings"
@@ -53,12 +55,12 @@
             <p class="slider-value-label">{{ bodyIntensity }}</p>
             <div v-if="bodyIntensity < INTENSITY_THRESHOLD" class="intensity-hint">
               <p class="intensity-hint-text">
-                Noch zu weit weg. Gehen wir kleiner: Wo kannst du die Perspektive so ändern,
+                Noch zu weit weg. Gehen wir kleiner: Wo kannst du die neue Reaktion so ändern,
                 dass sie greifbarer für dich wird?
               </p>
               <v-btn small flat color="primary" class="ml-0" @click="goToStep(2)">
                 <v-icon small left>chevron_left</v-icon>
-                Zurück zur neuen Perspektive
+                Zurück zur neuen Reaktion
               </v-btn>
             </div>
             <p class="body-1 grey--text mt-4 mb-0 wizard-prompt">Was fühlst du?</p>
@@ -68,6 +70,7 @@
         <pattern-change-affirmation
           v-show="step === 4"
           :belief="entry ? entry.belief : ''"
+          :exceptions="exceptions"
           :withoutBelief="withoutBelief"
           :withoutBeliefFeelings="withoutBeliefFeelings"
           :initialAffirmations="affirmations"
@@ -109,7 +112,7 @@ import { beliefStatus } from '@/utils/beliefStatus';
 import taxonomy from '../assets/taxonomy.json';
 
 // Below this the body sensation counts as "not there yet" and the wizard offers
-// a way back to reshape the new perspective.
+// a way back to reshape the new reaction.
 const INTENSITY_THRESHOLD = 4;
 
 const FEELINGS_STEP = 3;

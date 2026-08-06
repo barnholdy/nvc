@@ -4,12 +4,24 @@
       <p class="context-label">Situation</p>
       <p class="context-text">{{ situation }}</p>
     </div>
+    <!-- Folded by default, like every other block here: it is free text from
+         an earlier step, and the question this screen actually asks belongs
+         above the fold. -->
+    <div v-if="exceptions" class="context-block">
+      <div class="context-toggle" @click="isExceptionsOpen = !isExceptionsOpen">
+        <span class="context-label toggle-label">
+          {{ isExceptionsOpen ? 'Ausnahmen ausblenden' : 'Ausnahmen anzeigen' }}
+        </span>
+        <v-icon small class="context-chevron">
+          {{ isExceptionsOpen ? 'expand_more' : 'chevron_right' }}
+        </v-icon>
+      </div>
+      <p v-if="isExceptionsOpen" class="context-text mt-1">{{ exceptions }}</p>
+    </div>
     <div v-if="perspective" class="context-block">
-      <p class="context-label">Neue Perspektive</p>
+      <p class="context-label">Neue Reaktion</p>
       <p class="context-text">{{ perspective }}</p>
     </div>
-    <!-- Folded by default: it is free text from an earlier step, and the
-         question this screen actually asks belongs above the fold. -->
     <div v-if="reaction" class="context-block">
       <div class="context-toggle" @click="isReactionOpen = !isReactionOpen">
         <span class="context-label toggle-label">
@@ -53,6 +65,7 @@ export default {
   components: { FeelingChips },
   props: {
     situation: { type: String, default: '' },
+    exceptions: { type: String, default: '' },
     perspective: { type: String, default: '' },
     reaction: { type: String, default: '' },
     feelings: { type: Array, default: () => [] },
@@ -60,7 +73,7 @@ export default {
     origin: { type: String, default: '' },
   },
   data() {
-    return { isReactionOpen: false, isOriginOpen: false };
+    return { isExceptionsOpen: false, isReactionOpen: false, isOriginOpen: false };
   },
 };
 </script>

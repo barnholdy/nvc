@@ -181,7 +181,7 @@
                 <p class="expand-text">{{ entry.reflection.exceptions }}</p>
               </template>
               <template v-if="entry.reflection && entry.reflection.withoutBelief">
-                <p class="expand-label mt-3">Neue Perspektive</p>
+                <p class="expand-label mt-3">Neue Reaktion</p>
                 <p class="expand-text">{{ entry.reflection.withoutBelief }}</p>
               </template>
               <template v-if="entry.reflection && entry.reflection.withoutBeliefFeelings
