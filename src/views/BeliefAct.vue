@@ -19,6 +19,7 @@
           v-if="needsBelief"
           v-show="step === 1"
           :beliefs="allBeliefs"
+          :patterns="allPatterns"
           :initialValue="beliefTime"
           @changed="beliefTime = $event">
         </belief-act-pick-belief>
@@ -114,6 +115,10 @@ export default {
       return this.$store.getters.beliefs
         .filter(b => ACTIONABLE_STATUSES.indexOf(beliefStatus(b)) !== -1)
         .sort((a, b) => b.time - a.time);
+    },
+    // The pick step reads credibility and situation counts off these.
+    allPatterns() {
+      return this.$store.getters.patterns;
     },
     // Resolved on demand: in pick mode the belief only exists once chosen.
     entry() {

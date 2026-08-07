@@ -16,7 +16,28 @@
         class="belief-btn"
         :class="{ selected: b.time === selected }"
         @click="pick(b.time)"
-      >{{ b.belief }}</button>
+      >
+        <span class="belief-text">{{ b.belief }}</span>
+        <!-- The same two numbers the Überzeugungen list shows, so the choice
+             can be made here instead of from memory. -->
+        <template v-if="credibility(b) !== null">
+          <span class="pick-label">Glaubwürdigkeit</span>
+          <span class="slider-row">
+            <span class="slider-end-label">0</span>
+            <input
+              type="range"
+              min="0"
+              max="10"
+              step="0.1"
+              :value="credibility(b)"
+              class="readonly-slider"
+              disabled
+            />
+            <span class="slider-end-label">10</span>
+          </span>
+        </template>
+        <span class="pick-meta">{{ situationLabel(b) }}</span>
+      </button>
 
       <!-- Says why the list is as short as it is. -->
       <p class="footnote">Wandle Überzeugungen, um sie hier zum Handeln auszuwählen.</p>
@@ -27,16 +48,31 @@
 <script>
 // Only shown when the wizard is opened from the Handlungen list, where no
 // belief has been chosen yet.
+import { beliefCredibility } from '@/utils/credibility';
+import { situationsForBelief } from '@/utils/patterns';
+
 export default {
   name: 'belief-act-pick-belief',
   props: {
     beliefs: { type: Array, default: () => [] },
+    patterns: { type: Array, default: () => [] },
     initialValue: { type: Number, default: null },
   },
   data() {
     return { selected: this.initialValue };
   },
   methods: {
+    credibility(belief) {
+      return beliefCredibility(this.patterns, belief);
+    },
+    situationCount(belief) {
+      return situationsForBelief(this.patterns, belief.time).length;
+    },
+    situationLabel(belief) {
+      const n = this.situationCount(belief);
+      if (!n) return 'In keiner Situation';
+      return n === 1 ? 'In 1 Situation' : `In ${n} Situationen`;
+    },
     pick(time) {
       this.selected = time;
       this.$emit('changed', time);
@@ -66,8 +102,62 @@ export default {
   }
   &.selected {
     border-color: #4ade80;
-    color: #4ade80;
-    font-weight: 600;
+    .belief-text { color: #4ade80; font-weight: 600; }
+  }
+}
+.belief-text { display: block; }
+.pick-label {
+  display: block;
+  font-size: 0.68rem;
+  color: #8e8e93;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  margin: 10px 0 6px;
+}
+.pick-meta {
+  display: block;
+  font-size: 0.78rem;
+  color: #8e8e93;
+  margin-top: 8px;
+}
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px;
+}
+.slider-end-label {
+  font-size: 0.78rem;
+  color: #8e8e93;
+  flex-shrink: 0;
+}
+/* Shows a recorded value — deliberately not interactive, so a tap anywhere on
+   the button still selects the belief. */
+.readonly-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: #3a3a3c;
+  outline: none;
+  opacity: 1;
+  pointer-events: none;
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #4ade80;
+  }
+  &::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border: none;
+    border-radius: 50%;
+    background: #4ade80;
   }
 }
 .empty-text {

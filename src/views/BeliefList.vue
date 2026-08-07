@@ -104,10 +104,19 @@
             :key="entry.time + '-expand'"
             class="row-expand"
           >
+            <!-- Folded like the other carried-forward blocks: how many there
+                 are is the part worth seeing at a glance. -->
             <template v-if="associatedPatterns(entry.time).length">
-              <p class="expand-label">Situationen</p>
+              <div class="section-toggle" @click.stop="isSituationsOpen = !isSituationsOpen">
+                <span class="section-toggle-label">
+                  {{ isSituationsOpen ? 'Situationen ausblenden' : situationsLabel(entry) }}
+                </span>
+                <v-icon small class="section-chevron">
+                  {{ isSituationsOpen ? 'expand_more' : 'chevron_right' }}
+                </v-icon>
+              </div>
               <div
-                v-for="p in associatedPatterns(entry.time)"
+                v-for="p in (isSituationsOpen ? associatedPatterns(entry.time) : [])"
                 :key="'pat-' + p.time"
                 class="linked-row"
                 @click.stop="editPattern(p)"
@@ -356,6 +365,7 @@ export default {
   data() {
     return {
       openEntry: null,
+      isSituationsOpen: false,
       isOriginOpen: false,
       isEmpathyOpen: false,
       entryToDelete: null,
@@ -375,7 +385,15 @@ export default {
     '$route.query.open': function() { this.revealRequested(); },
     tab() {
       this.sw.openIdx = null; this.sw.openDir = null;
-      this.openEntry = null; this.isOriginOpen = false; this.isEmpathyOpen = false;
+      // A ?open= link switches the tab in order to show its row — folding that
+      // row away here would undo the very thing the switch was for. Tapping the
+      // tab bar still folds, because the row asked for does not live in the tab
+      // that was tapped.
+      const asked = requestedId(this.$route);
+      if (asked !== null && String(this.openEntry) === asked
+        && this.filteredBeliefs.some(e => String(e.time) === asked)) return;
+      this.openEntry = null;
+      this.isSituationsOpen = false; this.isOriginOpen = false; this.isEmpathyOpen = false;
     },
   },
   computed: {
@@ -407,7 +425,7 @@ export default {
       if (!entry) return;
       this.tab = beliefStatus(entry);
       this.openEntry = entry.time;
-      this.isOriginOpen = false;
+      this.isSituationsOpen = false; this.isOriginOpen = false;
       this.isEmpathyOpen = false;
       // After the tab switch has rendered the row.
       this.$nextTick(() => scrollRowIntoView(this.$el, entry.time));
@@ -416,12 +434,17 @@ export default {
     associatedPatterns(beliefTime) {
       return this.$store.getters.patterns.filter(p => (p.beliefs || []).indexOf(beliefTime) !== -1);
     },
+    // The count stands in for the list while it is folded away.
+    situationsLabel(entry) {
+      const n = this.associatedPatterns(entry.time).length;
+      return n === 1 ? '1 Situation anzeigen' : `${n} Situationen anzeigen`;
+    },
     toggle(time) {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.openEntry = this.openEntry === time ? null : time;
       // Every belief starts with its folded sections closed again — a previous
       // tap must not carry over to the next one.
-      this.isOriginOpen = false;
+      this.isSituationsOpen = false; this.isOriginOpen = false;
       this.isEmpathyOpen = false;
     },
     // The average across every situation and every evaluated experiment. Null
