@@ -45,7 +45,23 @@ function experimentLines(belief) {
   });
 }
 
-export function buildActionPrompt(belief, situations, patterns) {
+// Every action recorded anywhere else. Only the action itself and which belief
+// it belongs to: the point here is "this one already exists", not its detail,
+// and a full dump of every experiment in the app would bury the belief's own.
+function otherExperimentLines(allBeliefs, belief) {
+  const own = (belief || {}).time;
+  const lines = [];
+  (Array.isArray(allBeliefs) ? allBeliefs : []).forEach((other) => {
+    if (!other || other.time === own) return;
+    experimentsOf(other).forEach((x) => {
+      if (!x || !x.situation) return;
+      lines.push(`- ${x.situation}${other.belief ? ` (zu: "${other.belief}")` : ''}`);
+    });
+  });
+  return lines;
+}
+
+export function buildActionPrompt(belief, situations, patterns, allBeliefs) {
   const b = belief || {};
   const r = b.reflection || {};
   const lines = [
@@ -93,7 +109,12 @@ export function buildActionPrompt(belief, situations, patterns) {
 
   const tried = experimentLines(b);
   if (tried.length) {
-    lines.push('', 'Bereits geplante oder ausgewertete Handlungen:', ...tried);
+    lines.push('', 'Bereits geplante oder ausgewertete Handlungen zu dieser Überzeugung:', ...tried);
+  }
+
+  const elsewhere = otherExperimentLines(allBeliefs, b);
+  if (elsewhere.length) {
+    lines.push('', 'Handlungen, die es zu anderen Überzeugungen schon gibt:', ...elsewhere);
   }
 
   lines.push(
@@ -101,7 +122,15 @@ export function buildActionPrompt(belief, situations, patterns) {
     `Schlage genau ${SUGGESTION_COUNT} konkrete Handlungen vor. Jede beschreibt einen `
     + 'einzelnen Moment in den nächsten Tagen: wo, mit wem, wann. Klein, konkret und '
     + 'überprüfbar — ein Moment, kein Lebensthema. Knüpfe an die vergangenen '
-    + 'Situationen an und wiederhole keine der bereits geplanten Handlungen.',
+    + 'Situationen an. Schlage keine Handlung vor, die oben schon steht — weder zu '
+    + 'dieser noch zu einer anderen Überzeugung; auch keine, die nur anders '
+    + 'formuliert dasselbe tut.',
+    // The suggestion lands in a field the person writes about themselves in, so
+    // it has to arrive in their own voice rather than as an instruction.
+    'Formuliere jede Handlung als Ich-Aussage im Präsens, so als würde die Person '
+    + 'sie selbst aufschreiben. Beispiel: "Ich bitte morgen im Standup meine '
+    + 'Kollegin um Hilfe beim Report." Kein Imperativ, keine Anrede mit "du", '
+    + 'kein Infinitiv.',
     `Antworte mit genau ${SUGGESTION_COUNT} Zeilen, eine Handlung pro Zeile, `
     + 'je höchstens 20 Wörter, ohne Nummerierung und ohne Anführungszeichen.',
   );

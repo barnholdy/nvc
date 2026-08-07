@@ -91,6 +91,8 @@ export default {
     // Every situation in the app, so the credibility recorded for this belief
     // can be read off them.
     patterns: { type: Array, default: function() { return []; } },
+    // Every belief, so actions already planned elsewhere are not suggested again.
+    allBeliefs: { type: Array, default: function() { return []; } },
     initialValue: { type: String, default: '' },
   },
   data() {
@@ -135,7 +137,9 @@ export default {
       this.errorMsg = '';
       this.suggestions = [];
       try {
-        const prompt = buildActionPrompt(this.entry, this.situations, this.patterns);
+        const prompt = buildActionPrompt(
+          this.entry, this.situations, this.patterns, this.allBeliefs,
+        );
         const reply = await askClaude(this.apiKey, prompt, { maxTokens: 600 });
         this.suggestions = parseLines(reply, SUGGESTION_COUNT);
         if (!this.suggestions.length) this.errorMsg = 'Keine Vorschläge erhalten.';

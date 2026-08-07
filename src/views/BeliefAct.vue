@@ -29,6 +29,7 @@
           :entry="entry"
           :situations="situations"
           :patterns="allPatterns"
+          :allBeliefs="everyBelief"
           :initialValue="experiment.situation"
           @changed="experiment.situation = $event"
           @focussed="isFooterFixed = false"
@@ -120,6 +121,11 @@ export default {
     // The pick step reads credibility and situation counts off these.
     allPatterns() {
       return this.$store.getters.patterns;
+    },
+    // Unfiltered, unlike allBeliefs above: the suggestion prompt needs every
+    // action that already exists, wherever it sits, so none is proposed twice.
+    everyBelief() {
+      return this.$store.getters.beliefs;
     },
     // Resolved on demand: in pick mode the belief only exists once chosen.
     entry() {
