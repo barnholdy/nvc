@@ -36,6 +36,7 @@
           <div
             :key="item.text + '-row'"
             class="swipe-outer"
+            :data-row-id="item.text"
             @touchstart="tsStart($event, i)"
             @touchmove="tsMove($event, i)"
             @touchend="tsEnd($event, i)"
@@ -85,7 +86,38 @@
                list is about the sentence, not about its origin. -->
           <div :key="item.text + '-expand'" v-if="openIndex === i" class="row-expand">
             <p class="expand-label">Überzeugungen</p>
-            <p v-for="(s, j) in item.sources" :key="j" class="expand-text">„{{ s.beliefText }}“</p>
+            <div
+              v-for="(s, j) in item.sources"
+              :key="j"
+              class="belief-row"
+              @click="openBelief(s.beliefTime)"
+            >
+              <div class="belief-row-body">
+                <p class="expand-text">{{ s.beliefText }}</p>
+                <span
+                  v-if="beliefOf(s.beliefTime)"
+                  class="status-pill"
+                  :style="{ color: beliefStatusColor(beliefOf(s.beliefTime)) }"
+                >{{ beliefStatusLabel(beliefOf(s.beliefTime)) }}</span>
+                <template v-if="beliefTruth(s.beliefTime) !== null">
+                  <p class="expand-label mt-2">Glaubwürdigkeit</p>
+                  <div class="slider-row">
+                    <span class="slider-end-label">0</span>
+                    <input
+                      type="range"
+                      min="0"
+                      max="10"
+                      step="0.1"
+                      :value="beliefTruth(s.beliefTime)"
+                      class="readonly-slider"
+                      disabled
+                    />
+                    <span class="slider-end-label">10</span>
+                  </div>
+                </template>
+              </div>
+              <v-icon small class="belief-chevron">chevron_right</v-icon>
+            </div>
           </div>
           <div
             :key="item.text + '-sep'"
@@ -132,7 +164,9 @@ import {
   loadAffStatusMap,
   affirmationStatus,
 } from '@/utils/affirmationStatus';
-import { affirmationCredibility } from '@/utils/credibility';
+import { affirmationCredibility, beliefCredibility } from '@/utils/credibility';
+import { beliefStatusLabel, beliefStatusColor } from '@/utils/beliefStatus';
+import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 
 const AMEN_KEY = 'nvc.amen';
 
@@ -190,6 +224,7 @@ export default {
   },
   watch: {
     tab() { this.sw.openIdx = null; this.sw.openDir = null; this.openIndex = null; },
+    '$route.query.open': function() { this.revealRequested(); },
   },
   computed: {
     filteredAffirmations() {
@@ -229,7 +264,38 @@ export default {
       return this.$store.getters.beliefs.filter(b => linked.indexOf(b.time) === -1);
     },
   },
+  mounted() {
+    this.revealRequested();
+  },
   methods: {
+    // Affirmations are keyed by their own text, so that is what the link
+    // carries and what the tab has to be found from.
+    revealRequested() {
+      const text = requestedId(this.$route);
+      if (!text) return;
+      if (!this.affirmations.some(a => a.text === text)) return;
+      this.tab = affirmationStatus(text, this.statusMap);
+      this.$nextTick(() => {
+        const i = this.filteredAffirmations.findIndex(a => a.text === text);
+        if (i === -1) return;
+        this.openIndex = i;
+        this.$nextTick(() => scrollRowIntoView(this.$el, text));
+      });
+    },
+    beliefOf(time) {
+      return this.$store.getters.beliefs.find(b => b.time === time) || null;
+    },
+    // The belief's own standing, the same number its row shows in the belief
+    // list — an affirmation records no separate reading of it.
+    beliefTruth(time) {
+      return beliefCredibility(this.$store.getters.patterns, this.beliefOf(time));
+    },
+    beliefStatusLabel(belief) { return beliefStatusLabel(belief); },
+    beliefStatusColor(belief) { return beliefStatusColor(belief); },
+    openBelief(time) {
+      this.sw.openIdx = null; this.sw.openDir = null;
+      this.$router.push({ path: '/beliefs', query: openQuery(time) });
+    },
     toggle(i) {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.openIndex = this.openIndex === i ? null : i;
@@ -522,6 +588,33 @@ export default {
   letter-spacing: 0.08em;
   margin: 0 0 6px;
   font-weight: 600;
+}
+/* A belief inside the expand, shown the way the Situationen list shows one. */
+.belief-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  cursor: pointer;
+  border-top: 1px solid #2c2c2e;
+  -webkit-tap-highlight-color: transparent;
+  &:first-of-type { border-top: none; }
+  &:active { opacity: 0.6; }
+}
+.belief-row-body { flex: 1; min-width: 0; }
+.belief-chevron {
+  color: #636366 !important;
+  font-size: 1.1rem !important;
+  flex-shrink: 0;
+  margin-left: 6px;
+}
+.status-pill {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: #2c2c2e;
+  border-radius: 20px;
+  padding: 1px 8px;
 }
 .expand-text {
   font-size: 0.93rem;

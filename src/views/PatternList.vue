@@ -29,6 +29,7 @@
           <div
             :key="entry.time + '-row'"
             class="swipe-outer"
+            :data-row-id="entry.time"
             @touchstart="tsStart($event, idx)"
             @touchmove="tsMove($event, idx)"
             @touchend="tsEnd($event, idx)"
@@ -66,7 +67,7 @@
                 v-for="b in getBeliefs(entry)"
                 :key="b.time"
                 class="belief-row"
-                @click="editBelief(b)"
+                @click="openBelief(b)"
               >
                 <div class="belief-row-body">
                   <p class="expand-text">{{ b.belief }}</p>
@@ -130,6 +131,7 @@
 import moment from 'moment';
 import { beliefStatusLabel, beliefStatusColor } from '@/utils/beliefStatus';
 import { beliefTruthIn } from '@/utils/credibility';
+import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 
 export default {
   name: 'pattern-list',
@@ -146,7 +148,21 @@ export default {
       return this.$store.getters.patterns.concat().sort((a, b) => b.time - a.time);
     },
   },
+  mounted() {
+    this.revealRequested();
+  },
+  watch: {
+    '$route.query.open': function() { this.revealRequested(); },
+  },
   methods: {
+    revealRequested() {
+      const id = requestedId(this.$route);
+      if (!id) return;
+      const entry = this.patterns.find(p => String(p.time) === id);
+      if (!entry) return;
+      this.openEntry = entry.time;
+      this.$nextTick(() => scrollRowIntoView(this.$el, entry.time));
+    },
     getBeliefs(entry) {
       const beliefs = this.$store.getters.beliefs;
       return (entry.beliefs || []).map(id => beliefs.find(b => b.time === id)).filter(Boolean);
@@ -155,9 +171,9 @@ export default {
     truthOf(entry, belief) { return beliefTruthIn(entry, belief); },
     statusLabel(belief) { return beliefStatusLabel(belief); },
     statusColor(belief) { return beliefStatusColor(belief); },
-    editBelief(belief) {
+    openBelief(belief) {
       this.sw.openIdx = null; this.sw.openDir = null;
-      this.$router.push(`/edit-belief/${belief.time}`);
+      this.$router.push({ path: '/beliefs', query: openQuery(belief.time) });
     },
     toggle(time) {
       this.sw.openIdx = null; this.sw.openDir = null;

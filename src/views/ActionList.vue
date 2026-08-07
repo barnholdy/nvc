@@ -39,6 +39,7 @@
           <div
             :key="row.experiment.id + '-row'"
             class="swipe-outer"
+            :data-row-id="row.experiment.id"
             @touchstart="tsStart($event, i)"
             @touchmove="tsMove($event, i)"
             @touchend="tsEnd($event, i)"
@@ -91,7 +92,33 @@
 
           <div :key="row.experiment.id + '-expand'" v-if="openIndex === i" class="row-expand">
             <p class="expand-label">Überzeugung</p>
-            <p class="expand-text mb-1">„{{ row.beliefText }}“</p>
+            <div class="belief-row" @click.stop="openBelief(row)">
+              <div class="belief-row-body">
+                <p class="expand-text">{{ row.beliefText }}</p>
+                <span
+                  v-if="beliefOf(row)"
+                  class="status-pill"
+                  :style="{ color: beliefStatusColor(beliefOf(row)) }"
+                >{{ beliefStatusLabel(beliefOf(row)) }}</span>
+                <template v-if="beliefTruth(row) !== null">
+                  <p class="expand-label mt-2">Glaubwürdigkeit</p>
+                  <div class="slider-row">
+                    <span class="slider-end-label">0</span>
+                    <input
+                      type="range"
+                      min="0"
+                      max="10"
+                      step="0.1"
+                      :value="beliefTruth(row)"
+                      class="readonly-slider"
+                      disabled
+                    />
+                    <span class="slider-end-label">10</span>
+                  </div>
+                </template>
+              </div>
+              <v-icon small class="belief-chevron">chevron_right</v-icon>
+            </div>
 
             <p class="expand-label mt-3">Situation</p>
             <p class="expand-text mb-1">{{ row.experiment.situation || '—' }}</p>
@@ -442,6 +469,9 @@ import {
   isDue,
   isPlanned,
 } from '@/utils/experiment';
+import { beliefCredibility } from '@/utils/credibility';
+import { beliefStatusLabel, beliefStatusColor } from '@/utils/beliefStatus';
+import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 
 function triggerConfetti() {
   var canvas = document.createElement('canvas');
@@ -507,6 +537,7 @@ export default {
   },
   watch: {
     tab() { this.sw.openIdx = null; this.sw.openDir = null; this.openIndex = null; },
+    '$route.query.open': function() { this.revealRequested(); },
   },
   computed: {
     rows() {
@@ -539,6 +570,9 @@ export default {
       if (this.resultExpected === null) return 0;
       return this.resultExpected - this.resultActual;
     },
+  },
+  mounted() {
+    this.revealRequested();
   },
   methods: {
     state(x) { return experimentState(x); },
@@ -594,6 +628,30 @@ export default {
       this.resultLearning = '';
       this.resultBeliefTruth = 5;
       this.resultAffirmationTruth = 5;
+    },
+    // The belief's own standing, the same number its row shows in the belief
+    // list. The reading this experiment took is shown further down, separately.
+    beliefTruth(row) {
+      return beliefCredibility(this.$store.getters.patterns, this.beliefOf(row));
+    },
+    beliefStatusLabel(belief) { return beliefStatusLabel(belief); },
+    beliefStatusColor(belief) { return beliefStatusColor(belief); },
+    openBelief(row) {
+      this.sw.openIdx = null; this.sw.openDir = null;
+      this.$router.push({ path: '/beliefs', query: openQuery(row.beliefTime) });
+    },
+    revealRequested() {
+      const id = requestedId(this.$route);
+      if (!id) return;
+      const row = this.rows.find(r => String(r.experiment.id) === id);
+      if (!row) return;
+      this.tab = experimentDisplayState(row.experiment);
+      this.$nextTick(() => {
+        const i = this.filteredRows.findIndex(r => String(r.experiment.id) === id);
+        if (i === -1) return;
+        this.openIndex = i;
+        this.$nextTick(() => scrollRowIntoView(this.$el, id));
+      });
     },
     beliefOf(row) {
       return this.$store.getters.beliefs.find(b => b.time === row.beliefTime);
@@ -865,6 +923,31 @@ export default {
 .expand-meta { font-size: 0.78rem; color: #8e8e93; margin: 2px 0 0; }
 .mb-1 { margin-bottom: 4px !important; }
 .mt-3 { margin-top: 12px !important; }
+/* The belief this experiment tests, shown the way the Situationen list shows
+   one — tappable, with its standing and its credibility. */
+.belief-row {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  &:active { opacity: 0.6; }
+}
+.belief-row-body { flex: 1; min-width: 0; }
+.belief-chevron {
+  color: #636366 !important;
+  font-size: 1.1rem !important;
+  flex-shrink: 0;
+  margin-left: 6px;
+}
+.status-pill {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: #2c2c2e;
+  border-radius: 20px;
+  padding: 1px 8px;
+}
 
 .empty-state {
   display: flex; flex-direction: column; align-items: center;

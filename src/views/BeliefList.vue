@@ -38,6 +38,7 @@
           <div
             :key="entry.time + '-row'"
             class="swipe-outer"
+            :data-row-id="entry.time"
             @touchstart="tsStart($event, idx)"
             @touchmove="tsMove($event, idx)"
             @touchend="tsEnd($event, idx)"
@@ -214,7 +215,7 @@
                   v-for="(a, i) in entry.affirmations"
                   :key="'aff-' + i"
                   class="linked-row"
-                  @click.stop="openAffirmations()"
+                  @click.stop="openAffirmation(a.text)"
                 >
                   <div class="linked-row-body">
                     <p class="expand-text">{{ a.text }}</p>
@@ -244,7 +245,7 @@
                   v-for="x in experimentsOf(entry)"
                   :key="x.id"
                   class="linked-row"
-                  @click.stop="editExperiment(entry, x)"
+                  @click.stop="openExperiment(x)"
                 >
                   <div class="linked-row-body">
                     <p class="expand-text">{{ x.situation }}</p>
@@ -342,6 +343,7 @@ import {
 } from '@/utils/experiment';
 import { normalizeTruth } from '@/utils/affirmationTruth';
 import { beliefCredibility, beliefTruthIn } from '@/utils/credibility';
+import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 import {
   loadAffStatusMap,
   affirmationStatusLabel,
@@ -364,7 +366,13 @@ export default {
       sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
   },
+  mounted() {
+    this.revealRequested();
+  },
   watch: {
+    // Arriving from another list, or moving between two ?open= links without
+    // the component being torn down in between.
+    '$route.query.open': function() { this.revealRequested(); },
     tab() {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.openEntry = null; this.isOriginOpen = false; this.isEmpathyOpen = false;
@@ -389,6 +397,21 @@ export default {
     },
   },
   methods: {
+    // Open the belief this route asks for. It may well sit under a different
+    // tab than the one showing, so the tab follows the belief rather than the
+    // other way round.
+    revealRequested() {
+      const id = requestedId(this.$route);
+      if (!id) return;
+      const entry = this.$store.getters.beliefs.find(b => String(b.time) === id);
+      if (!entry) return;
+      this.tab = beliefStatus(entry);
+      this.openEntry = entry.time;
+      this.isOriginOpen = false;
+      this.isEmpathyOpen = false;
+      // After the tab switch has rendered the row.
+      this.$nextTick(() => scrollRowIntoView(this.$el, entry.time));
+    },
     patternCount(beliefTime) { return this.patternCountMap[beliefTime] || 0; },
     associatedPatterns(beliefTime) {
       return this.$store.getters.patterns.filter(p => (p.beliefs || []).indexOf(beliefTime) !== -1);
@@ -419,19 +442,20 @@ export default {
     truthOf(a) { return normalizeTruth(a.resonance); },
     affStatusLabel(text) { return affirmationStatusLabel(text, this.affStatusMap); },
     affStatusColor(text) { return affirmationStatusColor(text, this.affStatusMap); },
+    // Each of these opens the row in the list that owns it, unfolded and in
+    // view — following a reference should land you on the thing itself, not in
+    // a wizard for editing it.
     editPattern(p) {
       this.sw.openIdx = null; this.sw.openDir = null;
-      this.$router.push(`/edit-pattern/${p.time}`);
+      this.$router.push({ path: '/patterns', query: openQuery(p.time) });
     },
-    // Editing an affirmation lives in the wandeln wizard now; from here the
-    // row just opens the list it belongs to.
-    openAffirmations() {
+    openAffirmation(text) {
       this.sw.openIdx = null; this.sw.openDir = null;
-      this.$router.push('/affirmations');
+      this.$router.push({ path: '/affirmations', query: openQuery(text) });
     },
-    editExperiment(entry, x) {
+    openExperiment(x) {
       this.sw.openIdx = null; this.sw.openDir = null;
-      this.$router.push(`/act-belief/${entry.time}/${x.id}`);
+      this.$router.push({ path: '/actions', query: openQuery(x.id) });
     },
     changeEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/change-belief/${entry.time}`); },
     actEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/act-belief/${entry.time}`); },
