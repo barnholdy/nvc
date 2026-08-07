@@ -28,6 +28,7 @@
           v-show="step === situationStep"
           :entry="entry"
           :situations="situations"
+          :patterns="allPatterns"
           :initialValue="experiment.situation"
           @changed="experiment.situation = $event"
           @focussed="isFooterFixed = false"
