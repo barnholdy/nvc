@@ -36,13 +36,13 @@
       <template v-else>
         <div class="slider-row">
           <span class="slider-end-label">0</span>
-          <input type="range" min="0" max="100" v-model.number="fearExpected" class="fear-slider" />
-          <span class="slider-end-label">100</span>
+          <input type="range" min="0" max="10" v-model.number="fearExpected" class="fear-slider" />
+          <span class="slider-end-label">10</span>
         </div>
         <p class="slider-value-label">{{ fearExpected }}</p>
         <div class="scale-legend">
           <span>0 = gar nicht</span>
-          <span>100 = genau so schlimm wie befürchtet</span>
+          <span>10 = genau so schlimm wie befürchtet</span>
         </div>
       </template>
 
@@ -71,7 +71,7 @@ export default {
       fear: this.experiment.fear || '',
       fearExpected: typeof this.experiment.fearExpected === 'number'
         ? this.experiment.fearExpected
-        : 50,
+        : 5,
       // Once planned, the anchor must not move.
       isLocked: !!this.experiment.plannedAt,
     };

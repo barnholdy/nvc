@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import { migrateFearScale, needsFearScaleMigration } from '@/utils/experiment';
 
 Vue.use(Vuex);
 
@@ -260,6 +261,20 @@ export default new Vuex.Store({
             delete reflection.changeActs;
             delete reflection.changeAct;
             return Object.assign({}, b, { reflection: reflection });
+          });
+          // Fear used to be rated 0-100. Runs here rather than in the block
+          // above because it also has to catch experiments that block leaves
+          // untouched — and an imported old backup comes through this same
+          // path, so a one-off flag in localStorage would have missed it.
+          beliefs = beliefs.map(function(b) {
+            const r = b.reflection || {};
+            if (!needsFearScaleMigration(r.experiments)) return b;
+            migrated = true;
+            return Object.assign({}, b, {
+              reflection: Object.assign({}, r, {
+                experiments: r.experiments.map(migrateFearScale),
+              }),
+            });
           });
           if (migrated) {
             localStorage.setItem(BELIEFS_STORAGE_KEY, JSON.stringify(beliefs));

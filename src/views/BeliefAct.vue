@@ -127,11 +127,15 @@ export default {
           situations: situationsForBelief(patterns, b.time).length,
         }))
         .sort((x, y) => {
+          // Compared at whole points, which is the resolution the readings were
+          // given in and the most a slider can be read at. Raw averages differ
+          // in the third decimal often enough that the situation count would
+          // otherwise never decide anything, while the two bars look identical.
           // Never rated sorts last: "highest first" cannot rank a value nobody
           // gave, and an unrated belief is the least informed choice, not the
           // strongest one.
-          const cx = x.credibility === null ? -1 : x.credibility;
-          const cy = y.credibility === null ? -1 : y.credibility;
+          const cx = x.credibility === null ? -1 : Math.round(x.credibility);
+          const cy = y.credibility === null ? -1 : Math.round(y.credibility);
           if (cx !== cy) return cy - cx;
           if (x.situations !== y.situations) return y.situations - x.situations;
           // Equal on both counts — newest first, as the list did throughout.

@@ -187,7 +187,9 @@ export default {
       this.entryToDelete = null;
     },
     cancelDelete() { this.isDeleteDialogShowing = false; this.entryToDelete = null; },
-    formatTime(time) { moment.locale('de'); return moment(time).fromNow(); },
+    // The date itself, not "vor 3 Monaten": these entries are looked back on,
+    // and the same format the Handlungen list already uses.
+    formatTime(time) { moment.locale('de'); return moment(time).format('D. MMMM YYYY'); },
     tsStart(e, i) {
       if (e.target && e.target.closest && e.target.closest('.swipe-btn')) return;
       const t = e.touches[0];

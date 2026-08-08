@@ -134,12 +134,12 @@
                 <input
                   type="range"
                   min="0"
-                  max="100"
+                  max="10"
                   :value="row.experiment.fearExpected"
                   class="readonly-slider"
                   disabled
                 />
-                <span class="slider-end-label">100</span>
+                <span class="slider-end-label">10</span>
               </div>
             </template>
             <template v-if="typeof row.experiment.fearActual === 'number'">
@@ -149,12 +149,12 @@
                 <input
                   type="range"
                   min="0"
-                  max="100"
+                  max="10"
                   :value="row.experiment.fearActual"
                   class="readonly-slider"
                   disabled
                 />
-                <span class="slider-end-label">100</span>
+                <span class="slider-end-label">10</span>
               </div>
             </template>
 
@@ -212,6 +212,8 @@
               <p class="expand-label mt-3">Was sich mehr wahr anfühlt</p>
               <div class="slider-row">
                 <span class="slider-end-label">Überzeugung</span>
+                <!-- Its own old 0-100 scale, unrelated to the fear readings and
+                     never written again — so it is shown as it was recorded. -->
                 <input
                   type="range"
                   min="0"
@@ -283,13 +285,13 @@
                   </p>
                   <div class="slider-row">
                     <span class="slider-end-label">0</span>
-                    <input type="range" min="0" max="100" v-model.number="resultActual" class="fear-slider" />
-                    <span class="slider-end-label">100</span>
+                    <input type="range" min="0" max="10" v-model.number="resultActual" class="fear-slider" />
+                    <span class="slider-end-label">10</span>
                   </div>
                   <p class="slider-value-label">{{ resultActual }}</p>
                   <div class="scale-legend">
                     <span>0 = gar nicht</span>
-                    <span>100 = genau so schlimm wie erwartet</span>
+                    <span>10 = genau so schlimm wie erwartet</span>
                   </div>
                 </v-flex>
               </v-layout>
@@ -525,7 +527,7 @@ export default {
       resultRow: null,
       resultStep: 1,
       resultOutcome: '',
-      resultActual: 50,
+      resultActual: 5,
       resultLearning: '',
       // 0 = the old belief still holds, 100 = the affirmation does.
       resultBeliefTruth: 5,
@@ -609,7 +611,7 @@ export default {
       this.resultRow = row;
       this.resultStep = 1;
       this.resultOutcome = row.experiment.outcome || '';
-      this.resultActual = typeof row.experiment.fearActual === 'number' ? row.experiment.fearActual : 50;
+      this.resultActual = typeof row.experiment.fearActual === 'number' ? row.experiment.fearActual : 5;
       this.resultLearning = row.experiment.learning || '';
       this.resultBeliefTruth = typeof row.experiment.beliefTruth === 'number'
         ? row.experiment.beliefTruth

@@ -165,15 +165,15 @@ export default {
             // "Niemand lachte" is the whole point of the experiment.
             if (x.fear) {
               parts.push(`Befürchtung: ${x.fear}`
-                + (typeof x.fearExpected === 'number' ? ` (erwartet ${x.fearExpected} von 100)` : ''));
+                + (typeof x.fearExpected === 'number' ? ` (erwartet ${x.fearExpected} von 10)` : ''));
             } else if (typeof x.fearExpected === 'number') {
-              parts.push(`befürchtet ${x.fearExpected}/100`);
+              parts.push(`befürchtet ${x.fearExpected}/10`);
             }
             if (x.outcome) {
               parts.push(`Tatsächlich: ${x.outcome}`
-                + (typeof x.fearActual === 'number' ? ` (real ${x.fearActual} von 100)` : ''));
+                + (typeof x.fearActual === 'number' ? ` (real ${x.fearActual} von 10)` : ''));
             } else if (typeof x.fearActual === 'number') {
-              parts.push(`real ${x.fearActual}/100`);
+              parts.push(`real ${x.fearActual}/10`);
             }
             if (x.learning) parts.push(`Erkenntnis: ${x.learning}`);
             if (parts.length) lines.push(`  Verhaltensexperiment: ${parts.join(' | ')}`);

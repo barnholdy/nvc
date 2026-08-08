@@ -37,8 +37,8 @@ function experimentLines(belief) {
   return experimentsOf(belief).map((x) => {
     const parts = [`- ${x.situation || 'ohne Situation'}`];
     if (x.fear) parts.push(`Befürchtung: ${x.fear}`);
-    if (typeof x.fearExpected === 'number') parts.push(`erwartet: ${x.fearExpected}/100`);
-    if (typeof x.fearActual === 'number') parts.push(`real: ${x.fearActual}/100`);
+    if (typeof x.fearExpected === 'number') parts.push(`erwartet: ${x.fearExpected}/10`);
+    if (typeof x.fearActual === 'number') parts.push(`real: ${x.fearActual}/10`);
     if (x.learning) parts.push(`Erkenntnis: ${x.learning}`);
     parts.push(experimentState(x) === 'evaluated' ? 'ausgewertet' : 'noch offen');
     return parts.join(' · ');

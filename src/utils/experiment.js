@@ -26,12 +26,20 @@ export const EXPERIMENT_DISPLAY_COLORS = {
   done: '#4ade80',
 };
 
+// Fear is rated on the same 0-10 scale as everything else in the app. It used
+// to run 0-100, so every experiment records which scale its numbers are on.
+// A marker rather than a guess: 8 is a valid reading on both scales and means
+// nearly opposite things, so there is no telling them apart by value.
+export const FEAR_SCALE_MAX = 10;
+const LEGACY_FEAR_SCALE_MAX = 100;
+
 export function createExperiment(id) {
   return {
     id: id,
     situation: '',
     fear: '',
     fearExpected: null,
+    fearScale: FEAR_SCALE_MAX,
     plannedAt: null,
     doneAt: null,
     outcome: '',
@@ -41,6 +49,31 @@ export function createExperiment(id) {
     bodyTruth: null,
     completedAt: null,
   };
+}
+
+// Rounded to whole points: the old scale's extra resolution has no home on a
+// 10-point one, and half a point is finer than the new slider can be set.
+function rescale(value) {
+  if (typeof value !== 'number' || isNaN(value)) return null;
+  return Math.round((value * FEAR_SCALE_MAX) / LEGACY_FEAR_SCALE_MAX);
+}
+
+// Bring one experiment's fear readings onto the current scale. Idempotent, so
+// it can run on every load and on every import without compounding.
+export function migrateFearScale(x) {
+  if (!x || typeof x !== 'object') return x;
+  if (x.fearScale === FEAR_SCALE_MAX) return x;
+  return Object.assign({}, x, {
+    fearExpected: rescale(x.fearExpected),
+    fearActual: rescale(x.fearActual),
+    fearScale: FEAR_SCALE_MAX,
+  });
+}
+
+// True when anything in this list still carries old-scale numbers.
+export function needsFearScaleMigration(experiments) {
+  return (Array.isArray(experiments) ? experiments : [])
+    .some(x => x && typeof x === 'object' && x.fearScale !== FEAR_SCALE_MAX);
 }
 
 export function experimentState(x) {
