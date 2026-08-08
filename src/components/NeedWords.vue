@@ -1,9 +1,9 @@
 <template>
-  <p><span
+  <component :is="tag"><span
     v-for="(seg, i) in segments"
     :key="i"
     :style="seg.color ? { color: seg.color, fontWeight: 600 } : null"
-  >{{ seg.text }}</span></p>
+  >{{ seg.text }}</span></component>
 </template>
 
 <script>
@@ -17,6 +17,9 @@ import { colorForNeed, sortNeeds } from '@/utils/needs';
 export default {
   name: 'need-words',
   props: {
+    // 'span' lets two of these stand side by side inside one sentence; the
+    // default keeps every existing use rendering as its own paragraph.
+    tag: { type: String, default: 'p' },
     needs: { type: Array, default: function() { return []; } },
     prefix: { type: String, default: '' },
     suffix: { type: String, default: '' },

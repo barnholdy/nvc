@@ -5,14 +5,20 @@
       <p v-if="belief" class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
       <belief-context :exceptions="exceptions" :perspective="withoutBelief"></belief-context>
 
-      <!-- The feelings are named in the question now, not listed above it. -->
-      <feeling-words
-        class="body-1 grey--text mt-3 wizard-prompt"
+      <!-- Needs and feelings are named inside the question, not listed above
+           it. Both halves render as spans so they read as one sentence; they
+           sit flush against each other because any whitespace between them
+           would show up as a second space before "lässt". -->
+      <p class="body-1 grey--text mt-3 wizard-prompt"><need-words
+        tag="span"
+        :needs="needs"
+        prefix="Diese neue Reaktion, um deine Bedürfnisse nach "
+        fallback="Diese neue Reaktion"></need-words><feeling-words
+        tag="span"
         :feelings="withoutBeliefFeelings"
-        prefix="Diese neue Reaktion lässt dich "
+        prefix=" lässt dich "
         :suffix="' fühlen. ' + ASK"
-        :fallback="ASK">
-      </feeling-words>
+        :fallback="' fühlt sich neu an. ' + ASK"></feeling-words></p>
 
     </v-flex>
 
@@ -106,6 +112,7 @@
 <script>
 import BeliefContext from '@/views/BeliefContext.vue';
 import FeelingWords from '@/components/FeelingWords.vue';
+import NeedWords from '@/components/NeedWords.vue';
 import { normalizeTruth, truthHint } from '@/utils/affirmationTruth';
 
 const ASK = 'Formuliere einen Satz, der zu dieser gefühlten neuen Reaktion passt. '
@@ -115,13 +122,16 @@ const ASK = 'Formuliere einen Satz, der zu dieser gefühlten neuen Reaktion pass
 
 export default {
   name: 'pattern-change-affirmation',
-  components: { BeliefContext, FeelingWords },
+  components: { BeliefContext, FeelingWords, NeedWords },
   props: {
     belief: { type: String, default: '' },
     // Written in the wizard's first step, carried forward as context.
     exceptions: { type: String, default: '' },
     withoutBelief: { type: String, default: '' },
     withoutBeliefFeelings: { type: Array, default: function() { return []; } },
+    // The belief's needs, named in the question so the new reaction is tied
+    // back to what it is actually for.
+    needs: { type: Array, default: function() { return []; } },
     initialAffirmations: { type: Array, default: function() { return []; } },
     allAffirmations: { type: Array, default: function() { return []; } },
   },

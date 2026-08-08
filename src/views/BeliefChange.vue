@@ -73,6 +73,7 @@
           :exceptions="exceptions"
           :withoutBelief="withoutBelief"
           :withoutBeliefFeelings="withoutBeliefFeelings"
+          :needs="entry && entry.needs ? entry.needs : []"
           :initialAffirmations="affirmations"
           :allAffirmations="allAffirmations"
           @changed="affirmations = $event"

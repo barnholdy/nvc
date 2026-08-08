@@ -1,9 +1,9 @@
 <template>
-  <p><span
+  <component :is="tag"><span
     v-for="(seg, i) in segments"
     :key="i"
     :style="seg.color ? { color: seg.color, fontWeight: 600 } : null"
-  >{{ seg.text }}</span></p>
+  >{{ seg.text }}</span></component>
 </template>
 
 <script>
@@ -15,6 +15,9 @@ import { colorForFeeling, dedupeByName, joinNames, sortByEmotion } from '@/utils
 export default {
   name: 'feeling-words',
   props: {
+    // 'span' lets two of these stand side by side inside one sentence; the
+    // default keeps every existing use rendering as its own paragraph.
+    tag: { type: String, default: 'p' },
     feelings: { type: Array, default: function() { return []; } },
     prefix: { type: String, default: '' },
     suffix: { type: String, default: '' },
