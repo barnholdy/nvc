@@ -32,6 +32,8 @@ function experimentPoints(belief, field, keep) {
       value: x[field],
       source: 'action',
       label: x.situation || '',
+      // What this reading was taken on, so a chart can link back to it.
+      targetId: x.id,
     }));
 }
 
@@ -60,6 +62,7 @@ export function beliefPoints(patterns, belief) {
       value: value,
       source: 'situation',
       label: p.trigger || '',
+      targetId: p.time,
     });
   });
   return byTime(points.concat(experimentPoints(belief, 'beliefTruth')));
@@ -89,6 +92,8 @@ export function affirmationPoints(beliefs, text) {
         value: a.resonance,
         source: 'wandeln',
         label: belief.belief || '',
+        // A wandeln reading belongs to the belief that produced it.
+        targetId: belief.time,
       });
     });
     experimentPoints(belief, 'affirmationTruth', x => affirmationTextOf(x, belief) === text)

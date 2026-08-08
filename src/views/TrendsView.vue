@@ -58,7 +58,15 @@
             </div>
             <div class="chart-scroll">
               <div class="chart">
-                <div v-for="(p, i) in row.points" :key="i" class="bar-col">
+                <!-- A bar is a reading taken somewhere; tapping it opens that
+                     somewhere, unfolded, in the list that owns it. -->
+                <div
+                  v-for="(p, i) in row.points"
+                  :key="i"
+                  class="bar-col"
+                  :class="{ tappable: canOpen(p) }"
+                  @click="openPoint(p)"
+                >
                   <span class="bar-value" :style="{ color: barColor(p.value) }">{{ p.value }}</span>
                   <div class="bar-track">
                     <div class="bar-mid"></div>
@@ -89,6 +97,7 @@
 import moment from 'moment';
 import { truthColor, deltaColor, deltaLabel, TRUTH_SCALE_MAX } from '@/utils/beliefTrend';
 import { beliefRows, affirmationRows } from '@/utils/credibility';
+import { openQuery } from '@/utils/reveal';
 
 // Which side a reading came from — the same 0-10 question is asked in three
 // different places, and a bar means something else depending on where.
@@ -96,6 +105,13 @@ const SOURCES = {
   situation: 'Situation',
   wandeln: 'Wandeln',
   action: 'Handlung',
+};
+
+// The list each kind of reading can be followed back into.
+const ROUTES = {
+  situation: '/patterns',
+  wandeln: '/beliefs',
+  action: '/actions',
 };
 
 export default {
@@ -140,6 +156,20 @@ export default {
   },
   methods: {
     sourceLabel(source) { return SOURCES[source] || ''; },
+    // Which list owns the thing a reading was taken on. A situation reading
+    // came from a Situation, a wandeln reading from the belief that produced
+    // it, an action reading from the experiment that was evaluated.
+    routeFor(point) {
+      return point && ROUTES[point.source] ? ROUTES[point.source] : null;
+    },
+    canOpen(point) {
+      return !!this.routeFor(point)
+        && point.targetId !== undefined && point.targetId !== null;
+    },
+    openPoint(point) {
+      if (!this.canOpen(point)) return;
+      this.$router.push({ path: this.routeFor(point), query: openQuery(point.targetId) });
+    },
     // A belief is worth less the higher it stands, an affirmation is worth
     // more — so the same colour scale would say the opposite thing.
     barColor(value) {
@@ -259,6 +289,11 @@ export default {
   align-items: center;
   width: 48px;
   flex-shrink: 0;
+  &.tappable {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    &:active { opacity: 0.6; }
+  }
 }
 .bar-value {
   font-size: 0.78rem;
