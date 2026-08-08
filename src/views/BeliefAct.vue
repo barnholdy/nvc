@@ -71,6 +71,7 @@ import BeliefActSituation from '@/views/BeliefActSituation.vue';
 import BeliefActFear from '@/views/BeliefActFear.vue';
 import { createExperiment, isPlanned } from '@/utils/experiment';
 import { beliefStatus } from '@/utils/beliefStatus';
+import { beliefCredibility } from '@/utils/credibility';
 import { situationsForBelief } from '@/utils/patterns';
 
 // "Gewandelt" and "Gehandelt" — the two stages where a behavioural experiment
@@ -113,10 +114,30 @@ export default {
   computed: {
     // Only beliefs that have been through the change wizard: an experiment
     // tests a new perspective, and without one there is nothing to act from.
+    // Ordered by the two numbers the buttons show: credibility first, then how
+    // many situations the belief appears in — the most believed and most
+    // present one is the one worth testing next.
     allBeliefs() {
+      const patterns = this.$store.getters.patterns;
       return this.$store.getters.beliefs
         .filter(b => ACTIONABLE_STATUSES.indexOf(beliefStatus(b)) !== -1)
-        .sort((a, b) => b.time - a.time);
+        .map(b => ({
+          belief: b,
+          credibility: beliefCredibility(patterns, b),
+          situations: situationsForBelief(patterns, b.time).length,
+        }))
+        .sort((x, y) => {
+          // Never rated sorts last: "highest first" cannot rank a value nobody
+          // gave, and an unrated belief is the least informed choice, not the
+          // strongest one.
+          const cx = x.credibility === null ? -1 : x.credibility;
+          const cy = y.credibility === null ? -1 : y.credibility;
+          if (cx !== cy) return cy - cx;
+          if (x.situations !== y.situations) return y.situations - x.situations;
+          // Equal on both counts — newest first, as the list did throughout.
+          return y.belief.time - x.belief.time;
+        })
+        .map(s => s.belief);
     },
     // The pick step reads credibility and situation counts off these.
     allPatterns() {
