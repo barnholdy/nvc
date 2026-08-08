@@ -74,7 +74,10 @@
                     {{ row.experiment.fearExpected }} → {{ row.experiment.fearActual }}
                   </span>
                 </div>
-                <p class="check-meta">„{{ row.beliefText }}“</p>
+                <!-- The affirmation, not the belief: the row is about what is
+                     being moved towards. The belief falls back in only for the
+                     odd migrated experiment that never got one. -->
+                <p class="check-meta">„{{ rowSubtitle(row) }}“</p>
                 <p v-if="isDue(row.experiment)" class="due-hint">Schon durchgeführt?</p>
               </div>
               <button
@@ -119,6 +122,39 @@
               </div>
               <v-icon small class="belief-chevron">chevron_right</v-icon>
             </div>
+
+            <!-- The other end of what this experiment tests. Same shape as the
+                 belief above it, and the reading this experiment took of it is
+                 shown separately further down. -->
+            <template v-if="affirmationOf(row)">
+              <p class="expand-label mt-3">Affirmation</p>
+              <div class="belief-row" @click.stop="openAffirmation(row)">
+                <div class="belief-row-body">
+                  <p class="expand-text">{{ affirmationOf(row) }}</p>
+                  <span
+                    class="status-pill"
+                    :style="{ color: affStatusColor(affirmationOf(row)) }"
+                  >{{ affStatusLabel(affirmationOf(row)) }}</span>
+                  <template v-if="affirmationTruth(row) !== null">
+                    <p class="expand-label mt-2">Glaubwürdigkeit</p>
+                    <div class="slider-row">
+                      <span class="slider-end-label">0</span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="10"
+                        step="0.1"
+                        :value="affirmationTruth(row)"
+                        class="readonly-slider"
+                        disabled
+                      />
+                      <span class="slider-end-label">10</span>
+                    </div>
+                  </template>
+                </div>
+                <v-icon small class="belief-chevron">chevron_right</v-icon>
+              </div>
+            </template>
 
             <p class="expand-label mt-3">Situation</p>
             <p class="expand-text mb-1">{{ row.experiment.situation || '—' }}</p>
@@ -471,8 +507,13 @@ import {
   isDue,
   isPlanned,
 } from '@/utils/experiment';
-import { beliefCredibility } from '@/utils/credibility';
+import { beliefCredibility, affirmationCredibility } from '@/utils/credibility';
 import { beliefStatusLabel, beliefStatusColor } from '@/utils/beliefStatus';
+import {
+  loadAffStatusMap,
+  affirmationStatusLabel,
+  affirmationStatusColor,
+} from '@/utils/affirmationStatus';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 
 function triggerConfetti() {
@@ -532,6 +573,7 @@ export default {
       // 0 = the old belief still holds, 100 = the affirmation does.
       resultBeliefTruth: 5,
       resultAffirmationTruth: 5,
+      affStatusMap: loadAffStatusMap(),
       rowToDelete: null,
       isDeleteDialogShowing: false,
       sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
@@ -641,6 +683,33 @@ export default {
     openBelief(row) {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.$router.push({ path: '/beliefs', query: openQuery(row.beliefTime) });
+    },
+    rowSubtitle(row) {
+      return this.affirmationOf(row) || row.beliefText;
+    },
+    // One affirmation per belief, so the first is the one — but experiments
+    // written before that rule can name their own, and that one wins.
+    affirmationOf(row) {
+      const named = row && row.experiment && row.experiment.affirmationText;
+      if (named) return named;
+      const list = ((this.beliefOf(row) || {}).affirmations) || [];
+      const first = list.find(a => a && a.text);
+      return first ? first.text : '';
+    },
+    // The sentence's own standing across everything it was rated in, the same
+    // number the Affirmationen list shows.
+    affirmationTruth(row) {
+      const text = this.affirmationOf(row);
+      if (!text) return null;
+      return affirmationCredibility(this.$store.getters.beliefs, text);
+    },
+    affStatusLabel(text) { return affirmationStatusLabel(text, this.affStatusMap); },
+    affStatusColor(text) { return affirmationStatusColor(text, this.affStatusMap); },
+    openAffirmation(row) {
+      const text = this.affirmationOf(row);
+      if (!text) return;
+      this.sw.openIdx = null; this.sw.openDir = null;
+      this.$router.push({ path: '/affirmations', query: openQuery(text) });
     },
     revealRequested() {
       const id = requestedId(this.$route);
