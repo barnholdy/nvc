@@ -4,11 +4,14 @@
       <v-icon color="#8e8e93">close</v-icon>
     </button>
 
-    <p class="affirmation">{{ text }}</p>
-
     <div class="breath-slot">
-      <breath-circle size="min(52vw, 28vh)"></breath-circle>
+      <breath-circle size="min(92vw, 88vh)"></breath-circle>
     </div>
+
+    <!-- Dead centre, over the disc. White with a soft shadow so it stays
+         readable both against the black of the out-breath and the bright green
+         of the in-breath. -->
+    <p class="affirmation">„{{ text }}“</p>
 
     <!-- One word at a time, each at a different point around the disc. The
          positions are fixed and known to be clear of it; the order the words
@@ -27,22 +30,23 @@ import BreathCircle from '@/components/BreathCircle.vue';
 import { colorForFeeling, dedupeByName } from '@/utils/emotions';
 import { colorForNeed } from '@/utils/needs';
 
-// Points around the disc, as percentages of the screen. The disc is at most
-// 52vw wide and 28vh tall, so it covers roughly 24–76% across and 36–64% down —
-// every slot here sits outside that.
+// Points around the disc, as percentages of the screen. The disc now reaches
+// nearly the full width, so there is no room beside it — every slot sits in the
+// band above or below it. The lefts stay between 20% and 80% so a long word
+// still fits on screen once it is centred on its point.
 const SLOTS = [
-  { top: '20%', left: '28%' },
-  { top: '20%', left: '72%' },
-  { top: '33%', left: '15%' },
-  { top: '33%', left: '85%' },
-  { top: '67%', left: '15%' },
-  { top: '67%', left: '85%' },
-  { top: '80%', left: '30%' },
-  { top: '80%', left: '70%' },
+  { top: '10%', left: '30%' },
+  { top: '10%', left: '70%' },
+  { top: '17%', left: '20%' },
+  { top: '17%', left: '80%' },
+  { top: '83%', left: '20%' },
+  { top: '83%', left: '80%' },
+  { top: '90%', left: '32%' },
+  { top: '90%', left: '68%' },
 ];
 
-const FADE_MS = 900;
-const HOLD_MS = 2400;
+const FADE_MS = 1800;
+const HOLD_MS = 2600;
 
 export default {
   name: 'affirmation-practice',
@@ -138,19 +142,20 @@ export default {
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
 }
-/* Above the disc, where it can be read rather than over a pulsing green. */
 .affirmation {
   position: absolute;
-  top: 12%;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
-  width: 84vw;
+  transform: translate(-50%, -50%);
+  width: 78vw;
   margin: 0;
   text-align: center;
-  font-size: 1.15rem;
-  line-height: 1.45;
-  font-weight: 600;
+  font-size: 1.45rem;
+  line-height: 1.5;
+  font-weight: 400;
+  font-style: italic;
   color: #fff;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.6);
 }
 .breath-slot {
   display: flex;
@@ -161,13 +166,13 @@ export default {
   position: absolute;
   transform: translate(-50%, -50%);
   margin: 0;
-  max-width: 30vw;
+  max-width: 40vw;
   text-align: center;
-  font-size: 0.95rem;
+  font-size: 1.35rem;
   font-weight: 600;
   line-height: 1.3;
   opacity: 0;
-  transition: opacity 900ms ease-in-out;
+  transition: opacity 1800ms ease-in-out;
   pointer-events: none;
 }
 .word.shown { opacity: 1; }
