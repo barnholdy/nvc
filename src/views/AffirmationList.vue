@@ -15,24 +15,14 @@
         <p class="intro-text">Wiederholte positive Aussagen stärken neuronale Bahnen. Dein Gehirn kann sich durch bewusste Gedankenmuster neu vernetzen.</p>
       </div>
 
-      <div class="segment-row">
-        <button class="seg-tab" :class="{ active: tab === 'open' }" @click="tab = 'open'">Offen</button>
-        <button class="seg-tab" :class="{ active: tab === 'dabei' }" @click="tab = 'dabei'">Dabei</button>
-        <button class="seg-tab" :class="{ active: tab === 'verinnerlicht' }" @click="tab = 'verinnerlicht'">Verinnerlicht</button>
-      </div>
-
-      <div v-if="filteredAffirmations.length === 0" class="empty-state">
+      <div v-if="affirmations.length === 0" class="empty-state">
         <span class="empty-icon">✨</span>
         <p class="empty-title">Keine Einträge</p>
-        <p class="empty-sub">
-          <template v-if="tab === 'open'">Füge Affirmationen zu deinen Überzeugungen hinzu.</template>
-          <template v-else-if="tab === 'dabei'">Noch keine Affirmationen als „Dabei“ markiert.</template>
-          <template v-else>Noch keine Affirmationen als „Verinnerlicht“ markiert.</template>
-        </p>
+        <p class="empty-sub">Füge Affirmationen zu deinen Überzeugungen hinzu.</p>
       </div>
 
       <div v-else class="reminder-list">
-        <template v-for="(item, i) in filteredAffirmations">
+        <template v-for="(item, i) in affirmations">
           <div
             :key="item.text + '-row'"
             class="swipe-outer"
@@ -41,22 +31,13 @@
             @touchmove="tsMove($event, i)"
             @touchend="tsEnd($event, i)"
           >
-            <div class="swipe-right-panel">
-              <button
-                v-for="s in otherStatuses(item.text)"
-                :key="s.key"
-                class="swipe-btn status-btn"
-                :style="{ background: s.color }"
-                @click.stop="setStatus(item.text, s.key)"
-              ><span>{{ s.label }}</span></button>
-            </div>
             <div class="swipe-left-panel">
               <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(item)">
                 <v-icon small color="#fff">delete</v-icon>
                 <span>Löschen</span>
               </button>
             </div>
-            <div class="reminder-row" :style="rowSt(i, 195)" @click="deskClick(i)">
+            <div class="reminder-row" :style="rowSt(i)" @click="deskClick(i)">
               <div class="reminder-row-body">
                 <p class="reminder-text">{{ item.text }}</p>
                 <!-- Every reading this sentence has collected: from wandeln
@@ -141,7 +122,7 @@
           <div
             :key="item.text + '-sep'"
             class="ios-sep"
-            v-if="i < filteredAffirmations.length - 1 && openIndex !== i"
+            v-if="i < affirmations.length - 1 && openIndex !== i"
           ></div>
         </template>
       </div>
@@ -185,12 +166,6 @@
 
 <script>
 import moment from 'moment';
-import {
-  AFF_STATUS_KEY,
-  AFFIRMATION_STATUSES,
-  loadAffStatusMap,
-  affirmationStatus,
-} from '@/utils/affirmationStatus';
 import { affirmationCredibility, beliefCredibility } from '@/utils/credibility';
 import { beliefStatusLabel, beliefStatusColor } from '@/utils/beliefStatus';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
@@ -208,31 +183,18 @@ export default {
   components: { FeelingChips, AffirmationPractice },
   data() {
     return {
-      tab: 'dabei',
       openIndex: null,
       itemToDelete: null,
       isDeleteDialogShowing: false,
       amenMap: loadAhoMap(),
       practising: null,
-      statusMap: loadAffStatusMap(),
       sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
   },
   watch: {
-    tab() { this.sw.openIdx = null; this.sw.openDir = null; this.openIndex = null; },
     '$route.query.open': function() { this.revealRequested(); },
   },
   computed: {
-    filteredAffirmations() {
-      var sm = this.statusMap;
-      return this.affirmations.filter(function(item) {
-        var s = sm[item.text] || 'open';
-        if (this.tab === 'open') return s === 'open';
-        if (this.tab === 'dabei') return s === 'dabei';
-        if (this.tab === 'verinnerlicht') return s === 'verinnerlicht';
-        return true;
-      }, this);
-    },
     affirmations() {
       const map = {};
       const beliefs = this.$store.getters.beliefs;
@@ -247,7 +209,17 @@ export default {
       });
       return Object.values(map).map(item => Object.assign({}, item, {
         credibility: affirmationCredibility(beliefs, item.text),
-      })).sort((a, b) => b.beliefCount - a.beliefCount);
+      })).sort((a, b) => {
+        // Least believed first: that is the sentence most worth practising.
+        // Never rated sorts last — "lowest first" cannot rank a value nobody
+        // gave, and an unrated sentence is not the least believed one, it is
+        // simply unmeasured.
+        const ca = a.credibility === null ? Infinity : a.credibility;
+        const cb = b.credibility === null ? Infinity : b.credibility;
+        if (ca !== cb) return ca - cb;
+        if (a.beliefCount !== b.beliefCount) return b.beliefCount - a.beliefCount;
+        return a.text.localeCompare(b.text);
+      });
     },
     currentEditAffirmation() {
       const key = this.editOriginalText;
@@ -284,18 +256,14 @@ export default {
   },
   methods: {
     // Affirmations are keyed by their own text, so that is what the link
-    // carries and what the tab has to be found from.
+    // carries and what the row is found by.
     revealRequested() {
       const text = requestedId(this.$route);
       if (!text) return;
-      if (!this.affirmations.some(a => a.text === text)) return;
-      this.tab = affirmationStatus(text, this.statusMap);
-      this.$nextTick(() => {
-        const i = this.filteredAffirmations.findIndex(a => a.text === text);
-        if (i === -1) return;
-        this.openIndex = i;
-        this.$nextTick(() => scrollRowIntoView(this.$el, text));
-      });
+      const i = this.affirmations.findIndex(a => a.text === text);
+      if (i === -1) return;
+      this.openIndex = i;
+      this.$nextTick(() => scrollRowIntoView(this.$el, text));
     },
     beliefOf(time) {
       return this.$store.getters.beliefs.find(b => b.time === time) || null;
@@ -378,7 +346,9 @@ export default {
         this.sw.isH = Math.abs(dx) >= Math.abs(dy);
       if (!this.sw.isH) return;
       e.preventDefault();
-      this.sw.dx = Math.max(-80, Math.min(dx, 195));
+      // Nothing to reveal on the right any more; the row only opens towards
+      // the delete button.
+      this.sw.dx = Math.max(-80, Math.min(dx, 0));
       this.sw.drag = true;
     },
     tsEnd(e, i) {
@@ -390,37 +360,22 @@ export default {
         else { this.toggle(i); }
       } else if (this.sw.drag) {
         if (this.sw.dx < -40) { this.sw.openIdx = i; this.sw.openDir = 'left'; }
-        else if (this.sw.dx > 40) { this.sw.openIdx = i; this.sw.openDir = 'right'; }
         else { this.sw.openIdx = null; this.sw.openDir = null; }
         this.openIndex = null;
       }
       this.sw.touchIdx = null; this.sw.dx = 0; this.sw.drag = false; this.sw.isH = null;
     },
-    rowSt(i, rw) {
+    rowSt(i) {
       const s = this.sw;
       const live = s.touchIdx === i && s.drag && s.isH;
       let x = 0;
       if (live) x = s.dx;
-      else if (s.openIdx === i) x = s.openDir === 'left' ? -80 : rw;
+      else if (s.openIdx === i) x = -80;
       return { transform: `translateX(${x}px)`, transition: live ? 'none' : 'transform 0.2s ease' };
     },
     deskClick(i) {
       if (this.sw.openIdx !== null) { this.sw.openIdx = null; this.sw.openDir = null; return; }
       this.toggle(i);
-    },
-    otherStatuses(text) {
-      var current = affirmationStatus(text, this.statusMap);
-      return AFFIRMATION_STATUSES.filter(function(s) { return s.key !== current; });
-    },
-    // An affirmation still on "Offen" has not been taken up yet, so its button
-    // starts the practice instead of counting one.
-    setStatus(text, status) {
-      this.statusMap = Object.assign({}, this.statusMap, { [text]: status });
-      localStorage.setItem(AFF_STATUS_KEY, JSON.stringify(this.statusMap));
-      this.sw.openIdx = null;
-      this.sw.openDir = null;
-      // The row leaves this tab, so the index it was open at means nothing now.
-      this.openIndex = null;
     },
   },
 };
@@ -428,34 +383,6 @@ export default {
 
 <style scoped lang="scss">
 .dark-page { background: #000; min-height: 100vh; }
-
-.segment-row {
-  display: flex;
-  padding: 0 16px 16px;
-  border-bottom: 1px solid #2c2c2e;
-  margin-bottom: 4px;
-}
-.seg-tab {
-  flex: 1;
-  background: none;
-  border: none;
-  padding: 8px 0;
-  font-size: 0.875rem;
-  color: #8e8e93;
-  cursor: pointer;
-  position: relative;
-  font-family: inherit;
-  -webkit-tap-highlight-color: transparent;
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -1px; left: 0; right: 0;
-    height: 2px;
-    background: transparent;
-    border-radius: 2px;
-  }
-  &.active { color: #fff; font-weight: 600; &::after { background: #4ade80; } }
-}
 
 .reminder-list {
   background: #1c1c1e;
@@ -469,12 +396,6 @@ export default {
   position: relative;
   overflow: hidden;
   background: #1c1c1e;
-}
-.swipe-right-panel {
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  display: flex;
-  align-items: stretch;
 }
 .swipe-left-panel {
   position: absolute;
@@ -501,7 +422,6 @@ export default {
 }
 .swipe-btn-delete { background: #ff453a; width: 80px; }
 .swipe-btn-edit { background: #636366; }
-.status-btn { color: #000; font-size: 0.72rem; }
 
 .reminder-row {
   position: relative;

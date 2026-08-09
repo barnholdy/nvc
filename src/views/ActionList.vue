@@ -131,10 +131,6 @@
               <div class="belief-row" @click.stop="openAffirmation(row)">
                 <div class="belief-row-body">
                   <p class="expand-text">{{ affirmationOf(row) }}</p>
-                  <span
-                    class="status-pill"
-                    :style="{ color: affStatusColor(affirmationOf(row)) }"
-                  >{{ affStatusLabel(affirmationOf(row)) }}</span>
                   <template v-if="affirmationTruth(row) !== null">
                     <p class="expand-label mt-2">Glaubwürdigkeit</p>
                     <div class="slider-row">
@@ -509,11 +505,6 @@ import {
 } from '@/utils/experiment';
 import { beliefCredibility, affirmationCredibility } from '@/utils/credibility';
 import { beliefStatusLabel, beliefStatusColor } from '@/utils/beliefStatus';
-import {
-  loadAffStatusMap,
-  affirmationStatusLabel,
-  affirmationStatusColor,
-} from '@/utils/affirmationStatus';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 
 function triggerConfetti() {
@@ -573,7 +564,6 @@ export default {
       // 0 = the old belief still holds, 100 = the affirmation does.
       resultBeliefTruth: 5,
       resultAffirmationTruth: 5,
-      affStatusMap: loadAffStatusMap(),
       rowToDelete: null,
       isDeleteDialogShowing: false,
       sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
@@ -703,8 +693,6 @@ export default {
       if (!text) return null;
       return affirmationCredibility(this.$store.getters.beliefs, text);
     },
-    affStatusLabel(text) { return affirmationStatusLabel(text, this.affStatusMap); },
-    affStatusColor(text) { return affirmationStatusColor(text, this.affStatusMap); },
     openAffirmation(row) {
       const text = this.affirmationOf(row);
       if (!text) return;

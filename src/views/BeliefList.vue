@@ -226,9 +226,6 @@
                 >
                   <div class="linked-row-body">
                     <p class="expand-text">{{ a.text }}</p>
-                    <span class="status-pill" :style="{ color: affStatusColor(a.text) }">
-                      {{ affStatusLabel(a.text) }}
-                    </span>
                     <p class="expand-label mt-2">Glaubwürdigkeit</p>
                     <div class="slider-row">
                       <span class="slider-end-label">0</span>
@@ -351,11 +348,6 @@ import {
 import { normalizeTruth } from '@/utils/affirmationTruth';
 import { beliefCredibility, beliefTruthIn } from '@/utils/credibility';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
-import {
-  loadAffStatusMap,
-  affirmationStatusLabel,
-  affirmationStatusColor,
-} from '@/utils/affirmationStatus';
 
 export default {
   name: 'belief-list',
@@ -370,7 +362,6 @@ export default {
       isDeleteDialogShowing: false,
       // Saving a belief returns here with the tab it now belongs to.
       tab: isBeliefStatus(this.$route.query.tab) ? this.$route.query.tab : 'open',
-      affStatusMap: loadAffStatusMap(),
       sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
   },
@@ -461,8 +452,6 @@ export default {
     experimentStateLabel(x) { return stateLabelOf(x); },
     gapColor(gap) { return fearGapColor(gap); },
     truthOf(a) { return normalizeTruth(a.resonance); },
-    affStatusLabel(text) { return affirmationStatusLabel(text, this.affStatusMap); },
-    affStatusColor(text) { return affirmationStatusColor(text, this.affStatusMap); },
     // Each of these opens the row in the list that owns it, unfolded and in
     // view — following a reference should land you on the thing itself, not in
     // a wizard for editing it.
