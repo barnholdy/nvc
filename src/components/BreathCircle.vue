@@ -1,6 +1,10 @@
 <template>
   <div class="breath-wrap">
-    <div class="breath-circle" aria-hidden="true"></div>
+    <div
+      class="breath-circle"
+      :style="size ? { width: size, height: size } : null"
+      aria-hidden="true"
+    ></div>
   </div>
 </template>
 
@@ -9,6 +13,12 @@
 // behaviour cannot differ between them.
 export default {
   name: 'breath-circle',
+  props: {
+    // Any CSS length. Left unset the disc keeps the size the wizard screens
+    // use; the practice view makes it smaller to leave a ring of space free
+    // for the words that circle it.
+    size: { type: String, default: '' },
+  },
 };
 </script>
 

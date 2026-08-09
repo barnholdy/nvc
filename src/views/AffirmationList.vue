@@ -79,7 +79,7 @@
                 </template>
                 <p class="reminder-meta">{{ amenLabel(item.text) }}</p>
               </div>
-              <button class="amen-btn" @click.stop="primaryAction(item.text)">{{ primaryLabel(item.text) }}</button>
+              <button class="amen-btn" @click.stop="startPractice(item)">Üben</button>
             </div>
           </div>
           <!-- Where the affirmation comes from — behind a tap, because the
@@ -158,6 +158,14 @@
       </v-dialog>
     </v-content>
 
+    <affirmation-practice
+      v-if="practising"
+      :text="practising.text"
+      :feelings="practiceFeelings"
+      :needs="practiceNeeds"
+      @close="practising = null"
+    ></affirmation-practice>
+
     <v-bottom-nav :value="true" fixed app color="#1c1c1e" class="dark-nav">
       <v-btn flat color="grey" to="/patterns">
         <v-icon>bolt</v-icon>
@@ -187,51 +195,17 @@ import { affirmationCredibility, beliefCredibility } from '@/utils/credibility';
 import { beliefStatusLabel, beliefStatusColor } from '@/utils/beliefStatus';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 import FeelingChips from '@/components/FeelingChips.vue';
+import AffirmationPractice from '@/components/AffirmationPractice.vue';
 
 const AMEN_KEY = 'nvc.amen';
 
-function triggerConfetti() {
-  var canvas = document.createElement('canvas');
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  canvas.style.cssText = 'position:fixed;top:0;left:0;pointer-events:none;z-index:9999';
-  document.body.appendChild(canvas);
-  var ctx = canvas.getContext('2d');
-  if (!ctx) { document.body.removeChild(canvas); return; }
-  var COLORS = ['#4ade80', '#f9e02e', '#ff6b6b', '#60c5f9', '#c084fc', '#fb923c'];
-  var cx = canvas.width / 2, cy = canvas.height * 0.55;
-  var particles = [];
-  for (var i = 0; i < 72; i++) {
-    var angle = Math.PI * 2 * i / 72 + (Math.random() - 0.5) * 0.4;
-    var speed = 4 + Math.random() * 8;
-    particles.push({ x: cx, y: cy, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 3,
-      w: 4 + Math.random() * 7, h: 2 + Math.random() * 4,
-      color: COLORS[Math.floor(Math.random() * COLORS.length)],
-      rot: Math.random() * Math.PI * 2, vr: (Math.random() - 0.5) * 0.3 });
-  }
-  var start = null, dur = 1500;
-  function frame(ts) {
-    if (!start) start = ts;
-    var t = ts - start;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    particles.forEach(function(p) {
-      p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.vx *= 0.99; p.rot += p.vr;
-      ctx.save(); ctx.globalAlpha = Math.max(0, 1 - t / dur);
-      ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = p.color;
-      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore();
-    });
-    if (t < dur) { requestAnimationFrame(frame); }
-    else { if (canvas.parentNode) canvas.parentNode.removeChild(canvas); }
-  }
-  requestAnimationFrame(frame);
-}
 function loadAhoMap() {
   try { return JSON.parse(localStorage.getItem(AMEN_KEY)) || {}; } catch (e) { return {}; }
 }
 
 export default {
   name: 'affirmation-list',
-  components: { FeelingChips },
+  components: { FeelingChips, AffirmationPractice },
   data() {
     return {
       tab: 'dabei',
@@ -239,6 +213,7 @@ export default {
       itemToDelete: null,
       isDeleteDialogShowing: false,
       amenMap: loadAhoMap(),
+      practising: null,
       statusMap: loadAffStatusMap(),
       sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
@@ -278,6 +253,25 @@ export default {
       const key = this.editOriginalText;
       if (!key) return null;
       return this.affirmations.find(a => a.text === key) || null;
+    },
+    // Pooled across every belief that carries the sentence: in the practice
+    // view they circle the affirmation itself, not one belief at a time.
+    practiceFeelings() {
+      return this.practiceSourceBeliefs.reduce((all, b) => {
+        const r = b.reflection || {};
+        return all.concat(Array.isArray(r.withoutBeliefFeelings) ? r.withoutBeliefFeelings : []);
+      }, []);
+    },
+    practiceNeeds() {
+      return this.practiceSourceBeliefs.reduce(
+        (all, b) => all.concat(Array.isArray(b.needs) ? b.needs : []), [],
+      );
+    },
+    practiceSourceBeliefs() {
+      if (!this.practising) return [];
+      return (this.practising.sources || [])
+        .map(s => this.beliefOf(s.beliefTime))
+        .filter(Boolean);
     },
     unlinkedBeliefsForEdit() {
       if (!this.currentEditAffirmation) return [];
@@ -330,19 +324,19 @@ export default {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.openIndex = this.openIndex === i ? null : i;
     },
-    // Saying it out loud is worth marking, not worth scoring — the only value
-    // this sentence carries is the credibility it was actually rated with.
-    sayAho(text) {
+    // Practising is worth marking, not worth scoring — the only value this
+    // sentence carries is the credibility it was actually rated with.
+    startPractice(item) {
       this.sw.openIdx = null; this.sw.openDir = null;
-      this.amenMap = Object.assign({}, this.amenMap, { [text]: Date.now() });
+      this.practising = item;
+      this.amenMap = Object.assign({}, this.amenMap, { [item.text]: Date.now() });
       localStorage.setItem(AMEN_KEY, JSON.stringify(this.amenMap));
-      triggerConfetti();
     },
     amenLabel(text) {
       const ts = this.amenMap[text];
-      if (!ts) return 'Noch nicht gesagt';
+      if (!ts) return 'Noch nicht geübt';
       moment.locale('de');
-      return moment(ts).fromNow();
+      return `Geübt ${moment(ts).fromNow()}`;
     },
     addBeliefToAffirmation(text, belief) {
       // One affirmation per belief — linking replaces whatever was there.
@@ -420,16 +414,6 @@ export default {
     },
     // An affirmation still on "Offen" has not been taken up yet, so its button
     // starts the practice instead of counting one.
-    primaryLabel(text) {
-      return affirmationStatus(text, this.statusMap) === 'open' ? 'Üben' : 'Aho';
-    },
-    primaryAction(text) {
-      if (affirmationStatus(text, this.statusMap) === 'open') {
-        this.setStatus(text, 'dabei');
-        return;
-      }
-      this.sayAho(text);
-    },
     setStatus(text, status) {
       this.statusMap = Object.assign({}, this.statusMap, { [text]: status });
       localStorage.setItem(AFF_STATUS_KEY, JSON.stringify(this.statusMap));
