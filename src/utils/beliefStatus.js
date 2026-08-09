@@ -10,7 +10,7 @@ export function isBeliefStatus(value) {
 }
 
 export const BELIEF_STATUS_LABELS = {
-  open: 'Offen',
+  open: 'Neu',
   working: 'Ergründet',
   done: 'Gewandelt',
 };
