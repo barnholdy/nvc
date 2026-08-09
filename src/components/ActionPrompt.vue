@@ -33,7 +33,7 @@ export default {
     segments() {
       const parts = [{
         text: 'In welcher konkreten Situation in den nächsten Tagen könntest du dich so '
-          + 'verhalten, als würde diese Affirmation gelten? ',
+          + 'verhalten, als würde nicht die Überzeugung, sondern die Affirmation gelten? ',
       }];
 
       const needs = this.needs;

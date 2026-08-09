@@ -2,12 +2,52 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Situation</h1>
-      <!-- The affirmation is what this action is meant to practise, so it
-           stands where the belief used to — quoted the same way. -->
-      <p v-if="affirmationText" class="subheading grey--text belief-quote mt-1">
-        „{{ affirmationText }}“
-      </p>
-      <action-prompt :belief="entry" class="mt-2"></action-prompt>
+      <!-- Both ends of what this action tests, each with the standing it has
+           right now — the question below asks you to act as if the second one
+           held instead of the first. -->
+      <template v-if="entry">
+        <p class="step-label mt-3">Überzeugung</p>
+        <p class="quote">„{{ entry.belief }}“</p>
+        <template v-if="beliefTruth !== null">
+          <p class="step-label mt-2">Glaubwürdigkeit</p>
+          <div class="slider-row">
+            <span class="slider-end-label">0</span>
+            <input
+              type="range"
+              min="0"
+              max="10"
+              step="0.1"
+              :value="beliefTruth"
+              class="readonly-slider"
+              disabled
+            />
+            <span class="slider-end-label">10</span>
+          </div>
+        </template>
+      </template>
+
+      <template v-if="affirmationText">
+        <p class="step-label mt-3">Affirmation</p>
+        <p class="quote">„{{ affirmationText }}“</p>
+        <template v-if="affirmationTruth !== null">
+          <p class="step-label mt-2">Glaubwürdigkeit</p>
+          <div class="slider-row">
+            <span class="slider-end-label">0</span>
+            <input
+              type="range"
+              min="0"
+              max="10"
+              step="0.1"
+              :value="affirmationTruth"
+              class="readonly-slider"
+              disabled
+            />
+            <span class="slider-end-label">10</span>
+          </div>
+        </template>
+      </template>
+
+      <action-prompt :belief="entry" class="mt-4"></action-prompt>
     </v-flex>
     <v-flex>
       <v-text-field
@@ -79,6 +119,7 @@ import ActionPrompt from '@/components/ActionPrompt.vue';
 import SituationRows from '@/components/SituationRows.vue';
 import { askClaude, loadApiKey, saveApiKey, parseLines } from '@/utils/ai';
 import { buildActionPrompt, SUGGESTION_COUNT } from '@/utils/actionSuggestions';
+import { beliefCredibility, affirmationCredibility } from '@/utils/credibility';
 
 export default {
   name: 'belief-act-situation',
@@ -110,6 +151,17 @@ export default {
     affirmationText() {
       const list = (this.entry && this.entry.affirmations) || [];
       return list.map(a => a && a.text).filter(Boolean).join(' · ');
+    },
+    // The same two numbers their own lists show: everything each has been rated
+    // at so far, not a reading taken here.
+    beliefTruth() {
+      return beliefCredibility(this.patterns, this.entry);
+    },
+    affirmationTruth() {
+      const list = (this.entry && this.entry.affirmations) || [];
+      const first = list.find(a => a && a.text);
+      if (!first) return null;
+      return affirmationCredibility(this.allBeliefs, first.text);
     },
   },
   watch: {
@@ -155,6 +207,59 @@ export default {
 
 <style scoped lang="scss">
 .belief-quote { font-style: italic; }
+.step-label {
+  font-size: 0.68rem;
+  color: #8e8e93;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 4px;
+  font-weight: 600;
+}
+.quote {
+  font-size: 0.95rem;
+  color: #ebebf5;
+  font-style: italic;
+  line-height: 1.45;
+  margin: 0;
+}
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px;
+}
+.slider-end-label {
+  font-size: 0.78rem;
+  color: #8e8e93;
+  flex-shrink: 0;
+}
+/* Shows a recorded value — deliberately not interactive. */
+.readonly-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: #3a3a3c;
+  outline: none;
+  opacity: 1;
+  pointer-events: none;
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #4ade80;
+  }
+  &::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border: none;
+    border-radius: 50%;
+    background: #4ade80;
+  }
+}
 /* Full-width rows rather than chips: a suggestion is a whole sentence, and a
    chip would either wrap badly or push the line off the screen. */
 .suggestion-row {
