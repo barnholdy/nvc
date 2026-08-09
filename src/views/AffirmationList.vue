@@ -115,6 +115,25 @@
                     <span class="slider-end-label">10</span>
                   </div>
                 </template>
+                <!-- What this sentence is meant to bring about, and what it is
+                     for. Per belief rather than pooled: a shared affirmation
+                     carries different feelings and needs in each one. -->
+                <template v-if="newFeelingsOf(s.beliefTime).length">
+                  <p class="expand-label mt-2">Neue Gefühle</p>
+                  <feeling-chips
+                    :items="newFeelingsOf(s.beliefTime)"
+                    type="feelings"
+                    class="mb-1"
+                  ></feeling-chips>
+                </template>
+                <template v-if="needsOf(s.beliefTime).length">
+                  <p class="expand-label mt-2">Bedürfnisse</p>
+                  <feeling-chips
+                    :items="needsOf(s.beliefTime)"
+                    type="needs"
+                    class="mb-1"
+                  ></feeling-chips>
+                </template>
               </div>
               <v-icon small class="belief-chevron">chevron_right</v-icon>
             </div>
@@ -167,6 +186,7 @@ import {
 import { affirmationCredibility, beliefCredibility } from '@/utils/credibility';
 import { beliefStatusLabel, beliefStatusColor } from '@/utils/beliefStatus';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
+import FeelingChips from '@/components/FeelingChips.vue';
 
 const AMEN_KEY = 'nvc.amen';
 
@@ -211,6 +231,7 @@ function loadAhoMap() {
 
 export default {
   name: 'affirmation-list',
+  components: { FeelingChips },
   data() {
     return {
       tab: 'dabei',
@@ -289,6 +310,15 @@ export default {
     // list — an affirmation records no separate reading of it.
     beliefTruth(time) {
       return beliefCredibility(this.$store.getters.patterns, this.beliefOf(time));
+    },
+    // From the wandeln step: how the new perspective felt.
+    newFeelingsOf(time) {
+      const r = (this.beliefOf(time) || {}).reflection || {};
+      return Array.isArray(r.withoutBeliefFeelings) ? r.withoutBeliefFeelings : [];
+    },
+    needsOf(time) {
+      const list = (this.beliefOf(time) || {}).needs;
+      return Array.isArray(list) ? list : [];
     },
     beliefStatusLabel(belief) { return beliefStatusLabel(belief); },
     beliefStatusColor(belief) { return beliefStatusColor(belief); },
