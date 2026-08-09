@@ -74,9 +74,9 @@ import { beliefStatus } from '@/utils/beliefStatus';
 import { beliefCredibility } from '@/utils/credibility';
 import { situationsForBelief } from '@/utils/patterns';
 
-// "Gewandelt" and "Gehandelt" — the two stages where a behavioural experiment
-// has something to test.
-const ACTIONABLE_STATUSES = ['done', 'acted'];
+// "Gewandelt" is the stage where a behavioural experiment has something to
+// test: there is a new perspective to act from.
+const ACTIONABLE_STATUSES = ['done'];
 
 export default {
   name: 'belief-act',

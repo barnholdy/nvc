@@ -19,7 +19,6 @@
         <button class="seg-tab" :class="{ active: tab === 'open' }" @click="tab = 'open'">Offen</button>
         <button class="seg-tab" :class="{ active: tab === 'working' }" @click="tab = 'working'">Ergründet</button>
         <button class="seg-tab" :class="{ active: tab === 'done' }" @click="tab = 'done'">Gewandelt</button>
-        <button class="seg-tab" :class="{ active: tab === 'acted' }" @click="tab = 'acted'">Gehandelt</button>
       </div>
 
       <div v-if="filteredBeliefs.length === 0" class="empty-state">
@@ -28,8 +27,7 @@
         <p class="empty-sub">
           <template v-if="tab === 'open'">Überzeugungen entstehen beim Anlegen einer Situation.</template>
           <template v-else-if="tab === 'working'">Noch keine ergründeten Überzeugungen.</template>
-          <template v-else-if="tab === 'done'">Noch keine gewandelten Überzeugungen.</template>
-          <template v-else>Noch keine gehandelten Überzeugungen — plane ein Verhaltensexperiment über „Handeln“.</template>
+          <template v-else>Noch keine gewandelten Überzeugungen.</template>
         </p>
       </div>
 

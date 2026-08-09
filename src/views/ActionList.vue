@@ -735,7 +735,8 @@ export default {
         fearActual: this.resultActual,
         learning: this.resultLearning.trim(),
         // Evaluating implies it was carried out. Without this the belief would
-        // never reach "Gehandelt", which keys off doneAt.
+        // never count as acted on, which keys off doneAt — and that is one of
+        // the two ways it reaches "Gewandelt".
         doneAt: (row && row.experiment.doneAt) || now,
         completedAt: now,
         // How credible each sentence is after the experiment, on its own scale.

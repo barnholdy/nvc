@@ -3,7 +3,7 @@ import { isCarriedOut, experimentsOf } from './experiment';
 // Single source of truth for how far a belief has been worked through.
 // Lives here so the belief list and the Situationen list cannot drift apart.
 
-export const BELIEF_STATUSES = ['open', 'working', 'done', 'acted'];
+export const BELIEF_STATUSES = ['open', 'working', 'done'];
 
 export function isBeliefStatus(value) {
   return BELIEF_STATUSES.indexOf(value) !== -1;
@@ -13,7 +13,6 @@ export const BELIEF_STATUS_LABELS = {
   open: 'Offen',
   working: 'Ergründet',
   done: 'Gewandelt',
-  acted: 'Gehandelt',
 };
 
 // Same convention as the affirmation statuses: grey / orange / green.
@@ -21,8 +20,6 @@ export const BELIEF_STATUS_COLORS = {
   open: '#636366',
   working: '#fd9927',
   done: '#4ade80',
-  // A rung above "Gewandelt" — green is taken, violet reads as beyond it.
-  acted: '#c084fc',
 };
 
 export function isComplete(belief) {
@@ -64,9 +61,10 @@ export function hasActed(belief) {
 }
 
 export function beliefStatus(belief) {
-  // A real step outweighs how complete the forms are.
-  if (hasActed(belief)) return 'acted';
-  if (hasCompleteChange(belief)) return 'done';
+  // Having acted on a belief counts as having transformed it — carrying out an
+  // experiment is a real step, and it outweighs how completely the wandeln
+  // forms were filled in.
+  if (hasActed(belief) || hasCompleteChange(belief)) return 'done';
   if (!isComplete(belief)) return 'open';
   return 'working';
 }
