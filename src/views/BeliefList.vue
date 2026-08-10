@@ -78,28 +78,26 @@
         </div>
           <span class="card-pill">{{ statusLabel(entry) }}</span>
 
-          <!-- The line is pinned to the right edge and the text wraps in front
-               of it, so a long trend never pushes it onto its own row. -->
+          <!-- Number on the left, the movement of that number on the right:
+               the line and the words under it say the same thing, so they
+               belong in one column. -->
           <div v-if="credibility(entry) !== null" class="score-row">
-            <div class="score-main" :class="{ 'has-spark': trendOf(entry) }">
+            <div class="score-main">
               <span class="score-value">{{ round(credibility(entry)) }}</span>
               <span class="score-max">/10</span>
               <span class="score-label">Glaubwürdigkeit</span>
-              <!-- Its own line: inline it only fits when both the value and the
-                   month are short, and a half-wrapped trend reads worse than a
-                   deliberate second line. -->
+            </div>
+            <div v-if="trendOf(entry)" class="score-side">
+              <sparkline
+                class="score-spark"
+                :values="trendOf(entry).values"
+                :color="trendOf(entry).color"
+              ></sparkline>
               <span
-                v-if="trendOf(entry)"
                 class="score-trend"
                 :style="{ color: trendOf(entry).color }"
               >{{ trendOf(entry).text }}</span>
             </div>
-            <sparkline
-              v-if="trendOf(entry)"
-              class="score-spark"
-              :values="trendOf(entry).values"
-              :color="trendOf(entry).color"
-            ></sparkline>
           </div>
 
           <div v-if="!compact" class="card-sep"></div>
@@ -556,25 +554,30 @@ export default {
 /* Without the row list above it the box would butt straight against the
    trend line, which is a number, not a heading. */
 .aff-box-loose { margin-top: 14px !important; }
-.score-trend {
-  flex: 0 0 100%;
-  font-size: 0.85rem;
-  font-weight: 600;
-  white-space: nowrap;
-  margin-top: 2px;
-}
+/* Two columns of different heights now, so the shared baseline rule that
+   suits a single line does not apply here. */
+.score-row { align-items: center; }
 .score-main {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
   gap: 6px;
-  &.has-spark { padding-right: 96px; }
+  flex: 1;
+  min-width: 0;
 }
-.score-spark {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+/* The line and its reading, stacked and pinned right. */
+.score-side {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  margin-left: 12px;
+}
+.score-trend {
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 /* Only the head answers a swipe; the rest of the card scrolls freely. */
 
