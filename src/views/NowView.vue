@@ -16,30 +16,40 @@
         <p class="list-empty-sub">Lege eine Situation an, wenn dir etwas begegnet.</p>
       </div>
 
-      <!-- One block per kind of next step. A block with nothing in it is not
-           shown at all: an empty list is not news. -->
-      <div v-for="section in sections" :key="section.key" class="card">
-        <p class="now-head">{{ section.count }} {{ section.title }}</p>
+      <!-- One block per kind of next step, one card per thing to do. A block
+           with nothing in it is not shown at all: an empty list is not news. -->
+      <template v-for="section in sections">
+        <p :key="section.key + '-head'" class="section-head">
+          {{ section.count }} {{ section.title }}
+        </p>
 
         <div
           v-for="item in section.items"
           :key="item.key"
-          class="now-row"
+          class="card now-card"
           @click="section.run(item)"
         >
-          <span class="now-text">{{ item.text }}</span>
-          <span class="now-action">{{ section.action }}</span>
-          <v-icon class="detail-chevron">chevron_right</v-icon>
+          <div class="now-line">
+            <div class="now-body">
+              <p class="now-title">{{ item.text }}</p>
+              <p v-if="item.sub" class="now-sub">{{ item.sub }}</p>
+            </div>
+            <button class="now-btn" @click.stop="section.run(item)">{{ section.action }}</button>
+          </div>
+          <span v-if="item.chip" class="now-chip">{{ item.chip }}</span>
         </div>
 
         <!-- Only when there is more than the three shown. -->
-        <div v-if="section.count > TOP" class="card-link" @click="section.more()">
-          <span class="card-link-text">
-            {{ section.count - TOP }} {{ section.count - TOP === 1 ? 'weitere' : 'weitere' }} anzeigen
-          </span>
+        <div
+          v-if="section.count > TOP"
+          :key="section.key + '-more'"
+          class="now-more"
+          @click="section.more()"
+        >
+          <span>{{ section.count - TOP }} weitere anzeigen</span>
           <v-icon class="detail-chevron">chevron_right</v-icon>
         </div>
-      </div>
+      </template>
 
       <div class="list-bottom-space"></div>
     </v-content>
@@ -77,6 +87,7 @@ import {
   experimentDisplayState,
   experimentsOf,
   isPlanned,
+  isDue,
   experimentState,
 } from '@/utils/experiment';
 import { affirmationCredibility, beliefCredibility } from '@/utils/credibility';
@@ -85,12 +96,23 @@ import { affirmationCredibility, beliefCredibility } from '@/utils/credibility';
 // them. Showing everything would turn this screen back into those lists.
 const TOP = 3;
 const PRACTICE_KEY = 'nvc.amen';
+const DAY_MS = 24 * 60 * 60 * 1000;
+// A sentence you have not said in a week has stopped being a practice.
+const PRACTICE_DUE_DAYS = 7;
+
+function readPractised() {
+  try {
+    return JSON.parse(localStorage.getItem(PRACTICE_KEY)) || {};
+  } catch (e) {
+    return {};
+  }
+}
 
 export default {
   name: 'now-view',
   components: { AffirmationPractice },
   data() {
-    return { practising: null };
+    return { practising: null, practised: readPractised(), now: Date.now() };
   },
   computed: {
     TOP() { return TOP; },
@@ -144,7 +166,36 @@ export default {
       return this.rows.filter(r => experimentDisplayState(r.experiment) === 'planned');
     },
     sections() {
-      const belief = (b, action) => ({ key: `b${b.time}`, text: b.belief, entry: b, action });
+      const belief = (b) => {
+        const c = beliefCredibility(this.patterns, b);
+        return {
+          key: `b${b.time}`,
+          text: `„${b.belief}“`,
+          sub: c === null
+            ? 'Überzeugung · noch nicht bewertet'
+            : `Überzeugung · ${this.round(c)}/10 Glaubwürdigkeit`,
+          entry: b,
+        };
+      };
+      const affirmation = (a) => {
+        const last = this.practised[a.text];
+        const days = last ? Math.floor((this.now - last) / DAY_MS) : null;
+        return {
+          key: `a${a.text}`,
+          text: a.text,
+          sub: `Affirmation · ${this.sinceLabel(days)}`,
+          // Orange only when it is actually overdue — a chip on everything is
+          // a chip on nothing.
+          chip: days === null || days >= PRACTICE_DUE_DAYS ? 'überfällig' : null,
+          aff: a,
+        };
+      };
+      const experiment = r => ({
+        key: `x${r.experiment.id}`,
+        text: r.experiment.situation || r.beliefText,
+        sub: `Handlung · „${r.beliefText}“`,
+        row: r,
+      });
       const run = list => list.slice(0, TOP);
       const all = [
         {
@@ -179,7 +230,7 @@ export default {
           title: this.affirmations.length === 1 ? 'Affirmation üben' : 'Affirmationen üben',
           action: 'Üben',
           count: this.affirmations.length,
-          items: run(this.affirmations).map(a => ({ key: `a${a.text}`, text: a.text, aff: a })),
+          items: run(this.affirmations).map(affirmation),
           run: item => this.startPractice(item.aff),
           more: () => this.$router.push('/beliefs'),
         },
@@ -188,11 +239,7 @@ export default {
           title: 'neue Handlungen planen',
           action: 'Planen',
           count: this.openExperiments.length,
-          items: run(this.openExperiments).map(r => ({
-            key: `x${r.experiment.id}`,
-            text: r.experiment.situation || r.beliefText,
-            row: r,
-          })),
+          items: run(this.openExperiments).map(experiment),
           run: item => this.$router.push(
             `/act-belief/${item.row.beliefTime}/${item.row.experiment.id}`,
           ),
@@ -203,10 +250,9 @@ export default {
           title: 'geplante Handlungen auswerten',
           action: 'Auswerten',
           count: this.plannedExperiments.length,
-          items: run(this.plannedExperiments).map(r => ({
-            key: `x${r.experiment.id}`,
-            text: r.experiment.situation || r.beliefText,
-            row: r,
+          items: run(this.plannedExperiments).map(r => Object.assign(experiment(r), {
+            // isDue is the same seven-day mark the Handlungen list uses.
+            chip: isDue(r.experiment, this.now) ? 'überfällig' : null,
           })),
           // Evaluating happens in the Handlungen list, which owns that wizard.
           run: item => this.$router.push({
@@ -220,11 +266,22 @@ export default {
     },
   },
   methods: {
+    round(v) { return String(Math.round(v * 10) / 10).replace('.', ','); },
+    sinceLabel(days) {
+      if (days === null) return 'noch nie geübt';
+      if (days <= 0) return 'heute geübt';
+      if (days === 1) return 'gestern geübt';
+      return `zuletzt geübt vor ${days} Tagen`;
+    },
     startPractice(aff) {
       this.practising = { text: aff.text, feelings: aff.feelings, needs: aff.needs };
+      const at = Date.now();
+      // Kept in sync locally so the sub-line updates the moment you close the
+      // practice, without a reload.
+      this.practised = Object.assign({}, this.practised, { [aff.text]: at });
       try {
         const map = JSON.parse(localStorage.getItem(PRACTICE_KEY)) || {};
-        map[aff.text] = Date.now();
+        map[aff.text] = at;
         localStorage.setItem(PRACTICE_KEY, JSON.stringify(map));
       } catch (e) { /* a full or blocked store must not stop the practice */ }
     },
@@ -236,36 +293,73 @@ export default {
 <style scoped lang="scss">
 .dark-page { background: #000; min-height: 100vh; }
 
-.now-head {
-  font-size: 1rem;
-  color: #fff;
-  margin: 0 0 4px;
+/* Small grey capitals: the heading names the pile, the cards below are the
+   things in it. */
+.section-head {
+  font-size: 0.72rem;
   font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8e8e93;
+  margin: 18px 20px 8px;
 }
-.now-row {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid #2c2c2e;
+
+.now-card {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  &:active { opacity: 0.6; }
-  &:last-child { border-bottom: none; }
+  &:active { opacity: 0.7; }
 }
-.now-text {
-  flex: 1;
-  min-width: 0;
-  font-size: 0.95rem;
+.now-line {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.now-body { flex: 1; min-width: 0; }
+.now-title {
+  font-size: 1.05rem;
+  font-weight: 400;
+  color: #fff;
+  line-height: 1.35;
+  margin: 0;
+}
+.now-sub {
+  font-size: 0.88rem;
   color: #8e8e93;
+  margin: 4px 0 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.now-action {
+.now-btn {
   flex-shrink: 0;
-  font-size: 0.9rem;
+  background: none;
+  border: 1px solid #4ade80;
+  border-radius: 999px;
   color: #4ade80;
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 9px 20px;
+  cursor: pointer;
+}
+.now-chip {
+  display: inline-block;
+  margin-top: 12px;
+  border: 1px solid #fd9927;
+  border-radius: 8px;
+  color: #fd9927;
+  font-size: 0.85rem;
+  padding: 5px 12px;
+}
+.now-more {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  margin: -2px 20px 12px;
+  font-size: 0.9rem;
+  color: #8e8e93;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .dark-nav {

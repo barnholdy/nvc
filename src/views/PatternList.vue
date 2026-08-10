@@ -59,7 +59,10 @@
             :key="entry.time"
             :data-row-id="entry.time"
           >
-            <div class="timeline-row">
+            <div
+              class="timeline-row"
+              :class="{ 'timeline-last': entry.time === group.entries[group.entries.length - 1].time }"
+            >
               <span class="timeline-dot"></span>
               <div class="timeline-body">
                 <p class="timeline-meta">{{ dayLabel(entry.time) }}</p>
@@ -384,18 +387,22 @@ export default {
   gap: 14px;
   padding: 4px 20px 18px;
   background: #000;
-  /* The thread runs inside the entry only. Drawn from the dot as one long
-     line it carried on straight through the month headings between them. */
+  /* Each entry draws its own piece of thread, from its dot down into the next
+     entry's dot. Drawn once from the first dot as one long line it carried on
+     straight through the month headings in between. The last entry of a month
+     has nothing below it to reach, so it draws none — and that has to be said
+     explicitly, because every row is an only child of its own wrapper and
+     :last-child would therefore match all of them. */
   &::before {
     content: '';
     position: absolute;
     left: 24px;
     top: 17px;
-    bottom: 0;
+    bottom: -17px;
     width: 1px;
     background: #2c2c2e;
   }
-  &:last-child::before { display: none; }
+  &.timeline-last::before { display: none; }
 }
 .timeline-dot {
   position: relative;

@@ -63,7 +63,7 @@
           </div>
           <div
             class="card-head swipe-handle"
-            :style="rowSt(idx, 260)"
+            :style="rowSt(idx)"
             @touchstart="tsStart($event, idx)"
             @touchmove="tsMove($event, idx)"
             @touchend="tsEnd($event, idx)"
@@ -517,7 +517,7 @@ export default {
         this.sw.isH = Math.abs(dx) > Math.abs(dy) * 1.5;
       if (!this.sw.isH) return;
       e.preventDefault();
-      this.sw.dx = Math.max(-110, Math.min(dx, 260));
+      this.sw.dx = Math.max(-110, Math.min(dx, this.rightWidth(i)));
       this.sw.drag = true;
     },
     tsEnd(e, i) {
@@ -529,12 +529,18 @@ export default {
       }
       this.sw.touchIdx = null; this.sw.dx = 0; this.sw.drag = false; this.sw.isH = null;
     },
-    rowSt(i, rw) {
+    // Keep in step with the buttons rendered above: a head that slides further
+    // than the chip is wide leaves a gap and reads as slack.
+    rightWidth(i) {
+      const entry = this.filteredBeliefs[i];
+      return entry && this.otherSteps(entry).length >= 2 ? 190 : 110;
+    },
+    rowSt(i) {
       const s = this.sw;
       const live = s.touchIdx === i && s.drag && s.isH;
       let x = 0;
       if (live) x = s.dx;
-      else if (s.openIdx === i) x = s.openDir === 'left' ? -110 : rw;
+      else if (s.openIdx === i) x = s.openDir === 'left' ? -110 : this.rightWidth(i);
       return { transform: `translateX(${x}px)`, transition: live ? 'none' : 'transform 0.2s ease' };
     },
   },
