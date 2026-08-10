@@ -255,6 +255,9 @@
     ></affirmation-practice>
 
     <v-bottom-nav :value="true" fixed app color="#1c1c1e" class="dark-nav">
+      <v-btn flat color="grey" to="/now">
+        <v-icon>schedule</v-icon>
+      </v-btn>
       <v-btn flat color="grey" to="/patterns">
         <v-icon>bolt</v-icon>
       </v-btn>
@@ -263,9 +266,6 @@
       </v-btn>
       <v-btn flat color="grey" to="/actions">
         <v-icon>gps_fixed</v-icon>
-      </v-btn>
-      <v-btn flat color="grey" to="/now">
-        <v-icon>schedule</v-icon>
       </v-btn>
     </v-bottom-nav>
   </div>
