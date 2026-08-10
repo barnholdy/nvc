@@ -3,7 +3,27 @@
     <v-content>
       <div class="screen-title-row">
         <h1 class="screen-title">Handlungen</h1>
-        <button class="screen-add" @click="$router.push('/add-action')" aria-label="Neue Handlung">+</button>
+        <div class="screen-actions">
+          <button class="screen-add" @click="$router.push('/add-action')" aria-label="Neue Handlung">+</button>
+          <button class="screen-add" @click="$router.push('/settings')" aria-label="Einstellungen">
+            <v-icon color="#4ade80">settings</v-icon>
+          </button>
+        </div>
+      </div>
+
+      <div v-if="filterBeliefs.length > 1" class="pill-row">
+        <button
+          class="pill"
+          :class="{ active: beliefFilter === null }"
+          @click="beliefFilter = null"
+        >Alle</button>
+        <button
+          v-for="b in filterBeliefs"
+          :key="b.time"
+          class="pill"
+          :class="{ active: beliefFilter === b.time }"
+          @click="beliefFilter = b.time"
+        >„{{ b.belief }}“</button>
       </div>
 
       <div class="pill-row">
@@ -23,37 +43,11 @@
       </div>
 
       <div
-        v-for="(row, i) in filteredRows"
+        v-for="row in filteredRows"
         :key="row.experiment.id"
-        class="swipe-outer"
+        class="card"
         :data-row-id="row.experiment.id"
-        @touchstart="tsStart($event, i)"
-        @touchmove="tsMove($event, i)"
-        @touchend="tsEnd($event, i)"
       >
-        <div v-if="sw.openIdx === i || sw.touchIdx === i" class="swipe-right-panel">
-          <button class="swipe-btn swipe-btn-edit" @click.stop="editExperiment(row)">
-            <v-icon small color="#fff">edit</v-icon>
-            <span>Planen</span>
-          </button>
-          <!-- Nothing to compare against until an anchor exists -->
-          <button
-            v-if="!needsPlan(row.experiment)"
-            class="swipe-btn swipe-btn-evaluate"
-            @click.stop="startResult(row)"
-          >
-            <v-icon small color="#fff">assessment</v-icon>
-            <span>Auswerten</span>
-          </button>
-        </div>
-        <div v-if="sw.openIdx === i || sw.touchIdx === i" class="swipe-left-panel">
-          <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(row)">
-            <v-icon small color="#fff">delete</v-icon>
-            <span>Löschen</span>
-          </button>
-        </div>
-
-        <div class="card" :style="rowSt(i)">
           <div class="card-head">
             <p class="card-title">{{ row.experiment.situation || 'Ohne Situation' }}</p>
             <button
@@ -66,6 +60,11 @@
               class="card-btn"
               @click.stop="startResult(row)"
             >Auswerten</button>
+            <button
+              class="card-icon-btn"
+              aria-label="Löschen"
+              @click.stop="preDelete(row)"
+            ><v-icon small color="#ff453a">delete</v-icon></button>
           </div>
           <span class="card-pill">{{ stateLine(row.experiment) }}</span>
           <p v-if="isDue(row.experiment)" class="due-hint">Schon durchgeführt?</p>
@@ -162,7 +161,6 @@
               {{ round(beliefTruth(row)) }}/10
             </span>
           </div>
-        </div>
       </div>
 
       <div class="list-bottom-space"></div>
@@ -457,6 +455,7 @@ export default {
       // Which written answer is unfolded, keyed by experiment and row: every
       // card is open at once now, so one shared index would not do.
       openRows: {},
+      beliefFilter: null,
       now: Date.now(),
       isResultDialogShowing: false,
       resultRow: null,
@@ -469,26 +468,41 @@ export default {
       resultAffirmationTruth: 5,
       rowToDelete: null,
       isDeleteDialogShowing: false,
-      sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
   },
   watch: {
-    tab() { this.sw.openIdx = null; this.sw.openDir = null; },
     '$route.query.open': function() { this.revealRequested(); },
   },
   computed: {
     rows() {
       return collectExperiments(this.$store.getters.beliefs);
     },
+    // Both filters apply: a belief narrows which runs are in play, the state
+    // narrows how far along they are.
+    byBelief() {
+      if (this.beliefFilter === null) return this.rows;
+      return this.rows.filter(r => r.beliefTime === this.beliefFilter);
+    },
     filteredRows() {
       const tab = this.tab;
-      if (tab === 'all') return this.rows;
-      return this.rows.filter(function(row) {
+      if (tab === 'all') return this.byBelief;
+      return this.byBelief.filter(function(row) {
         return experimentDisplayState(row.experiment) === tab;
       });
     },
+    // Only beliefs that actually carry a run can filter one.
+    filterBeliefs() {
+      const seen = {};
+      const out = [];
+      this.rows.forEach((r) => {
+        if (seen[r.beliefTime]) return;
+        seen[r.beliefTime] = true;
+        out.push({ time: r.beliefTime, belief: r.beliefText });
+      });
+      return out;
+    },
     filters() {
-      const rows = this.rows;
+      const rows = this.byBelief;
       const all = { key: 'all', label: 'Alle', count: rows.length };
       return [all].concat(EXPERIMENT_DISPLAY_STATES.map(key => ({
         key,
@@ -579,7 +593,6 @@ export default {
     },
 
     startResult(row) {
-      this.sw.openIdx = null; this.sw.openDir = null;
       this.resultRow = row;
       this.resultStep = 1;
       this.resultOutcome = row.experiment.outcome || '';
@@ -611,7 +624,6 @@ export default {
     beliefStatusLabel(belief) { return beliefStatusLabel(belief); },
     beliefStatusColor(belief) { return beliefStatusColor(belief); },
     openBelief(row) {
-      this.sw.openIdx = null; this.sw.openDir = null;
       this.$router.push({ path: '/beliefs', query: openQuery(row.beliefTime) });
     },
     // One affirmation per belief, so the first is the one — but experiments
@@ -633,7 +645,6 @@ export default {
     openAffirmation(row) {
       const text = this.affirmationOf(row);
       if (!text) return;
-      this.sw.openIdx = null; this.sw.openDir = null;
       this.$router.push({ path: '/affirmations', query: openQuery(text) });
     },
     revealRequested() {
@@ -642,6 +653,7 @@ export default {
       const row = this.rows.find(r => String(r.experiment.id) === id);
       if (!row) return;
       this.tab = 'all';
+      this.beliefFilter = null;
       this.$nextTick(() => scrollRowIntoView(this.$el, id));
     },
     beliefOf(row) {
@@ -676,7 +688,6 @@ export default {
     // Same wizard as "Handeln" on a belief, so there is one place to edit an
     // experiment.
     editExperiment(row) {
-      this.sw.openIdx = null; this.sw.openDir = null;
       this.$router.push(`/act-belief/${row.beliefTime}/${row.experiment.id}`);
     },
     dateLabel(ts) {
@@ -686,7 +697,6 @@ export default {
     },
 
     preDelete(row) {
-      this.sw.openIdx = null; this.sw.openDir = null;
       this.rowToDelete = row;
       this.isDeleteDialogShowing = true;
     },
@@ -705,55 +715,6 @@ export default {
         reflection: Object.assign({}, r, { experiments: list }),
       }));
     },
-
-    tsStart(e, i) {
-      if (e.target && e.target.closest && (e.target.closest('.swipe-btn') || e.target.closest('.check-btn'))) return;
-      const t = e.touches[0];
-      this.sw.touchIdx = i; this.sw.startX = t.clientX; this.sw.startY = t.clientY;
-      this.sw.dx = 0; this.sw.isH = null; this.sw.drag = false;
-    },
-    tsMove(e, i) {
-      if (this.sw.touchIdx !== i) return;
-      const t = e.touches[0];
-      const dx = t.clientX - this.sw.startX, dy = t.clientY - this.sw.startY;
-      if (this.sw.isH === null && (Math.abs(dx) > 4 || Math.abs(dy) > 4))
-        this.sw.isH = Math.abs(dx) >= Math.abs(dy);
-      if (!this.sw.isH) return;
-      e.preventDefault();
-      this.sw.dx = Math.max(-80, Math.min(dx, this.rightWidth(i)));
-      this.sw.drag = true;
-    },
-    tsEnd(e, i) {
-      if (this.sw.touchIdx !== i) return;
-      const wasVert = this.sw.isH === false;
-      if (!wasVert) e.preventDefault();
-      if (!this.sw.drag && !wasVert) {
-        if (this.sw.openIdx !== null) { this.sw.openIdx = null; this.sw.openDir = null; }
-      } else if (this.sw.drag) {
-        if (this.sw.dx < -40) { this.sw.openIdx = i; this.sw.openDir = 'left'; }
-        else if (this.sw.dx > 40) { this.sw.openIdx = i; this.sw.openDir = 'right'; }
-        else { this.sw.openIdx = null; this.sw.openDir = null; }
-      }
-      this.sw.touchIdx = null; this.sw.dx = 0; this.sw.drag = false; this.sw.isH = null;
-    },
-    // Keep in step with the buttons rendered above: a mismatch makes the row
-    // spring back before the second one can be tapped.
-    rightWidth(i) {
-      const row = this.filteredRows[i];
-      return row && !this.needsPlan(row.experiment) ? 130 : 65;
-    },
-    rowSt(i) {
-      const s = this.sw;
-      const live = s.touchIdx === i && s.drag && s.isH;
-      let x = 0;
-      if (live) x = s.dx;
-      else if (s.openIdx === i) x = s.openDir === 'left' ? -80 : this.rightWidth(i);
-      return { transform: `translateX(${x}px)`, transition: live ? 'none' : 'transform 0.2s ease' };
-    },
-    deskClick(i) {
-      if (this.sw.openIdx !== null) { this.sw.openIdx = null; this.sw.openDir = null; return; }
-      this.toggle(i);
-    },
   },
 };
 </script>
@@ -761,94 +722,8 @@ export default {
 <style scoped lang="scss">
 .dark-page { background: #000; min-height: 100vh; }
 
-.segment-row {
-  display: flex;
-  padding: 0 16px 16px;
-  border-bottom: 1px solid #2c2c2e;
-  margin-bottom: 4px;
-}
-.seg-tab {
-  flex: 1;
-  background: none;
-  border: none;
-  padding: 8px 0;
-  font-size: 0.875rem;
-  color: #8e8e93;
-  cursor: pointer;
-  position: relative;
-  font-family: inherit;
-  -webkit-tap-highlight-color: transparent;
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -1px; left: 0; right: 0;
-    height: 2px;
-    background: transparent;
-    border-radius: 2px;
-  }
-  &.active { color: #fff; font-weight: 600; &::after { background: #4ade80; } }
-}
-
-.ios-list {
-  background: #1c1c1e;
-  border-radius: 12px;
-  margin: 0 16px 24px;
-  overflow: hidden;
-}
-
 /* ─── Swipe rows ─── */
-.swipe-outer {
-  position: relative;
-  overflow: hidden;
-  background: #1c1c1e;
-}
-.swipe-right-panel {
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  display: flex;
-  align-items: stretch;
-}
-.swipe-left-panel {
-  position: absolute;
-  right: 0; top: 0; bottom: 0;
-  display: flex;
-  align-items: stretch;
-}
-.swipe-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  cursor: pointer;
-  font-size: 0.62rem;
-  font-weight: 600;
-  font-family: inherit;
-  color: #fff;
-  width: 65px;
-  padding: 0;
-  gap: 3px;
-  -webkit-tap-highlight-color: transparent;
-  &:active { opacity: 0.85; }
-}
-.swipe-btn-delete { background: #ff453a; width: 80px; }
-.swipe-btn-edit { background: #636366; }
-.swipe-btn-evaluate { background: #2f7a52; }
 
-.ios-row {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  padding: 13px 12px 13px 20px;
-  background: #1c1c1e;
-  cursor: pointer;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-  will-change: transform;
-  &:active { background: #2c2c2e; }
-}
-.row-body { flex: 1; min-width: 0; margin-right: 12px; }
 .row-title {
   font-size: 0.95rem;
   color: #fff;
@@ -879,22 +754,6 @@ export default {
   margin: 4px 0 0;
 }
 
-.check-btn {
-  background: #4ade80;
-  color: #000;
-  border: none;
-  border-radius: 20px;
-  padding: 7px 16px;
-  font-size: 0.875rem;
-  font-weight: 700;
-  font-family: inherit;
-  cursor: pointer;
-  flex-shrink: 0;
-  -webkit-tap-highlight-color: transparent;
-  &:active { background: #3dcc70; transform: scale(0.97); }
-}
-
-.ios-sep { height: 1px; background: #2c2c2e; margin-left: 20px; }
 .row-expand {
   background: #141416;
   padding: 14px 20px 16px;
@@ -1102,24 +961,6 @@ export default {
 .dark-nav { border-top: 1px solid #2c2c2e !important; }
 
 /* ─── Card list ─── */
-.swipe-outer {
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 14px;
-}
-.swipe-outer .card { margin-bottom: 0; }
-.swipe-right-panel {
-  position: absolute;
-  left: 16px; top: 0; bottom: 0;
-  display: flex;
-  align-items: stretch;
-}
-.swipe-left-panel {
-  position: absolute;
-  right: 16px; top: 0; bottom: 0;
-  display: flex;
-  align-items: stretch;
-}
 .due-hint { font-size: 0.85rem; color: #fd9927; margin: 10px 0 0; }
 
 /* One track, two fills: the fear laid over what reality turned out to be, so

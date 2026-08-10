@@ -525,6 +525,7 @@ html, body {
   margin: 0;
   letter-spacing: -0.02em;
 }
+.screen-actions { display: flex; gap: 8px; flex-shrink: 0; }
 .screen-add {
   width: 40px;
   height: 40px;
@@ -607,6 +608,21 @@ html, body {
   font-family: inherit;
   padding: 9px 20px;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  &:active { opacity: 0.6; }
+}
+.card-icon-btn {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: none;
+  border: 1px solid #2c2c2e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-family: inherit;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
 }

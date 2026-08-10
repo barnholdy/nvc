@@ -3,7 +3,12 @@
     <v-content>
       <div class="screen-title-row">
         <h1 class="screen-title">Verlauf</h1>
-        <button class="screen-add" @click="$router.push('/add-pattern')" aria-label="Neue Situation">+</button>
+        <div class="screen-actions">
+          <button class="screen-add" @click="$router.push('/add-pattern')" aria-label="Neue Situation">+</button>
+          <button class="screen-add" @click="$router.push('/settings')" aria-label="Einstellungen">
+            <v-icon color="#4ade80">settings</v-icon>
+          </button>
+        </div>
       </div>
 
       <!-- Filtering by belief rather than by state: this screen is a record of
