@@ -13,7 +13,7 @@
           v-for="(item, i) in group.items"
           :key="i"
           class="feeling-chip"
-          :style="{ backgroundColor: chipColor(item.name), color: '#000' }"
+          :style="{ color: chipColor(item.name), borderColor: chipColor(item.name) }"
         >{{ item.name }}</span>
       </div>
     </div>
@@ -137,7 +137,8 @@ export default {
 .feeling-chip {
   display: inline-flex;
   align-items: center;
-  padding: 5px 12px;
+  padding: 4px 11px;
+  border: 1px solid currentColor;
   border-radius: 20px;
   font-size: 0.8125rem;
   font-weight: 500;

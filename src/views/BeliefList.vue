@@ -4,7 +4,7 @@
       <div class="screen-title-row">
         <h1 class="screen-title">Überzeugungen</h1>
         <button class="screen-add" @click="$router.push('/settings')" aria-label="Einstellungen">
-          <v-icon color="#4ade80">settings</v-icon>
+          <v-icon color="#8e8e93">settings</v-icon>
         </button>
       </div>
 
@@ -43,13 +43,23 @@
         :data-row-id="entry.time"
       >
         <div class="head-swipe">
+          <!-- The step the card already offers is left out: it is on screen a
+               few pixels away. -->
           <div v-if="isSwiping(idx)" class="swipe-panel left">
-            <button class="swipe-btn swipe-btn-edit" @click.stop="editEntry(entry)">Ergründen</button>
-            <button class="swipe-btn swipe-btn-change" @click.stop="changeEntry(entry)">Wandeln</button>
-            <button class="swipe-btn swipe-btn-act" @click.stop="actEntry(entry)">Handeln</button>
+            <div class="swipe-group" :class="{ single: otherSteps(entry).length === 1 }">
+              <button
+                v-for="step in otherSteps(entry)"
+                :key="step.key"
+                class="swipe-btn"
+                :style="{ color: step.color }"
+                @click.stop="step.run(entry)"
+              >{{ step.label }}</button>
+            </div>
           </div>
           <div v-if="isSwiping(idx)" class="swipe-panel right">
-            <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">Löschen</button>
+            <div class="swipe-group single swipe-btn-delete">
+              <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">Löschen</button>
+            </div>
           </div>
           <div
             class="card-head swipe-handle"
@@ -197,7 +207,7 @@
           <div
             v-if="affirmationOf(entry)"
             class="aff-box"
-            @click.stop="openAffirmation(affirmationOf(entry).text)"
+            :class="{ 'aff-box-loose': compact }"
           >
             <p class="aff-label">Affirmation</p>
             <p class="aff-text">„{{ affirmationOf(entry).text }}“</p>
@@ -251,11 +261,11 @@
       <v-btn flat color="primary" to="/beliefs">
         <v-icon>lightbulb_outline</v-icon>
       </v-btn>
-      <v-btn flat color="grey" to="/affirmations">
-        <v-icon>flare</v-icon>
-      </v-btn>
       <v-btn flat color="grey" to="/actions">
         <v-icon>gps_fixed</v-icon>
+      </v-btn>
+      <v-btn flat color="grey" to="/now">
+        <v-icon>schedule</v-icon>
       </v-btn>
     </v-bottom-nav>
   </div>
@@ -277,7 +287,7 @@ import { experimentsOf, experimentDisplayState } from '@/utils/experiment';
 import { normalizeTruth } from '@/utils/affirmationTruth';
 import { beliefCredibility, beliefPoints } from '@/utils/credibility';
 import { deltaColor } from '@/utils/beliefTrend';
-import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
+import { requestedId, scrollRowIntoView } from '@/utils/reveal';
 
 const PRACTICE_KEY = 'nvc.amen';
 const COMPACT_KEY = 'nvc.beliefsCompact';
@@ -406,6 +416,15 @@ export default {
         localStorage.setItem(PRACTICE_KEY, JSON.stringify(map));
       } catch (e) { /* a full or blocked store must not stop the practice */ }
     },
+    // Every step except the one the card's own button already offers.
+    otherSteps(entry) {
+      const here = this.rowActionLabel(entry);
+      return [
+        { key: 'edit', label: 'Ergründen', color: '#8e8e93', run: e => this.editEntry(e) },
+        { key: 'change', label: 'Wandeln', color: '#fd9927', run: e => this.changeEntry(e) },
+        { key: 'act', label: 'Handeln', color: '#4ade80', run: e => this.actEntry(e) },
+      ].filter(s => s.label !== here);
+    },
     isSwiping(idx) { return this.sw.openIdx === idx || this.sw.touchIdx === idx; },
     isOpen(entry, key) { return !!this.openRows[`${entry.time}:${key}`]; },
     toggleRow(entry, key) {
@@ -455,10 +474,6 @@ export default {
     },
     openExperiments(entry) {
       this.$router.push({ path: '/actions', query: { belief: String(entry.time) } });
-    },
-    openAffirmation(text) {
-      this.sw.openIdx = null; this.sw.openDir = null;
-      this.$router.push({ path: '/affirmations', query: openQuery(text) });
     },
     // The one step that moves this belief forward from where it stands.
     rowActionLabel(entry) {
@@ -532,6 +547,9 @@ export default {
 
 .mt-2 { margin-top: 8px !important; }
 
+/* Without the row list above it the box would butt straight against the
+   trend line, which is a number, not a heading. */
+.aff-box-loose { margin-top: 14px !important; }
 .score-trend {
   flex: 0 0 100%;
   font-size: 0.85rem;

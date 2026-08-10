@@ -6,7 +6,7 @@
         <div class="screen-actions">
           <button class="screen-add" @click="$router.push('/add-action')" aria-label="Neue Handlung">+</button>
           <button class="screen-add" @click="$router.push('/settings')" aria-label="Einstellungen">
-            <v-icon color="#4ade80">settings</v-icon>
+            <v-icon color="#8e8e93">settings</v-icon>
           </button>
         </div>
       </div>
@@ -49,17 +49,22 @@
         :data-row-id="row.experiment.id"
       >
         <div class="head-swipe">
-          <div v-if="isSwiping(i)" class="swipe-panel left">
-            <button class="swipe-btn swipe-btn-edit" @click.stop="editExperiment(row)">Planen</button>
-            <!-- Nothing to compare against until an anchor exists -->
-            <button
-              v-if="!needsPlan(row.experiment)"
-              class="swipe-btn swipe-btn-evaluate"
-              @click.stop="startResult(row)"
-            >Auswerten</button>
+          <!-- Whatever the card's own button already offers is left out. -->
+          <div v-if="isSwiping(i) && otherSteps(row).length" class="swipe-panel left">
+            <div class="swipe-group" :class="{ single: otherSteps(row).length === 1 }">
+              <button
+                v-for="step in otherSteps(row)"
+                :key="step.key"
+                class="swipe-btn"
+                :style="{ color: step.color }"
+                @click.stop="step.run(row)"
+              >{{ step.label }}</button>
+            </div>
           </div>
           <div v-if="isSwiping(i)" class="swipe-panel right">
-            <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(row)">Löschen</button>
+            <div class="swipe-group single swipe-btn-delete">
+              <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(row)">Löschen</button>
+            </div>
           </div>
           <div
             class="card-head swipe-handle"
@@ -152,11 +157,7 @@
             <v-icon v-if="!isOpen(row, 'learning')" class="detail-chevron">chevron_right</v-icon>
           </div>
 
-          <div
-            v-if="affirmationOf(row)"
-            class="aff-box"
-            @click.stop="openAffirmation(row)"
-          >
+          <div v-if="affirmationOf(row)" class="aff-box">
             <p class="aff-label">Affirmation</p>
             <p class="aff-text">„{{ affirmationOf(row) }}“</p>
             <div class="aff-foot" v-if="affirmationTruth(row) !== null">
@@ -390,11 +391,11 @@
       <v-btn flat color="grey" to="/beliefs">
         <v-icon>lightbulb_outline</v-icon>
       </v-btn>
-      <v-btn flat color="grey" to="/affirmations">
-        <v-icon>flare</v-icon>
-      </v-btn>
       <v-btn flat color="primary" to="/actions">
         <v-icon>gps_fixed</v-icon>
+      </v-btn>
+      <v-btn flat color="grey" to="/now">
+        <v-icon>schedule</v-icon>
       </v-btn>
     </v-bottom-nav>
   </div>
@@ -576,6 +577,21 @@ export default {
     isDue(x) { return isDue(x, this.now); },
     // A migrated action has a situation but no anchor — it cannot be evaluated.
     needsPlan(x) { return experimentState(x) !== 'evaluated' && !isPlanned(x); },
+    // The card shows Planen while an anchor is missing and Auswerten once it
+    // is there; the swipe offers whichever of the two is not on screen.
+    otherSteps(row) {
+      const steps = [
+        { key: 'plan', label: 'Planen', color: '#8e8e93', run: r => this.editExperiment(r) },
+      ];
+      // Nothing to compare against until an anchor exists.
+      if (!this.needsPlan(row.experiment)) {
+        steps.push({ key: 'evaluate', label: 'Auswerten', color: '#4ade80', run: r => this.startResult(r) });
+      }
+      const here = this.needsPlan(row.experiment)
+        ? 'Planen'
+        : (this.displayState(row.experiment) === 'planned' ? 'Auswerten' : '');
+      return steps.filter(s => s.label !== here);
+    },
     isSwiping(i) { return this.sw.openIdx === i || this.sw.touchIdx === i; },
     isOpen(row, key) { return !!this.openRows[`${row.experiment.id}:${key}`]; },
     toggleRow(row, key) {
@@ -670,11 +686,6 @@ export default {
       if (!text) return null;
       return affirmationCredibility(this.$store.getters.beliefs, text);
     },
-    openAffirmation(row) {
-      const text = this.affirmationOf(row);
-      if (!text) return;
-      this.$router.push({ path: '/affirmations', query: openQuery(text) });
-    },
     // Coming from a belief card: select its chip and scroll the row so the
     // selection is visible rather than off to the right.
     applyBeliefQuery() {
@@ -725,7 +736,8 @@ export default {
     // spring back before the second one can be tapped.
     rightWidth(i) {
       const row = this.filteredRows[i];
-      return row && !this.needsPlan(row.experiment) ? 190 : 95;
+      const n = this.otherSteps(row).length;
+      return n >= 2 ? 190 : 110;
     },
     rowSt(i) {
       const s = this.sw;

@@ -527,12 +527,14 @@ html, body {
 }
 .screen-actions { display: flex; gap: 8px; flex-shrink: 0; }
 .screen-add {
+  /* Grey: adding and settings are always-there controls, not the step the
+     screen is inviting. */
   width: 34px;
   height: 34px;
   border-radius: 50%;
   background: #1c1c1e;
   border: none;
-  color: #4ade80;
+  color: #8e8e93;
   font-size: 1.5rem;
   line-height: 1;
   display: flex;
@@ -619,20 +621,32 @@ html, body {
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
 }
-/* Swipe actions look like the button they sit beside: outlined, same size,
-   spaced apart rather than a solid block of colour. */
+/* Swipe actions look like the button they sit beside: outlined, the same size.
+   Several of them share one outline and are divided by a hairline, so two or
+   three actions cost barely more width than one. */
+.swipe-group {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid #3a3a3c;
+  border-radius: 999px;
+  overflow: hidden;
+}
 .swipe-btn {
   flex-shrink: 0;
   background: none;
-  border: 1px solid currentColor;
-  border-radius: 999px;
+  border: none;
   font-size: 0.9rem;
   font-family: inherit;
-  padding: 7px 16px;
+  padding: 7px 14px;
   cursor: pointer;
   white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
+  & + & { border-left: 1px solid #3a3a3c; }
+}
+/* On its own it carries its own outline in its own colour. */
+.swipe-group.single {
+  border-color: currentColor;
 }
 .swipe-btn-edit { color: #8e8e93; }
 .swipe-btn-change { color: #fd9927; }

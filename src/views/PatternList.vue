@@ -6,7 +6,7 @@
         <div class="screen-actions">
           <button class="screen-add" @click="$router.push('/add-pattern')" aria-label="Neue Situation">+</button>
           <button class="screen-add" @click="$router.push('/settings')" aria-label="Einstellungen">
-            <v-icon color="#4ade80">settings</v-icon>
+            <v-icon color="#8e8e93">settings</v-icon>
           </button>
         </div>
       </div>
@@ -65,10 +65,14 @@
                 <p class="timeline-meta">{{ dayLabel(entry.time) }}</p>
                 <div class="head-swipe">
                   <div v-if="isSwiping(entry.time)" class="swipe-panel left">
-                    <button class="swipe-btn swipe-btn-edit" @click.stop="editEntry(entry)">Bearbeiten</button>
+                    <div class="swipe-group single swipe-btn-edit">
+                      <button class="swipe-btn swipe-btn-edit" @click.stop="editEntry(entry)">Bearbeiten</button>
+                    </div>
                   </div>
                   <div v-if="isSwiping(entry.time)" class="swipe-panel right">
-                    <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">Löschen</button>
+                    <div class="swipe-group single swipe-btn-delete">
+                      <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">Löschen</button>
+                    </div>
                   </div>
                   <p
                     class="timeline-text swipe-handle"
@@ -118,11 +122,11 @@
       <v-btn flat color="grey" to="/beliefs">
         <v-icon>lightbulb_outline</v-icon>
       </v-btn>
-      <v-btn flat color="grey" to="/affirmations">
-        <v-icon>flare</v-icon>
-      </v-btn>
       <v-btn flat color="grey" to="/actions">
         <v-icon>gps_fixed</v-icon>
+      </v-btn>
+      <v-btn flat color="grey" to="/now">
+        <v-icon>schedule</v-icon>
       </v-btn>
     </v-bottom-nav>
   </div>
@@ -380,6 +384,18 @@ export default {
   gap: 14px;
   padding: 4px 20px 18px;
   background: #000;
+  /* The thread runs inside the entry only. Drawn from the dot as one long
+     line it carried on straight through the month headings between them. */
+  &::before {
+    content: '';
+    position: absolute;
+    left: 24px;
+    top: 17px;
+    bottom: 0;
+    width: 1px;
+    background: #2c2c2e;
+  }
+  &:last-child::before { display: none; }
 }
 .timeline-dot {
   position: relative;
@@ -389,15 +405,6 @@ export default {
   border-radius: 50%;
   background: #48484a;
   margin-top: 6px;
-  &::after {
-    content: '';
-    position: absolute;
-    left: 4px;
-    top: 13px;
-    width: 1px;
-    height: 100vh;
-    background: #2c2c2e;
-  }
 }
 .timeline-body { flex: 1; min-width: 0; position: relative; z-index: 1; }
 .timeline-meta {

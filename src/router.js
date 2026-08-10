@@ -60,9 +60,10 @@ export default new Router({
       component: () => import('./views/BeliefAct.vue'),
     },
     {
-      path: '/affirmations',
-      name: 'affirmations',
-      component: () => import('./views/AffirmationList.vue'),
+      // What to do next, gathered from the four lists.
+      path: '/now',
+      name: 'now',
+      component: () => import('./views/NowView.vue'),
     },
     {
       path: '/actions',
