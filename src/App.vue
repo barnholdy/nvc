@@ -516,10 +516,10 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 20px 4px;
+  padding: 6px 16px 2px;
 }
 .screen-title {
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: 700;
   color: #fff;
   margin: 0;
@@ -527,8 +527,8 @@ html, body {
 }
 .screen-actions { display: flex; gap: 8px; flex-shrink: 0; }
 .screen-add {
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   background: #1c1c1e;
   border: none;
@@ -550,7 +550,7 @@ html, body {
 .pill-row {
   display: flex;
   gap: 8px;
-  padding: 10px 20px 14px;
+  padding: 8px 14px 10px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
@@ -561,8 +561,8 @@ html, body {
   background: none;
   border: 1px solid #2c2c2e;
   border-radius: 999px;
-  padding: 11px 20px;
-  font-size: 0.95rem;
+  padding: 8px 16px;
+  font-size: 0.88rem;
   font-family: inherit;
   color: #8e8e93;
   cursor: pointer;
@@ -579,10 +579,10 @@ html, body {
 .pill.active .pill-count { color: #8e8e93; }
 
 .card {
-  background: #1c1c1e;
-  border-radius: 20px;
-  margin: 0 16px 16px;
-  padding: 22px 24px;
+  background: #141416;
+  border-radius: 18px;
+  margin: 0 14px 12px;
+  padding: 16px 18px;
 }
 .card-head {
   display: flex;
@@ -592,7 +592,7 @@ html, body {
 .card-title {
   flex: 1;
   min-width: 0;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   line-height: 1.35;
   color: #fff;
   margin: 0;
@@ -604,9 +604,9 @@ html, body {
   border: 1px solid #4ade80;
   border-radius: 999px;
   color: #4ade80;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-family: inherit;
-  padding: 11px 22px;
+  padding: 7px 16px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
@@ -628,8 +628,8 @@ html, body {
 }
 .card-pill {
   display: inline-block;
-  margin-top: 12px;
-  font-size: 0.85rem;
+  margin-top: 10px;
+  font-size: 0.78rem;
   font-weight: 500;
   color: #8e8e93;
   background: #2c2c2e;
@@ -643,21 +643,21 @@ html, body {
   position: relative;
   display: flex;
   align-items: baseline;
-  gap: 6px;
-  margin-top: 16px;
+  gap: 5px;
+  margin-top: 12px;
 }
-.score-value { font-size: 2.4rem; font-weight: 700; color: #fff; line-height: 1; }
-.score-max { font-size: 1rem; color: #636366; }
-.score-label { font-size: 1rem; color: #8e8e93; }
+.score-value { font-size: 2rem; font-weight: 700; color: #fff; line-height: 1; }
+.score-max { font-size: 0.9rem; color: #636366; }
+.score-label { font-size: 0.9rem; color: #8e8e93; }
 
-.card-sep { height: 1px; background: #2c2c2e; margin: 20px 0 0; }
+.card-sep { height: 1px; background: #2c2c2e; margin: 14px 0 0; }
 
 /* A written answer, folded to one line until it is asked for. */
 .detail-row {
   display: flex;
   align-items: baseline;
-  gap: 16px;
-  padding: 18px 0;
+  gap: 12px;
+  padding: 12px 0;
   border-bottom: 1px solid #2c2c2e;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -665,16 +665,16 @@ html, body {
   &:last-child { border-bottom: none; }
 }
 .detail-label {
-  flex-shrink: 0;
-  font-size: 1.05rem;
+  flex: 0 0 34%;
+  font-size: 0.95rem;
   color: #fff;
 }
 .detail-value {
   flex: 1;
   min-width: 0;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   color: #8e8e93;
-  text-align: right;
+  text-align: left;
   margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -689,7 +689,7 @@ html, body {
 .detail-chevron {
   flex-shrink: 0;
   color: #48484a !important;
-  font-size: 1.25rem !important;
+  font-size: 1.05rem !important;
 }
 /* Once open the answer needs the full width, so the label sits above it. */
 .detail-row.open {
@@ -702,10 +702,10 @@ html, body {
    card that is meant to be true rather than merely recorded. */
 .aff-box {
   border-left: 3px solid #4ade80;
-  background: #232325;
-  border-radius: 0 14px 14px 0;
-  padding: 18px 20px;
-  margin-top: 20px;
+  background: #1c1c1e;
+  border-radius: 0 12px 12px 0;
+  padding: 14px 16px;
+  margin-top: 14px;
 }
 .aff-label {
   font-size: 0.68rem;
@@ -716,9 +716,9 @@ html, body {
   margin: 0 0 8px;
 }
 .aff-text {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #fff;
-  line-height: 1.45;
+  line-height: 1.4;
   margin: 0;
 }
 .aff-foot {
@@ -728,22 +728,22 @@ html, body {
   margin-top: 12px;
 }
 .aff-score { display: flex; align-items: baseline; gap: 5px; flex: 1; min-width: 0; }
-.aff-value { font-size: 1.7rem; font-weight: 700; color: #fff; line-height: 1; }
-.aff-max { font-size: 0.95rem; color: #636366; }
-.aff-word { font-size: 1rem; color: #8e8e93; }
+.aff-value { font-size: 1.4rem; font-weight: 700; color: #fff; line-height: 1; }
+.aff-max { font-size: 0.85rem; color: #636366; }
+.aff-word { font-size: 0.9rem; color: #8e8e93; }
 
 /* Links out of the card, to the lists that own the detail. */
 .card-link {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 18px 0;
+  padding: 13px 0;
   border-top: 1px solid #2c2c2e;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
 }
-.card-link-text { flex: 1; font-size: 1.05rem; color: #8e8e93; }
+.card-link-text { flex: 1; font-size: 0.95rem; color: #8e8e93; }
 
 .list-empty {
   text-align: center;

@@ -48,7 +48,7 @@
         class="swipe-outer"
         :data-row-id="row.experiment.id"
       >
-        <div v-if="sw.openIdx === i || sw.touchIdx === i" class="swipe-right-panel">
+        <div v-if="sw.openIdx === i || sw.touchIdx === i" class="swipe-right-panel" :style="panelStyle">
           <button class="swipe-btn swipe-btn-edit" @click.stop="editExperiment(row)">
             <v-icon small color="#fff">edit</v-icon>
             <span>Planen</span>
@@ -63,7 +63,7 @@
             <span>Auswerten</span>
           </button>
         </div>
-        <div v-if="sw.openIdx === i || sw.touchIdx === i" class="swipe-left-panel">
+        <div v-if="sw.openIdx === i || sw.touchIdx === i" class="swipe-left-panel" :style="panelStyle">
           <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(row)">
             <v-icon small color="#fff">delete</v-icon>
             <span>Löschen</span>
@@ -480,7 +480,7 @@ export default {
       // card is open at once now, so one shared index would not do.
       openRows: {},
       beliefFilter: null,
-      sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
+      sw: { openIdx: null, handleHeight: 0, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
       now: Date.now(),
       isResultDialogShowing: false,
       resultRow: null,
@@ -502,6 +502,11 @@ export default {
     beliefFilter() { this.sw.openIdx = null; this.sw.openDir = null; },
   },
   computed: {
+    // The panels reach only as far down as the part that answers the
+    // swipe, so a tall card does not get a full-height slab behind it.
+    panelStyle() {
+      return this.sw.handleHeight ? { height: `${this.sw.handleHeight}px` } : null;
+    },
     rows() {
       return collectExperiments(this.$store.getters.beliefs);
     },
@@ -695,6 +700,7 @@ export default {
     // Only the card head answers a swipe; the rest of the card scrolls.
     tsStart(e, i) {
       if (e.target && e.target.closest && e.target.closest('.card-btn')) return;
+      this.sw.handleHeight = e.currentTarget ? e.currentTarget.offsetHeight : 0;
       const t = e.touches[0];
       this.sw.touchIdx = i; this.sw.startX = t.clientX; this.sw.startY = t.clientY;
       this.sw.dx = 0; this.sw.isH = null; this.sw.drag = false;
@@ -1057,13 +1063,13 @@ export default {
 .swipe-outer .card { margin-bottom: 0; }
 .swipe-right-panel {
   position: absolute;
-  left: 16px; top: 0; bottom: 0;
+  left: 14px; top: 0;
   display: flex;
   align-items: stretch;
 }
 .swipe-left-panel {
   position: absolute;
-  right: 16px; top: 0; bottom: 0;
+  right: 14px; top: 0;
   display: flex;
   align-items: stretch;
 }

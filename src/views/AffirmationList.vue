@@ -20,7 +20,7 @@
         class="swipe-outer"
         :data-row-id="item.text"
       >
-        <div v-if="sw.openIdx === i || sw.touchIdx === i" class="swipe-left-panel">
+        <div v-if="sw.openIdx === i || sw.touchIdx === i" class="swipe-left-panel" :style="panelStyle">
           <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(item)">
             <v-icon small color="#fff">delete</v-icon>
             <span>Löschen</span>
@@ -147,13 +147,18 @@ export default {
       isDeleteDialogShowing: false,
       amenMap: loadAhoMap(),
       practising: null,
-      sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
+      sw: { openIdx: null, handleHeight: 0, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
   },
   watch: {
     '$route.query.open': function() { this.revealRequested(); },
   },
   computed: {
+    // The panels reach only as far down as the part that answers the
+    // swipe, so a tall card does not get a full-height slab behind it.
+    panelStyle() {
+      return this.sw.handleHeight ? { height: `${this.sw.handleHeight}px` } : null;
+    },
     affirmations() {
       const map = {};
       const beliefs = this.$store.getters.beliefs;
@@ -299,6 +304,7 @@ export default {
     },
     tsStart(e, i) {
       if (e.target && e.target.closest && (e.target.closest('.amen-btn') || e.target.closest('.swipe-btn'))) return;
+      this.sw.handleHeight = e.currentTarget ? e.currentTarget.offsetHeight : 0;
       const t = e.touches[0];
       this.sw.touchIdx = i; this.sw.startX = t.clientX; this.sw.startY = t.clientY;
       this.sw.dx = 0; this.sw.isH = null; this.sw.drag = false;
@@ -353,7 +359,7 @@ export default {
 .swipe-outer .card { margin-bottom: 0; }
 .swipe-left-panel {
   position: absolute;
-  right: 16px; top: 0; bottom: 0;
+  right: 14px; top: 0;
   display: flex;
   align-items: stretch;
 }

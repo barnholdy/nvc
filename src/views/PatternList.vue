@@ -63,13 +63,13 @@
             class="swipe-outer"
             :data-row-id="entry.time"
           >
-            <div v-if="sw.openKey === entry.time || sw.touchKey === entry.time" class="swipe-right-panel">
+            <div v-if="sw.openKey === entry.time || sw.touchKey === entry.time" class="swipe-right-panel" :style="panelStyle">
               <button class="swipe-btn swipe-btn-edit" @click.stop="editEntry(entry)">
                 <v-icon small color="#fff">edit</v-icon>
                 <span>Bearb.</span>
               </button>
             </div>
-            <div v-if="sw.openKey === entry.time || sw.touchKey === entry.time" class="swipe-left-panel">
+            <div v-if="sw.openKey === entry.time || sw.touchKey === entry.time" class="swipe-left-panel" :style="panelStyle">
               <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">
                 <v-icon small color="#fff">delete</v-icon>
                 <span>Löschen</span>
@@ -149,10 +149,15 @@ export default {
       beliefFilter: null,
       entryToDelete: null,
       isDeleteDialogShowing: false,
-      sw: { openKey: null, openDir: null, touchKey: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
+      sw: { openKey: null, handleHeight: 0, openDir: null, touchKey: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
   },
   computed: {
+    // The panels reach only as far down as the part that answers the
+    // swipe, so a tall card does not get a full-height slab behind it.
+    panelStyle() {
+      return this.sw.handleHeight ? { height: `${this.sw.handleHeight}px` } : null;
+    },
     patterns() {
       return this.$store.getters.patterns.concat().sort((a, b) => b.time - a.time);
     },
@@ -282,6 +287,7 @@ export default {
     tsStart(e, key) {
       if (e.target && e.target.closest
         && (e.target.closest('.swipe-btn') || e.target.closest('.timeline-chip'))) return;
+      this.sw.handleHeight = e.currentTarget ? e.currentTarget.offsetHeight : 0;
       const t = e.touches[0];
       this.sw.touchKey = key; this.sw.startX = t.clientX; this.sw.startY = t.clientY;
       this.sw.dx = 0; this.sw.isH = null; this.sw.drag = false;
@@ -376,8 +382,8 @@ export default {
 }
 
 .swipe-outer { position: relative; overflow: hidden; }
-.swipe-right-panel { position: absolute; left: 16px; top: 0; bottom: 0; display: flex; align-items: stretch; }
-.swipe-left-panel { position: absolute; right: 16px; top: 0; bottom: 0; display: flex; align-items: stretch; }
+.swipe-right-panel { position: absolute; left: 14px; top: 0; display: flex; align-items: stretch; }
+.swipe-left-panel { position: absolute; right: 14px; top: 0; display: flex; align-items: stretch; }
 .swipe-btn {
   width: 65px;
   display: flex;

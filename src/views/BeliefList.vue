@@ -32,7 +32,7 @@
         class="swipe-outer"
         :data-row-id="entry.time"
       >
-        <div v-if="sw.openIdx === idx || sw.touchIdx === idx" class="swipe-right-panel">
+        <div v-if="sw.openIdx === idx || sw.touchIdx === idx" class="swipe-right-panel" :style="panelStyle">
           <button class="swipe-btn swipe-btn-edit" @click.stop="editEntry(entry)">
             <v-icon small color="#fff">edit</v-icon>
             <span>Ergründen</span>
@@ -46,7 +46,7 @@
             <span>Handeln</span>
           </button>
         </div>
-        <div v-if="sw.openIdx === idx || sw.touchIdx === idx" class="swipe-left-panel">
+        <div v-if="sw.openIdx === idx || sw.touchIdx === idx" class="swipe-left-panel" :style="panelStyle">
           <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">
             <v-icon small color="#fff">delete</v-icon>
             <span>Löschen</span>
@@ -76,13 +76,14 @@
               <span class="score-value">{{ round(credibility(entry)) }}</span>
               <span class="score-max">/10</span>
               <span class="score-label">Glaubwürdigkeit</span>
-              <!-- The separator travels with the trend, so a wrap never leaves
-                   a lone middot at the end of the line. -->
+              <!-- Its own line: inline it only fits when both the value and the
+                   month are short, and a half-wrapped trend reads worse than a
+                   deliberate second line. -->
               <span
                 v-if="trendOf(entry)"
                 class="score-trend"
                 :style="{ color: trendOf(entry).color }"
-              ><span class="score-sep">· </span>{{ trendOf(entry).text }}</span>
+              >{{ trendOf(entry).text }}</span>
             </div>
             <sparkline
               v-if="trendOf(entry)"
@@ -207,6 +208,7 @@
                 <span class="aff-max">/10</span>
                 <span class="aff-word">Glaubwürdigkeit</span>
               </span>
+              <button class="card-btn" @click.stop="startPractice(entry)">Üben</button>
             </div>
           </div>
 
@@ -236,6 +238,14 @@
       </v-dialog>
     </v-content>
 
+    <affirmation-practice
+      v-if="practising"
+      :text="practising.text"
+      :feelings="practising.feelings"
+      :needs="practising.needs"
+      @close="practising = null"
+    ></affirmation-practice>
+
     <v-bottom-nav :value="true" fixed app color="#1c1c1e" class="dark-nav">
       <v-btn flat color="grey" to="/patterns">
         <v-icon>bolt</v-icon>
@@ -257,6 +267,7 @@
 import moment from 'moment';
 import FeelingChips from '@/components/FeelingChips.vue';
 import Sparkline from '@/components/Sparkline.vue';
+import AffirmationPractice from '@/components/AffirmationPractice.vue';
 import {
   beliefStatus,
   beliefStatusLabel,
@@ -270,19 +281,22 @@ import { beliefCredibility, beliefPoints } from '@/utils/credibility';
 import { deltaColor } from '@/utils/beliefTrend';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 
+const PRACTICE_KEY = 'nvc.amen';
+
 export default {
   name: 'belief-list',
-  components: { FeelingChips, Sparkline },
+  components: { FeelingChips, Sparkline, AffirmationPractice },
   data() {
     return {
       // Which written answer is unfolded, keyed by belief and row: every card
       // is open at once now, so one shared flag would open them all.
       openRows: {},
+      practising: null,
       entryToDelete: null,
       isDeleteDialogShowing: false,
       // Saving a belief returns here with the tab it now belongs to.
       tab: isBeliefStatus(this.$route.query.tab) ? this.$route.query.tab : 'all',
-      sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
+      sw: { openIdx: null, handleHeight: 0, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
   },
   mounted() {
@@ -293,6 +307,11 @@ export default {
     tab() { this.sw.openIdx = null; this.sw.openDir = null; },
   },
   computed: {
+    // The panels reach only as far down as the part that answers the
+    // swipe, so a tall card does not get a full-height slab behind it.
+    panelStyle() {
+      return this.sw.handleHeight ? { height: `${this.sw.handleHeight}px` } : null;
+    },
     beliefs() {
       const map = this.patternCountMap;
       return this.$store.getters.beliefs
@@ -367,6 +386,23 @@ export default {
         color: deltaColor(delta),
         values: points.map(pt => pt.value),
       };
+    },
+    // The same screen the Affirmationen list opens, fed from this belief: the
+    // new feelings it was written towards, and the needs it serves.
+    startPractice(entry) {
+      const a = this.affirmationOf(entry);
+      if (!a) return;
+      this.practising = {
+        text: a.text,
+        feelings: this.newFeelingsOf(entry),
+        needs: this.needsOf(entry),
+      };
+      // Practising is recorded in one place, whichever list it was started from.
+      try {
+        const map = JSON.parse(localStorage.getItem(PRACTICE_KEY)) || {};
+        map[a.text] = Date.now();
+        localStorage.setItem(PRACTICE_KEY, JSON.stringify(map));
+      } catch (e) { /* a full or blocked store must not stop the practice */ }
     },
     isOpen(entry, key) { return !!this.openRows[`${entry.time}:${key}`]; },
     toggleRow(entry, key) {
@@ -450,6 +486,7 @@ export default {
     tsStart(e, i) {
       if (e.target && e.target.closest
         && (e.target.closest('.swipe-btn') || e.target.closest('.card-btn'))) return;
+      this.sw.handleHeight = e.currentTarget ? e.currentTarget.offsetHeight : 0;
       const t = e.touches[0];
       this.sw.touchIdx = i; this.sw.startX = t.clientX; this.sw.startY = t.clientY;
       this.sw.dx = 0; this.sw.isH = null; this.sw.drag = false;
@@ -497,15 +534,15 @@ export default {
 .swipe-outer .card { margin-bottom: 0; }
 .swipe-right-panel {
   position: absolute;
-  left: 16px; top: 0; bottom: 0;
+  left: 14px; top: 0;
   display: flex;
-  align-items: center;
+  align-items: stretch;
 }
 .swipe-left-panel {
   position: absolute;
-  right: 16px; top: 0; bottom: 0;
+  right: 14px; top: 0;
   display: flex;
-  align-items: center;
+  align-items: stretch;
 }
 .swipe-btn {
   width: 65px;
@@ -530,8 +567,13 @@ export default {
 
 .mt-2 { margin-top: 8px !important; }
 
-.score-trend { font-size: 0.95rem; font-weight: 600; white-space: nowrap; }
-.score-sep { color: #8e8e93; font-weight: 400; }
+.score-trend {
+  flex: 0 0 100%;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  margin-top: 2px;
+}
 .score-main {
   display: flex;
   align-items: baseline;
