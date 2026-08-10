@@ -26,7 +26,7 @@
           class="pill"
           :class="{ active: beliefFilter === b.time }"
           @click="beliefFilter = b.time"
-        >„{{ b.belief }}“<span v-if="b.truth !== null" class="pill-count"> {{ round(b.truth) }}/10</span></button>
+        >„{{ b.belief }}“<span class="pill-count"> · {{ b.count }}</span></button>
       </div>
 
       <div v-if="!filtered.length" class="list-empty">
@@ -49,9 +49,6 @@
             </span>
             <span class="summary-count">{{ row.count }}</span>
           </div>
-          <p class="summary-note">
-            Das sieht man nur hier — die Überzeugungskarte zeigt Gesamtzahlen, nicht die Häufung in diesem Monat.
-          </p>
         </div>
 
         <template v-for="group in groups">
@@ -60,32 +57,27 @@
           <div
             v-for="entry in group.entries"
             :key="entry.time"
-            class="swipe-outer"
             :data-row-id="entry.time"
           >
-            <div v-if="sw.openKey === entry.time || sw.touchKey === entry.time" class="swipe-right-panel" :style="panelStyle">
-              <button class="swipe-btn swipe-btn-edit" @click.stop="editEntry(entry)">
-                <v-icon small color="#fff">edit</v-icon>
-                <span>Bearb.</span>
-              </button>
-            </div>
-            <div v-if="sw.openKey === entry.time || sw.touchKey === entry.time" class="swipe-left-panel" :style="panelStyle">
-              <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">
-                <v-icon small color="#fff">delete</v-icon>
-                <span>Löschen</span>
-              </button>
-            </div>
-
-            <div class="timeline-row" :style="rowSt(entry.time)">
-              <span class="timeline-dot" :class="{ pending: !isExplored(entry) }"></span>
+            <div class="timeline-row">
+              <span class="timeline-dot"></span>
               <div class="timeline-body">
                 <p class="timeline-meta">{{ dayLabel(entry.time) }}</p>
-                <p
-                  class="timeline-text swipe-handle"
-                  @touchstart="tsStart($event, entry.time)"
-                  @touchmove="tsMove($event, entry.time)"
-                  @touchend="tsEnd($event, entry.time)"
-                >{{ entry.trigger }}</p>
+                <div class="head-swipe">
+                  <div v-if="isSwiping(entry.time)" class="swipe-panel left">
+                    <button class="swipe-btn swipe-btn-edit" @click.stop="editEntry(entry)">Bearbeiten</button>
+                  </div>
+                  <div v-if="isSwiping(entry.time)" class="swipe-panel right">
+                    <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">Löschen</button>
+                  </div>
+                  <p
+                    class="timeline-text swipe-handle"
+                    :style="rowSt(entry.time)"
+                    @touchstart="tsStart($event, entry.time)"
+                    @touchmove="tsMove($event, entry.time)"
+                    @touchend="tsEnd($event, entry.time)"
+                  >{{ entry.trigger }}</p>
+                </div>
                 <div v-if="beliefFilter === null" class="timeline-chips">
                   <span
                     v-for="b in beliefsOf(entry)"
@@ -172,7 +164,12 @@ export default {
       const patterns = this.$store.getters.patterns;
       return this.$store.getters.beliefs
         .filter(b => seen[b.time])
-        .map(b => Object.assign({}, b, { truth: beliefCredibility(patterns, b) }));
+        .map(b => Object.assign({}, b, {
+          truth: beliefCredibility(patterns, b),
+          // How many situations it turns up in — the same reading the state
+          // chips give, so both rows of chips answer the same question.
+          count: this.patterns.filter(pt => (pt.beliefs || []).indexOf(b.time) !== -1).length,
+        }));
     },
     groups() {
       const out = [];
@@ -238,6 +235,7 @@ export default {
         }
       });
     },
+    isSwiping(key) { return this.sw.openKey === key || this.sw.touchKey === key; },
     revealRequested() {
       const id = requestedId(this.$route);
       if (!id) return;
@@ -300,7 +298,7 @@ export default {
         this.sw.isH = Math.abs(dx) > Math.abs(dy) * 1.5;
       if (!this.sw.isH) return;
       e.preventDefault();
-      this.sw.dx = Math.max(-80, Math.min(dx, 65));
+      this.sw.dx = Math.max(-110, Math.min(dx, 120));
       this.sw.drag = true;
     },
     tsEnd(e, key) {
@@ -319,7 +317,7 @@ export default {
       const live = s.touchKey === key && s.drag && s.isH;
       let x = 0;
       if (live) x = s.dx;
-      else if (s.openKey === key) x = s.openDir === 'left' ? -80 : 65;
+      else if (s.openKey === key) x = s.openDir === 'left' ? -110 : 120;
       return { transform: `translateX(${x}px)`, transition: live ? 'none' : 'transform 0.2s ease' };
     },
   },
@@ -363,14 +361,6 @@ export default {
 }
 .summary-fill { display: block; height: 100%; background: #48484a; border-radius: 999px; }
 .summary-count { width: 18px; text-align: right; font-size: 0.9rem; color: #8e8e93; flex-shrink: 0; }
-.summary-note {
-  font-size: 0.85rem;
-  color: #636366;
-  line-height: 1.5;
-  margin: 14px 0 0;
-  padding-top: 14px;
-  border-top: 1px solid #2c2c2e;
-}
 
 .month-head {
   font-size: 0.72rem;
@@ -381,25 +371,6 @@ export default {
   padding: 0 20px;
 }
 
-.swipe-outer { position: relative; overflow: hidden; }
-.swipe-right-panel { position: absolute; left: 14px; top: 0; display: flex; align-items: stretch; }
-.swipe-left-panel { position: absolute; right: 14px; top: 0; display: flex; align-items: stretch; }
-.swipe-btn {
-  width: 65px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  border: none;
-  color: #fff;
-  font-size: 0.7rem;
-  font-family: inherit;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-.swipe-btn-edit { background: #636366; border-radius: 14px; }
-.swipe-btn-delete { background: #ff453a; width: 80px; border-radius: 14px; }
 
 /* The line runs through the dots, so the entries read as one thread rather
    than as separate cards. */
@@ -418,7 +389,6 @@ export default {
   border-radius: 50%;
   background: #48484a;
   margin-top: 6px;
-  &.pending { background: #fd9927; }
   &::after {
     content: '';
     position: absolute;
@@ -437,7 +407,7 @@ export default {
   margin: 0 0 6px;
   text-transform: uppercase;
 }
-.swipe-handle { touch-action: pan-y; }
+.head-swipe .swipe-handle { background: #000; }
 .timeline-text {
   font-size: 1rem;
   color: #ebebf5;

@@ -17,19 +17,16 @@
       <div
         v-for="(item, i) in affirmations"
         :key="item.text"
-        class="swipe-outer"
+        class="card"
         :data-row-id="item.text"
       >
-        <div v-if="sw.openIdx === i || sw.touchIdx === i" class="swipe-left-panel" :style="panelStyle">
-          <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(item)">
-            <v-icon small color="#fff">delete</v-icon>
-            <span>Löschen</span>
-          </button>
-        </div>
-
-        <div class="card" :style="rowSt(i)">
+        <div class="head-swipe">
+          <div v-if="isSwiping(i)" class="swipe-panel right">
+            <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(item)">Löschen</button>
+          </div>
           <div
             class="card-head swipe-handle"
+            :style="rowSt(i)"
             @touchstart="tsStart($event, i)"
             @touchmove="tsMove($event, i)"
             @touchend="tsEnd($event, i)"
@@ -37,6 +34,7 @@
             <p class="card-title">„{{ item.text }}“</p>
             <button class="card-btn" @click.stop="startPractice(item)">Üben</button>
           </div>
+        </div>
 
           <div v-if="item.credibility !== null" class="score-row">
             <span class="score-value">{{ round(item.credibility) }}</span>
@@ -80,7 +78,6 @@
               <v-icon class="detail-chevron">chevron_right</v-icon>
             </template>
           </div>
-        </div>
       </div>
 
       <div class="list-bottom-space"></div>
@@ -258,6 +255,7 @@ export default {
       if (v === null || v === undefined) return '';
       return String(Math.round(v * 10) / 10).replace('.', ',');
     },
+    isSwiping(i) { return this.sw.openIdx === i || this.sw.touchIdx === i; },
     isOpen(item, j) { return !!this.openRows[`${item.text}:${j}`]; },
     toggleRow(item, j) {
       const k = `${item.text}:${j}`;
@@ -319,7 +317,7 @@ export default {
       e.preventDefault();
       // Nothing to reveal on the right any more; the row only opens towards
       // the delete button.
-      this.sw.dx = Math.max(-80, Math.min(dx, 0));
+      this.sw.dx = Math.max(-110, Math.min(dx, 0));
       this.sw.drag = true;
     },
     tsEnd(e, i) {
@@ -340,7 +338,7 @@ export default {
       const live = s.touchIdx === i && s.drag && s.isH;
       let x = 0;
       if (live) x = s.dx;
-      else if (s.openIdx === i) x = -80;
+      else if (s.openIdx === i) x = -110;
       return { transform: `translateX(${x}px)`, transition: live ? 'none' : 'transform 0.2s ease' };
     },
 
@@ -351,35 +349,7 @@ export default {
 <style scoped lang="scss">
 .dark-page { background: #000; min-height: 100vh; }
 
-.swipe-outer {
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 14px;
-}
-.swipe-outer .card { margin-bottom: 0; }
-.swipe-left-panel {
-  position: absolute;
-  right: 14px; top: 0;
-  display: flex;
-  align-items: stretch;
-}
-.swipe-btn {
-  width: 80px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  border: none;
-  color: #fff;
-  font-size: 0.7rem;
-  font-family: inherit;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-.swipe-btn-delete { background: #ff453a; border-radius: 18px; }
 
-.swipe-handle { touch-action: pan-y; }
 .practice-meta { font-size: 0.85rem; color: #636366; margin: 8px 0 0; }
 
 .source-score { font-size: 0.85rem; color: #8e8e93; margin: 6px 0 0; }

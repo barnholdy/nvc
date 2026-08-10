@@ -23,7 +23,7 @@
           class="pill"
           :class="{ active: beliefFilter === b.time }"
           @click="beliefFilter = b.time"
-        >„{{ b.belief }}“</button>
+        >„{{ b.belief }}“<span class="pill-count"> · {{ b.count }}</span></button>
       </div>
 
       <div class="pill-row">
@@ -45,34 +45,25 @@
       <div
         v-for="(row, i) in filteredRows"
         :key="row.experiment.id"
-        class="swipe-outer"
+        class="card"
         :data-row-id="row.experiment.id"
       >
-        <div v-if="sw.openIdx === i || sw.touchIdx === i" class="swipe-right-panel" :style="panelStyle">
-          <button class="swipe-btn swipe-btn-edit" @click.stop="editExperiment(row)">
-            <v-icon small color="#fff">edit</v-icon>
-            <span>Planen</span>
-          </button>
-          <!-- Nothing to compare against until an anchor exists -->
-          <button
-            v-if="!needsPlan(row.experiment)"
-            class="swipe-btn swipe-btn-evaluate"
-            @click.stop="startResult(row)"
-          >
-            <v-icon small color="#fff">assessment</v-icon>
-            <span>Auswerten</span>
-          </button>
-        </div>
-        <div v-if="sw.openIdx === i || sw.touchIdx === i" class="swipe-left-panel" :style="panelStyle">
-          <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(row)">
-            <v-icon small color="#fff">delete</v-icon>
-            <span>Löschen</span>
-          </button>
-        </div>
-
-        <div class="card" :style="rowSt(i)">
+        <div class="head-swipe">
+          <div v-if="isSwiping(i)" class="swipe-panel left">
+            <button class="swipe-btn swipe-btn-edit" @click.stop="editExperiment(row)">Planen</button>
+            <!-- Nothing to compare against until an anchor exists -->
+            <button
+              v-if="!needsPlan(row.experiment)"
+              class="swipe-btn swipe-btn-evaluate"
+              @click.stop="startResult(row)"
+            >Auswerten</button>
+          </div>
+          <div v-if="isSwiping(i)" class="swipe-panel right">
+            <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(row)">Löschen</button>
+          </div>
           <div
             class="card-head swipe-handle"
+            :style="rowSt(i)"
             @touchstart="tsStart($event, i)"
             @touchmove="tsMove($event, i)"
             @touchend="tsEnd($event, i)"
@@ -89,6 +80,7 @@
               @click.stop="startResult(row)"
             >Auswerten</button>
           </div>
+        </div>
           <span class="card-pill">{{ stateLine(row.experiment) }}</span>
           <p v-if="isDue(row.experiment)" class="due-hint">Schon durchgeführt?</p>
 
@@ -184,7 +176,6 @@
               {{ round(beliefTruth(row)) }}/10
             </span>
           </div>
-        </div>
       </div>
 
       <div class="list-bottom-space"></div>
@@ -528,9 +519,11 @@ export default {
       const seen = {};
       const out = [];
       this.rows.forEach((r) => {
-        if (seen[r.beliefTime]) return;
-        seen[r.beliefTime] = true;
-        out.push({ time: r.beliefTime, belief: r.beliefText });
+        if (seen[r.beliefTime] === undefined) {
+          seen[r.beliefTime] = out.length;
+          out.push({ time: r.beliefTime, belief: r.beliefText, count: 0 });
+        }
+        out[seen[r.beliefTime]].count += 1;
       });
       return out;
     },
@@ -583,6 +576,7 @@ export default {
     isDue(x) { return isDue(x, this.now); },
     // A migrated action has a situation but no anchor — it cannot be evaluated.
     needsPlan(x) { return experimentState(x) !== 'evaluated' && !isPlanned(x); },
+    isSwiping(i) { return this.sw.openIdx === i || this.sw.touchIdx === i; },
     isOpen(row, key) { return !!this.openRows[`${row.experiment.id}:${key}`]; },
     toggleRow(row, key) {
       const k = `${row.experiment.id}:${key}`;
@@ -713,7 +707,7 @@ export default {
         this.sw.isH = Math.abs(dx) > Math.abs(dy) * 1.5;
       if (!this.sw.isH) return;
       e.preventDefault();
-      this.sw.dx = Math.max(-80, Math.min(dx, this.rightWidth(i)));
+      this.sw.dx = Math.max(-110, Math.min(dx, this.rightWidth(i)));
       this.sw.drag = true;
     },
     tsEnd(e, i) {
@@ -731,14 +725,14 @@ export default {
     // spring back before the second one can be tapped.
     rightWidth(i) {
       const row = this.filteredRows[i];
-      return row && !this.needsPlan(row.experiment) ? 130 : 65;
+      return row && !this.needsPlan(row.experiment) ? 190 : 95;
     },
     rowSt(i) {
       const s = this.sw;
       const live = s.touchIdx === i && s.drag && s.isH;
       let x = 0;
       if (live) x = s.dx;
-      else if (s.openIdx === i) x = s.openDir === 'left' ? -80 : this.rightWidth(i);
+      else if (s.openIdx === i) x = s.openDir === 'left' ? -110 : this.rightWidth(i);
       return { transform: `translateX(${x}px)`, transition: live ? 'none' : 'transform 0.2s ease' };
     },
     revealRequested() {
@@ -1055,42 +1049,6 @@ export default {
 .dark-nav { border-top: 1px solid #2c2c2e !important; }
 
 /* ─── Card list ─── */
-.swipe-outer {
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 16px;
-}
-.swipe-outer .card { margin-bottom: 0; }
-.swipe-right-panel {
-  position: absolute;
-  left: 14px; top: 0;
-  display: flex;
-  align-items: stretch;
-}
-.swipe-left-panel {
-  position: absolute;
-  right: 14px; top: 0;
-  display: flex;
-  align-items: stretch;
-}
-.swipe-btn {
-  width: 65px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  border: none;
-  color: #fff;
-  font-size: 0.7rem;
-  font-family: inherit;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-.swipe-btn-edit { background: #636366; border-radius: 20px 0 0 20px; }
-.swipe-btn-evaluate { background: #2f7a52; border-radius: 0 20px 20px 0; }
-.swipe-btn-delete { background: #ff453a; width: 80px; border-radius: 20px; }
-.swipe-handle { touch-action: pan-y; }
 
 .due-hint { font-size: 0.85rem; color: #fd9927; margin: 10px 0 0; }
 

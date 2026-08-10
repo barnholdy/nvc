@@ -11,6 +11,16 @@
       <!-- Counts on the filter, so the shape of the whole is readable before
            anything is opened. -->
       <div class="pill-row">
+        <!-- Compact strips the card back to what a belief is and where it
+             stands; everything written about it stays one tap away. -->
+        <button
+          class="pill pill-icon"
+          :class="{ active: compact }"
+          :aria-label="compact ? 'Ausführliche Ansicht' : 'Kompakte Ansicht'"
+          @click="compact = !compact"
+        >
+          <v-icon small>{{ compact ? 'unfold_more' : 'unfold_less' }}</v-icon>
+        </button>
         <button
           v-for="f in filters"
           :key="f.key"
@@ -29,44 +39,33 @@
       <div
         v-for="(entry, idx) in filteredBeliefs"
         :key="entry.time"
-        class="swipe-outer"
+        class="card"
         :data-row-id="entry.time"
       >
-        <div v-if="sw.openIdx === idx || sw.touchIdx === idx" class="swipe-right-panel" :style="panelStyle">
-          <button class="swipe-btn swipe-btn-edit" @click.stop="editEntry(entry)">
-            <v-icon small color="#fff">edit</v-icon>
-            <span>Ergründen</span>
-          </button>
-          <button class="swipe-btn swipe-btn-change" @click.stop="changeEntry(entry)">
-            <v-icon small color="#fff">autorenew</v-icon>
-            <span>Wandeln</span>
-          </button>
-          <button class="swipe-btn swipe-btn-act" @click.stop="actEntry(entry)">
-            <v-icon small color="#fff">directions_run</v-icon>
-            <span>Handeln</span>
-          </button>
-        </div>
-        <div v-if="sw.openIdx === idx || sw.touchIdx === idx" class="swipe-left-panel" :style="panelStyle">
-          <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">
-            <v-icon small color="#fff">delete</v-icon>
-            <span>Löschen</span>
-          </button>
-        </div>
-
-        <div class="card" :style="rowSt(idx, 195)">
+        <div class="head-swipe">
+          <div v-if="isSwiping(idx)" class="swipe-panel left">
+            <button class="swipe-btn swipe-btn-edit" @click.stop="editEntry(entry)">Ergründen</button>
+            <button class="swipe-btn swipe-btn-change" @click.stop="changeEntry(entry)">Wandeln</button>
+            <button class="swipe-btn swipe-btn-act" @click.stop="actEntry(entry)">Handeln</button>
+          </div>
+          <div v-if="isSwiping(idx)" class="swipe-panel right">
+            <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">Löschen</button>
+          </div>
           <div
             class="card-head swipe-handle"
+            :style="rowSt(idx, 260)"
             @touchstart="tsStart($event, idx)"
             @touchmove="tsMove($event, idx)"
             @touchend="tsEnd($event, idx)"
           >
-            <p class="card-title">{{ entry.belief }}</p>
+            <p class="card-title">„{{ entry.belief }}“</p>
             <button
               v-if="rowActionLabel(entry)"
               class="card-btn"
               @click.stop="runRowAction(entry)"
             >{{ rowActionLabel(entry) }}</button>
           </div>
+        </div>
           <span class="card-pill">{{ statusLabel(entry) }}</span>
 
           <!-- The line is pinned to the right edge and the text wraps in front
@@ -93,12 +92,12 @@
             ></sparkline>
           </div>
 
-          <div class="card-sep"></div>
+          <div v-if="!compact" class="card-sep"></div>
 
           <!-- The order the work happens in: what the belief does, where it
                comes from, what it is for, then what has been put against it. -->
           <div
-            v-if="entry.withBelief || feelingsOf(entry).length"
+            v-if="!compact && (entry.withBelief || feelingsOf(entry).length)"
             class="detail-row"
             :class="{ open: isOpen(entry, 'reaction') }"
             @click.stop="toggleRow(entry, 'reaction')"
@@ -121,7 +120,7 @@
           </div>
 
           <div
-            v-if="originOf(entry)"
+            v-if="!compact && originOf(entry)"
             class="detail-row"
             :class="{ open: isOpen(entry, 'origin') }"
             @click.stop="toggleRow(entry, 'origin')"
@@ -132,7 +131,7 @@
           </div>
 
           <div
-            v-if="needsOf(entry).length"
+            v-if="!compact && needsOf(entry).length"
             class="detail-row"
             :class="{ open: isOpen(entry, 'needs') }"
             @click.stop="toggleRow(entry, 'needs')"
@@ -151,7 +150,7 @@
           </div>
 
           <div
-            v-if="entry.empathy"
+            v-if="!compact && entry.empathy"
             class="detail-row"
             :class="{ open: isOpen(entry, 'empathy') }"
             @click.stop="toggleRow(entry, 'empathy')"
@@ -162,7 +161,7 @@
           </div>
 
           <div
-            v-if="exceptionsOf(entry)"
+            v-if="!compact && exceptionsOf(entry)"
             class="detail-row"
             :class="{ open: isOpen(entry, 'exceptions') }"
             @click.stop="toggleRow(entry, 'exceptions')"
@@ -173,7 +172,7 @@
           </div>
 
           <div
-            v-if="withoutBeliefOf(entry) || newFeelingsOf(entry).length"
+            v-if="!compact && (withoutBeliefOf(entry) || newFeelingsOf(entry).length)"
             class="detail-row"
             :class="{ open: isOpen(entry, 'newReaction') }"
             @click.stop="toggleRow(entry, 'newReaction')"
@@ -212,16 +211,15 @@
             </div>
           </div>
 
-          <div v-if="patternCount(entry.time)" class="card-link" @click.stop="openSituations(entry)">
+          <div v-if="!compact && patternCount(entry.time)" class="card-link" @click.stop="openSituations(entry)">
             <span class="card-link-text">{{ situationsLabel(entry) }}</span>
             <v-icon class="detail-chevron">chevron_right</v-icon>
           </div>
 
-          <div v-if="experimentCount(entry)" class="card-link" @click.stop="openExperiments(entry)">
+          <div v-if="!compact && experimentCount(entry)" class="card-link" @click.stop="openExperiments(entry)">
             <span class="card-link-text">{{ experimentsLabel(entry) }}</span>
             <v-icon class="detail-chevron">chevron_right</v-icon>
           </div>
-        </div>
       </div>
 
       <div class="list-bottom-space"></div>
@@ -282,6 +280,7 @@ import { deltaColor } from '@/utils/beliefTrend';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 
 const PRACTICE_KEY = 'nvc.amen';
+const COMPACT_KEY = 'nvc.beliefsCompact';
 
 export default {
   name: 'belief-list',
@@ -292,6 +291,8 @@ export default {
       // is open at once now, so one shared flag would open them all.
       openRows: {},
       practising: null,
+      // Remembered, so the choice survives leaving the list and coming back.
+      compact: localStorage.getItem(COMPACT_KEY) === '1',
       entryToDelete: null,
       isDeleteDialogShowing: false,
       // Saving a belief returns here with the tab it now belongs to.
@@ -303,6 +304,7 @@ export default {
     this.revealRequested();
   },
   watch: {
+    compact(v) { localStorage.setItem(COMPACT_KEY, v ? '1' : '0'); },
     '$route.query.open': function() { this.revealRequested(); },
     tab() { this.sw.openIdx = null; this.sw.openDir = null; },
   },
@@ -404,6 +406,7 @@ export default {
         localStorage.setItem(PRACTICE_KEY, JSON.stringify(map));
       } catch (e) { /* a full or blocked store must not stop the practice */ }
     },
+    isSwiping(idx) { return this.sw.openIdx === idx || this.sw.touchIdx === idx; },
     isOpen(entry, key) { return !!this.openRows[`${entry.time}:${key}`]; },
     toggleRow(entry, key) {
       const k = `${entry.time}:${key}`;
@@ -499,7 +502,7 @@ export default {
         this.sw.isH = Math.abs(dx) > Math.abs(dy) * 1.5;
       if (!this.sw.isH) return;
       e.preventDefault();
-      this.sw.dx = Math.max(-80, Math.min(dx, 195));
+      this.sw.dx = Math.max(-110, Math.min(dx, 260));
       this.sw.drag = true;
     },
     tsEnd(e, i) {
@@ -516,7 +519,7 @@ export default {
       const live = s.touchIdx === i && s.drag && s.isH;
       let x = 0;
       if (live) x = s.dx;
-      else if (s.openIdx === i) x = s.openDir === 'left' ? -80 : rw;
+      else if (s.openIdx === i) x = s.openDir === 'left' ? -110 : rw;
       return { transform: `translateX(${x}px)`, transition: live ? 'none' : 'transform 0.2s ease' };
     },
   },
@@ -526,44 +529,6 @@ export default {
 <style scoped lang="scss">
 .dark-page { background: #000; min-height: 100vh; }
 
-.swipe-outer {
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 14px;
-}
-.swipe-outer .card { margin-bottom: 0; }
-.swipe-right-panel {
-  position: absolute;
-  left: 14px; top: 0;
-  display: flex;
-  align-items: stretch;
-}
-.swipe-left-panel {
-  position: absolute;
-  right: 14px; top: 0;
-  display: flex;
-  align-items: stretch;
-}
-.swipe-btn {
-  width: 65px;
-  align-self: stretch;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  border: none;
-  color: #fff;
-  font-size: 0.7rem;
-  font-family: inherit;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  span { line-height: 1.1; }
-}
-.swipe-btn-edit { background: #636366; border-radius: 18px 0 0 18px; }
-.swipe-btn-change { background: #fd9927; }
-.swipe-btn-act { background: #2f7a52; border-radius: 0 18px 18px 0; }
-.swipe-btn-delete { background: #ff453a; width: 80px; border-radius: 18px; }
 
 .mt-2 { margin-top: 8px !important; }
 
@@ -588,7 +553,6 @@ export default {
   transform: translateY(-50%);
 }
 /* Only the head answers a swipe; the rest of the card scrolls freely. */
-.swipe-handle { touch-action: pan-y; }
 
 .confirm-dialog { background: #1c1c1e !important; }
 .confirm-title { color: #fff; font-size: 1rem; justify-content: center; padding: 16px; }

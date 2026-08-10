@@ -576,6 +576,14 @@ html, body {
   }
 }
 .pill-count { color: #636366; margin-left: 4px; }
+/* Square-ish, because it holds an icon rather than a word. */
+.pill-icon {
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  .v-icon { color: #8e8e93 !important; }
+  &.active .v-icon { color: #fff !important; }
+}
 .pill.active .pill-count { color: #8e8e93; }
 
 .card {
@@ -611,6 +619,47 @@ html, body {
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
 }
+/* Swipe actions look like the button they sit beside: outlined, same size,
+   spaced apart rather than a solid block of colour. */
+.swipe-btn {
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  padding: 7px 16px;
+  cursor: pointer;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  &:active { opacity: 0.6; }
+}
+.swipe-btn-edit { color: #8e8e93; }
+.swipe-btn-change { color: #fd9927; }
+.swipe-btn-act { color: #4ade80; }
+.swipe-btn-evaluate { color: #4ade80; }
+.swipe-btn-delete { color: #ff453a; }
+
+/* The head slides on its own; the rest of the card stays put. */
+.head-swipe {
+  position: relative;
+  overflow: hidden;
+}
+.head-swipe .swipe-panel {
+  position: absolute;
+  top: 0;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+.head-swipe .swipe-panel.left { left: 0; }
+.head-swipe .swipe-panel.right { right: 0; }
+.swipe-handle {
+  position: relative;
+  background: #141416;
+  touch-action: pan-y;
+}
+
 .card-icon-btn {
   flex-shrink: 0;
   width: 36px;
@@ -700,12 +749,14 @@ html, body {
 
 /* The affirmation, set apart by a green edge: it is the one sentence on the
    card that is meant to be true rather than merely recorded. */
+/* Butted straight against the line above it: the affirmation is the end of
+   that list, not a separate card floating under it. */
 .aff-box {
   border-left: 3px solid #4ade80;
   background: #1c1c1e;
-  border-radius: 0 12px 12px 0;
+  border-radius: 0;
   padding: 14px 16px;
-  margin-top: 14px;
+  margin-top: 0;
 }
 .aff-label {
   font-size: 0.68rem;
