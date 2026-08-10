@@ -201,21 +201,6 @@
                   class="mb-1"
                 ></feeling-chips>
               </template>
-              <template v-if="entry.reflection && typeof entry.reflection.bodyIntensity === 'number'">
-                <p class="expand-label mt-3">Körperempfindung</p>
-                <div class="slider-row">
-                  <span class="slider-end-label">0</span>
-                  <input
-                    type="range"
-                    min="0"
-                    max="10"
-                    :value="entry.reflection.bodyIntensity"
-                    class="readonly-slider"
-                    disabled
-                  />
-                  <span class="slider-end-label">10</span>
-                </div>
-              </template>
               <template v-if="entry.affirmations && entry.affirmations.length">
                 <p class="expand-label mt-3">Affirmation</p>
                 <div
@@ -243,10 +228,20 @@
                   <v-icon small class="linked-chevron">chevron_right</v-icon>
                 </div>
               </template>
+              <!-- Folded like the situations above, and reduced to what
+                   identifies a run: what was done, and how far it got. The
+                   numbers behind it live in the Handlungen list, one tap away. -->
               <template v-if="experimentsOf(entry).length">
-                <p class="expand-label mt-3">Verhaltensexperimente</p>
+                <div class="section-toggle" @click.stop="isExperimentsOpen = !isExperimentsOpen">
+                  <span class="section-toggle-label">
+                    {{ isExperimentsOpen ? 'Verhaltensexperimente ausblenden' : experimentsLabel(entry) }}
+                  </span>
+                  <v-icon small class="section-chevron">
+                    {{ isExperimentsOpen ? 'expand_more' : 'chevron_right' }}
+                  </v-icon>
+                </div>
                 <div
-                  v-for="x in experimentsOf(entry)"
+                  v-for="x in (isExperimentsOpen ? experimentsOf(entry) : [])"
                   :key="x.id"
                   class="linked-row"
                   @click.stop="openExperiment(x)"
@@ -256,45 +251,6 @@
                     <span class="status-pill" :style="{ color: experimentStateColor(x) }">
                       {{ experimentStateLabel(x) }}
                     </span>
-                    <span v-if="experimentGap(x) !== null" class="experiment-gap">
-                      Erwartet {{ x.fearExpected }} → real {{ x.fearActual }}
-                      <span :style="{ color: gapColor(experimentGap(x)) }">
-                        ({{ experimentGap(x) > 0 ? '−' : '+' }}{{ Math.abs(experimentGap(x)) }})
-                      </span>
-                    </span>
-                    <!-- Both readings the evaluation took, each on its own
-                         scale — an experiment can lower the belief without
-                         raising the affirmation. -->
-                    <template v-if="typeof x.beliefTruth === 'number'">
-                      <p class="expand-label mt-2">Glaubwürdigkeit Überzeugung</p>
-                      <div class="slider-row">
-                        <span class="slider-end-label">0</span>
-                        <input
-                          type="range"
-                          min="0"
-                          max="10"
-                          :value="x.beliefTruth"
-                          class="readonly-slider"
-                          disabled
-                        />
-                        <span class="slider-end-label">10</span>
-                      </div>
-                    </template>
-                    <template v-if="typeof x.affirmationTruth === 'number'">
-                      <p class="expand-label mt-2">Glaubwürdigkeit Affirmation</p>
-                      <div class="slider-row">
-                        <span class="slider-end-label">0</span>
-                        <input
-                          type="range"
-                          min="0"
-                          max="10"
-                          :value="x.affirmationTruth"
-                          class="readonly-slider"
-                          disabled
-                        />
-                        <span class="slider-end-label">10</span>
-                      </div>
-                    </template>
                   </div>
                   <v-icon small class="linked-chevron">chevron_right</v-icon>
                 </div>
@@ -339,8 +295,6 @@
 import FeelingChips from '@/components/FeelingChips.vue';
 import { beliefStatus, hasChangeData, isBeliefStatus } from '@/utils/beliefStatus';
 import {
-  fearGap,
-  fearGapColor,
   experimentStateLabel as stateLabelOf,
   experimentStateColor as stateColorOf,
   experimentsOf,
@@ -356,6 +310,7 @@ export default {
     return {
       openEntry: null,
       isSituationsOpen: false,
+      isExperimentsOpen: false,
       isOriginOpen: false,
       isEmpathyOpen: false,
       entryToDelete: null,
@@ -382,7 +337,7 @@ export default {
       if (asked !== null && String(this.openEntry) === asked
         && this.filteredBeliefs.some(e => String(e.time) === asked)) return;
       this.openEntry = null;
-      this.isSituationsOpen = false; this.isOriginOpen = false; this.isEmpathyOpen = false;
+      this.isSituationsOpen = false; this.isExperimentsOpen = false; this.isOriginOpen = false; this.isEmpathyOpen = false;
     },
   },
   computed: {
@@ -414,7 +369,7 @@ export default {
       if (!entry) return;
       this.tab = beliefStatus(entry);
       this.openEntry = entry.time;
-      this.isSituationsOpen = false; this.isOriginOpen = false;
+      this.isSituationsOpen = false; this.isExperimentsOpen = false; this.isOriginOpen = false;
       this.isEmpathyOpen = false;
       // After the tab switch has rendered the row.
       this.$nextTick(() => scrollRowIntoView(this.$el, entry.time));
@@ -428,12 +383,16 @@ export default {
       const n = this.associatedPatterns(entry.time).length;
       return n === 1 ? '1 Situation anzeigen' : `${n} Situationen anzeigen`;
     },
+    experimentsLabel(entry) {
+      const n = this.experimentsOf(entry).length;
+      return n === 1 ? '1 Verhaltensexperiment anzeigen' : `${n} Verhaltensexperimente anzeigen`;
+    },
     toggle(time) {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.openEntry = this.openEntry === time ? null : time;
       // Every belief starts with its folded sections closed again — a previous
       // tap must not carry over to the next one.
-      this.isSituationsOpen = false; this.isOriginOpen = false;
+      this.isSituationsOpen = false; this.isExperimentsOpen = false; this.isOriginOpen = false;
       this.isEmpathyOpen = false;
     },
     // The average across every situation and every evaluated experiment. Null
@@ -447,10 +406,8 @@ export default {
     // Still a method: the template calls hasChangeData(entry) directly.
     hasChangeData(entry) { return hasChangeData(entry); },
     experimentsOf(entry) { return experimentsOf(entry); },
-    experimentGap(x) { return fearGap(x); },
     experimentStateColor(x) { return stateColorOf(x); },
     experimentStateLabel(x) { return stateLabelOf(x); },
-    gapColor(gap) { return fearGapColor(gap); },
     truthOf(a) { return normalizeTruth(a.resonance); },
     // Each of these opens the row in the list that owns it, unfolded and in
     // view — following a reference should land you on the thing itself, not in
@@ -711,7 +668,6 @@ export default {
 .section-chevron { color: #636366 !important; margin-left: 2px; }
 .expand-text { font-size: 0.93rem; color: #ebebf5; margin: 0; line-height: 1.5; }
 .empathy-text { white-space: pre-wrap; }
-.experiment-gap { display: block; font-size: 0.78rem; color: #8e8e93; margin: 2px 0 0; }
 
 /* Shows a recorded value — deliberately not interactive. */
 .slider-row {
