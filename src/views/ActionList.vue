@@ -1,272 +1,171 @@
 <template>
   <div class="dark-page">
-    <v-toolbar color="#000" dark flat app>
-      <v-toolbar-title>Handlungen</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn icon @click="$router.push('/add-action')">
-        <v-icon color="#4ade80">add</v-icon>
-      </v-btn>
-      <v-btn icon @click="$router.push('/settings')">
-        <v-icon color="#4ade80">settings</v-icon>
-      </v-btn>
-    </v-toolbar>
-
     <v-content>
-      <div class="intro-card">
-        <span class="intro-icon">🎯</span>
-        <p class="intro-title">Verhaltensexperiment</p>
-        <p class="intro-text">Eine Überzeugung lässt sich nicht wegdiskutieren, aber testen. Du schreibst vorher auf, was du befürchtest — und vergleichst es danach mit dem, was wirklich passiert ist. Die Lücke dazwischen ist die Evidenz.</p>
+      <div class="screen-title-row">
+        <h1 class="screen-title">Handlungen</h1>
+        <button class="screen-add" @click="$router.push('/add-action')" aria-label="Neue Handlung">+</button>
       </div>
 
-      <div class="segment-row">
-        <button class="seg-tab" :class="{ active: tab === 'open' }" @click="tab = 'open'">Neu</button>
-        <button class="seg-tab" :class="{ active: tab === 'planned' }" @click="tab = 'planned'">Geplant</button>
-        <button class="seg-tab" :class="{ active: tab === 'done' }" @click="tab = 'done'">Ausgewertet</button>
+      <div class="pill-row">
+        <button
+          v-for="f in filters"
+          :key="f.key"
+          class="pill"
+          :class="{ active: tab === f.key }"
+          @click="tab = f.key"
+        >{{ f.label }}<span class="pill-count"> · {{ f.count }}</span></button>
       </div>
 
-      <div v-if="filteredRows.length === 0" class="empty-state">
-        <span class="empty-icon">🏃</span>
-        <p class="empty-title">Keine Einträge</p>
-        <p class="empty-sub">
-          <template v-if="tab === 'open'">Alle Experimente sind geplant — neu ist hier nur, was noch keine Befürchtung hat.</template>
-          <template v-else-if="tab === 'planned'">Noch kein Experiment geplant.</template>
-          <template v-else>Noch kein Experiment ausgewertet.</template>
-        </p>
+      <div v-if="filteredRows.length === 0" class="list-empty">
+        <span class="list-empty-icon">🎯</span>
+        <p class="list-empty-title">Keine Einträge</p>
+        <p class="list-empty-sub">{{ emptyText }}</p>
       </div>
 
-      <div v-else class="ios-list">
-        <template v-for="(row, i) in filteredRows">
-          <div
-            :key="row.experiment.id + '-row'"
-            class="swipe-outer"
-            :data-row-id="row.experiment.id"
-            @touchstart="tsStart($event, i)"
-            @touchmove="tsMove($event, i)"
-            @touchend="tsEnd($event, i)"
+      <div
+        v-for="(row, i) in filteredRows"
+        :key="row.experiment.id"
+        class="swipe-outer"
+        :data-row-id="row.experiment.id"
+        @touchstart="tsStart($event, i)"
+        @touchmove="tsMove($event, i)"
+        @touchend="tsEnd($event, i)"
+      >
+        <div v-if="sw.openIdx === i || sw.touchIdx === i" class="swipe-right-panel">
+          <button class="swipe-btn swipe-btn-edit" @click.stop="editExperiment(row)">
+            <v-icon small color="#fff">edit</v-icon>
+            <span>Planen</span>
+          </button>
+          <!-- Nothing to compare against until an anchor exists -->
+          <button
+            v-if="!needsPlan(row.experiment)"
+            class="swipe-btn swipe-btn-evaluate"
+            @click.stop="startResult(row)"
           >
-            <div class="swipe-right-panel">
-              <button class="swipe-btn swipe-btn-edit" @click.stop="editExperiment(row)">
-                <v-icon small color="#fff">edit</v-icon>
-                <span>Planen</span>
-              </button>
-              <!-- Nothing to compare against until an anchor exists -->
-              <button
-                v-if="!needsPlan(row.experiment)"
-                class="swipe-btn swipe-btn-evaluate"
-                @click.stop="startResult(row)"
-              >
-                <v-icon small color="#fff">assessment</v-icon>
-                <span>Auswerten</span>
-              </button>
+            <v-icon small color="#fff">assessment</v-icon>
+            <span>Auswerten</span>
+          </button>
+        </div>
+        <div v-if="sw.openIdx === i || sw.touchIdx === i" class="swipe-left-panel">
+          <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(row)">
+            <v-icon small color="#fff">delete</v-icon>
+            <span>Löschen</span>
+          </button>
+        </div>
+
+        <div class="card" :style="rowSt(i)">
+          <div class="card-head">
+            <p class="card-title">{{ row.experiment.situation || 'Ohne Situation' }}</p>
+            <button
+              v-if="needsPlan(row.experiment)"
+              class="card-btn"
+              @click.stop="editExperiment(row)"
+            >Planen</button>
+            <button
+              v-else-if="displayState(row.experiment) === 'planned'"
+              class="card-btn"
+              @click.stop="startResult(row)"
+            >Auswerten</button>
+          </div>
+          <span class="card-pill">{{ stateLine(row.experiment) }}</span>
+          <p v-if="isDue(row.experiment)" class="due-hint">Schon durchgeführt?</p>
+
+          <!-- What was feared against what happened, as one bar: the orange
+               reaches as far as the fear did, the blue as far as reality. -->
+          <template v-if="gapOf(row.experiment) !== null">
+            <div class="gap-bar">
+              <span
+                class="gap-fill gap-expected"
+                :style="{ width: pct(row.experiment.fearExpected) }"
+              ></span>
+              <span
+                class="gap-fill gap-real"
+                :style="{ width: pct(row.experiment.fearActual) }"
+              ></span>
             </div>
-            <div class="swipe-left-panel">
-              <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(row)">
-                <v-icon small color="#fff">delete</v-icon>
-                <span>Löschen</span>
-              </button>
+            <div class="gap-legend">
+              <span class="gap-key"><i class="gap-dot gap-dot-expected"></i>erwartet {{ row.experiment.fearExpected }}</span>
+              <span class="gap-key"><i class="gap-dot gap-dot-real"></i>real {{ row.experiment.fearActual }}</span>
+              <span class="gap-delta" :style="{ color: gapColor(gapOf(row.experiment)) }">
+                {{ gapOf(row.experiment) > 0 ? '−' : '+' }}{{ Math.abs(gapOf(row.experiment)) }}
+              </span>
             </div>
-            <div class="ios-row" :style="rowSt(i)" @click="deskClick(i)">
-              <div class="row-body">
-                <p class="row-title">{{ row.experiment.situation || 'Ohne Situation' }}</p>
-                <div v-if="gapOf(row.experiment) !== null" class="row-badges">
-                  <span class="badge-pill gap-pill"
-                    :style="{ color: gapColor(gapOf(row.experiment)) }">
-                    {{ row.experiment.fearExpected }} → {{ row.experiment.fearActual }}
-                  </span>
-                </div>
-                <!-- The affirmation, not the belief: the row is about what is
-                     being moved towards. The belief falls back in only for the
-                     odd migrated experiment that never got one. -->
-                <p class="check-meta">„{{ rowSubtitle(row) }}“</p>
-                <p v-if="isDue(row.experiment)" class="due-hint">Schon durchgeführt?</p>
-              </div>
-              <button
-                v-if="needsPlan(row.experiment)"
-                class="check-btn"
-                @click.stop="editExperiment(row)"
-              >Planen</button>
-              <button
-                v-else-if="displayState(row.experiment) === 'planned'"
-                class="check-btn"
-                @click.stop="startResult(row)"
-              >Auswerten</button>
+          </template>
+          <template v-else-if="row.experiment.fearExpected !== null">
+            <div class="gap-bar">
+              <span
+                class="gap-fill gap-expected"
+                :style="{ width: pct(row.experiment.fearExpected) }"
+              ></span>
+            </div>
+            <div class="gap-legend">
+              <span class="gap-key"><i class="gap-dot gap-dot-expected"></i>erwartet {{ row.experiment.fearExpected }}</span>
+            </div>
+          </template>
+
+          <div class="card-sep"></div>
+
+          <div
+            v-if="row.experiment.fear"
+            class="detail-row"
+            :class="{ open: isOpen(row, 'fear') }"
+            @click.stop="toggleRow(row, 'fear')"
+          >
+            <span class="detail-label">Befürchtung</span>
+            <p class="detail-value" :class="{ open: isOpen(row, 'fear') }">{{ row.experiment.fear }}</p>
+            <v-icon v-if="!isOpen(row, 'fear')" class="detail-chevron">chevron_right</v-icon>
+          </div>
+
+          <div
+            v-if="row.experiment.outcome"
+            class="detail-row"
+            :class="{ open: isOpen(row, 'outcome') }"
+            @click.stop="toggleRow(row, 'outcome')"
+          >
+            <span class="detail-label">Was passiert ist</span>
+            <p class="detail-value" :class="{ open: isOpen(row, 'outcome') }">{{ row.experiment.outcome }}</p>
+            <v-icon v-if="!isOpen(row, 'outcome')" class="detail-chevron">chevron_right</v-icon>
+          </div>
+
+          <div
+            v-if="row.experiment.learning"
+            class="detail-row"
+            :class="{ open: isOpen(row, 'learning') }"
+            @click.stop="toggleRow(row, 'learning')"
+          >
+            <span class="detail-label">Was sagt dir das?</span>
+            <p class="detail-value" :class="{ open: isOpen(row, 'learning') }">{{ row.experiment.learning }}</p>
+            <v-icon v-if="!isOpen(row, 'learning')" class="detail-chevron">chevron_right</v-icon>
+          </div>
+
+          <div
+            v-if="affirmationOf(row)"
+            class="aff-box"
+            @click.stop="openAffirmation(row)"
+          >
+            <p class="aff-label">Affirmation</p>
+            <p class="aff-text">„{{ affirmationOf(row) }}“</p>
+            <div class="aff-foot" v-if="affirmationTruth(row) !== null">
+              <span class="aff-score">
+                <span class="aff-value">{{ round(affirmationTruth(row)) }}</span>
+                <span class="aff-max">/10</span>
+                <span class="aff-word">Glaubwürdigkeit</span>
+              </span>
             </div>
           </div>
 
-          <div :key="row.experiment.id + '-expand'" v-if="openIndex === i" class="row-expand">
-            <p class="expand-label">Überzeugung</p>
-            <div class="belief-row" @click.stop="openBelief(row)">
-              <div class="belief-row-body">
-                <p class="expand-text">{{ row.beliefText }}</p>
-                <span
-                  v-if="beliefOf(row)"
-                  class="status-pill"
-                  :style="{ color: beliefStatusColor(beliefOf(row)) }"
-                >{{ beliefStatusLabel(beliefOf(row)) }}</span>
-                <template v-if="beliefTruth(row) !== null">
-                  <p class="expand-label mt-2">Glaubwürdigkeit</p>
-                  <div class="slider-row">
-                    <span class="slider-end-label">0</span>
-                    <input
-                      type="range"
-                      min="0"
-                      max="10"
-                      step="0.1"
-                      :value="beliefTruth(row)"
-                      class="readonly-slider"
-                      disabled
-                    />
-                    <span class="slider-end-label">10</span>
-                  </div>
-                </template>
-              </div>
-              <v-icon small class="belief-chevron">chevron_right</v-icon>
-            </div>
-
-            <!-- The other end of what this experiment tests. Same shape as the
-                 belief above it, and the reading this experiment took of it is
-                 shown separately further down. -->
-            <template v-if="affirmationOf(row)">
-              <p class="expand-label mt-3">Affirmation</p>
-              <div class="belief-row" @click.stop="openAffirmation(row)">
-                <div class="belief-row-body">
-                  <p class="expand-text">{{ affirmationOf(row) }}</p>
-                  <template v-if="affirmationTruth(row) !== null">
-                    <p class="expand-label mt-2">Glaubwürdigkeit</p>
-                    <div class="slider-row">
-                      <span class="slider-end-label">0</span>
-                      <input
-                        type="range"
-                        min="0"
-                        max="10"
-                        step="0.1"
-                        :value="affirmationTruth(row)"
-                        class="readonly-slider"
-                        disabled
-                      />
-                      <span class="slider-end-label">10</span>
-                    </div>
-                  </template>
-                </div>
-                <v-icon small class="belief-chevron">chevron_right</v-icon>
-              </div>
-            </template>
-
-            <p class="expand-label mt-3">Situation</p>
-            <p class="expand-text mb-1">{{ row.experiment.situation || '—' }}</p>
-
-            <template v-if="row.experiment.fear">
-              <p class="expand-label mt-3">Befürchtung</p>
-              <p class="expand-text mb-1">{{ row.experiment.fear }}</p>
-            </template>
-            <template v-if="row.experiment.fearExpected !== null">
-              <p class="expand-label mt-3">Erwartet</p>
-              <div class="slider-row">
-                <span class="slider-end-label">0</span>
-                <input
-                  type="range"
-                  min="0"
-                  max="10"
-                  :value="row.experiment.fearExpected"
-                  class="readonly-slider"
-                  disabled
-                />
-                <span class="slider-end-label">10</span>
-              </div>
-            </template>
-            <template v-if="typeof row.experiment.fearActual === 'number'">
-              <p class="expand-label mt-3">Real</p>
-              <div class="slider-row">
-                <span class="slider-end-label">0</span>
-                <input
-                  type="range"
-                  min="0"
-                  max="10"
-                  :value="row.experiment.fearActual"
-                  class="readonly-slider"
-                  disabled
-                />
-                <span class="slider-end-label">10</span>
-              </div>
-            </template>
-
-            <template v-if="row.experiment.outcome">
-              <p class="expand-label mt-3">Was passiert ist</p>
-              <p class="expand-text mb-1">{{ row.experiment.outcome }}</p>
-            </template>
-
-            <template v-if="gapOf(row.experiment) !== null">
-              <p class="expand-label mt-3">Abgleich</p>
-              <p class="expand-text mb-1">
-                Erwartung {{ row.experiment.fearExpected }} · real {{ row.experiment.fearActual }}
-                <span :style="{ color: gapColor(gapOf(row.experiment)) }">
-                  ({{ gapOf(row.experiment) > 0 ? '−' : '+' }}{{ Math.abs(gapOf(row.experiment)) }})
-                </span>
-              </p>
-            </template>
-            <template v-if="row.experiment.learning">
-              <p class="expand-label mt-3">Was sagt dir das?</p>
-              <p class="expand-text mb-1">{{ row.experiment.learning }}</p>
-            </template>
-            <template v-if="typeof row.experiment.beliefTruth === 'number'">
-              <p class="expand-label mt-3">Glaubwürdigkeit Überzeugung</p>
-              <div class="slider-row">
-                <span class="slider-end-label">0</span>
-                <input
-                  type="range"
-                  min="0"
-                  max="10"
-                  :value="row.experiment.beliefTruth"
-                  class="readonly-slider"
-                  disabled
-                />
-                <span class="slider-end-label">10</span>
-              </div>
-            </template>
-            <template v-if="typeof row.experiment.affirmationTruth === 'number'">
-              <p class="expand-label mt-3">Glaubwürdigkeit Affirmation</p>
-              <div class="slider-row">
-                <span class="slider-end-label">0</span>
-                <input
-                  type="range"
-                  min="0"
-                  max="10"
-                  :value="row.experiment.affirmationTruth"
-                  class="readonly-slider"
-                  disabled
-                />
-                <span class="slider-end-label">10</span>
-              </div>
-            </template>
-            <!-- Evaluations from before the scale was split kept one value
-                 between the two sentences. Still shown, never written again. -->
-            <template v-else-if="typeof row.experiment.bodyTruth === 'number'">
-              <p class="expand-label mt-3">Was sich mehr wahr anfühlt</p>
-              <div class="slider-row">
-                <span class="slider-end-label">Überzeugung</span>
-                <!-- Its own old 0-100 scale, unrelated to the fear readings and
-                     never written again — so it is shown as it was recorded. -->
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  :value="row.experiment.bodyTruth"
-                  class="readonly-slider"
-                  disabled
-                />
-                <span class="slider-end-label">Affirmation</span>
-              </div>
-            </template>
-
-            <p class="expand-label mt-3">Verlauf</p>
-            <p class="expand-meta">Geplant: {{ dateLabel(row.experiment.plannedAt) }}</p>
-            <p class="expand-meta">Gemacht: {{ dateLabel(row.experiment.doneAt) }}</p>
-            <p class="expand-meta">Ausgewertet: {{ dateLabel(row.experiment.completedAt) }}</p>
+          <!-- The belief under test, kept at the foot of the card: the run is
+               the subject here, the belief is what it is aimed at. -->
+          <div class="belief-chip" @click.stop="openBelief(row)">
+            <span class="belief-chip-text">„{{ row.beliefText }}“</span>
+            <span v-if="beliefTruth(row) !== null" class="belief-chip-score">
+              {{ round(beliefTruth(row)) }}/10
+            </span>
           </div>
-
-          <div :key="row.experiment.id + '-sep'" class="ios-sep" v-if="i < filteredRows.length - 1"></div>
-        </template>
+        </div>
       </div>
+
+      <div class="list-bottom-space"></div>
 
       <!-- Step 4: result and comparison -->
       <v-dialog v-model="isResultDialogShowing" fullscreen>
@@ -493,6 +392,8 @@ import moment from 'moment';
 import ExperimentRecall from '@/views/ExperimentRecall.vue';
 import BeliefContext from '@/views/BeliefContext.vue';
 import {
+  EXPERIMENT_DISPLAY_STATES,
+  EXPERIMENT_DISPLAY_LABELS,
   collectExperiments,
   experimentsOf,
   experimentDisplayState,
@@ -552,8 +453,10 @@ export default {
       // a wizard can send you straight to a specific tab with ?tab=.
       tab: isExperimentDisplayState(this.$route.query.tab)
         ? this.$route.query.tab
-        : 'planned',
-      openIndex: null,
+        : 'all',
+      // Which written answer is unfolded, keyed by experiment and row: every
+      // card is open at once now, so one shared index would not do.
+      openRows: {},
       now: Date.now(),
       isResultDialogShowing: false,
       resultRow: null,
@@ -570,7 +473,7 @@ export default {
     };
   },
   watch: {
-    tab() { this.sw.openIdx = null; this.sw.openDir = null; this.openIndex = null; },
+    tab() { this.sw.openIdx = null; this.sw.openDir = null; },
     '$route.query.open': function() { this.revealRequested(); },
   },
   computed: {
@@ -579,9 +482,25 @@ export default {
     },
     filteredRows() {
       const tab = this.tab;
+      if (tab === 'all') return this.rows;
       return this.rows.filter(function(row) {
         return experimentDisplayState(row.experiment) === tab;
       });
+    },
+    filters() {
+      const rows = this.rows;
+      const all = { key: 'all', label: 'Alle', count: rows.length };
+      return [all].concat(EXPERIMENT_DISPLAY_STATES.map(key => ({
+        key,
+        label: EXPERIMENT_DISPLAY_LABELS[key],
+        count: rows.filter(r => experimentDisplayState(r.experiment) === key).length,
+      })));
+    },
+    emptyText() {
+      if (this.tab === 'open') return 'Neu ist hier nur, was noch keine Befürchtung hat.';
+      if (this.tab === 'planned') return 'Noch kein Experiment geplant.';
+      if (this.tab === 'done') return 'Noch kein Experiment ausgewertet.';
+      return 'Noch keine Handlung angelegt.';
     },
     resultSituation() {
       return this.resultRow ? this.resultRow.experiment.situation : '';
@@ -616,9 +535,30 @@ export default {
     isDue(x) { return isDue(x, this.now); },
     // A migrated action has a situation but no anchor — it cannot be evaluated.
     needsPlan(x) { return experimentState(x) !== 'evaluated' && !isPlanned(x); },
-    toggle(i) {
-      this.sw.openIdx = null; this.sw.openDir = null;
-      this.openIndex = this.openIndex === i ? null : i;
+    isOpen(row, key) { return !!this.openRows[`${row.experiment.id}:${key}`]; },
+    toggleRow(row, key) {
+      const k = `${row.experiment.id}:${key}`;
+      this.openRows = Object.assign({}, this.openRows, { [k]: !this.openRows[k] });
+    },
+    // One decimal, and a German comma: the headline number is the only
+    // place this value is shown, so rounding it whole would hide half a
+    // point that was actually recorded.
+    round(v) {
+      if (v === null || v === undefined) return '';
+      return String(Math.round(v * 10) / 10).replace('.', ',');
+    },
+    // The bar is drawn on the 0-10 fear scale.
+    pct(v) { return `${Math.max(0, Math.min(10, v || 0)) * 10}%`; },
+    // State and, once it is finished, when — a run is identified as much by
+    // its date as by how far it got.
+    stateLine(x) {
+      const label = EXPERIMENT_DISPLAY_LABELS[experimentDisplayState(x)];
+      const at = x.completedAt || x.doneAt || x.plannedAt;
+      return at ? `${label} · ${this.shortDate(at)}` : label;
+    },
+    shortDate(ts) {
+      moment.locale('de');
+      return moment(ts).format('D. MMM');
     },
 
     // Writes the changed experiment back into its belief, matched by id.
@@ -674,9 +614,6 @@ export default {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.$router.push({ path: '/beliefs', query: openQuery(row.beliefTime) });
     },
-    rowSubtitle(row) {
-      return this.affirmationOf(row) || row.beliefText;
-    },
     // One affirmation per belief, so the first is the one — but experiments
     // written before that rule can name their own, and that one wins.
     affirmationOf(row) {
@@ -704,13 +641,8 @@ export default {
       if (!id) return;
       const row = this.rows.find(r => String(r.experiment.id) === id);
       if (!row) return;
-      this.tab = experimentDisplayState(row.experiment);
-      this.$nextTick(() => {
-        const i = this.filteredRows.findIndex(r => String(r.experiment.id) === id);
-        if (i === -1) return;
-        this.openIndex = i;
-        this.$nextTick(() => scrollRowIntoView(this.$el, id));
-      });
+      this.tab = 'all';
+      this.$nextTick(() => scrollRowIntoView(this.$el, id));
     },
     beliefOf(row) {
       return this.$store.getters.beliefs.find(b => b.time === row.beliefTime);
@@ -772,7 +704,6 @@ export default {
       this.$store.dispatch('updateBelief', Object.assign({}, belief, {
         reflection: Object.assign({}, r, { experiments: list }),
       }));
-      this.openIndex = null;
     },
 
     tsStart(e, i) {
@@ -798,12 +729,10 @@ export default {
       if (!wasVert) e.preventDefault();
       if (!this.sw.drag && !wasVert) {
         if (this.sw.openIdx !== null) { this.sw.openIdx = null; this.sw.openDir = null; }
-        else { this.toggle(i); }
       } else if (this.sw.drag) {
         if (this.sw.dx < -40) { this.sw.openIdx = i; this.sw.openDir = 'left'; }
         else if (this.sw.dx > 40) { this.sw.openIdx = i; this.sw.openDir = 'right'; }
         else { this.sw.openIdx = null; this.sw.openDir = null; }
-        this.openIndex = null;
       }
       this.sw.touchIdx = null; this.sw.dx = 0; this.sw.drag = false; this.sw.isH = null;
     },
@@ -1171,4 +1100,79 @@ export default {
 .confirm-delete { flex: 1; color: #ff453a !important; font-weight: 600 !important; }
 
 .dark-nav { border-top: 1px solid #2c2c2e !important; }
+
+/* ─── Card list ─── */
+.swipe-outer {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.swipe-outer .card { margin-bottom: 0; }
+.swipe-right-panel {
+  position: absolute;
+  left: 16px; top: 0; bottom: 0;
+  display: flex;
+  align-items: stretch;
+}
+.swipe-left-panel {
+  position: absolute;
+  right: 16px; top: 0; bottom: 0;
+  display: flex;
+  align-items: stretch;
+}
+.due-hint { font-size: 0.85rem; color: #fd9927; margin: 10px 0 0; }
+
+/* One track, two fills: the fear laid over what reality turned out to be, so
+   the difference is the part of the bar that is only orange. */
+.gap-bar {
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  background: #2c2c2e;
+  margin-top: 16px;
+  overflow: hidden;
+}
+.gap-fill {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  border-radius: 999px;
+}
+.gap-expected { background: #fd9927; }
+.gap-real { background: #6aaef7; }
+.gap-legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: #8e8e93;
+}
+.gap-key { display: flex; align-items: center; gap: 6px; }
+.gap-dot { width: 9px; height: 9px; border-radius: 3px; display: inline-block; }
+.gap-dot-expected { background: #fd9927; }
+.gap-dot-real { background: #6aaef7; }
+.gap-delta { margin-left: auto; font-weight: 600; }
+
+.belief-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #2c2c2e;
+  border-radius: 12px;
+  padding: 11px 14px;
+  margin-top: 14px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  &:active { opacity: 0.6; }
+}
+.belief-chip-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.9rem;
+  color: #8e8e93;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.belief-chip-score { font-size: 0.85rem; color: #636366; flex-shrink: 0; }
 </style>

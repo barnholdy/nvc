@@ -1,266 +1,209 @@
 <template>
   <div class="dark-page">
-    <v-toolbar color="#000" dark flat app>
-      <v-toolbar-title>Überzeugungen</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn icon @click="$router.push('/settings')">
-        <v-icon color="#4ade80">settings</v-icon>
-      </v-btn>
-    </v-toolbar>
-
     <v-content>
-      <div class="intro-card">
-        <span class="intro-icon">💡</span>
-        <p class="intro-title">Dein inneres Betriebssystem</p>
-        <p class="intro-text">Deine Überzeugungen formen dein Denken, Fühlen und Handeln. Authentizität entsteht, wenn du klar siehst, was du glaubst — und dann bewusst wählst, was bleiben darf.</p>
+      <div class="screen-title-row">
+        <h1 class="screen-title">Überzeugungen</h1>
+        <button class="screen-add" @click="$router.push('/settings')" aria-label="Einstellungen">
+          <v-icon color="#4ade80">settings</v-icon>
+        </button>
       </div>
 
-      <div class="segment-row">
-        <button class="seg-tab" :class="{ active: tab === 'open' }" @click="tab = 'open'">Neu</button>
-        <button class="seg-tab" :class="{ active: tab === 'working' }" @click="tab = 'working'">Ergründet</button>
-        <button class="seg-tab" :class="{ active: tab === 'done' }" @click="tab = 'done'">Gewandelt</button>
+      <!-- Counts on the filter, so the shape of the whole is readable before
+           anything is opened. -->
+      <div class="pill-row">
+        <button
+          v-for="f in filters"
+          :key="f.key"
+          class="pill"
+          :class="{ active: tab === f.key }"
+          @click="tab = f.key"
+        >{{ f.label }}<span class="pill-count"> · {{ f.count }}</span></button>
       </div>
 
-      <div v-if="filteredBeliefs.length === 0" class="empty-state">
-        <span class="empty-icon">💡</span>
-        <p class="empty-title">Keine Einträge</p>
-        <p class="empty-sub">
-          <template v-if="tab === 'open'">Überzeugungen entstehen beim Anlegen einer Situation.</template>
-          <template v-else-if="tab === 'working'">Noch keine ergründeten Überzeugungen.</template>
-          <template v-else>Noch keine gewandelten Überzeugungen.</template>
-        </p>
+      <div v-if="filteredBeliefs.length === 0" class="list-empty">
+        <span class="list-empty-icon">💡</span>
+        <p class="list-empty-title">Keine Einträge</p>
+        <p class="list-empty-sub">{{ emptyText }}</p>
       </div>
 
-      <div v-else class="ios-list">
-        <template v-for="(entry, idx) in filteredBeliefs">
+      <div
+        v-for="(entry, idx) in filteredBeliefs"
+        :key="entry.time"
+        class="swipe-outer"
+        :data-row-id="entry.time"
+        @touchstart="tsStart($event, idx)"
+        @touchmove="tsMove($event, idx)"
+        @touchend="tsEnd($event, idx)"
+      >
+        <div v-if="sw.openIdx === idx || sw.touchIdx === idx" class="swipe-right-panel">
+          <button class="swipe-btn swipe-btn-edit" @click.stop="editEntry(entry)">
+            <v-icon small color="#fff">edit</v-icon>
+            <span>Ergründen</span>
+          </button>
+          <button class="swipe-btn swipe-btn-change" @click.stop="changeEntry(entry)">
+            <v-icon small color="#fff">autorenew</v-icon>
+            <span>Wandeln</span>
+          </button>
+          <button class="swipe-btn swipe-btn-act" @click.stop="actEntry(entry)">
+            <v-icon small color="#fff">directions_run</v-icon>
+            <span>Handeln</span>
+          </button>
+        </div>
+        <div v-if="sw.openIdx === idx || sw.touchIdx === idx" class="swipe-left-panel">
+          <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">
+            <v-icon small color="#fff">delete</v-icon>
+            <span>Löschen</span>
+          </button>
+        </div>
+
+        <div class="card" :style="rowSt(idx, 195)">
+          <div class="card-head">
+            <p class="card-title">{{ entry.belief }}</p>
+            <button
+              v-if="rowActionLabel(entry)"
+              class="card-btn"
+              @click.stop="runRowAction(entry)"
+            >{{ rowActionLabel(entry) }}</button>
+          </div>
+          <span class="card-pill">{{ statusLabel(entry) }}</span>
+
+          <div v-if="credibility(entry) !== null" class="score-row">
+            <span class="score-value">{{ round(credibility(entry)) }}</span>
+            <span class="score-max">/10</span>
+            <span class="score-label">Glaubwürdigkeit</span>
+          </div>
+
+          <div class="card-sep"></div>
+
+          <!-- The order the work happens in: what the belief does, where it
+               comes from, what it is for, then what has been put against it. -->
           <div
-            :key="entry.time + '-row'"
-            class="swipe-outer"
-            :data-row-id="entry.time"
-            @touchstart="tsStart($event, idx)"
-            @touchmove="tsMove($event, idx)"
-            @touchend="tsEnd($event, idx)"
+            v-if="entry.withBelief || feelingsOf(entry).length"
+            class="detail-row"
+            :class="{ open: isOpen(entry, 'reaction') }"
+            @click.stop="toggleRow(entry, 'reaction')"
           >
-            <div class="swipe-right-panel">
-              <button class="swipe-btn swipe-btn-edit" @click.stop="editEntry(entry)">
-                <v-icon small color="#fff">edit</v-icon>
-                <span>Ergründen</span>
-              </button>
-              <button class="swipe-btn swipe-btn-change" @click.stop="changeEntry(entry)">
-                <v-icon small color="#fff">autorenew</v-icon>
-                <span>Wandeln</span>
-              </button>
-              <button class="swipe-btn swipe-btn-act" @click.stop="actEntry(entry)">
-                <v-icon small color="#fff">directions_run</v-icon>
-                <span>Handeln</span>
-              </button>
-            </div>
-            <div class="swipe-left-panel">
-              <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">
-                <v-icon small color="#fff">delete</v-icon>
-                <span>Löschen</span>
-              </button>
-            </div>
-            <div class="ios-row" :style="rowSt(idx, 195)" @click="deskClick(idx)">
-              <div class="row-body">
-                <p class="row-title">{{ entry.belief }}</p>
-                <div class="row-badges">
-                  <span v-if="patternCount(entry.time) > 0" class="badge-pill">
-                    {{ patternCount(entry.time) }} {{ patternCount(entry.time) === 1 ? 'Situation' : 'Situationen' }}
-                  </span>
-                </div>
-                <!-- Everything that was ever recorded about this belief, on the
-                     scale it was recorded on. -->
-                <template v-if="credibility(entry) !== null">
-                  <p class="expand-label mt-2">Glaubwürdigkeit</p>
-                  <div class="slider-row">
-                    <span class="slider-end-label">0</span>
-                    <input
-                      type="range"
-                      min="0"
-                      max="10"
-                      step="0.1"
-                      :value="credibility(entry)"
-                      class="readonly-slider"
-                      disabled
-                    />
-                    <span class="slider-end-label">10</span>
-                  </div>
-                </template>
-              </div>
-              <button
-                v-if="rowActionLabel(entry)"
-                class="row-action-btn"
-                @click.stop="runRowAction(entry)"
-              >{{ rowActionLabel(entry) }}</button>
-              <v-icon class="row-chevron" :class="{ rotated: openEntry === entry.time }">chevron_right</v-icon>
-            </div>
+            <span class="detail-label">Reaktion</span>
+            <template v-if="isOpen(entry, 'reaction')">
+              <p class="detail-value open">{{ entry.withBelief || '—' }}</p>
+              <feeling-chips
+                v-if="feelingsOf(entry).length"
+                :items="feelingsOf(entry)"
+                type="feelings"
+                flat
+                class="mt-2"
+              ></feeling-chips>
+            </template>
+            <template v-else>
+              <p class="detail-value">{{ entry.withBelief || feelingNames(entry) }}</p>
+              <v-icon class="detail-chevron">chevron_right</v-icon>
+            </template>
           </div>
 
           <div
-            v-if="openEntry === entry.time"
-            :key="entry.time + '-expand'"
-            class="row-expand"
+            v-if="originOf(entry)"
+            class="detail-row"
+            :class="{ open: isOpen(entry, 'origin') }"
+            @click.stop="toggleRow(entry, 'origin')"
           >
-            <!-- Folded like the other carried-forward blocks: how many there
-                 are is the part worth seeing at a glance. -->
-            <template v-if="associatedPatterns(entry.time).length">
-              <div class="section-toggle" @click.stop="isSituationsOpen = !isSituationsOpen">
-                <span class="section-toggle-label">
-                  {{ isSituationsOpen ? 'Situationen ausblenden' : situationsLabel(entry) }}
-                </span>
-                <v-icon small class="section-chevron">
-                  {{ isSituationsOpen ? 'expand_more' : 'chevron_right' }}
-                </v-icon>
-              </div>
-              <div
-                v-for="p in (isSituationsOpen ? associatedPatterns(entry.time) : [])"
-                :key="'pat-' + p.time"
-                class="linked-row"
-                @click.stop="editPattern(p)"
-              >
-                <div class="linked-row-body">
-                  <p class="expand-text">{{ p.trigger }}</p>
-                  <!-- What this belief was rated at in this situation, on the
-                       scale it was rated on. -->
-                  <template v-if="situationTruth(p, entry) !== null">
-                    <p class="expand-label mt-2">Glaubwürdigkeit</p>
-                    <div class="slider-row">
-                      <span class="slider-end-label">0</span>
-                      <input
-                        type="range"
-                        min="0"
-                        max="10"
-                        :value="situationTruth(p, entry)"
-                        class="readonly-slider"
-                        disabled
-                      />
-                      <span class="slider-end-label">10</span>
-                    </div>
-                  </template>
-                </div>
-                <v-icon small class="linked-chevron">chevron_right</v-icon>
-              </div>
-            </template>
-            <template v-if="entry.withBelief">
-              <p class="expand-label mt-3">Reaktion</p>
-              <p class="expand-text">{{ entry.withBelief }}</p>
-            </template>
-            <template v-if="entry.feelings && entry.feelings.length">
-              <p class="expand-label mt-3">Gefühle</p>
-              <feeling-chips :items="entry.feelings" type="feelings" class="mb-2"></feeling-chips>
-            </template>
-            <!-- Childhood material is reopened by a deliberate tap, never as a
-                 side effect of opening the belief. -->
-            <template v-if="entry.reflection && entry.reflection.origin">
-              <div class="section-toggle" @click.stop="isOriginOpen = !isOriginOpen">
-                <span class="section-toggle-label">
-                  {{ isOriginOpen ? 'Ursprung ausblenden' : 'Ursprung anzeigen' }}
-                </span>
-                <v-icon small class="section-chevron">
-                  {{ isOriginOpen ? 'expand_more' : 'chevron_right' }}
-                </v-icon>
-              </div>
-              <p v-if="isOriginOpen" class="expand-text mt-2">{{ entry.reflection.origin }}</p>
-            </template>
-            <template v-if="entry.needs && entry.needs.length">
-              <p class="expand-label mt-3">Bedürfnisse</p>
-              <feeling-chips :items="entry.needs" type="needs" class="mb-2"></feeling-chips>
-            </template>
+            <span class="detail-label">Ursprung</span>
+            <p class="detail-value" :class="{ open: isOpen(entry, 'origin') }">{{ originOf(entry) }}</p>
+            <v-icon v-if="!isOpen(entry, 'origin')" class="detail-chevron">chevron_right</v-icon>
+          </div>
 
-            <!-- Below the six the wizard collects, and folded away, because it
-                 is the longest text here. -->
-            <template v-if="entry.empathy">
-              <div class="section-toggle" @click.stop="isEmpathyOpen = !isEmpathyOpen">
-                <span class="section-toggle-label">
-                  {{ isEmpathyOpen ? 'Empathie ausblenden' : 'Empathie anzeigen' }}
-                </span>
-                <v-icon small class="section-chevron">
-                  {{ isEmpathyOpen ? 'expand_more' : 'chevron_right' }}
-                </v-icon>
-              </div>
-              <p v-if="isEmpathyOpen" class="expand-text empathy-text mt-2">{{ entry.empathy }}</p>
-            </template>
-
-            <!-- What wandeln and handeln added afterwards. -->
-            <template v-if="hasChangeData(entry) || (entry.affirmations && entry.affirmations.length)">
-              <template v-if="entry.reflection && entry.reflection.exceptions">
-                <p class="expand-label mt-3">Ausnahmen</p>
-                <p class="expand-text">{{ entry.reflection.exceptions }}</p>
-              </template>
-              <template v-if="entry.reflection && entry.reflection.withoutBelief">
-                <p class="expand-label mt-3">Neue Reaktion</p>
-                <p class="expand-text">{{ entry.reflection.withoutBelief }}</p>
-              </template>
-              <template v-if="entry.reflection && entry.reflection.withoutBeliefFeelings
-                && entry.reflection.withoutBeliefFeelings.length">
-                <p class="expand-label mt-3">Neue Gefühle</p>
-                <feeling-chips
-                  :items="entry.reflection.withoutBeliefFeelings"
-                  type="feelings"
-                  class="mb-1"
-                ></feeling-chips>
-              </template>
-              <template v-if="entry.affirmations && entry.affirmations.length">
-                <p class="expand-label mt-3">Affirmation</p>
-                <div
-                  v-for="(a, i) in entry.affirmations"
-                  :key="'aff-' + i"
-                  class="linked-row"
-                  @click.stop="openAffirmation(a.text)"
-                >
-                  <div class="linked-row-body">
-                    <p class="expand-text">{{ a.text }}</p>
-                    <p class="expand-label mt-2">Glaubwürdigkeit</p>
-                    <div class="slider-row">
-                      <span class="slider-end-label">0</span>
-                      <input
-                        type="range"
-                        min="0"
-                        max="10"
-                        :value="truthOf(a)"
-                        class="readonly-slider"
-                        disabled
-                      />
-                      <span class="slider-end-label">10</span>
-                    </div>
-                  </div>
-                  <v-icon small class="linked-chevron">chevron_right</v-icon>
-                </div>
-              </template>
-              <!-- Folded like the situations above, and reduced to what
-                   identifies a run: what was done, and how far it got. The
-                   numbers behind it live in the Handlungen list, one tap away. -->
-              <template v-if="experimentsOf(entry).length">
-                <div class="section-toggle" @click.stop="isExperimentsOpen = !isExperimentsOpen">
-                  <span class="section-toggle-label">
-                    {{ isExperimentsOpen ? 'Verhaltensexperimente ausblenden' : experimentsLabel(entry) }}
-                  </span>
-                  <v-icon small class="section-chevron">
-                    {{ isExperimentsOpen ? 'expand_more' : 'chevron_right' }}
-                  </v-icon>
-                </div>
-                <div
-                  v-for="x in (isExperimentsOpen ? experimentsOf(entry) : [])"
-                  :key="x.id"
-                  class="linked-row"
-                  @click.stop="openExperiment(x)"
-                >
-                  <div class="linked-row-body">
-                    <p class="expand-text">{{ x.situation }}</p>
-                    <span class="status-pill" :style="{ color: experimentStateColor(x) }">
-                      {{ experimentStateLabel(x) }}
-                    </span>
-                  </div>
-                  <v-icon small class="linked-chevron">chevron_right</v-icon>
-                </div>
-              </template>
+          <div
+            v-if="needsOf(entry).length"
+            class="detail-row"
+            :class="{ open: isOpen(entry, 'needs') }"
+            @click.stop="toggleRow(entry, 'needs')"
+          >
+            <span class="detail-label">Bedürfnisse</span>
+            <feeling-chips
+              v-if="isOpen(entry, 'needs')"
+              :items="needsOf(entry)"
+              type="needs"
+              flat
+            ></feeling-chips>
+            <template v-else>
+              <p class="detail-value">{{ needNames(entry) }}</p>
+              <v-icon class="detail-chevron">chevron_right</v-icon>
             </template>
           </div>
 
-          <div :key="entry.time + '-sep'" class="ios-sep" v-if="idx < filteredBeliefs.length - 1"></div>
-        </template>
+          <div
+            v-if="entry.empathy"
+            class="detail-row"
+            :class="{ open: isOpen(entry, 'empathy') }"
+            @click.stop="toggleRow(entry, 'empathy')"
+          >
+            <span class="detail-label">Empathie</span>
+            <p class="detail-value" :class="{ open: isOpen(entry, 'empathy') }">{{ entry.empathy }}</p>
+            <v-icon v-if="!isOpen(entry, 'empathy')" class="detail-chevron">chevron_right</v-icon>
+          </div>
+
+          <div
+            v-if="exceptionsOf(entry)"
+            class="detail-row"
+            :class="{ open: isOpen(entry, 'exceptions') }"
+            @click.stop="toggleRow(entry, 'exceptions')"
+          >
+            <span class="detail-label">Ausnahmen</span>
+            <p class="detail-value" :class="{ open: isOpen(entry, 'exceptions') }">{{ exceptionsOf(entry) }}</p>
+            <v-icon v-if="!isOpen(entry, 'exceptions')" class="detail-chevron">chevron_right</v-icon>
+          </div>
+
+          <div
+            v-if="withoutBeliefOf(entry) || newFeelingsOf(entry).length"
+            class="detail-row"
+            :class="{ open: isOpen(entry, 'newReaction') }"
+            @click.stop="toggleRow(entry, 'newReaction')"
+          >
+            <span class="detail-label">Neue Reaktion</span>
+            <template v-if="isOpen(entry, 'newReaction')">
+              <p class="detail-value open">{{ withoutBeliefOf(entry) || '—' }}</p>
+              <feeling-chips
+                v-if="newFeelingsOf(entry).length"
+                :items="newFeelingsOf(entry)"
+                type="feelings"
+                flat
+                class="mt-2"
+              ></feeling-chips>
+            </template>
+            <template v-else>
+              <p class="detail-value">{{ withoutBeliefOf(entry) || newFeelingNames(entry) }}</p>
+              <v-icon class="detail-chevron">chevron_right</v-icon>
+            </template>
+          </div>
+
+          <div
+            v-if="affirmationOf(entry)"
+            class="aff-box"
+            @click.stop="openAffirmation(affirmationOf(entry).text)"
+          >
+            <p class="aff-label">Affirmation</p>
+            <p class="aff-text">„{{ affirmationOf(entry).text }}“</p>
+            <div class="aff-foot">
+              <span class="aff-score">
+                <span class="aff-value">{{ round(truthOf(affirmationOf(entry))) }}</span>
+                <span class="aff-max">/10</span>
+                <span class="aff-word">Glaubwürdigkeit</span>
+              </span>
+            </div>
+          </div>
+
+          <div v-if="patternCount(entry.time)" class="card-link" @click.stop="openSituations(entry)">
+            <span class="card-link-text">{{ situationsLabel(entry) }}</span>
+            <v-icon class="detail-chevron">chevron_right</v-icon>
+          </div>
+
+          <div v-if="experimentCount(entry)" class="card-link" @click.stop="openExperiments(entry)">
+            <span class="card-link-text">{{ experimentsLabel(entry) }}</span>
+            <v-icon class="detail-chevron">chevron_right</v-icon>
+          </div>
+        </div>
       </div>
+
+      <div class="list-bottom-space"></div>
 
       <v-dialog v-model="isDeleteDialogShowing" width="300">
         <v-card class="confirm-dialog">
@@ -293,14 +236,16 @@
 
 <script>
 import FeelingChips from '@/components/FeelingChips.vue';
-import { beliefStatus, hasChangeData, isBeliefStatus } from '@/utils/beliefStatus';
 import {
-  experimentStateLabel as stateLabelOf,
-  experimentStateColor as stateColorOf,
-  experimentsOf,
-} from '@/utils/experiment';
+  beliefStatus,
+  beliefStatusLabel,
+  isBeliefStatus,
+  BELIEF_STATUSES,
+  BELIEF_STATUS_LABELS,
+} from '@/utils/beliefStatus';
+import { experimentsOf, experimentDisplayState } from '@/utils/experiment';
 import { normalizeTruth } from '@/utils/affirmationTruth';
-import { beliefCredibility, beliefTruthIn } from '@/utils/credibility';
+import { beliefCredibility } from '@/utils/credibility';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 
 export default {
@@ -308,15 +253,13 @@ export default {
   components: { FeelingChips },
   data() {
     return {
-      openEntry: null,
-      isSituationsOpen: false,
-      isExperimentsOpen: false,
-      isOriginOpen: false,
-      isEmpathyOpen: false,
+      // Which written answer is unfolded, keyed by belief and row: every card
+      // is open at once now, so one shared flag would open them all.
+      openRows: {},
       entryToDelete: null,
       isDeleteDialogShowing: false,
       // Saving a belief returns here with the tab it now belongs to.
-      tab: isBeliefStatus(this.$route.query.tab) ? this.$route.query.tab : 'open',
+      tab: isBeliefStatus(this.$route.query.tab) ? this.$route.query.tab : 'all',
       sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
   },
@@ -324,21 +267,8 @@ export default {
     this.revealRequested();
   },
   watch: {
-    // Arriving from another list, or moving between two ?open= links without
-    // the component being torn down in between.
     '$route.query.open': function() { this.revealRequested(); },
-    tab() {
-      this.sw.openIdx = null; this.sw.openDir = null;
-      // A ?open= link switches the tab in order to show its row — folding that
-      // row away here would undo the very thing the switch was for. Tapping the
-      // tab bar still folds, because the row asked for does not live in the tab
-      // that was tapped.
-      const asked = requestedId(this.$route);
-      if (asked !== null && String(this.openEntry) === asked
-        && this.filteredBeliefs.some(e => String(e.time) === asked)) return;
-      this.openEntry = null;
-      this.isSituationsOpen = false; this.isExperimentsOpen = false; this.isOriginOpen = false; this.isEmpathyOpen = false;
-    },
+    tab() { this.sw.openIdx = null; this.sw.openDir = null; },
   },
   computed: {
     beliefs() {
@@ -348,7 +278,22 @@ export default {
         .sort((a, b) => ((map[b.time] || 0) - (map[a.time] || 0)) || (b.time - a.time));
     },
     filteredBeliefs() {
+      if (this.tab === 'all') return this.beliefs;
       return this.beliefs.filter(e => beliefStatus(e) === this.tab);
+    },
+    filters() {
+      const all = { key: 'all', label: 'Alle', count: this.beliefs.length };
+      return [all].concat(BELIEF_STATUSES.map(key => ({
+        key,
+        label: BELIEF_STATUS_LABELS[key],
+        count: this.beliefs.filter(e => beliefStatus(e) === key).length,
+      })));
+    },
+    emptyText() {
+      if (this.tab === 'open') return 'Überzeugungen entstehen beim Anlegen einer Situation.';
+      if (this.tab === 'working') return 'Noch keine ergründeten Überzeugungen.';
+      if (this.tab === 'done') return 'Noch keine gewandelten Überzeugungen.';
+      return 'Überzeugungen entstehen beim Anlegen einer Situation.';
     },
     patternCountMap() {
       const map = {};
@@ -367,65 +312,76 @@ export default {
       if (!id) return;
       const entry = this.$store.getters.beliefs.find(b => String(b.time) === id);
       if (!entry) return;
-      this.tab = beliefStatus(entry);
-      this.openEntry = entry.time;
-      this.isSituationsOpen = false; this.isExperimentsOpen = false; this.isOriginOpen = false;
-      this.isEmpathyOpen = false;
-      // After the tab switch has rendered the row.
+      this.tab = 'all';
       this.$nextTick(() => scrollRowIntoView(this.$el, entry.time));
     },
-    patternCount(beliefTime) { return this.patternCountMap[beliefTime] || 0; },
-    associatedPatterns(beliefTime) {
-      return this.$store.getters.patterns.filter(p => (p.beliefs || []).indexOf(beliefTime) !== -1);
+    // One decimal, and a German comma: the headline number is the only
+    // place this value is shown, so rounding it whole would hide half a
+    // point that was actually recorded.
+    round(v) {
+      if (v === null || v === undefined) return '';
+      return String(Math.round(v * 10) / 10).replace('.', ',');
     },
-    // The count stands in for the list while it is folded away.
-    situationsLabel(entry) {
-      const n = this.associatedPatterns(entry.time).length;
-      return n === 1 ? '1 Situation anzeigen' : `${n} Situationen anzeigen`;
-    },
-    experimentsLabel(entry) {
-      const n = this.experimentsOf(entry).length;
-      return n === 1 ? '1 Verhaltensexperiment anzeigen' : `${n} Verhaltensexperimente anzeigen`;
-    },
-    toggle(time) {
-      this.sw.openIdx = null; this.sw.openDir = null;
-      this.openEntry = this.openEntry === time ? null : time;
-      // Every belief starts with its folded sections closed again — a previous
-      // tap must not carry over to the next one.
-      this.isSituationsOpen = false; this.isExperimentsOpen = false; this.isOriginOpen = false;
-      this.isEmpathyOpen = false;
-    },
-    // The average across every situation and every evaluated experiment. Null
-    // while nothing was ever rated, because a slider at zero would claim an
-    // answer nobody gave.
+    statusLabel(entry) { return beliefStatusLabel(entry); },
     credibility(entry) {
       return beliefCredibility(this.$store.getters.patterns, entry);
     },
-    // What this one situation recorded, as opposed to the average above.
-    situationTruth(pattern, entry) { return beliefTruthIn(pattern, entry); },
-    // Still a method: the template calls hasChangeData(entry) directly.
-    hasChangeData(entry) { return hasChangeData(entry); },
-    experimentsOf(entry) { return experimentsOf(entry); },
-    experimentStateColor(x) { return stateColorOf(x); },
-    experimentStateLabel(x) { return stateLabelOf(x); },
+    isOpen(entry, key) { return !!this.openRows[`${entry.time}:${key}`]; },
+    toggleRow(entry, key) {
+      const k = `${entry.time}:${key}`;
+      this.openRows = Object.assign({}, this.openRows, { [k]: !this.openRows[k] });
+    },
+    // Everything the card reads, each guarded so a half-filled belief simply
+    // shows fewer rows rather than empty ones.
+    feelingsOf(entry) { return Array.isArray(entry.feelings) ? entry.feelings : []; },
+    needsOf(entry) { return Array.isArray(entry.needs) ? entry.needs : []; },
+    originOf(entry) { return (entry.reflection && entry.reflection.origin) || ''; },
+    exceptionsOf(entry) { return (entry.reflection && entry.reflection.exceptions) || ''; },
+    withoutBeliefOf(entry) { return (entry.reflection && entry.reflection.withoutBelief) || ''; },
+    newFeelingsOf(entry) {
+      const r = entry.reflection || {};
+      return Array.isArray(r.withoutBeliefFeelings) ? r.withoutBeliefFeelings : [];
+    },
+    affirmationOf(entry) {
+      const list = Array.isArray(entry.affirmations) ? entry.affirmations : [];
+      return list.find(a => a && a.text) || null;
+    },
     truthOf(a) { return normalizeTruth(a.resonance); },
-    // Each of these opens the row in the list that owns it, unfolded and in
-    // view — following a reference should land you on the thing itself, not in
-    // a wizard for editing it.
-    editPattern(p) {
-      this.sw.openIdx = null; this.sw.openDir = null;
-      this.$router.push({ path: '/patterns', query: openQuery(p.time) });
+    names(list) { return list.map(x => x && x.name).filter(Boolean).join(' · '); },
+    feelingNames(entry) { return this.names(this.feelingsOf(entry)); },
+    newFeelingNames(entry) { return this.names(this.newFeelingsOf(entry)); },
+    needNames(entry) { return this.names(this.needsOf(entry)); },
+    patternCount(beliefTime) { return this.patternCountMap[beliefTime] || 0; },
+    experimentCount(entry) { return experimentsOf(entry).length; },
+    situationsLabel(entry) {
+      const n = this.patternCount(entry.time);
+      if (!n) return 'Keine Situationen';
+      return n === 1 ? '1 Situation ansehen' : `${n} Situationen ansehen`;
+    },
+    // How many runs there are and how many still wait — the two numbers that
+    // say whether there is anything to do here.
+    experimentsLabel(entry) {
+      const list = experimentsOf(entry);
+      if (!list.length) return 'Keine Handlungen';
+      const openCount = list.filter(x => experimentDisplayState(x) !== 'done').length;
+      const head = list.length === 1 ? '1 Handlung' : `${list.length} Handlungen`;
+      return openCount ? `${head} · ${openCount} offen` : head;
+    },
+    openSituations(entry) {
+      const first = this.$store.getters.patterns
+        .find(p => (p.beliefs || []).indexOf(entry.time) !== -1);
+      if (!first) return;
+      this.$router.push({ path: '/patterns', query: openQuery(first.time) });
+    },
+    openExperiments(entry) {
+      const first = experimentsOf(entry)[0];
+      if (!first) return;
+      this.$router.push({ path: '/actions', query: openQuery(first.id) });
     },
     openAffirmation(text) {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.$router.push({ path: '/affirmations', query: openQuery(text) });
     },
-    openExperiment(x) {
-      this.sw.openIdx = null; this.sw.openDir = null;
-      this.$router.push({ path: '/actions', query: openQuery(x.id) });
-    },
-    changeEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/change-belief/${entry.time}`); },
-    actEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/act-belief/${entry.time}`); },
     // The one step that moves this belief forward from where it stands.
     rowActionLabel(entry) {
       const s = beliefStatus(entry);
@@ -441,6 +397,8 @@ export default {
       else if (s === 'done') this.actEntry(entry);
     },
     editEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/edit-belief/${entry.time}`); },
+    changeEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/change-belief/${entry.time}`); },
+    actEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/act-belief/${entry.time}`); },
     preDelete(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.entryToDelete = entry; this.isDeleteDialogShowing = true; },
     confirmDelete() {
       this.isDeleteDialogShowing = false;
@@ -448,9 +406,11 @@ export default {
       this.entryToDelete = null;
     },
     cancelDelete() { this.isDeleteDialogShowing = false; this.entryToDelete = null; },
+    // The card is tall, so a swipe has to be clearly horizontal before it
+    // counts — otherwise scrolling past a card would drag it sideways.
     tsStart(e, i) {
       if (e.target && e.target.closest
-        && (e.target.closest('.swipe-btn') || e.target.closest('.row-action-btn'))) return;
+        && (e.target.closest('.swipe-btn') || e.target.closest('.card-btn'))) return;
       const t = e.touches[0];
       this.sw.touchIdx = i; this.sw.startX = t.clientX; this.sw.startY = t.clientY;
       this.sw.dx = 0; this.sw.isH = null; this.sw.drag = false;
@@ -459,8 +419,8 @@ export default {
       if (this.sw.touchIdx !== i) return;
       const t = e.touches[0];
       const dx = t.clientX - this.sw.startX, dy = t.clientY - this.sw.startY;
-      if (this.sw.isH === null && (Math.abs(dx) > 4 || Math.abs(dy) > 4))
-        this.sw.isH = Math.abs(dx) >= Math.abs(dy);
+      if (this.sw.isH === null && (Math.abs(dx) > 8 || Math.abs(dy) > 8))
+        this.sw.isH = Math.abs(dx) > Math.abs(dy) * 1.5;
       if (!this.sw.isH) return;
       e.preventDefault();
       this.sw.dx = Math.max(-80, Math.min(dx, 195));
@@ -468,16 +428,10 @@ export default {
     },
     tsEnd(e, i) {
       if (this.sw.touchIdx !== i) return;
-      const wasVert = this.sw.isH === false;
-      if (!wasVert) e.preventDefault();
-      if (!this.sw.drag && !wasVert) {
-        if (this.sw.openIdx !== null) { this.sw.openIdx = null; this.sw.openDir = null; }
-        else { this.onRowTap(i); }
-      } else if (this.sw.drag) {
+      if (this.sw.drag) {
         if (this.sw.dx < -40) { this.sw.openIdx = i; this.sw.openDir = 'left'; }
         else if (this.sw.dx > 40) { this.sw.openIdx = i; this.sw.openDir = 'right'; }
         else { this.sw.openIdx = null; this.sw.openDir = null; }
-        this.openEntry = null;
       }
       this.sw.touchIdx = null; this.sw.dx = 0; this.sw.drag = false; this.sw.isH = null;
     },
@@ -489,14 +443,6 @@ export default {
       else if (s.openIdx === i) x = s.openDir === 'left' ? -80 : rw;
       return { transform: `translateX(${x}px)`, transition: live ? 'none' : 'transform 0.2s ease' };
     },
-    onRowTap(i) {
-      const entry = this.filteredBeliefs[i];
-      if (entry) this.toggle(entry.time);
-    },
-    deskClick(i) {
-      if (this.sw.openIdx !== null) { this.sw.openIdx = null; this.sw.openDir = null; return; }
-      this.onRowTap(i);
-    },
   },
 };
 </script>
@@ -504,258 +450,55 @@ export default {
 <style scoped lang="scss">
 .dark-page { background: #000; min-height: 100vh; }
 
-/* ─── Segment tabs ─── */
-.segment-row {
-  display: flex;
-  padding: 0 16px 16px;
-  border-bottom: 1px solid #2c2c2e;
-  margin-bottom: 4px;
-}
-.seg-tab {
-  flex: 1;
-  background: none;
-  border: none;
-  padding: 8px 0;
-  font-size: 0.875rem;
-  color: #8e8e93;
-  cursor: pointer;
-  position: relative;
-  font-family: inherit;
-  -webkit-tap-highlight-color: transparent;
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -1px; left: 0; right: 0;
-    height: 2px;
-    background: transparent;
-    border-radius: 2px;
-  }
-  &.active { color: #fff; font-weight: 600; &::after { background: #4ade80; } }
-}
-
-.ios-list {
-  background: #1c1c1e;
-  border-radius: 12px;
-  margin: 8px 16px 24px;
-  overflow: hidden;
-}
-
-/* ─── Swipe rows ─── */
 .swipe-outer {
   position: relative;
   overflow: hidden;
-  background: #1c1c1e;
+  margin-bottom: 14px;
 }
+.swipe-outer .card { margin-bottom: 0; }
 .swipe-right-panel {
   position: absolute;
-  left: 0; top: 0; bottom: 0;
+  left: 16px; top: 0; bottom: 0;
   display: flex;
-  align-items: stretch;
+  align-items: center;
 }
 .swipe-left-panel {
   position: absolute;
-  right: 0; top: 0; bottom: 0;
+  right: 16px; top: 0; bottom: 0;
   display: flex;
-  align-items: stretch;
+  align-items: center;
 }
 .swipe-btn {
+  width: 65px;
+  align-self: stretch;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: none;
-  cursor: pointer;
-  font-size: 0.62rem;
-  font-weight: 600;
-  font-family: inherit;
-  color: #fff;
-  width: 65px;
-  padding: 0;
   gap: 3px;
-  -webkit-tap-highlight-color: transparent;
-  &:active { opacity: 0.85; }
-}
-.swipe-btn-delete { background: #ff453a; width: 80px; }
-.swipe-btn-edit { background: #636366; }
-.swipe-btn-change { background: #1a5fa8; }
-.swipe-btn-act { background: #7c3aed; }
-
-.ios-row {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  padding: 12px 12px 12px 20px;
-  background: #1c1c1e;
-  cursor: pointer;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-  will-change: transform;
-  &:active { background: #2c2c2e; }
-}
-.row-body { flex: 1; min-width: 0; }
-.row-title {
-  font-size: 0.95rem;
-  color: #fff;
-  margin: 0 0 3px;
-  white-space: normal;
-  word-break: break-word;
-  line-height: 1.4;
-}
-.row-badges { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.badge-pill {
-  font-size: 0.7rem;
-  color: #8e8e93;
-  background: #2c2c2e;
-  border-radius: 20px;
-  padding: 1px 6px;
-}
-.row-action-btn {
-  background: #4ade80;
-  color: #000;
   border: none;
-  border-radius: 20px;
-  padding: 6px 14px;
-  font-size: 0.8125rem;
-  font-weight: 700;
+  color: #fff;
+  font-size: 0.7rem;
   font-family: inherit;
   cursor: pointer;
-  flex-shrink: 0;
-  margin-left: 8px;
   -webkit-tap-highlight-color: transparent;
-  &:active { background: #3dcc70; transform: scale(0.97); }
+  span { line-height: 1.1; }
 }
-.row-chevron {
-  color: #636366 !important;
-  font-size: 1.2rem !important;
-  transition: transform 0.2s ease;
-  margin-left: 2px;
-  flex-shrink: 0;
-  &.rotated { transform: rotate(90deg); }
-}
+.swipe-btn-edit { background: #636366; border-radius: 18px 0 0 18px; }
+.swipe-btn-change { background: #fd9927; }
+.swipe-btn-act { background: #2f7a52; border-radius: 0 18px 18px 0; }
+.swipe-btn-delete { background: #ff453a; width: 80px; border-radius: 18px; }
 
-.ios-sep { height: 1px; background: #2c2c2e; margin-left: 20px; }
-
-.row-expand {
-  background: #141416;
-  padding: 14px 20px 16px;
-  border-top: 1px solid #2c2c2e;
-}
-.expand-label {
-  font-size: 0.68rem;
-  color: #8e8e93;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin: 0 0 4px;
-  font-weight: 600;
-}
-/* Folded sections carry the same label as the open ones — only the chevron
-   says that there is more behind it. */
-.section-toggle {
-  display: flex;
-  align-items: center;
-  margin-top: 14px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-.section-toggle-label {
-  font-size: 0.68rem;
-  color: #8e8e93;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 600;
-}
-.section-chevron { color: #636366 !important; margin-left: 2px; }
-.expand-text { font-size: 0.93rem; color: #ebebf5; margin: 0; line-height: 1.5; }
-.empathy-text { white-space: pre-wrap; }
-
-/* Shows a recorded value — deliberately not interactive. */
-.slider-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 2px 4px 0;
-}
-.slider-end-label {
-  font-size: 0.72rem;
-  color: #636366;
-  flex-shrink: 0;
-}
-.readonly-slider {
-  flex: 1;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 4px;
-  border-radius: 2px;
-  background: #3a3a3c;
-  outline: none;
-  opacity: 1;
-  pointer-events: none;
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: #4ade80;
-  }
-  &::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    border: none;
-    border-radius: 50%;
-    background: #4ade80;
-  }
-}
-
-.linked-row {
-  display: flex;
-  align-items: center;
-  padding: 8px 0;
-  cursor: pointer;
-  border-top: 1px solid #2c2c2e;
-  -webkit-tap-highlight-color: transparent;
-  &:first-of-type { border-top: none; }
-  &:active { opacity: 0.6; }
-}
-.linked-row-body { flex: 1; min-width: 0; }
-.status-pill {
-  display: inline-block;
-  margin-top: 4px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  background: #2c2c2e;
-  border-radius: 20px;
-  padding: 1px 8px;
-}
-.linked-chevron {
-  color: #636366 !important;
-  font-size: 1.1rem !important;
-  flex-shrink: 0;
-  margin-left: 6px;
-}
-.chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
-.mt-3 { margin-top: 12px !important; }
 .mt-2 { margin-top: 8px !important; }
-.mb-1 { margin-bottom: 4px !important; }
-.mb-2 { margin-bottom: 8px !important; }
 
-.empty-state {
-  display: flex; flex-direction: column; align-items: center;
-  padding: 5rem 2rem; text-align: center;
+.confirm-dialog { background: #1c1c1e !important; }
+.confirm-title { color: #fff; font-size: 1rem; justify-content: center; padding: 16px; }
+.confirm-actions { justify-content: space-around; padding: 4px; }
+.confirm-cancel { color: #8e8e93 !important; }
+.confirm-delete { color: #ff453a !important; }
+
+.dark-nav {
+  border-top: 1px solid #2c2c2e;
+  .v-btn { min-width: 0; }
 }
-.empty-icon { font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 16px; }
-.empty-title { font-size: 1.1rem; color: #fff; font-weight: 600; margin: 0 0 6px; }
-.empty-sub { font-size: 0.875rem; color: #8e8e93; margin: 0; }
-
-.confirm-dialog { border-radius: 14px !important; overflow: hidden; }
-.confirm-title {
-  font-size: 1rem !important; font-weight: 600 !important; color: #fff !important;
-  justify-content: center !important; padding: 16px !important;
-}
-.confirm-actions { padding: 0 !important; display: flex; }
-.confirm-cancel { flex: 1; color: #4ade80 !important; border-right: 1px solid #3a3a3c; }
-.confirm-delete { flex: 1; color: #ff453a !important; font-weight: 600 !important; }
-
-.dark-nav { border-top: 1px solid #2c2c2e !important; }
 </style>

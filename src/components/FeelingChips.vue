@@ -1,7 +1,11 @@
 <template>
-  <div class="feeling-chips">
+  <div class="feeling-chips" :class="{ flat: flat }">
     <div v-for="group in groups" :key="group.id || 'unknown'" class="chip-group">
-      <span v-if="group.label" class="group-label" :style="{ color: groupColor(group.id) }">
+      <span
+        v-if="group.label && !flat"
+        class="group-label"
+        :style="{ color: groupColor(group.id) }"
+      >
         {{ group.label }}
       </span>
       <div class="chip-row">
@@ -41,6 +45,10 @@ import {
 export default {
   name: 'feeling-chips',
   props: {
+    // Drops the Grundemotion / Grundkategorie headings. The words keep their
+    // colours, so the grouping is still legible without being spelled out —
+    // in a card the headings cost more room than they earn.
+    flat: { type: Boolean, default: false },
     items: { type: Array, default: function() { return []; } },
     type: { type: String, default: 'feelings' },
   },
@@ -110,6 +118,13 @@ export default {
 
 <style scoped lang="scss">
 .chip-group + .chip-group { margin-top: 8px; }
+/* Without the headings the groups have nothing to separate, so the words run
+   on as one wrapped line. */
+.feeling-chips.flat {
+  display: flex;
+  flex-wrap: wrap;
+  .chip-group + .chip-group { margin-top: 0; }
+}
 .group-label {
   display: block;
   font-size: 0.68rem;

@@ -507,4 +507,234 @@ html, body {
 }
 .ob-fade-enter-active, .ob-fade-leave-active { transition: opacity 0.25s; }
 .ob-fade-enter, .ob-fade-leave-to { opacity: 0; }
+
+/* ─── Cards ───
+   One visual language for the four lists. Every screen is a stack of cards on
+   black: a filter row at the top, then one card per thing, each card a title
+   with its state and its number, then labelled rows of what was written. */
+.screen-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 20px 4px;
+}
+.screen-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+.screen-add {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #1c1c1e;
+  border: none;
+  color: #4ade80;
+  font-size: 1.5rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+  &:active { opacity: 0.6; }
+}
+
+/* Filter pills. They scroll sideways rather than shrinking, so a long label
+   stays readable instead of being squeezed to fit. */
+.pill-row {
+  display: flex;
+  gap: 8px;
+  padding: 10px 20px 14px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+.pill {
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid #2c2c2e;
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: #8e8e93;
+  cursor: pointer;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  &:active { opacity: 0.6; }
+  &.active {
+    color: #fff;
+    background: #1c1c1e;
+    border-color: #3a3a3c;
+  }
+}
+.pill-count { color: #636366; margin-left: 4px; }
+.pill.active .pill-count { color: #8e8e93; }
+
+.card {
+  background: #1c1c1e;
+  border-radius: 18px;
+  margin: 0 16px 14px;
+  padding: 18px 20px;
+}
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.card-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 1.15rem;
+  line-height: 1.35;
+  color: #fff;
+  margin: 0;
+  font-weight: 500;
+}
+.card-btn {
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid #4ade80;
+  border-radius: 999px;
+  color: #4ade80;
+  font-size: 0.95rem;
+  font-family: inherit;
+  padding: 9px 20px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  &:active { opacity: 0.6; }
+}
+.card-pill {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #8e8e93;
+  background: #2c2c2e;
+  border-radius: 8px;
+  padding: 4px 10px;
+}
+
+/* The number first, then what it measures — the value is what the eye is
+   looking for. */
+.score-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 14px;
+}
+.score-value { font-size: 2.1rem; font-weight: 700; color: #fff; line-height: 1; }
+.score-max { font-size: 0.95rem; color: #636366; }
+.score-label { font-size: 0.95rem; color: #8e8e93; }
+
+.card-sep { height: 1px; background: #2c2c2e; margin: 16px 0 0; }
+
+/* A written answer, folded to one line until it is asked for. */
+.detail-row {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid #2c2c2e;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  &:active { opacity: 0.6; }
+  &:last-child { border-bottom: none; }
+}
+.detail-label {
+  flex-shrink: 0;
+  font-size: 1rem;
+  color: #fff;
+}
+.detail-value {
+  flex: 1;
+  min-width: 0;
+  font-size: 1rem;
+  color: #8e8e93;
+  text-align: right;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.detail-value.open {
+  text-align: left;
+  white-space: normal;
+  overflow: visible;
+  line-height: 1.5;
+}
+.detail-chevron {
+  flex-shrink: 0;
+  color: #48484a !important;
+  font-size: 1.1rem !important;
+}
+/* Once open the answer needs the full width, so the label sits above it. */
+.detail-row.open {
+  display: block;
+  cursor: pointer;
+}
+.detail-row.open .detail-label { display: block; margin-bottom: 6px; }
+
+/* The affirmation, set apart by a green edge: it is the one sentence on the
+   card that is meant to be true rather than merely recorded. */
+.aff-box {
+  border-left: 3px solid #4ade80;
+  background: #232325;
+  border-radius: 0 12px 12px 0;
+  padding: 14px 16px;
+  margin-top: 16px;
+}
+.aff-label {
+  font-size: 0.68rem;
+  color: #8e8e93;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+.aff-text {
+  font-size: 1.05rem;
+  color: #fff;
+  line-height: 1.4;
+  margin: 0;
+}
+.aff-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+.aff-score { display: flex; align-items: baseline; gap: 5px; flex: 1; min-width: 0; }
+.aff-value { font-size: 1.5rem; font-weight: 700; color: #fff; line-height: 1; }
+.aff-max { font-size: 0.85rem; color: #636366; }
+.aff-word { font-size: 0.9rem; color: #8e8e93; }
+
+/* Links out of the card, to the lists that own the detail. */
+.card-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 0;
+  border-top: 1px solid #2c2c2e;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  &:active { opacity: 0.6; }
+}
+.card-link-text { flex: 1; font-size: 1rem; color: #8e8e93; }
+
+.list-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+.list-empty-icon { font-size: 2.6rem; display: block; margin-bottom: 14px; opacity: 0.5; }
+.list-empty-title { font-size: 1.05rem; color: #fff; font-weight: 600; margin: 0 0 6px; }
+.list-empty-sub { font-size: 0.9rem; color: #8e8e93; margin: 0; line-height: 1.5; }
+
+.list-bottom-space { height: 90px; }
 </style>

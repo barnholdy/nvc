@@ -1,102 +1,107 @@
 <template>
   <div class="dark-page">
-    <v-toolbar color="#000" dark flat app>
-      <v-toolbar-title>Situationen</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn icon @click="$router.push('/add-pattern')">
-        <v-icon color="#4ade80">add</v-icon>
-      </v-btn>
-      <v-btn icon @click="$router.push('/settings')">
-        <v-icon color="#4ade80">settings</v-icon>
-      </v-btn>
-    </v-toolbar>
-
     <v-content>
-      <div class="intro-card">
-        <span class="intro-icon">⚡</span>
-        <p class="intro-title">Zwischen Reiz und Reaktion</p>
-        <p class="intro-text">In diesem Raum liegt unsere Macht, unsere Reaktion zu wählen. In unserer Reaktion liegen unser Wachstum und unsere Freiheit.</p>
+      <div class="screen-title-row">
+        <h1 class="screen-title">Verlauf</h1>
+        <button class="screen-add" @click="$router.push('/add-pattern')" aria-label="Neue Situation">+</button>
       </div>
 
-      <div v-if="patterns.length === 0" class="empty-state">
-        <span class="empty-icon">⚡</span>
-        <p class="empty-title">Noch keine Situationen</p>
-        <p class="empty-sub">Tippe auf + um eine neue Situation hinzuzufügen.</p>
+      <!-- Filtering by belief rather than by state: this screen is a record of
+           what happened, and the question it answers is which belief keeps
+           turning up. -->
+      <div class="pill-row">
+        <button
+          class="pill"
+          :class="{ active: beliefFilter === null }"
+          @click="beliefFilter = null"
+        >Alle</button>
+        <button
+          v-for="b in filterBeliefs"
+          :key="b.time"
+          class="pill"
+          :class="{ active: beliefFilter === b.time }"
+          @click="beliefFilter = b.time"
+        >„{{ b.belief }}“<span v-if="b.truth !== null" class="pill-count"> {{ round(b.truth) }}/10</span></button>
       </div>
 
-      <div v-else class="ios-list">
-        <template v-for="(entry, idx) in patterns">
+      <div v-if="!filtered.length" class="list-empty">
+        <span class="list-empty-icon">⚡</span>
+        <p class="list-empty-title">Noch keine Situationen</p>
+        <p class="list-empty-sub">Tippe auf + um eine neue Situation hinzuzufügen.</p>
+      </div>
+
+      <template v-else>
+        <!-- What this month actually looked like. The belief cards count every
+             situation ever; this counts only the ones just recorded, which is a
+             different question and the reason this card exists. -->
+        <div v-if="summary" class="card summary-card">
+          <p class="summary-head">{{ summary.month }} · {{ summary.total }} {{ summary.total === 1 ? 'Situation' : 'Situationen' }} erfasst</p>
+          <p class="summary-claim">„{{ summary.top.belief }}“ taucht in {{ summary.top.count }} von {{ summary.total }} auf.</p>
+          <div v-for="row in summary.rows" :key="row.time" class="summary-row">
+            <span class="summary-belief">„{{ row.belief }}“</span>
+            <span class="summary-track">
+              <span class="summary-fill" :style="{ width: barWidth(row.count, summary.top.count) }"></span>
+            </span>
+            <span class="summary-count">{{ row.count }}</span>
+          </div>
+          <p class="summary-note">
+            Das sieht man nur hier — die Überzeugungskarte zeigt Gesamtzahlen, nicht die Häufung in diesem Monat.
+          </p>
+        </div>
+
+        <template v-for="group in groups">
+          <p :key="group.key" class="month-head">{{ group.label }}</p>
+
           <div
-            :key="entry.time + '-row'"
+            v-for="entry in group.entries"
+            :key="entry.time"
             class="swipe-outer"
             :data-row-id="entry.time"
-            @touchstart="tsStart($event, idx)"
-            @touchmove="tsMove($event, idx)"
-            @touchend="tsEnd($event, idx)"
+            @touchstart="tsStart($event, entry.time)"
+            @touchmove="tsMove($event, entry.time)"
+            @touchend="tsEnd($event, entry.time)"
           >
-            <div class="swipe-right-panel">
+            <div v-if="sw.openKey === entry.time || sw.touchKey === entry.time" class="swipe-right-panel">
               <button class="swipe-btn swipe-btn-edit" @click.stop="editEntry(entry)">
                 <v-icon small color="#fff">edit</v-icon>
                 <span>Bearb.</span>
               </button>
             </div>
-            <div class="swipe-left-panel">
+            <div v-if="sw.openKey === entry.time || sw.touchKey === entry.time" class="swipe-left-panel">
               <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">
                 <v-icon small color="#fff">delete</v-icon>
                 <span>Löschen</span>
               </button>
             </div>
-            <div class="ios-row" :style="rowSt(idx, 65)" @click="deskClick(idx)">
-              <div class="row-body">
-                <p class="row-title">{{ entry.trigger }}</p>
-                <p class="row-meta">{{ formatTime(entry.time) }}</p>
+
+            <div class="timeline-row" :style="rowSt(entry.time)">
+              <span class="timeline-dot" :class="{ pending: !isExplored(entry) }"></span>
+              <div class="timeline-body">
+                <p class="timeline-meta">
+                  {{ dayLabel(entry.time) }}
+                  <span v-if="!isExplored(entry)" class="timeline-flag">· noch nicht ergründet</span>
+                </p>
+                <p class="timeline-text">{{ entry.trigger }}</p>
+                <div class="timeline-chips">
+                  <span
+                    v-for="b in beliefsOf(entry)"
+                    :key="b.time"
+                    class="timeline-chip"
+                    @click.stop="openBelief(b)"
+                  >
+                    „{{ b.belief }}“
+                    <span v-if="truthOf(entry, b) !== null" class="timeline-chip-score">
+                      {{ truthOf(entry, b) }}/10
+                    </span>
+                  </span>
+                </div>
               </div>
-              <v-icon class="row-chevron" :class="{ rotated: openEntry === entry.time }">chevron_right</v-icon>
             </div>
           </div>
-          <div
-            v-if="openEntry === entry.time"
-            :key="entry.time + '-expand'"
-            class="row-expand"
-          >
-            <!-- The row itself is the situation text now, so repeating it here
-                 would only say the same thing twice. -->
-            <template v-if="getBeliefs(entry).length">
-              <p class="expand-label">Überzeugungen</p>
-              <div
-                v-for="b in getBeliefs(entry)"
-                :key="b.time"
-                class="belief-row"
-                @click="openBelief(b)"
-              >
-                <div class="belief-row-body">
-                  <p class="expand-text">{{ b.belief }}</p>
-                  <span class="status-pill" :style="{ color: statusColor(b) }">{{ statusLabel(b) }}</span>
-                  <!-- What was recorded here, on the same scale it was given
-                       on — a percentage hid which end of it that was. -->
-                  <template v-if="truthOf(entry, b) !== null">
-                    <p class="expand-label mt-2">Glaubwürdigkeit</p>
-                    <div class="slider-row">
-                      <span class="slider-end-label">0</span>
-                      <input
-                        type="range"
-                        min="0"
-                        max="10"
-                        :value="truthOf(entry, b)"
-                        class="readonly-slider"
-                        disabled
-                      />
-                      <span class="slider-end-label">10</span>
-                    </div>
-                  </template>
-                </div>
-                <v-icon small class="belief-chevron">chevron_right</v-icon>
-              </div>
-            </template>
-          </div>
-          <div :key="entry.time + '-sep'" class="ios-sep" v-if="idx < patterns.length - 1"></div>
         </template>
-      </div>
+      </template>
+
+      <div class="list-bottom-space"></div>
 
       <v-dialog v-model="isDeleteDialogShowing" width="300">
         <v-card class="confirm-dialog">
@@ -129,23 +134,75 @@
 
 <script>
 import moment from 'moment';
-import { beliefStatusLabel, beliefStatusColor } from '@/utils/beliefStatus';
-import { beliefTruthIn } from '@/utils/credibility';
+import { isComplete } from '@/utils/beliefStatus';
+import { beliefTruthIn, beliefCredibility } from '@/utils/credibility';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 
 export default {
   name: 'pattern-list',
   data() {
     return {
-      openEntry: null,
+      beliefFilter: null,
       entryToDelete: null,
       isDeleteDialogShowing: false,
-      sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
+      sw: { openKey: null, openDir: null, touchKey: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
   },
   computed: {
     patterns() {
       return this.$store.getters.patterns.concat().sort((a, b) => b.time - a.time);
+    },
+    filtered() {
+      if (this.beliefFilter === null) return this.patterns;
+      return this.patterns.filter(p => (p.beliefs || []).indexOf(this.beliefFilter) !== -1);
+    },
+    // Only beliefs that actually appear in a situation can filter one.
+    filterBeliefs() {
+      const seen = {};
+      this.patterns.forEach((p) => { (p.beliefs || []).forEach((id) => { seen[id] = true; }); });
+      const patterns = this.$store.getters.patterns;
+      return this.$store.getters.beliefs
+        .filter(b => seen[b.time])
+        .map(b => Object.assign({}, b, { truth: beliefCredibility(patterns, b) }));
+    },
+    groups() {
+      const out = [];
+      const index = {};
+      moment.locale('de');
+      this.filtered.forEach((entry) => {
+        const key = moment(entry.time).format('YYYY-MM');
+        if (index[key] === undefined) {
+          index[key] = out.length;
+          out.push({ key, label: moment(entry.time).format('MMMM YYYY').toUpperCase(), entries: [] });
+        }
+        out[index[key]].entries.push(entry);
+      });
+      return out;
+    },
+    // The most recent month with anything in it, counted by belief.
+    summary() {
+      const first = this.groups[0];
+      if (!first || !first.entries.length) return null;
+      const counts = {};
+      first.entries.forEach((entry) => {
+        (entry.beliefs || []).forEach((id) => { counts[id] = (counts[id] || 0) + 1; });
+      });
+      const beliefs = this.$store.getters.beliefs;
+      const rows = Object.keys(counts)
+        .map((id) => {
+          const b = beliefs.find(x => String(x.time) === String(id));
+          return b ? { time: b.time, belief: b.belief, count: counts[id] } : null;
+        })
+        .filter(Boolean)
+        .sort((a, b) => b.count - a.count);
+      if (!rows.length) return null;
+      moment.locale('de');
+      return {
+        month: moment(first.entries[0].time).format('MMMM'),
+        total: first.entries.length,
+        rows,
+        top: rows[0],
+      };
     },
   },
   mounted() {
@@ -158,85 +215,85 @@ export default {
     revealRequested() {
       const id = requestedId(this.$route);
       if (!id) return;
-      const entry = this.patterns.find(p => String(p.time) === id);
-      if (!entry) return;
-      this.openEntry = entry.time;
-      this.$nextTick(() => scrollRowIntoView(this.$el, entry.time));
+      if (!this.patterns.some(p => String(p.time) === id)) return;
+      this.beliefFilter = null;
+      this.$nextTick(() => scrollRowIntoView(this.$el, id));
     },
-    getBeliefs(entry) {
+    // One decimal, and a German comma: the headline number is the only
+    // place this value is shown, so rounding it whole would hide half a
+    // point that was actually recorded.
+    round(v) {
+      if (v === null || v === undefined) return '';
+      return String(Math.round(v * 10) / 10).replace('.', ',');
+    },
+    beliefsOf(entry) {
       const beliefs = this.$store.getters.beliefs;
       return (entry.beliefs || []).map(id => beliefs.find(b => b.time === id)).filter(Boolean);
     },
-    // Recorded on the situation when the belief was added to it.
+    // A situation whose beliefs have not been worked through yet is worth
+    // marking: it is the open end of the record.
+    isExplored(entry) {
+      const list = this.beliefsOf(entry);
+      return list.length > 0 && list.every(isComplete);
+    },
     truthOf(entry, belief) { return beliefTruthIn(entry, belief); },
-    statusLabel(belief) { return beliefStatusLabel(belief); },
-    statusColor(belief) { return beliefStatusColor(belief); },
+    barWidth(count, max) {
+      return `${max ? Math.max(6, (count / max) * 100) : 0}%`;
+    },
+    dayLabel(time) {
+      moment.locale('de');
+      return moment(time).format('D. MMM').toUpperCase();
+    },
     openBelief(belief) {
-      this.sw.openIdx = null; this.sw.openDir = null;
+      this.sw.openKey = null; this.sw.openDir = null;
       this.$router.push({ path: '/beliefs', query: openQuery(belief.time) });
     },
-    toggle(time) {
-      this.sw.openIdx = null; this.sw.openDir = null;
-      this.openEntry = this.openEntry === time ? null : time;
-    },
-    editEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/edit-pattern/${entry.time}`); },
-    preDelete(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.entryToDelete = entry; this.isDeleteDialogShowing = true; },
+    editEntry(entry) { this.sw.openKey = null; this.sw.openDir = null; this.$router.push(`/edit-pattern/${entry.time}`); },
+    preDelete(entry) { this.sw.openKey = null; this.sw.openDir = null; this.entryToDelete = entry; this.isDeleteDialogShowing = true; },
     confirmDelete() {
       this.isDeleteDialogShowing = false;
       this.$store.dispatch('deletePattern', this.entryToDelete);
       this.entryToDelete = null;
     },
     cancelDelete() { this.isDeleteDialogShowing = false; this.entryToDelete = null; },
-    // The date itself, not "vor 3 Monaten": these entries are looked back on,
-    // and the same format the Handlungen list already uses.
-    formatTime(time) { moment.locale('de'); return moment(time).format('D. MMMM YYYY'); },
-    tsStart(e, i) {
-      if (e.target && e.target.closest && e.target.closest('.swipe-btn')) return;
+    // Keyed by the entry rather than its index: the timeline is grouped, so an
+    // index within a group would collide across months.
+    tsStart(e, key) {
+      if (e.target && e.target.closest
+        && (e.target.closest('.swipe-btn') || e.target.closest('.timeline-chip'))) return;
       const t = e.touches[0];
-      this.sw.touchIdx = i; this.sw.startX = t.clientX; this.sw.startY = t.clientY;
+      this.sw.touchKey = key; this.sw.startX = t.clientX; this.sw.startY = t.clientY;
       this.sw.dx = 0; this.sw.isH = null; this.sw.drag = false;
     },
-    tsMove(e, i) {
-      if (this.sw.touchIdx !== i) return;
+    tsMove(e, key) {
+      if (this.sw.touchKey !== key) return;
       const t = e.touches[0];
       const dx = t.clientX - this.sw.startX, dy = t.clientY - this.sw.startY;
-      if (this.sw.isH === null && (Math.abs(dx) > 4 || Math.abs(dy) > 4))
-        this.sw.isH = Math.abs(dx) >= Math.abs(dy);
+      if (this.sw.isH === null && (Math.abs(dx) > 8 || Math.abs(dy) > 8))
+        this.sw.isH = Math.abs(dx) > Math.abs(dy) * 1.5;
       if (!this.sw.isH) return;
       e.preventDefault();
       this.sw.dx = Math.max(-80, Math.min(dx, 65));
       this.sw.drag = true;
     },
-    tsEnd(e, i) {
-      if (this.sw.touchIdx !== i) return;
-      const wasVert = this.sw.isH === false;
-      if (!wasVert) e.preventDefault();
-      if (!this.sw.drag && !wasVert) {
-        if (this.sw.openIdx !== null) { this.sw.openIdx = null; this.sw.openDir = null; }
-        else { this.onRowTap(i); }
-      } else if (this.sw.drag) {
-        if (this.sw.dx < -40) { this.sw.openIdx = i; this.sw.openDir = 'left'; }
-        else if (this.sw.dx > 40) { this.sw.openIdx = i; this.sw.openDir = 'right'; }
-        else { this.sw.openIdx = null; this.sw.openDir = null; }
-        this.openEntry = null;
+    tsEnd(e, key) {
+      if (this.sw.touchKey !== key) return;
+      if (this.sw.drag) {
+        if (this.sw.dx < -40) { this.sw.openKey = key; this.sw.openDir = 'left'; }
+        else if (this.sw.dx > 40) { this.sw.openKey = key; this.sw.openDir = 'right'; }
+        else { this.sw.openKey = null; this.sw.openDir = null; }
+      } else if (this.sw.openKey !== null) {
+        this.sw.openKey = null; this.sw.openDir = null;
       }
-      this.sw.touchIdx = null; this.sw.dx = 0; this.sw.drag = false; this.sw.isH = null;
+      this.sw.touchKey = null; this.sw.dx = 0; this.sw.drag = false; this.sw.isH = null;
     },
-    rowSt(i, rw) {
+    rowSt(key) {
       const s = this.sw;
-      const live = s.touchIdx === i && s.drag && s.isH;
+      const live = s.touchKey === key && s.drag && s.isH;
       let x = 0;
       if (live) x = s.dx;
-      else if (s.openIdx === i) x = s.openDir === 'left' ? -80 : rw;
+      else if (s.openKey === key) x = s.openDir === 'left' ? -80 : 65;
       return { transform: `translateX(${x}px)`, transition: live ? 'none' : 'transform 0.2s ease' };
-    },
-    onRowTap(i) {
-      const entry = this.patterns[i];
-      if (entry) this.toggle(entry.time);
-    },
-    deskClick(i) {
-      if (this.sw.openIdx !== null) { this.sw.openIdx = null; this.sw.openDir = null; return; }
-      this.onRowTap(i);
     },
   },
 };
@@ -245,189 +302,146 @@ export default {
 <style scoped lang="scss">
 .dark-page { background: #000; min-height: 100vh; }
 
-.ios-list {
-  background: #1c1c1e;
-  border-radius: 12px;
-  margin: 0 16px 24px;
+.summary-card { padding-bottom: 16px; }
+.summary-head { font-size: 0.9rem; color: #8e8e93; margin: 0 0 10px; }
+.summary-claim {
+  font-size: 1.15rem;
+  color: #fff;
+  line-height: 1.35;
+  margin: 0 0 16px;
+  font-weight: 500;
+}
+.summary-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.summary-belief {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.95rem;
+  color: #ebebf5;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.summary-track {
+  width: 90px;
+  height: 6px;
+  border-radius: 999px;
+  background: #2c2c2e;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.summary-fill { display: block; height: 100%; background: #48484a; border-radius: 999px; }
+.summary-count { width: 18px; text-align: right; font-size: 0.9rem; color: #8e8e93; flex-shrink: 0; }
+.summary-note {
+  font-size: 0.85rem;
+  color: #636366;
+  line-height: 1.5;
+  margin: 14px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid #2c2c2e;
 }
 
-/* ─── Swipe rows ─── */
-.swipe-outer {
-  position: relative;
-  overflow: hidden;
-  background: #1c1c1e;
+.month-head {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: #636366;
+  font-weight: 600;
+  margin: 18px 0 10px;
+  padding: 0 20px;
 }
-.swipe-right-panel {
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  display: flex;
-  align-items: stretch;
-}
-.swipe-left-panel {
-  position: absolute;
-  right: 0; top: 0; bottom: 0;
-  display: flex;
-  align-items: stretch;
-}
+
+.swipe-outer { position: relative; overflow: hidden; }
+.swipe-right-panel { position: absolute; left: 16px; top: 0; bottom: 0; display: flex; align-items: stretch; }
+.swipe-left-panel { position: absolute; right: 16px; top: 0; bottom: 0; display: flex; align-items: stretch; }
 .swipe-btn {
+  width: 65px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: none;
-  cursor: pointer;
-  font-size: 0.62rem;
-  font-weight: 600;
-  font-family: inherit;
-  color: #fff;
-  width: 65px;
-  padding: 0;
   gap: 3px;
-  -webkit-tap-highlight-color: transparent;
-  &:active { opacity: 0.85; }
-}
-.swipe-btn-delete { background: #ff453a; width: 80px; }
-.swipe-btn-edit { background: #636366; }
-
-.ios-row {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  padding: 13px 16px 13px 20px;
-  background: #1c1c1e;
-  cursor: pointer;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-  will-change: transform;
-  &:active { background: #2c2c2e; }
-}
-.row-body { flex: 1; min-width: 0; }
-.row-title {
-  font-size: 1rem;
+  border: none;
   color: #fff;
-  margin: 0;
-  white-space: normal;
-  word-break: break-word;
-  line-height: 1.4;
-}
-.row-meta { font-size: 0.78rem; color: #8e8e93; margin: 2px 0 0; }
-.row-chevron {
-  color: #636366 !important;
-  font-size: 1.2rem !important;
-  transition: transform 0.2s ease;
-  margin-left: 4px;
-  flex-shrink: 0;
-  &.rotated { transform: rotate(90deg); }
-}
-
-.ios-sep { height: 1px; background: #2c2c2e; margin-left: 20px; }
-
-.row-expand {
-  background: #141416;
-  padding: 14px 20px 16px;
-  border-top: 1px solid #2c2c2e;
-}
-.expand-label {
   font-size: 0.7rem;
-  color: #8e8e93;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin: 0 0 4px;
-  font-weight: 600;
-}
-.expand-text {
-  font-size: 0.95rem;
-  color: #ebebf5;
-  margin: 0;
-  line-height: 1.5;
-  white-space: pre-wrap;
-}
-
-.belief-row {
-  display: flex;
-  align-items: center;
-  padding: 8px 0;
+  font-family: inherit;
   cursor: pointer;
-  border-top: 1px solid #2c2c2e;
   -webkit-tap-highlight-color: transparent;
-  &:first-of-type { border-top: none; }
+}
+.swipe-btn-edit { background: #636366; border-radius: 14px; }
+.swipe-btn-delete { background: #ff453a; width: 80px; border-radius: 14px; }
+
+/* The line runs through the dots, so the entries read as one thread rather
+   than as separate cards. */
+.timeline-row {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  padding: 4px 20px 18px;
+  background: #000;
+}
+.timeline-dot {
+  position: relative;
+  flex-shrink: 0;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #48484a;
+  margin-top: 6px;
+  &.pending { background: #fd9927; }
+  &::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 13px;
+    width: 1px;
+    height: 100vh;
+    background: #2c2c2e;
+  }
+}
+.timeline-body { flex: 1; min-width: 0; position: relative; z-index: 1; }
+.timeline-meta {
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: #636366;
+  margin: 0 0 6px;
+  text-transform: uppercase;
+}
+.timeline-flag { color: #fd9927; text-transform: none; letter-spacing: 0; }
+.timeline-text {
+  font-size: 1rem;
+  color: #ebebf5;
+  line-height: 1.45;
+  margin: 0 0 10px;
+}
+.timeline-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.timeline-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #1c1c1e;
+  border: 1px solid #2c2c2e;
+  border-radius: 999px;
+  padding: 7px 13px;
+  font-size: 0.85rem;
+  color: #8e8e93;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
 }
-.belief-row-body { flex: 1; min-width: 0; }
-/* Shows a recorded value — deliberately not interactive. */
-.slider-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 2px 4px 0;
-}
-.slider-end-label {
-  font-size: 0.72rem;
-  color: #636366;
-  flex-shrink: 0;
-}
-.readonly-slider {
-  flex: 1;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 4px;
-  border-radius: 2px;
-  background: #3a3a3c;
-  outline: none;
-  opacity: 1;
-  pointer-events: none;
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: #4ade80;
-  }
-  &::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    border: none;
-    border-radius: 50%;
-    background: #4ade80;
-  }
-}
-.status-pill {
-  display: inline-block;
-  margin-top: 4px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  background: #2c2c2e;
-  border-radius: 20px;
-  padding: 1px 8px;
-}
-.belief-chevron {
-  color: #636366 !important;
-  font-size: 1.1rem !important;
-  flex-shrink: 0;
-  margin-left: 6px;
-}
-.mt-3 { margin-top: 12px !important; }
-.mb-1 { margin-bottom: 4px !important; }
+.timeline-chip-score { color: #636366; }
 
-.empty-state {
-  display: flex; flex-direction: column; align-items: center;
-  padding: 5rem 2rem; text-align: center;
-}
-.empty-icon { font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 16px; }
-.empty-title { font-size: 1.1rem; color: #fff; font-weight: 600; margin: 0 0 6px; }
-.empty-sub { font-size: 0.875rem; color: #8e8e93; margin: 0; }
+.confirm-dialog { background: #1c1c1e !important; }
+.confirm-title { color: #fff; font-size: 1rem; justify-content: center; padding: 16px; }
+.confirm-actions { justify-content: space-around; padding: 4px; }
+.confirm-cancel { color: #8e8e93 !important; }
+.confirm-delete { color: #ff453a !important; }
 
-.confirm-dialog { border-radius: 14px !important; overflow: hidden; }
-.confirm-title {
-  font-size: 1rem !important; font-weight: 600 !important; color: #fff !important;
-  justify-content: center !important; padding: 16px !important;
+.dark-nav {
+  border-top: 1px solid #2c2c2e;
+  .v-btn { min-width: 0; }
 }
-.confirm-actions { padding: 0 !important; display: flex; }
-.confirm-cancel { flex: 1; color: #4ade80 !important; border-right: 1px solid #3a3a3c; }
-.confirm-delete { flex: 1; color: #ff453a !important; font-weight: 600 !important; }
-
-.dark-nav { border-top: 1px solid #2c2c2e !important; }
 </style>

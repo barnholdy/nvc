@@ -1,131 +1,87 @@
 <template>
   <div class="dark-page">
-    <v-toolbar color="#000" dark flat app>
-      <v-toolbar-title>Affirmationen</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn icon @click="$router.push('/settings')">
-        <v-icon color="#4ade80">settings</v-icon>
-      </v-btn>
-    </v-toolbar>
-
     <v-content>
-      <div class="intro-card">
-        <span class="intro-icon">✨</span>
-        <p class="intro-title">Zeit für Affirmationen</p>
-        <p class="intro-text">Wiederholte positive Aussagen stärken neuronale Bahnen. Dein Gehirn kann sich durch bewusste Gedankenmuster neu vernetzen.</p>
+      <div class="screen-title-row">
+        <h1 class="screen-title">Affirmationen</h1>
+        <button class="screen-add" @click="$router.push('/settings')" aria-label="Einstellungen">
+          <v-icon color="#4ade80">settings</v-icon>
+        </button>
       </div>
 
-      <div v-if="affirmations.length === 0" class="empty-state">
-        <span class="empty-icon">✨</span>
-        <p class="empty-title">Keine Einträge</p>
-        <p class="empty-sub">Füge Affirmationen zu deinen Überzeugungen hinzu.</p>
+      <div v-if="affirmations.length === 0" class="list-empty">
+        <span class="list-empty-icon">✨</span>
+        <p class="list-empty-title">Keine Einträge</p>
+        <p class="list-empty-sub">Füge Affirmationen zu deinen Überzeugungen hinzu.</p>
       </div>
 
-      <div v-else class="reminder-list">
-        <template v-for="(item, i) in affirmations">
+      <div
+        v-for="(item, i) in affirmations"
+        :key="item.text"
+        class="swipe-outer"
+        :data-row-id="item.text"
+        @touchstart="tsStart($event, i)"
+        @touchmove="tsMove($event, i)"
+        @touchend="tsEnd($event, i)"
+      >
+        <div v-if="sw.openIdx === i || sw.touchIdx === i" class="swipe-left-panel">
+          <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(item)">
+            <v-icon small color="#fff">delete</v-icon>
+            <span>Löschen</span>
+          </button>
+        </div>
+
+        <div class="card" :style="rowSt(i)">
+          <div class="card-head">
+            <p class="card-title">„{{ item.text }}“</p>
+            <button class="card-btn" @click.stop="startPractice(item)">Üben</button>
+          </div>
+
+          <div v-if="item.credibility !== null" class="score-row">
+            <span class="score-value">{{ round(item.credibility) }}</span>
+            <span class="score-max">/10</span>
+            <span class="score-label">Glaubwürdigkeit</span>
+          </div>
+          <p class="practice-meta">{{ amenLabel(item.text) }}</p>
+
+          <div class="card-sep"></div>
+
+          <!-- Where the sentence comes from, and what it is meant to bring —
+               one block per belief that carries it. -->
           <div
-            :key="item.text + '-row'"
-            class="swipe-outer"
-            :data-row-id="item.text"
-            @touchstart="tsStart($event, i)"
-            @touchmove="tsMove($event, i)"
-            @touchend="tsEnd($event, i)"
+            v-for="(s, j) in item.sources"
+            :key="j"
+            class="detail-row"
+            :class="{ open: isOpen(item, j) }"
+            @click.stop="toggleRow(item, j)"
           >
-            <div class="swipe-left-panel">
-              <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(item)">
-                <v-icon small color="#fff">delete</v-icon>
-                <span>Löschen</span>
+            <span class="detail-label">Überzeugung</span>
+            <template v-if="isOpen(item, j)">
+              <p class="detail-value open">„{{ s.beliefText }}“</p>
+              <p v-if="beliefTruth(s.beliefTime) !== null" class="source-score">
+                {{ round(beliefTruth(s.beliefTime)) }}/10 Glaubwürdigkeit
+              </p>
+              <template v-if="newFeelingsOf(s.beliefTime).length">
+                <p class="source-label">Neue Gefühle</p>
+                <feeling-chips :items="newFeelingsOf(s.beliefTime)" type="feelings" flat></feeling-chips>
+              </template>
+              <template v-if="needsOf(s.beliefTime).length">
+                <p class="source-label">Bedürfnisse</p>
+                <feeling-chips :items="needsOf(s.beliefTime)" type="needs" flat></feeling-chips>
+              </template>
+              <button class="source-link" @click.stop="openBelief(s.beliefTime)">
+                Zur Überzeugung
+                <v-icon class="detail-chevron">chevron_right</v-icon>
               </button>
-            </div>
-            <div class="reminder-row" :style="rowSt(i)" @click="deskClick(i)">
-              <div class="reminder-row-body">
-                <p class="reminder-text">{{ item.text }}</p>
-                <!-- Every reading this sentence has collected: from wandeln
-                     and from the experiments it was tested in. -->
-                <template v-if="item.credibility !== null">
-                  <p class="expand-label mt-2">Glaubwürdigkeit</p>
-                  <div class="slider-row">
-                    <span class="slider-end-label">0</span>
-                    <input
-                      type="range"
-                      min="0"
-                      max="10"
-                      step="0.1"
-                      :value="item.credibility"
-                      class="readonly-slider"
-                      disabled
-                    />
-                    <span class="slider-end-label">10</span>
-                  </div>
-                </template>
-                <p class="reminder-meta">{{ amenLabel(item.text) }}</p>
-              </div>
-              <button class="amen-btn" @click.stop="startPractice(item)">Üben</button>
-            </div>
+            </template>
+            <template v-else>
+              <p class="detail-value">„{{ s.beliefText }}“</p>
+              <v-icon class="detail-chevron">chevron_right</v-icon>
+            </template>
           </div>
-          <!-- Where the affirmation comes from — behind a tap, because the
-               list is about the sentence, not about its origin. -->
-          <div :key="item.text + '-expand'" v-if="openIndex === i" class="row-expand">
-            <p class="expand-label">Überzeugungen</p>
-            <div
-              v-for="(s, j) in item.sources"
-              :key="j"
-              class="belief-row"
-              @click="openBelief(s.beliefTime)"
-            >
-              <div class="belief-row-body">
-                <p class="expand-text">{{ s.beliefText }}</p>
-                <span
-                  v-if="beliefOf(s.beliefTime)"
-                  class="status-pill"
-                  :style="{ color: beliefStatusColor(beliefOf(s.beliefTime)) }"
-                >{{ beliefStatusLabel(beliefOf(s.beliefTime)) }}</span>
-                <template v-if="beliefTruth(s.beliefTime) !== null">
-                  <p class="expand-label mt-2">Glaubwürdigkeit</p>
-                  <div class="slider-row">
-                    <span class="slider-end-label">0</span>
-                    <input
-                      type="range"
-                      min="0"
-                      max="10"
-                      step="0.1"
-                      :value="beliefTruth(s.beliefTime)"
-                      class="readonly-slider"
-                      disabled
-                    />
-                    <span class="slider-end-label">10</span>
-                  </div>
-                </template>
-                <!-- What this sentence is meant to bring about, and what it is
-                     for. Per belief rather than pooled: a shared affirmation
-                     carries different feelings and needs in each one. -->
-                <template v-if="newFeelingsOf(s.beliefTime).length">
-                  <p class="expand-label mt-2">Neue Gefühle</p>
-                  <feeling-chips
-                    :items="newFeelingsOf(s.beliefTime)"
-                    type="feelings"
-                    class="mb-1"
-                  ></feeling-chips>
-                </template>
-                <template v-if="needsOf(s.beliefTime).length">
-                  <p class="expand-label mt-2">Bedürfnisse</p>
-                  <feeling-chips
-                    :items="needsOf(s.beliefTime)"
-                    type="needs"
-                    class="mb-1"
-                  ></feeling-chips>
-                </template>
-              </div>
-              <v-icon small class="belief-chevron">chevron_right</v-icon>
-            </div>
-          </div>
-          <div
-            :key="item.text + '-sep'"
-            class="ios-sep"
-            v-if="i < affirmations.length - 1 && openIndex !== i"
-          ></div>
-        </template>
+        </div>
       </div>
+
+      <div class="list-bottom-space"></div>
 
       <v-dialog v-model="isDeleteDialogShowing" width="300">
         <v-card class="confirm-dialog">
@@ -183,7 +139,8 @@ export default {
   components: { FeelingChips, AffirmationPractice },
   data() {
     return {
-      openIndex: null,
+      // Which source belief is unfolded, keyed by sentence and index.
+      openRows: {},
       itemToDelete: null,
       isDeleteDialogShowing: false,
       amenMap: loadAhoMap(),
@@ -262,7 +219,6 @@ export default {
       if (!text) return;
       const i = this.affirmations.findIndex(a => a.text === text);
       if (i === -1) return;
-      this.openIndex = i;
       this.$nextTick(() => scrollRowIntoView(this.$el, text));
     },
     beliefOf(time) {
@@ -288,9 +244,17 @@ export default {
       this.sw.openIdx = null; this.sw.openDir = null;
       this.$router.push({ path: '/beliefs', query: openQuery(time) });
     },
-    toggle(i) {
-      this.sw.openIdx = null; this.sw.openDir = null;
-      this.openIndex = this.openIndex === i ? null : i;
+    // One decimal, and a German comma: the headline number is the only
+    // place this value is shown, so rounding it whole would hide half a
+    // point that was actually recorded.
+    round(v) {
+      if (v === null || v === undefined) return '';
+      return String(Math.round(v * 10) / 10).replace('.', ',');
+    },
+    isOpen(item, j) { return !!this.openRows[`${item.text}:${j}`]; },
+    toggleRow(item, j) {
+      const k = `${item.text}:${j}`;
+      this.openRows = Object.assign({}, this.openRows, { [k]: !this.openRows[k] });
     },
     // Practising is worth marking, not worth scoring — the only value this
     // sentence carries is the credibility it was actually rated with.
@@ -330,7 +294,6 @@ export default {
           this.$store.dispatch('updateBelief', Object.assign({}, belief, { affirmations: updated }));
         }
       });
-      this.openIndex = null;
     },
     tsStart(e, i) {
       if (e.target && e.target.closest && (e.target.closest('.amen-btn') || e.target.closest('.swipe-btn'))) return;
@@ -357,11 +320,10 @@ export default {
       if (!wasVert) e.preventDefault();
       if (!this.sw.drag && !wasVert) {
         if (this.sw.openIdx !== null) { this.sw.openIdx = null; this.sw.openDir = null; }
-        else { this.toggle(i); }
+        else { this.sw.openIdx = null; this.sw.openDir = null; }
       } else if (this.sw.drag) {
         if (this.sw.dx < -40) { this.sw.openIdx = i; this.sw.openDir = 'left'; }
         else { this.sw.openIdx = null; this.sw.openDir = null; }
-        this.openIndex = null;
       }
       this.sw.touchIdx = null; this.sw.dx = 0; this.sw.drag = false; this.sw.isH = null;
     },
@@ -373,10 +335,7 @@ export default {
       else if (s.openIdx === i) x = -80;
       return { transform: `translateX(${x}px)`, transition: live ? 'none' : 'transform 0.2s ease' };
     },
-    deskClick(i) {
-      if (this.sw.openIdx !== null) { this.sw.openIdx = null; this.sw.openDir = null; return; }
-      this.toggle(i);
-    },
+
   },
 };
 </script>
@@ -384,196 +343,68 @@ export default {
 <style scoped lang="scss">
 .dark-page { background: #000; min-height: 100vh; }
 
-.reminder-list {
-  background: #1c1c1e;
-  border-radius: 12px;
-  margin: 0 16px 24px;
-  overflow: hidden;
-}
-
-/* ─── Swipe rows ─── */
 .swipe-outer {
   position: relative;
   overflow: hidden;
-  background: #1c1c1e;
+  margin-bottom: 14px;
 }
+.swipe-outer .card { margin-bottom: 0; }
 .swipe-left-panel {
   position: absolute;
-  right: 0; top: 0; bottom: 0;
+  right: 16px; top: 0; bottom: 0;
   display: flex;
   align-items: stretch;
 }
 .swipe-btn {
+  width: 80px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: none;
-  cursor: pointer;
-  font-size: 0.62rem;
-  font-weight: 600;
-  font-family: inherit;
-  color: #fff;
-  width: 65px;
-  padding: 0;
   gap: 3px;
-  -webkit-tap-highlight-color: transparent;
-  &:active { opacity: 0.85; }
-}
-.swipe-btn-delete { background: #ff453a; width: 80px; }
-.swipe-btn-edit { background: #636366; }
-
-.reminder-row {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  padding: 14px 16px 14px 20px;
-  background: #1c1c1e;
-  cursor: pointer;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-  will-change: transform;
-  &:active { background: #2c2c2e; }
-}
-.reminder-row-body {
-  flex: 1;
-  min-width: 0;
-  margin-right: 12px;
-}
-.reminder-text {
-  font-size: 0.95rem;
-  color: #fff;
-  margin: 0 0 4px;
-  white-space: normal;
-  word-break: break-word;
-  line-height: 1.4;
-}
-.reminder-meta {
-  font-size: 0.75rem;
-  color: #8e8e93;
-  margin: 4px 0 0;
-}
-/* Shows a recorded value — deliberately not interactive. */
-.slider-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 2px 4px 0;
-}
-.slider-end-label {
-  font-size: 0.72rem;
-  color: #636366;
-  flex-shrink: 0;
-}
-.readonly-slider {
-  flex: 1;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 4px;
-  border-radius: 2px;
-  background: #3a3a3c;
-  outline: none;
-  opacity: 1;
-  pointer-events: none;
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: #4ade80;
-  }
-  &::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    border: none;
-    border-radius: 50%;
-    background: #4ade80;
-  }
-}
-
-.amen-btn {
-  background: #4ade80;
-  color: #000;
   border: none;
-  border-radius: 20px;
-  padding: 7px 18px;
-  font-size: 0.875rem;
-  font-weight: 700;
+  color: #fff;
+  font-size: 0.7rem;
   font-family: inherit;
   cursor: pointer;
-  flex-shrink: 0;
   -webkit-tap-highlight-color: transparent;
-  &:active { background: #3dcc70; transform: scale(0.97); }
 }
+.swipe-btn-delete { background: #ff453a; border-radius: 18px; }
 
-.ios-sep { height: 1px; background: #2c2c2e; margin-left: 20px; }
+.practice-meta { font-size: 0.85rem; color: #636366; margin: 8px 0 0; }
 
-.row-expand {
-  background: #141416;
-  padding: 14px 20px 16px;
-  border-top: 1px solid #2c2c2e;
-}
-.expand-label {
+.source-score { font-size: 0.85rem; color: #8e8e93; margin: 6px 0 0; }
+.source-label {
   font-size: 0.68rem;
   color: #8e8e93;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  margin: 0 0 6px;
   font-weight: 600;
+  margin: 12px 0 6px;
 }
-/* A belief inside the expand, shown the way the Situationen list shows one. */
-.belief-row {
+.source-link {
   display: flex;
   align-items: center;
-  padding: 8px 0;
+  gap: 4px;
+  background: none;
+  border: none;
+  padding: 12px 0 0;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: #4ade80;
   cursor: pointer;
-  border-top: 1px solid #2c2c2e;
   -webkit-tap-highlight-color: transparent;
-  &:first-of-type { border-top: none; }
   &:active { opacity: 0.6; }
 }
-.belief-row-body { flex: 1; min-width: 0; }
-.belief-chevron {
-  color: #636366 !important;
-  font-size: 1.1rem !important;
-  flex-shrink: 0;
-  margin-left: 6px;
-}
-.status-pill {
-  display: inline-block;
-  margin-top: 4px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  background: #2c2c2e;
-  border-radius: 20px;
-  padding: 1px 8px;
-}
-.expand-text {
-  font-size: 0.93rem;
-  color: #ebebf5;
-  margin: 0 0 4px;
-  line-height: 1.5;
-  font-style: italic;
-}
 
-.empty-state {
-  display: flex; flex-direction: column; align-items: center;
-  padding: 5rem 2rem; text-align: center;
-}
-.empty-icon { font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 16px; }
-.empty-title { font-size: 1.1rem; color: #fff; font-weight: 600; margin: 0 0 6px; }
-.empty-sub { font-size: 0.875rem; color: #8e8e93; margin: 0; }
+.confirm-dialog { background: #1c1c1e !important; }
+.confirm-title { color: #fff; font-size: 1rem; justify-content: center; padding: 16px; }
+.confirm-actions { justify-content: space-around; padding: 4px; }
+.confirm-cancel { color: #8e8e93 !important; }
+.confirm-delete { color: #ff453a !important; }
 
-.confirm-dialog { border-radius: 14px !important; overflow: hidden; }
-.confirm-title {
-  font-size: 1rem !important; font-weight: 600 !important; color: #fff !important;
-  justify-content: center !important; padding: 16px !important;
+.dark-nav {
+  border-top: 1px solid #2c2c2e;
+  .v-btn { min-width: 0; }
 }
-.confirm-actions { padding: 0 !important; display: flex; }
-.confirm-cancel { flex: 1; color: #4ade80 !important; border-right: 1px solid #3a3a3c; }
-.confirm-delete { flex: 1; color: #ff453a !important; font-weight: 600 !important; }
-
-.dark-nav { border-top: 1px solid #2c2c2e !important; }
 </style>
