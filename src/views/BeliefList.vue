@@ -558,9 +558,8 @@ export default {
   flex: 1;
   background: none;
   border: none;
-  padding: 8px 2px;
-  /* four tabs have to fit across a phone */
-  font-size: 0.8rem;
+  padding: 8px 0;
+  font-size: 0.875rem;
   color: #8e8e93;
   cursor: pointer;
   position: relative;

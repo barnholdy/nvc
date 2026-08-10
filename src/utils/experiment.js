@@ -14,7 +14,7 @@ export function isExperimentDisplayState(value) {
 }
 
 export const EXPERIMENT_DISPLAY_LABELS = {
-  open: 'Offen',
+  open: 'Neu',
   planned: 'Geplant',
   done: 'Ausgewertet',
 };

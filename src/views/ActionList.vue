@@ -19,7 +19,7 @@
       </div>
 
       <div class="segment-row">
-        <button class="seg-tab" :class="{ active: tab === 'open' }" @click="tab = 'open'">Offen</button>
+        <button class="seg-tab" :class="{ active: tab === 'open' }" @click="tab = 'open'">Neu</button>
         <button class="seg-tab" :class="{ active: tab === 'planned' }" @click="tab = 'planned'">Geplant</button>
         <button class="seg-tab" :class="{ active: tab === 'done' }" @click="tab = 'done'">Ausgewertet</button>
       </div>
@@ -28,7 +28,7 @@
         <span class="empty-icon">🏃</span>
         <p class="empty-title">Keine Einträge</p>
         <p class="empty-sub">
-          <template v-if="tab === 'open'">Alle Experimente sind geplant — offen ist hier nur, was noch keine Befürchtung hat.</template>
+          <template v-if="tab === 'open'">Alle Experimente sind geplant — neu ist hier nur, was noch keine Befürchtung hat.</template>
           <template v-else-if="tab === 'planned'">Noch kein Experiment geplant.</template>
           <template v-else>Noch kein Experiment ausgewertet.</template>
         </p>
