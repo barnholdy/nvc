@@ -31,9 +31,6 @@
         :key="entry.time"
         class="swipe-outer"
         :data-row-id="entry.time"
-        @touchstart="tsStart($event, idx)"
-        @touchmove="tsMove($event, idx)"
-        @touchend="tsEnd($event, idx)"
       >
         <div v-if="sw.openIdx === idx || sw.touchIdx === idx" class="swipe-right-panel">
           <button class="swipe-btn swipe-btn-edit" @click.stop="editEntry(entry)">
@@ -57,7 +54,12 @@
         </div>
 
         <div class="card" :style="rowSt(idx, 195)">
-          <div class="card-head">
+          <div
+            class="card-head swipe-handle"
+            @touchstart="tsStart($event, idx)"
+            @touchmove="tsMove($event, idx)"
+            @touchend="tsEnd($event, idx)"
+          >
             <p class="card-title">{{ entry.belief }}</p>
             <button
               v-if="rowActionLabel(entry)"
@@ -67,10 +69,27 @@
           </div>
           <span class="card-pill">{{ statusLabel(entry) }}</span>
 
+          <!-- The line is pinned to the right edge and the text wraps in front
+               of it, so a long trend never pushes it onto its own row. -->
           <div v-if="credibility(entry) !== null" class="score-row">
-            <span class="score-value">{{ round(credibility(entry)) }}</span>
-            <span class="score-max">/10</span>
-            <span class="score-label">Glaubwürdigkeit</span>
+            <div class="score-main" :class="{ 'has-spark': trendOf(entry) }">
+              <span class="score-value">{{ round(credibility(entry)) }}</span>
+              <span class="score-max">/10</span>
+              <span class="score-label">Glaubwürdigkeit</span>
+              <!-- The separator travels with the trend, so a wrap never leaves
+                   a lone middot at the end of the line. -->
+              <span
+                v-if="trendOf(entry)"
+                class="score-trend"
+                :style="{ color: trendOf(entry).color }"
+              ><span class="score-sep">· </span>{{ trendOf(entry).text }}</span>
+            </div>
+            <sparkline
+              v-if="trendOf(entry)"
+              class="score-spark"
+              :values="trendOf(entry).values"
+              :color="trendOf(entry).color"
+            ></sparkline>
           </div>
 
           <div class="card-sep"></div>
@@ -235,7 +254,9 @@
 </template>
 
 <script>
+import moment from 'moment';
 import FeelingChips from '@/components/FeelingChips.vue';
+import Sparkline from '@/components/Sparkline.vue';
 import {
   beliefStatus,
   beliefStatusLabel,
@@ -245,12 +266,13 @@ import {
 } from '@/utils/beliefStatus';
 import { experimentsOf, experimentDisplayState } from '@/utils/experiment';
 import { normalizeTruth } from '@/utils/affirmationTruth';
-import { beliefCredibility } from '@/utils/credibility';
+import { beliefCredibility, beliefPoints } from '@/utils/credibility';
+import { deltaColor } from '@/utils/beliefTrend';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 
 export default {
   name: 'belief-list',
-  components: { FeelingChips },
+  components: { FeelingChips, Sparkline },
   data() {
     return {
       // Which written answer is unfolded, keyed by belief and row: every card
@@ -326,6 +348,26 @@ export default {
     credibility(entry) {
       return beliefCredibility(this.$store.getters.patterns, entry);
     },
+    // Only from the second reading on: one number has no direction. The month
+    // named is the one the run started in, so "seit Juni" means "since the
+    // first time you rated this".
+    trendOf(entry) {
+      const points = beliefPoints(this.$store.getters.patterns, entry);
+      if (points.length < 2) return null;
+      const first = points[0];
+      const last = points[points.length - 1];
+      const delta = Math.round((last.value - first.value) * 10) / 10;
+      if (delta === 0) return null;
+      moment.locale('de');
+      const sign = delta > 0 ? '+' : '−';
+      const shown = String(Math.abs(delta)).replace('.', ',');
+      return {
+        text: `${sign}${shown} seit ${moment(first.time).format('MMMM')}`,
+        // A belief losing credibility is the direction the work aims at.
+        color: deltaColor(delta),
+        values: points.map(pt => pt.value),
+      };
+    },
     isOpen(entry, key) { return !!this.openRows[`${entry.time}:${key}`]; },
     toggleRow(entry, key) {
       const k = `${entry.time}:${key}`;
@@ -367,16 +409,13 @@ export default {
       const head = list.length === 1 ? '1 Handlung' : `${list.length} Handlungen`;
       return openCount ? `${head} · ${openCount} offen` : head;
     },
+    // The target list opens filtered to this belief rather than at one of its
+    // rows: the question being asked is "all of them", not "that one".
     openSituations(entry) {
-      const first = this.$store.getters.patterns
-        .find(p => (p.beliefs || []).indexOf(entry.time) !== -1);
-      if (!first) return;
-      this.$router.push({ path: '/patterns', query: openQuery(first.time) });
+      this.$router.push({ path: '/patterns', query: { belief: String(entry.time) } });
     },
     openExperiments(entry) {
-      const first = experimentsOf(entry)[0];
-      if (!first) return;
-      this.$router.push({ path: '/actions', query: openQuery(first.id) });
+      this.$router.push({ path: '/actions', query: { belief: String(entry.time) } });
     },
     openAffirmation(text) {
       this.sw.openIdx = null; this.sw.openDir = null;
@@ -490,6 +529,24 @@ export default {
 .swipe-btn-delete { background: #ff453a; width: 80px; border-radius: 18px; }
 
 .mt-2 { margin-top: 8px !important; }
+
+.score-trend { font-size: 0.95rem; font-weight: 600; white-space: nowrap; }
+.score-sep { color: #8e8e93; font-weight: 400; }
+.score-main {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  &.has-spark { padding-right: 96px; }
+}
+.score-spark {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+/* Only the head answers a swipe; the rest of the card scrolls freely. */
+.swipe-handle { touch-action: pan-y; }
 
 .confirm-dialog { background: #1c1c1e !important; }
 .confirm-title { color: #fff; font-size: 1rem; justify-content: center; padding: 16px; }

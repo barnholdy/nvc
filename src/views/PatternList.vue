@@ -62,9 +62,6 @@
             :key="entry.time"
             class="swipe-outer"
             :data-row-id="entry.time"
-            @touchstart="tsStart($event, entry.time)"
-            @touchmove="tsMove($event, entry.time)"
-            @touchend="tsEnd($event, entry.time)"
           >
             <div v-if="sw.openKey === entry.time || sw.touchKey === entry.time" class="swipe-right-panel">
               <button class="swipe-btn swipe-btn-edit" @click.stop="editEntry(entry)">
@@ -82,12 +79,14 @@
             <div class="timeline-row" :style="rowSt(entry.time)">
               <span class="timeline-dot" :class="{ pending: !isExplored(entry) }"></span>
               <div class="timeline-body">
-                <p class="timeline-meta">
-                  {{ dayLabel(entry.time) }}
-                  <span v-if="!isExplored(entry)" class="timeline-flag">· noch nicht ergründet</span>
-                </p>
-                <p class="timeline-text">{{ entry.trigger }}</p>
-                <div class="timeline-chips">
+                <p class="timeline-meta">{{ dayLabel(entry.time) }}</p>
+                <p
+                  class="timeline-text swipe-handle"
+                  @touchstart="tsStart($event, entry.time)"
+                  @touchmove="tsMove($event, entry.time)"
+                  @touchend="tsEnd($event, entry.time)"
+                >{{ entry.trigger }}</p>
+                <div v-if="beliefFilter === null" class="timeline-chips">
                   <span
                     v-for="b in beliefsOf(entry)"
                     :key="b.time"
@@ -211,12 +210,29 @@ export default {
     },
   },
   mounted() {
+    this.applyBeliefQuery();
     this.revealRequested();
   },
   watch: {
     '$route.query.open': function() { this.revealRequested(); },
+    '$route.query.belief': function() { this.applyBeliefQuery(); },
   },
   methods: {
+    // Coming from a belief card: select its chip, and scroll the pill row so
+    // the selection is visible rather than somewhere off to the right.
+    applyBeliefQuery() {
+      const raw = this.$route.query.belief;
+      if (!raw) return;
+      const time = parseInt(raw, 10);
+      if (!this.filterBeliefs.some(b => b.time === time)) return;
+      this.beliefFilter = time;
+      this.$nextTick(() => {
+        const el = this.$el.querySelector('.pill.active');
+        if (el && el.scrollIntoView) {
+          el.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+        }
+      });
+    },
     revealRequested() {
       const id = requestedId(this.$route);
       if (!id) return;
@@ -415,7 +431,7 @@ export default {
   margin: 0 0 6px;
   text-transform: uppercase;
 }
-.timeline-flag { color: #fd9927; text-transform: none; letter-spacing: 0; }
+.swipe-handle { touch-action: pan-y; }
 .timeline-text {
   font-size: 1rem;
   color: #ebebf5;

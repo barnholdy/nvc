@@ -43,12 +43,40 @@
       </div>
 
       <div
-        v-for="row in filteredRows"
+        v-for="(row, i) in filteredRows"
         :key="row.experiment.id"
-        class="card"
+        class="swipe-outer"
         :data-row-id="row.experiment.id"
       >
-          <div class="card-head">
+        <div v-if="sw.openIdx === i || sw.touchIdx === i" class="swipe-right-panel">
+          <button class="swipe-btn swipe-btn-edit" @click.stop="editExperiment(row)">
+            <v-icon small color="#fff">edit</v-icon>
+            <span>Planen</span>
+          </button>
+          <!-- Nothing to compare against until an anchor exists -->
+          <button
+            v-if="!needsPlan(row.experiment)"
+            class="swipe-btn swipe-btn-evaluate"
+            @click.stop="startResult(row)"
+          >
+            <v-icon small color="#fff">assessment</v-icon>
+            <span>Auswerten</span>
+          </button>
+        </div>
+        <div v-if="sw.openIdx === i || sw.touchIdx === i" class="swipe-left-panel">
+          <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(row)">
+            <v-icon small color="#fff">delete</v-icon>
+            <span>Löschen</span>
+          </button>
+        </div>
+
+        <div class="card" :style="rowSt(i)">
+          <div
+            class="card-head swipe-handle"
+            @touchstart="tsStart($event, i)"
+            @touchmove="tsMove($event, i)"
+            @touchend="tsEnd($event, i)"
+          >
             <p class="card-title">{{ row.experiment.situation || 'Ohne Situation' }}</p>
             <button
               v-if="needsPlan(row.experiment)"
@@ -60,11 +88,6 @@
               class="card-btn"
               @click.stop="startResult(row)"
             >Auswerten</button>
-            <button
-              class="card-icon-btn"
-              aria-label="Löschen"
-              @click.stop="preDelete(row)"
-            ><v-icon small color="#ff453a">delete</v-icon></button>
           </div>
           <span class="card-pill">{{ stateLine(row.experiment) }}</span>
           <p v-if="isDue(row.experiment)" class="due-hint">Schon durchgeführt?</p>
@@ -161,6 +184,7 @@
               {{ round(beliefTruth(row)) }}/10
             </span>
           </div>
+        </div>
       </div>
 
       <div class="list-bottom-space"></div>
@@ -456,6 +480,7 @@ export default {
       // card is open at once now, so one shared index would not do.
       openRows: {},
       beliefFilter: null,
+      sw: { openIdx: null, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
       now: Date.now(),
       isResultDialogShowing: false,
       resultRow: null,
@@ -472,6 +497,9 @@ export default {
   },
   watch: {
     '$route.query.open': function() { this.revealRequested(); },
+    '$route.query.belief': function() { this.applyBeliefQuery(); },
+    tab() { this.sw.openIdx = null; this.sw.openDir = null; },
+    beliefFilter() { this.sw.openIdx = null; this.sw.openDir = null; },
   },
   computed: {
     rows() {
@@ -539,6 +567,7 @@ export default {
     },
   },
   mounted() {
+    this.applyBeliefQuery();
     this.revealRequested();
   },
   methods: {
@@ -646,6 +675,65 @@ export default {
       const text = this.affirmationOf(row);
       if (!text) return;
       this.$router.push({ path: '/affirmations', query: openQuery(text) });
+    },
+    // Coming from a belief card: select its chip and scroll the row so the
+    // selection is visible rather than off to the right.
+    applyBeliefQuery() {
+      const raw = this.$route.query.belief;
+      if (!raw) return;
+      const time = parseInt(raw, 10);
+      if (!this.filterBeliefs.some(b => b.time === time)) return;
+      this.beliefFilter = time;
+      this.tab = 'all';
+      this.$nextTick(() => {
+        const el = this.$el.querySelector('.pill.active');
+        if (el && el.scrollIntoView) {
+          el.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+        }
+      });
+    },
+    // Only the card head answers a swipe; the rest of the card scrolls.
+    tsStart(e, i) {
+      if (e.target && e.target.closest && e.target.closest('.card-btn')) return;
+      const t = e.touches[0];
+      this.sw.touchIdx = i; this.sw.startX = t.clientX; this.sw.startY = t.clientY;
+      this.sw.dx = 0; this.sw.isH = null; this.sw.drag = false;
+    },
+    tsMove(e, i) {
+      if (this.sw.touchIdx !== i) return;
+      const t = e.touches[0];
+      const dx = t.clientX - this.sw.startX, dy = t.clientY - this.sw.startY;
+      if (this.sw.isH === null && (Math.abs(dx) > 8 || Math.abs(dy) > 8))
+        this.sw.isH = Math.abs(dx) > Math.abs(dy) * 1.5;
+      if (!this.sw.isH) return;
+      e.preventDefault();
+      this.sw.dx = Math.max(-80, Math.min(dx, this.rightWidth(i)));
+      this.sw.drag = true;
+    },
+    tsEnd(e, i) {
+      if (this.sw.touchIdx !== i) return;
+      if (this.sw.drag) {
+        if (this.sw.dx < -40) { this.sw.openIdx = i; this.sw.openDir = 'left'; }
+        else if (this.sw.dx > 40) { this.sw.openIdx = i; this.sw.openDir = 'right'; }
+        else { this.sw.openIdx = null; this.sw.openDir = null; }
+      } else if (this.sw.openIdx !== null) {
+        this.sw.openIdx = null; this.sw.openDir = null;
+      }
+      this.sw.touchIdx = null; this.sw.dx = 0; this.sw.drag = false; this.sw.isH = null;
+    },
+    // Keep in step with the buttons rendered above: a mismatch makes the card
+    // spring back before the second one can be tapped.
+    rightWidth(i) {
+      const row = this.filteredRows[i];
+      return row && !this.needsPlan(row.experiment) ? 130 : 65;
+    },
+    rowSt(i) {
+      const s = this.sw;
+      const live = s.touchIdx === i && s.drag && s.isH;
+      let x = 0;
+      if (live) x = s.dx;
+      else if (s.openIdx === i) x = s.openDir === 'left' ? -80 : this.rightWidth(i);
+      return { transform: `translateX(${x}px)`, transition: live ? 'none' : 'transform 0.2s ease' };
     },
     revealRequested() {
       const id = requestedId(this.$route);
@@ -961,6 +1049,43 @@ export default {
 .dark-nav { border-top: 1px solid #2c2c2e !important; }
 
 /* ─── Card list ─── */
+.swipe-outer {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.swipe-outer .card { margin-bottom: 0; }
+.swipe-right-panel {
+  position: absolute;
+  left: 16px; top: 0; bottom: 0;
+  display: flex;
+  align-items: stretch;
+}
+.swipe-left-panel {
+  position: absolute;
+  right: 16px; top: 0; bottom: 0;
+  display: flex;
+  align-items: stretch;
+}
+.swipe-btn {
+  width: 65px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: none;
+  color: #fff;
+  font-size: 0.7rem;
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.swipe-btn-edit { background: #636366; border-radius: 20px 0 0 20px; }
+.swipe-btn-evaluate { background: #2f7a52; border-radius: 0 20px 20px 0; }
+.swipe-btn-delete { background: #ff453a; width: 80px; border-radius: 20px; }
+.swipe-handle { touch-action: pan-y; }
+
 .due-hint { font-size: 0.85rem; color: #fd9927; margin: 10px 0 0; }
 
 /* One track, two fills: the fear laid over what reality turned out to be, so

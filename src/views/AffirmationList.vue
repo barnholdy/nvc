@@ -19,9 +19,6 @@
         :key="item.text"
         class="swipe-outer"
         :data-row-id="item.text"
-        @touchstart="tsStart($event, i)"
-        @touchmove="tsMove($event, i)"
-        @touchend="tsEnd($event, i)"
       >
         <div v-if="sw.openIdx === i || sw.touchIdx === i" class="swipe-left-panel">
           <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(item)">
@@ -31,7 +28,12 @@
         </div>
 
         <div class="card" :style="rowSt(i)">
-          <div class="card-head">
+          <div
+            class="card-head swipe-handle"
+            @touchstart="tsStart($event, i)"
+            @touchmove="tsMove($event, i)"
+            @touchend="tsEnd($event, i)"
+          >
             <p class="card-title">„{{ item.text }}“</p>
             <button class="card-btn" @click.stop="startPractice(item)">Üben</button>
           </div>
@@ -371,6 +373,7 @@ export default {
 }
 .swipe-btn-delete { background: #ff453a; border-radius: 18px; }
 
+.swipe-handle { touch-action: pan-y; }
 .practice-meta { font-size: 0.85rem; color: #636366; margin: 8px 0 0; }
 
 .source-score { font-size: 0.85rem; color: #8e8e93; margin: 6px 0 0; }

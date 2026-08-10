@@ -561,8 +561,8 @@ html, body {
   background: none;
   border: 1px solid #2c2c2e;
   border-radius: 999px;
-  padding: 9px 16px;
-  font-size: 0.9rem;
+  padding: 11px 20px;
+  font-size: 0.95rem;
   font-family: inherit;
   color: #8e8e93;
   cursor: pointer;
@@ -580,9 +580,9 @@ html, body {
 
 .card {
   background: #1c1c1e;
-  border-radius: 18px;
-  margin: 0 16px 14px;
-  padding: 18px 20px;
+  border-radius: 20px;
+  margin: 0 16px 16px;
+  padding: 22px 24px;
 }
 .card-head {
   display: flex;
@@ -592,11 +592,11 @@ html, body {
 .card-title {
   flex: 1;
   min-width: 0;
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   line-height: 1.35;
   color: #fff;
   margin: 0;
-  font-weight: 500;
+  font-weight: 400;
 }
 .card-btn {
   flex-shrink: 0;
@@ -604,9 +604,9 @@ html, body {
   border: 1px solid #4ade80;
   border-radius: 999px;
   color: #4ade80;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-family: inherit;
-  padding: 9px 20px;
+  padding: 11px 22px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
@@ -628,8 +628,8 @@ html, body {
 }
 .card-pill {
   display: inline-block;
-  margin-top: 10px;
-  font-size: 0.8rem;
+  margin-top: 12px;
+  font-size: 0.85rem;
   font-weight: 500;
   color: #8e8e93;
   background: #2c2c2e;
@@ -640,23 +640,24 @@ html, body {
 /* The number first, then what it measures — the value is what the eye is
    looking for. */
 .score-row {
+  position: relative;
   display: flex;
   align-items: baseline;
   gap: 6px;
-  margin-top: 14px;
+  margin-top: 16px;
 }
-.score-value { font-size: 2.1rem; font-weight: 700; color: #fff; line-height: 1; }
-.score-max { font-size: 0.95rem; color: #636366; }
-.score-label { font-size: 0.95rem; color: #8e8e93; }
+.score-value { font-size: 2.4rem; font-weight: 700; color: #fff; line-height: 1; }
+.score-max { font-size: 1rem; color: #636366; }
+.score-label { font-size: 1rem; color: #8e8e93; }
 
-.card-sep { height: 1px; background: #2c2c2e; margin: 16px 0 0; }
+.card-sep { height: 1px; background: #2c2c2e; margin: 20px 0 0; }
 
 /* A written answer, folded to one line until it is asked for. */
 .detail-row {
   display: flex;
   align-items: baseline;
-  gap: 14px;
-  padding: 14px 0;
+  gap: 16px;
+  padding: 18px 0;
   border-bottom: 1px solid #2c2c2e;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -665,13 +666,13 @@ html, body {
 }
 .detail-label {
   flex-shrink: 0;
-  font-size: 1rem;
+  font-size: 1.05rem;
   color: #fff;
 }
 .detail-value {
   flex: 1;
   min-width: 0;
-  font-size: 1rem;
+  font-size: 1.05rem;
   color: #8e8e93;
   text-align: right;
   margin: 0;
@@ -688,7 +689,7 @@ html, body {
 .detail-chevron {
   flex-shrink: 0;
   color: #48484a !important;
-  font-size: 1.1rem !important;
+  font-size: 1.25rem !important;
 }
 /* Once open the answer needs the full width, so the label sits above it. */
 .detail-row.open {
@@ -702,9 +703,9 @@ html, body {
 .aff-box {
   border-left: 3px solid #4ade80;
   background: #232325;
-  border-radius: 0 12px 12px 0;
-  padding: 14px 16px;
-  margin-top: 16px;
+  border-radius: 0 14px 14px 0;
+  padding: 18px 20px;
+  margin-top: 20px;
 }
 .aff-label {
   font-size: 0.68rem;
@@ -715,9 +716,9 @@ html, body {
   margin: 0 0 8px;
 }
 .aff-text {
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   color: #fff;
-  line-height: 1.4;
+  line-height: 1.45;
   margin: 0;
 }
 .aff-foot {
@@ -727,22 +728,22 @@ html, body {
   margin-top: 12px;
 }
 .aff-score { display: flex; align-items: baseline; gap: 5px; flex: 1; min-width: 0; }
-.aff-value { font-size: 1.5rem; font-weight: 700; color: #fff; line-height: 1; }
-.aff-max { font-size: 0.85rem; color: #636366; }
-.aff-word { font-size: 0.9rem; color: #8e8e93; }
+.aff-value { font-size: 1.7rem; font-weight: 700; color: #fff; line-height: 1; }
+.aff-max { font-size: 0.95rem; color: #636366; }
+.aff-word { font-size: 1rem; color: #8e8e93; }
 
 /* Links out of the card, to the lists that own the detail. */
 .card-link {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 14px 0;
+  padding: 18px 0;
   border-top: 1px solid #2c2c2e;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
 }
-.card-link-text { flex: 1; font-size: 1rem; color: #8e8e93; }
+.card-link-text { flex: 1; font-size: 1.05rem; color: #8e8e93; }
 
 .list-empty {
   text-align: center;
