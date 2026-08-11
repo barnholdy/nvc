@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="beliefs.length">
     <p class="section-head">Bedürfnisprofil</p>
     <div class="card">
       <template v-if="topNeeds.length">

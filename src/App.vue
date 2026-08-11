@@ -540,6 +540,14 @@ html { overflow-x: hidden; }
 /* Lifted 2px: the title's cap height sits above its box, so centring on the
    box leaves the round buttons looking low next to it. */
 .screen-actions { display: flex; gap: 8px; flex-shrink: 0; position: relative; top: -2px; }
+/* Reserve the glyph box: until the icon font arrives the ligature renders as
+   its own word, which is wider than the icon and shoves the header sideways
+   for the first paint. */
+.screen-add .v-icon {
+  width: 24px;
+  overflow: hidden;
+  justify-content: center;
+}
 .screen-add {
   /* Grey: adding and settings are always-there controls, not the step the
      screen is inviting. */

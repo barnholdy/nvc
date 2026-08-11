@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="beliefs.length">
     <p class="section-head">Muster &amp; Auflösung</p>
 
     <!-- One card per cluster: the name the analysis gave it, and the beliefs

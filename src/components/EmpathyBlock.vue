@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="beliefs.length">
     <p class="section-head">Empathie</p>
 
     <div class="card">
@@ -92,6 +92,7 @@ export default {
     };
   },
   computed: {
+    beliefs() { return this.$store.getters.beliefs; },
     currentHash() {
       const patterns = this.$store.getters.patterns;
       const beliefs = this.$store.getters.beliefs;
