@@ -121,9 +121,12 @@ export default {
 html, body {
   background: #000 !important;
   touch-action: manipulation;
-  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
+/* Only on html: set on body as well it turns body into a scroll container of
+   its own, and everything sticky inside it stops sticking. On html the rule
+   propagates to the viewport, which is what it was for. */
+html { overflow-x: hidden; }
 
 .application, .v-application {
   background: #000 !important;
