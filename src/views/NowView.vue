@@ -12,47 +12,15 @@
         </div>
       </div>
 
-      <!-- What has moved, before what is still to do. -->
-      <template v-if="trendRows.length">
-        <p class="section-head">Trends</p>
-
-        <!-- Two levels of chip: which kind of thing, then which one. -->
-        <div class="pill-row">
-          <button
-            v-for="t in trendTabs"
-            :key="t.key"
-            class="pill"
-            :class="{ active: t.key === shownTrendTab }"
-            @click="trendTab = t.key; trendKey = null"
-          >{{ t.label }}<span class="pill-count"> · {{ t.rows.length }}</span></button>
-        </div>
-
-        <div class="pill-row">
-          <button
-            v-for="r in tabRows"
-            :key="r.key"
-            class="pill trend-pill"
-            :class="{ active: r.key === shownTrendKey }"
-            @click="trendKey = r.key"
-          >{{ r.short }}<span class="pill-count"> · {{ r.points.length }}</span></button>
-        </div>
-
-        <div v-if="shownTrend" class="card">
-          <p class="card-title">„{{ shownTrend.text }}“</p>
-          <trend-chart :row="shownTrend" :inverted="shownTrend.inverted"></trend-chart>
-        </div>
-      </template>
-
-      <profile-stats></profile-stats>
-
       <div v-if="!tileSections.length && !practiseSection && !trendRows.length" class="list-empty">
         <span class="list-empty-icon">✅</span>
         <p class="list-empty-title">Nichts offen</p>
         <p class="list-empty-sub">Lege eine Situation an, wenn dir etwas begegnet.</p>
       </div>
 
-      <!-- Five kinds of next step, as count tiles: which belief or action to
-           work on is picked in the list the tile opens, not previewed here. -->
+      <!-- What to do next, first. Five kinds of next step, as count tiles:
+           which belief or action to work on is picked in the list the tile
+           opens, not previewed here. -->
       <template v-if="tileSections.length">
         <p class="section-head">Handlungen &amp; Überzeugungen</p>
         <div class="tile-grid">
@@ -104,6 +72,39 @@
           <v-icon class="detail-chevron">chevron_right</v-icon>
         </div>
       </template>
+
+      <!-- Then what has moved. -->
+      <template v-if="trendRows.length">
+        <p class="section-head">Trends</p>
+
+        <!-- Two levels of chip: which kind of thing, then which one. -->
+        <div class="pill-row">
+          <button
+            v-for="t in trendTabs"
+            :key="t.key"
+            class="pill"
+            :class="{ active: t.key === shownTrendTab }"
+            @click="trendTab = t.key; trendKey = null"
+          >{{ t.label }}<span class="pill-count"> · {{ t.rows.length }}</span></button>
+        </div>
+
+        <div class="pill-row">
+          <button
+            v-for="r in tabRows"
+            :key="r.key"
+            class="pill trend-pill"
+            :class="{ active: r.key === shownTrendKey }"
+            @click="trendKey = r.key"
+          >{{ r.short }}<span class="pill-count"> · {{ r.points.length }}</span></button>
+        </div>
+
+        <div v-if="shownTrend" class="card">
+          <p class="card-title">„{{ shownTrend.text }}“</p>
+          <trend-chart :row="shownTrend" :inverted="shownTrend.inverted"></trend-chart>
+        </div>
+      </template>
+
+      <profile-stats></profile-stats>
 
       <!-- Last: what the beliefs have in common, and the same material read
            back to you. Both are a look around, not a next step. -->
@@ -208,9 +209,12 @@ export default {
     },
     // Every sentence that exists, least believed first — the one you believe
     // least is the one most worth saying again.
+    // Only from beliefs that have actually been transformed: an affirmation
+    // written earlier in the process belongs to the wandeln wizard that wrote
+    // it, not to this list of sentences worth practising.
     affirmations() {
       const map = {};
-      this.beliefs.forEach((b) => {
+      this.beliefs.filter(b => beliefStatus(b) === 'done').forEach((b) => {
         (b.affirmations || []).forEach((a) => {
           if (!a || !a.text || map[a.text]) return;
           map[a.text] = {
@@ -364,7 +368,7 @@ export default {
           count: this.affirmations.length,
           items: this.affirmations.map(affirmation),
           run: item => this.startPractice(item.aff),
-          more: () => this.$router.push('/beliefs'),
+          more: () => this.$router.push({ path: '/beliefs', query: { tab: 'done' } }),
         },
         {
           key: 'change',
