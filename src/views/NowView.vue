@@ -52,17 +52,25 @@
       </template>
 
       <!-- Last, and deliberately so: everything above is what to do next,
-           this is what has moved so far. -->
-      <template v-if="trendSummary">
+           this is what has moved so far. One chart at a time — a wall of them
+           is a report, and nobody reads a report on their phone. -->
+      <template v-if="trendRows.length">
         <p class="section-head">Trends</p>
-        <div class="card now-card" @click="$router.push('/trends')">
-          <div class="now-line">
-            <div class="now-body">
-              <p class="now-title">Glaubwürdigkeit im Verlauf</p>
-              <p class="now-sub">{{ trendSummary }}</p>
-            </div>
-            <button class="now-btn" @click.stop="$router.push('/trends')">Ansehen</button>
-          </div>
+
+        <div class="pill-row">
+          <button
+            v-for="r in trendRows"
+            :key="r.key"
+            class="pill trend-pill"
+            :class="{ active: r.key === shownTrendKey }"
+            @click="trendKey = r.key"
+          >{{ r.short }}<span class="pill-count"> · {{ r.points.length }}</span></button>
+        </div>
+
+        <div class="card">
+          <p class="card-title">„{{ shownTrend.text }}“</p>
+          <p class="now-sub trend-kind">{{ shownTrend.kind }}</p>
+          <trend-chart :row="shownTrend" :inverted="shownTrend.inverted"></trend-chart>
         </div>
       </template>
 
@@ -79,16 +87,16 @@
 
     <v-bottom-nav :value="true" fixed app color="#1c1c1e" class="dark-nav">
       <v-btn flat color="primary" to="/now">
-        <v-icon>schedule</v-icon>
+        <nav-icon name="now"></nav-icon>
       </v-btn>
       <v-btn flat color="grey" to="/patterns">
-        <v-icon>bolt</v-icon>
+        <nav-icon name="patterns"></nav-icon>
       </v-btn>
       <v-btn flat color="grey" to="/beliefs">
-        <v-icon>lightbulb_outline</v-icon>
+        <nav-icon name="beliefs"></nav-icon>
       </v-btn>
       <v-btn flat color="grey" to="/actions">
-        <v-icon>gps_fixed</v-icon>
+        <nav-icon name="actions"></nav-icon>
       </v-btn>
     </v-bottom-nav>
   </div>
@@ -108,6 +116,8 @@ import {
 import {
   affirmationCredibility, beliefCredibility, beliefRows, affirmationRows,
 } from '@/utils/credibility';
+import NavIcon from '@/components/NavIcon.vue';
+import TrendChart from '@/components/TrendChart.vue';
 
 // Three is enough to start on; the rest is one tap away in the list that owns
 // them. Showing everything would turn this screen back into those lists.
@@ -125,9 +135,11 @@ function readPractised() {
 
 export default {
   name: 'now-view',
-  components: { AffirmationPractice },
+  components: { AffirmationPractice, NavIcon, TrendChart },
   data() {
-    return { practising: null, practised: readPractised(), now: Date.now() };
+    return {
+      practising: null, practised: readPractised(), now: Date.now(), trendKey: null,
+    };
   },
   computed: {
     TOP() { return TOP; },
@@ -174,15 +186,37 @@ export default {
       });
     },
     // Nothing to show until something has been rated twice; one reading is a
-    // number, not a trend.
-    trendSummary() {
-      const b = beliefRows(this.patterns, this.beliefs).filter(r => r.hasTrend).length;
-      const a = affirmationRows(this.beliefs).filter(r => r.hasTrend).length;
-      if (!b && !a) return null;
-      const parts = [];
-      if (b) parts.push(`${b} ${b === 1 ? 'Überzeugung' : 'Überzeugungen'}`);
-      if (a) parts.push(`${a} ${a === 1 ? 'Affirmation' : 'Affirmationen'}`);
-      return `${parts.join(' · ')} mit Verlauf`;
+    // number, not a trend. Beliefs first — that is the scale the rest of the
+    // screen is about.
+    trendRows() {
+      const shorten = t => (t.length > 28 ? `${t.slice(0, 27)}…` : t);
+      const beliefs = beliefRows(this.patterns, this.beliefs)
+        .filter(r => r.hasTrend)
+        .map(r => Object.assign({}, r, {
+          key: `b${r.key}`,
+          kind: 'Überzeugung',
+          inverted: false,
+          short: shorten(r.text),
+        }));
+      const affirmations = affirmationRows(this.beliefs)
+        .filter(r => r.hasTrend)
+        .map(r => Object.assign({}, r, {
+          key: `a${r.key}`,
+          kind: 'Affirmation',
+          inverted: true,
+          short: shorten(r.text),
+        }));
+      return beliefs.concat(affirmations);
+    },
+    // The chosen chip, or the first one — a chip that vanished (a rating
+    // undone elsewhere) must not leave the block blank.
+    shownTrendKey() {
+      const rows = this.trendRows;
+      if (!rows.length) return null;
+      return rows.some(r => r.key === this.trendKey) ? this.trendKey : rows[0].key;
+    },
+    shownTrend() {
+      return this.trendRows.find(r => r.key === this.shownTrendKey) || null;
     },
     openExperiments() {
       return this.rows.filter(r => experimentState(r.experiment) !== 'evaluated'
@@ -374,6 +408,18 @@ export default {
   color: #fd9927;
   font-size: 0.85rem;
   padding: 5px 12px;
+}
+/* A belief is a sentence, so its chip needs a ceiling or one chip fills the
+   whole row. */
+.trend-pill {
+  max-width: 62vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+}
+.trend-kind {
+  margin-top: 2px;
 }
 .now-more {
   display: flex;

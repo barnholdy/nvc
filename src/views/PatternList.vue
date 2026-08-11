@@ -120,16 +120,16 @@
 
     <v-bottom-nav :value="true" fixed app color="#1c1c1e" class="dark-nav">
       <v-btn flat color="grey" to="/now">
-        <v-icon>schedule</v-icon>
+        <nav-icon name="now"></nav-icon>
       </v-btn>
       <v-btn flat color="primary" to="/patterns">
-        <v-icon>bolt</v-icon>
+        <nav-icon name="patterns"></nav-icon>
       </v-btn>
       <v-btn flat color="grey" to="/beliefs">
-        <v-icon>lightbulb_outline</v-icon>
+        <nav-icon name="beliefs"></nav-icon>
       </v-btn>
       <v-btn flat color="grey" to="/actions">
-        <v-icon>gps_fixed</v-icon>
+        <nav-icon name="actions"></nav-icon>
       </v-btn>
     </v-bottom-nav>
   </div>
@@ -140,9 +140,11 @@ import moment from 'moment';
 import { isComplete } from '@/utils/beliefStatus';
 import { beliefTruthIn, beliefCredibility } from '@/utils/credibility';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
+import NavIcon from '@/components/NavIcon.vue';
 
 export default {
   name: 'pattern-list',
+  components: { NavIcon },
   data() {
     return {
       beliefFilter: null,
