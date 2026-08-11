@@ -14,6 +14,10 @@
            rest of the screen sits in. -->
       <pattern-groups></pattern-groups>
 
+      <!-- Directly under the patterns: the same material, read back to you
+           rather than counted. -->
+      <empathy-block></empathy-block>
+
       <div v-if="!sections.length && !trendRows.length" class="list-empty">
         <span class="list-empty-icon">✅</span>
         <p class="list-empty-title">Nichts offen</p>
@@ -128,6 +132,7 @@ import NavIcon from '@/components/NavIcon.vue';
 import TrendChart from '@/components/TrendChart.vue';
 import ProfileStats from '@/components/ProfileStats.vue';
 import PatternGroups from '@/components/PatternGroups.vue';
+import EmpathyBlock from '@/components/EmpathyBlock.vue';
 
 // Three is enough to start on; the rest is one tap away in the list that owns
 // them. Showing everything would turn this screen back into those lists.
@@ -146,7 +151,7 @@ function readPractised() {
 export default {
   name: 'now-view',
   components: {
-    AffirmationPractice, NavIcon, TrendChart, ProfileStats, PatternGroups,
+    AffirmationPractice, NavIcon, TrendChart, ProfileStats, PatternGroups, EmpathyBlock,
   },
   data() {
     return {

@@ -1,62 +1,60 @@
 <template>
-  <div class="dark-page">
-    <v-toolbar color="#000" dark flat app>
-      <v-btn icon @click="$router.back()">
-        <v-icon color="#4ade80">arrow_back</v-icon>
-      </v-btn>
-      <v-toolbar-title>Empathie</v-toolbar-title>
-    </v-toolbar>
+  <div>
+    <p class="section-head">Empathie</p>
 
-    <v-content>
-      <div class="intro-card">
-        <span class="intro-icon">❤️</span>
-        <p class="intro-title">Einfühlsam begegnen</p>
-        <p class="intro-text">Lass dir spiegeln, was dich gerade bewegt — auf Basis all deiner Muster und Überzeugungen.</p>
-      </div>
-
-      <div class="ios-section">
-        <template v-if="showApiKeyInput">
-          <p class="section-label">Anthropic API Key</p>
-          <div class="input-row">
-            <v-text-field
-              v-model="apiKeyInput"
-              placeholder="sk-ant-..."
-              type="password"
-              single-line
-              hide-details
-              class="dark-input"
-            ></v-text-field>
-          </div>
-          <div class="action-row mt-3">
-            <button class="primary-btn" :disabled="!apiKeyInput" @click="saveApiKey">Speichern &amp; generieren</button>
-            <button class="ghost-btn" @click="showApiKeyInput = false">Abbrechen</button>
-          </div>
-        </template>
-        <template v-else>
-          <div class="generate-row">
-            <button
-              class="primary-btn"
-              :disabled="isLoading || isDataUnchanged"
-              @click="generate"
-            >
-              <span v-if="isLoading">Wird generiert…</span>
-              <span v-else>❤️ Empathie generieren</span>
-            </button>
-            <button v-if="apiKey" class="icon-btn" @click="showApiKeyInput = true" title="API Key ändern">
-              <v-icon small color="#636366">settings</v-icon>
-            </button>
-          </div>
-          <p v-if="isDataUnchanged && text" class="hint-text">Keine neuen Daten seit der letzten Generierung.</p>
-        </template>
-
-        <p v-if="errorMsg" class="error-text mt-2">{{ errorMsg }}</p>
-
-        <div v-if="text !== null" class="empathy-result mt-4">
-          <div class="empathy-text md-content" v-html="renderMd(text)"></div>
+    <div class="card">
+      <div class="now-line">
+        <div class="now-body">
+          <p class="now-title">Einfühlsam begegnen</p>
+          <p class="now-sub" :class="{ 'sub-error': !!errorMsg }">{{ subline }}</p>
         </div>
+        <v-progress-circular
+          v-if="isLoading"
+          indeterminate
+          color="#4ade80"
+          size="20"
+          width="2"
+        ></v-progress-circular>
+        <button
+          v-else
+          class="now-btn"
+          :disabled="isDataUnchanged && !!text"
+          @click="generate"
+        >{{ text ? 'Neu' : 'Generieren' }}</button>
       </div>
-    </v-content>
 
+      <!-- Collapsed to a few lines: the answer is long, and the screen it now
+           lives on is a list of short things. -->
+      <template v-if="text !== null">
+        <div class="card-sep"></div>
+        <div
+          class="empathy-text md-content"
+          :class="{ clipped: !expanded }"
+          v-html="renderMd(text)"
+        ></div>
+        <div class="empathy-toggle" @click="expanded = !expanded">
+          <span>{{ expanded ? 'Weniger anzeigen' : 'Mehr anzeigen' }}</span>
+          <v-icon class="detail-chevron">{{ expanded ? 'expand_less' : 'expand_more' }}</v-icon>
+        </div>
+      </template>
+    </div>
+
+    <!-- Only when there is no key yet; otherwise the button above is enough. -->
+    <div v-if="showApiKeyInput" class="card">
+      <p class="card-title">Anthropic API Key</p>
+      <v-text-field
+        v-model="apiKeyInput"
+        placeholder="sk-ant-..."
+        type="password"
+        single-line
+        hide-details
+        class="dark-input"
+      ></v-text-field>
+      <div class="key-actions">
+        <button class="now-btn" :disabled="!apiKeyInput" @click="saveApiKey">Speichern</button>
+        <button class="ghost-btn" @click="showApiKeyInput = false">Abbrechen</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -78,10 +76,10 @@ function hashString(str) {
 }
 
 export default {
-  name: 'empathy-view',
+  name: 'empathy-block',
   data() {
     let saved = null;
-    try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch (e) {}
+    try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch (e) { saved = null; }
     return {
       text: saved ? saved.text : null,
       savedHash: saved ? (saved.hash || null) : null,
@@ -90,6 +88,7 @@ export default {
       showApiKeyInput: false,
       apiKeyInput: '',
       apiKey: localStorage.getItem('nvc.apiKey') || '',
+      expanded: false,
     };
   },
   computed: {
@@ -100,6 +99,14 @@ export default {
     },
     isDataUnchanged() {
       return this.savedHash !== null && this.currentHash === this.savedHash;
+    },
+    subline() {
+      if (this.errorMsg) return this.errorMsg;
+      if (this.isLoading) return 'Wird generiert…';
+      if (!this.apiKey) return 'API Key in den Einstellungen hinterlegen';
+      if (this.text && this.isDataUnchanged) return 'Keine neuen Daten seit der letzten Generierung';
+      if (this.text) return 'Es gibt Neues seit der letzten Generierung';
+      return 'Lass dir spiegeln, was dich gerade bewegt';
     },
   },
   methods: {
@@ -259,98 +266,75 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.dark-page {
-  background: #000;
-  min-height: 100vh;
-}
-.page-title-area {
-  padding: 8px 20px 20px;
-}
-.page-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: -0.5px;
-  margin: 0 0 8px;
-}
-.page-sub {
-  font-size: 0.875rem;
-  color: #8e8e93;
-  margin: 0;
-  line-height: 1.5;
-}
-.ios-section {
-  padding: 0 16px;
-}
-.section-label {
-  font-size: 0.78rem;
-  color: #8e8e93;
+.section-head {
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
-  font-weight: 600;
-  margin: 0 0 8px 4px;
+  color: #8e8e93;
+  margin: 18px 20px 8px;
 }
-/* The field brings its own surface now — no box inside a box. */
-.input-row {
-  padding: 0;
-}
-.generate-row {
+
+.now-line {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 14px;
 }
-.primary-btn {
-  background: #4ade80;
-  color: #000;
-  border: none;
-  border-radius: 12px;
-  padding: 12px 20px;
-  font-size: 1rem;
-  font-weight: 700;
+.now-body { flex: 1; min-width: 0; }
+.now-title {
+  font-size: 1.05rem;
+  font-weight: 400;
+  color: #fff;
+  line-height: 1.35;
+  margin: 0;
+}
+.now-sub {
+  font-size: 0.88rem;
+  color: #8e8e93;
+  margin: 4px 0 0;
+  line-height: 1.4;
+}
+.sub-error { color: #ff453a; }
+.now-btn {
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid #4ade80;
+  border-radius: 999px;
+  color: #4ade80;
   font-family: inherit;
+  font-size: 0.95rem;
+  padding: 9px 20px;
   cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  &:disabled { opacity: 0.35; cursor: not-allowed; }
-  &:active:not(:disabled) { background: #3dcc70; transform: scale(0.98); }
+  &:disabled { border-color: #3a3a3c; color: #636366; cursor: default; }
 }
 .ghost-btn {
   background: none;
   border: none;
-  color: #4ade80;
-  font-size: 0.95rem;
+  color: #8e8e93;
   font-family: inherit;
+  font-size: 0.95rem;
+  padding: 9px 12px;
   cursor: pointer;
-  padding: 12px 0;
-  -webkit-tap-highlight-color: transparent;
 }
-.icon-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 50%;
-  -webkit-tap-highlight-color: transparent;
+.key-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
 }
-.hint-text {
-  font-size: 0.8rem;
-  color: #636366;
-  margin: 8px 0 0;
-}
-.error-text {
-  font-size: 0.85rem;
-  color: #ff453a;
-  margin: 0;
-}
-.empathy-result {
-  background: #1c1c1e;
-  border-radius: 16px;
-  padding: 20px;
-}
+
 .empathy-text {
   font-size: 0.95rem;
   color: #ebebf5;
   line-height: 1.7;
   margin: 0;
+}
+/* Four lines is enough to tell whether it is worth opening. */
+.clipped {
+  max-height: 6.8em;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(#000 60%, transparent);
+  mask-image: linear-gradient(#000 60%, transparent);
 }
 .md-content {
   h1, h2, h3 { color: #fff; font-weight: 700; margin: 0 0 6px; line-height: 1.3; }
@@ -365,7 +349,15 @@ export default {
   em { color: #c9c9d3; font-style: italic; }
   .md-gap { height: 10px; }
 }
-.mt-2 { margin-top: 8px !important; }
-.mt-3 { margin-top: 12px !important; }
-.mt-4 { margin-top: 20px !important; }
+.empathy-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #8e8e93;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
 </style>

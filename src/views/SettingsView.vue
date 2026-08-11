@@ -11,14 +11,6 @@
       <!-- KI -->
       <p class="section-header">KI</p>
       <div class="settings-group">
-        <div class="settings-row tappable" @click="$router.push('/empathy')">
-          <div class="settings-row-body">
-            <p class="settings-label">Empathie generieren</p>
-            <p class="settings-sub">Einfühlsame Spiegelung deiner Muster</p>
-          </div>
-          <v-icon color="#4ade80">favorite_border</v-icon>
-        </div>
-        <div class="settings-sep"></div>
         <div class="settings-row">
           <div class="settings-row-body">
             <p class="settings-label">Anthropic API Key</p>
