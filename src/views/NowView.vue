@@ -10,7 +10,11 @@
         </div>
       </div>
 
-      <div v-if="!sections.length" class="list-empty">
+      <!-- Above everything: what the beliefs have in common is the frame the
+           rest of the screen sits in. -->
+      <pattern-groups></pattern-groups>
+
+      <div v-if="!sections.length && !trendRows.length" class="list-empty">
         <span class="list-empty-icon">✅</span>
         <p class="list-empty-title">Nichts offen</p>
         <p class="list-empty-sub">Lege eine Situation an, wenn dir etwas begegnet.</p>
@@ -123,6 +127,7 @@ import {
 import NavIcon from '@/components/NavIcon.vue';
 import TrendChart from '@/components/TrendChart.vue';
 import ProfileStats from '@/components/ProfileStats.vue';
+import PatternGroups from '@/components/PatternGroups.vue';
 
 // Three is enough to start on; the rest is one tap away in the list that owns
 // them. Showing everything would turn this screen back into those lists.
@@ -141,7 +146,7 @@ function readPractised() {
 export default {
   name: 'now-view',
   components: {
-    AffirmationPractice, NavIcon, TrendChart, ProfileStats,
+    AffirmationPractice, NavIcon, TrendChart, ProfileStats, PatternGroups,
   },
   data() {
     return {
