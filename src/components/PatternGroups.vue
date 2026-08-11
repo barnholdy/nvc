@@ -7,14 +7,20 @@
     <div v-for="(k, i) in patternGroups" :key="i" class="card">
       <p class="card-title">{{ k.title }}</p>
       <div class="group-chips">
-        <span
+        <!-- Only clickable when the text still matches a belief that exists:
+             the analysis echoes text back, and a renamed or deleted one has
+             nowhere left to jump to. -->
+        <component
+          :is="b.time !== null ? 'button' : 'span'"
           v-for="(b, j) in k.beliefs"
           :key="j"
           class="group-chip"
+          :class="{ tappable: b.time !== null }"
+          @click="openBelief(b)"
         >„{{ b.text }}“<span
           v-if="b.credibility !== null"
           class="chip-score"
-        > · {{ b.credibility }}/10</span></span>
+        > · {{ b.credibility }}/10</span></component>
       </div>
     </div>
 
@@ -44,6 +50,7 @@
 
 <script>
 import { beliefCredibility } from '@/utils/credibility';
+import { openQuery } from '@/utils/reveal';
 
 // Quotes, case, spacing and a trailing period are all the analysis is likely to
 // change when it repeats a belief back — none of them make it a different one.
@@ -93,6 +100,9 @@ export default {
             text: belief ? belief.belief : t,
             // One decimal, German comma — the same number the cards show.
             credibility: c === null ? null : String(Math.round(c * 10) / 10).replace('.', ','),
+            // Only set when the text still matches something stored — that is
+            // what makes the chip a link rather than just a label.
+            time: belief ? belief.time : null,
           };
         }),
       }));
@@ -108,6 +118,12 @@ export default {
     },
   },
   methods: {
+    // Lands on Überzeugungen with this belief flush against the top edge —
+    // the chip names exactly one thing, so there is nothing to search for.
+    openBelief(chip) {
+      if (chip.time === null) return;
+      this.$router.push({ path: '/beliefs', query: openQuery(chip.time, { top: true }) });
+    },
     async generateKernmuster() {
       if (this.isLoading) return;
       if (!this.apiKey) {
@@ -186,10 +202,14 @@ export default {
   gap: 6px;
   margin-top: 12px;
 }
-/* Outline, like the feeling chips: a belief in a cluster is a label, not a
-   button. A belief is a whole sentence, so the chip wraps rather than running
-   off the card — rounded ends still read as one chip across two lines. */
+/* Outline, like the feeling chips. A belief is a whole sentence, so the chip
+   wraps rather than running off the card — rounded ends still read as one
+   chip across two lines. Rendered as a <button> when it links to a belief, so
+   it needs its browser chrome reset back to nothing. */
 .group-chip {
+  display: inline-block;
+  background: none;
+  font-family: inherit;
   font-size: 0.85rem;
   color: #8e8e93;
   border: 1px solid #3a3a3c;
@@ -199,6 +219,12 @@ export default {
   max-width: 100%;
   min-width: 0;
   overflow-wrap: anywhere;
+  text-align: left;
+}
+.group-chip.tappable {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  &:active { opacity: 0.6; }
 }
 
 /* The number is the quieter half of the chip, and never wraps away from the

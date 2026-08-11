@@ -289,7 +289,7 @@ import { experimentsOf, experimentDisplayState } from '@/utils/experiment';
 import { normalizeTruth } from '@/utils/affirmationTruth';
 import { beliefCredibility, beliefPoints } from '@/utils/credibility';
 import { deltaColor } from '@/utils/beliefTrend';
-import { requestedId, scrollRowIntoView } from '@/utils/reveal';
+import { requestedId, scrollRowIntoView, scrollRowToTop } from '@/utils/reveal';
 import NavIcon from '@/components/NavIcon.vue';
 
 const PRACTICE_KEY = 'nvc.amen';
@@ -369,7 +369,12 @@ export default {
       const entry = this.$store.getters.beliefs.find(b => String(b.time) === id);
       if (!entry) return;
       this.tab = 'all';
-      this.$nextTick(() => scrollRowIntoView(this.$el, entry.time));
+      // A chip that names exactly one belief lands it flush at the top;
+      // arriving from a longer list keeps the centred landing.
+      const top = this.$route.query.top === '1';
+      this.$nextTick(() => (top
+        ? scrollRowToTop(this.$el, entry.time)
+        : scrollRowIntoView(this.$el, entry.time)));
     },
     // One decimal, and a German comma: the headline number is the only
     // place this value is shown, so rounding it whole would hide half a
