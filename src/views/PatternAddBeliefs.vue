@@ -2,8 +2,10 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Überzeugungen</h1>
-      <p v-if="trigger" class="subheading grey--text situation-quote mt-1">„{{ trigger }}“</p>
-      <p class="body-1 grey--text mt-2 wizard-prompt">Welche tiefer liegenden Überzeugungen sind damit verbunden?</p>
+      <!-- The situation this step is about, labelled the same way every other
+           wizard step labels the text it carries forward. -->
+      <belief-context :situation="trigger"></belief-context>
+      <p class="body-1 grey--text mt-3 wizard-prompt">Welche tiefer liegenden Überzeugungen sind damit verbunden?</p>
 
       <!-- Writing a new one is the answer to the question above, so it sits
            directly under it rather than below the list of existing ones. -->
@@ -83,6 +85,8 @@
 </template>
 
 <script>
+import BeliefContext from '@/views/BeliefContext.vue';
+
 const TRUTH_DEFAULT = 5;
 
 // Laddering: what someone first writes down is usually a surface complaint,
@@ -92,6 +96,7 @@ const DEEPER_QUESTION = 'Angenommen, das stimmt — was würde das über dich be
 
 export default {
   name: 'pattern-add-beliefs',
+  components: { BeliefContext },
   props: {
     allBeliefs: { type: Array, default: function() { return []; } },
     selectedBeliefIds: { type: Array, default: function() { return []; } },
@@ -185,10 +190,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.situation-quote {
-  font-style: italic;
-  white-space: pre-wrap;
-}
 /* App.vue paints every flat button green via .v-btn:not(.primary):not(.red),
    which outranks Vuetify's own colour prop — so all three options here would
    read as equally weighty. Only Hinzufügen ends the ladder, so it keeps the

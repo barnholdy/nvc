@@ -105,6 +105,9 @@ export default {
   color: #ebebf5;
   line-height: 1.5;
   margin: 0;
+  /* Every block here comes from a multi-line field, so the paragraphs someone
+     typed survive being carried into the next step. */
+  white-space: pre-wrap;
 }
 .context-toggle {
   display: flex;
