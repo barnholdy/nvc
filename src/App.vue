@@ -525,7 +525,9 @@ html, body {
   margin: 0;
   letter-spacing: -0.02em;
 }
-.screen-actions { display: flex; gap: 8px; flex-shrink: 0; }
+/* Lifted 2px: the title's cap height sits above its box, so centring on the
+   box leaves the round buttons looking low next to it. */
+.screen-actions { display: flex; gap: 8px; flex-shrink: 0; position: relative; top: -2px; }
 .screen-add {
   /* Grey: adding and settings are always-there controls, not the step the
      screen is inviting. */
@@ -558,6 +560,9 @@ html, body {
   scrollbar-width: none;
   &::-webkit-scrollbar { display: none; }
 }
+/* Stacked filter rows sit as close together as the last row sits to the
+   card: they are one control, not two separate blocks. */
+.pill-row + .pill-row { padding-top: 0; }
 .pill {
   flex-shrink: 0;
   background: none;
