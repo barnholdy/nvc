@@ -4,6 +4,41 @@
       <h1 class="headline font-weight-regular">Überzeugungen</h1>
       <p v-if="trigger" class="subheading grey--text situation-quote mt-1">„{{ trigger }}“</p>
       <p class="body-1 grey--text mt-2 wizard-prompt">Welche tiefer liegenden Überzeugungen sind damit verbunden?</p>
+
+      <!-- Writing a new one is the answer to the question above, so it sits
+           directly under it rather than below the list of existing ones. -->
+      <div class="new-belief mt-3">
+        <template v-if="showNewInput">
+          <!-- Each rung the laddering has already climbed, oldest first. Kept
+               in view so the chain reads as one thought, not a series of
+               unrelated fields. -->
+          <p v-for="(rung, i) in ladder" :key="i" class="ladder-rung">„{{ rung }}“</p>
+
+          <p v-if="ladder.length" class="body-1 grey--text mt-2 wizard-prompt">{{ DEEPER_QUESTION }}</p>
+
+          <v-text-field
+            v-model="newBeliefText"
+            :label="ladder.length ? 'Antwort' : 'Neue Überzeugung'"
+            :placeholder="ladder.length ? '' : 'Ich bin nicht gut genug...'"
+            single-line
+            hide-details
+            class="mb-2"
+            @keyup.enter="createBelief"
+          ></v-text-field>
+
+          <!-- Two ways on: one more rung down, or stop here and keep what
+               stands. Only the last rung becomes the belief. -->
+          <v-btn small flat class="ladder-quiet" :disabled="!hasText" @click="goDeeper">Tiefer gehen</v-btn>
+          <v-btn small flat color="primary" :disabled="!hasText" @click="createBelief">Hinzufügen</v-btn>
+          <v-btn small flat class="ladder-quiet" @click="cancelNew">Abbrechen</v-btn>
+        </template>
+        <template v-else>
+          <v-btn small flat color="primary" @click="showNewInput = true">
+            <v-icon small left>add</v-icon>
+            Neue Überzeugung
+          </v-btn>
+        </template>
+      </div>
     </v-flex>
 
     <v-flex v-if="selectedBeliefObjects.length" class="mb-2">
@@ -43,32 +78,17 @@
           >{{ b.belief }}</v-chip>
         </div>
       </div>
-
-      <template v-if="showNewInput">
-        <v-text-field
-          v-model="newBeliefText"
-          label="Neue Überzeugung"
-          placeholder="Ich bin nicht gut genug..."
-          single-line
-          hide-details
-          class="mb-2"
-          @keyup.enter="createBelief"
-        ></v-text-field>
-        <v-btn small flat color="primary" :disabled="!newBeliefText.trim()" @click="createBelief">Hinzufügen</v-btn>
-        <v-btn small flat color="grey" @click="cancelNew">Abbrechen</v-btn>
-      </template>
-      <template v-else>
-        <v-btn small flat color="primary" @click="showNewInput = true">
-          <v-icon small left>add</v-icon>
-          Neue Überzeugung
-        </v-btn>
-      </template>
     </v-flex>
   </v-layout>
 </template>
 
 <script>
 const TRUTH_DEFAULT = 5;
+
+// Laddering: what someone first writes down is usually a surface complaint,
+// and the belief underneath it comes out by asking the same question of each
+// answer in turn.
+const DEEPER_QUESTION = 'Angenommen, das stimmt — was würde das über dich bedeuten?';
 
 export default {
   name: 'pattern-add-beliefs',
@@ -84,9 +104,14 @@ export default {
       truths: Object.assign({}, this.initialTruths),
       showNewInput: false,
       newBeliefText: '',
+      // Every answer already given, oldest first. Context only — the belief
+      // that gets saved is whatever stands in the field at the end.
+      ladder: [],
+      DEEPER_QUESTION,
     };
   },
   computed: {
+    hasText() { return this.newBeliefText.trim().length > 0; },
     selectedBeliefObjects() {
       var beliefs = this.allBeliefs;
       return this.selectedIds.map(function(id) {
@@ -132,16 +157,28 @@ export default {
       this.$delete(this.truths, time);
     },
     cancelNew() {
+      this.resetNew();
+    },
+    resetNew() {
       this.showNewInput = false;
       this.newBeliefText = '';
+      this.ladder = [];
     },
+    // One rung down: what stands now becomes context, and the same question is
+    // asked of it. Nothing is saved yet.
+    goDeeper() {
+      if (!this.hasText) return;
+      this.ladder.push(this.newBeliefText.trim());
+      this.newBeliefText = '';
+    },
+    // Stop here. Only what stands in the field becomes the belief — the rungs
+    // above it were the way to get to it, not beliefs in their own right.
     createBelief() {
-      if (!this.newBeliefText.trim()) return;
+      if (!this.hasText) return;
       var time = +new Date();
       this.$store.dispatch('saveBelief', { time: time, belief: this.newBeliefText.trim() });
       this.selectedIds = this.selectedIds.concat([time]);
-      this.newBeliefText = '';
-      this.showNewInput = false;
+      this.resetNew();
     },
   },
 };
@@ -152,6 +189,24 @@ export default {
   font-style: italic;
   white-space: pre-wrap;
 }
+/* App.vue paints every flat button green via .v-btn:not(.primary):not(.red),
+   which outranks Vuetify's own colour prop — so all three options here would
+   read as equally weighty. Only Hinzufügen ends the ladder, so it keeps the
+   accent and these two step back. Needs the extra class to outrank that rule. */
+.new-belief .v-btn.ladder-quiet { color: #8e8e93 !important; }
+
+/* The rungs already climbed. Quieter than the field below them: they are what
+   was said on the way here, not what is being answered now. */
+.ladder-rung {
+  font-size: 0.9rem;
+  color: #8e8e93;
+  line-height: 1.4;
+  margin: 0 0 6px;
+  padding-left: 10px;
+  border-left: 2px solid #2c2c2e;
+  word-break: break-word;
+}
+
 .belief-row {
   padding: 12px 0;
   border-top: 1px solid #2c2c2e;
