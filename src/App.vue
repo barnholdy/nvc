@@ -512,6 +512,15 @@ html, body {
    One visual language for the four lists. Every screen is a stack of cards on
    black: a filter row at the top, then one card per thing, each card a title
    with its state and its number, then labelled rows of what was written. */
+/* Heading, the buttons beside it and the filters stay put while the list
+   moves under them: the filters are how you steer the list, and steering
+   should not require scrolling back up. */
+.screen-header {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background: #000;
+}
 .screen-title-row {
   display: flex;
   align-items: center;

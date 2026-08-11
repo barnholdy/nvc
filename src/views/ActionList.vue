@@ -1,39 +1,41 @@
 <template>
   <div class="dark-page">
     <v-content>
-      <div class="screen-title-row">
-        <h1 class="screen-title">Handlungen</h1>
-        <div class="screen-actions">
-          <button class="screen-add" @click="$router.push('/add-action')" aria-label="Neue Handlung">+</button>
-          <button class="screen-add" @click="$router.push('/settings')" aria-label="Einstellungen">
-            <v-icon color="#8e8e93">settings</v-icon>
-          </button>
+      <div class="screen-header">
+        <div class="screen-title-row">
+          <h1 class="screen-title">Handlungen</h1>
+          <div class="screen-actions">
+            <button class="screen-add" @click="$router.push('/add-action')" aria-label="Neue Handlung">+</button>
+            <button class="screen-add" @click="$router.push('/settings')" aria-label="Einstellungen">
+              <v-icon color="#8e8e93">settings</v-icon>
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div v-if="filterBeliefs.length > 1" class="pill-row">
-        <button
-          class="pill"
-          :class="{ active: beliefFilter === null }"
-          @click="beliefFilter = null"
-        >Alle</button>
-        <button
-          v-for="b in filterBeliefs"
-          :key="b.time"
-          class="pill"
-          :class="{ active: beliefFilter === b.time }"
-          @click="beliefFilter = b.time"
-        >„{{ b.belief }}“<span class="pill-count"> · {{ b.count }}</span></button>
-      </div>
+        <div v-if="filterBeliefs.length > 1" class="pill-row">
+          <button
+            class="pill"
+            :class="{ active: beliefFilter === null }"
+            @click="beliefFilter = null"
+          >Alle</button>
+          <button
+            v-for="b in filterBeliefs"
+            :key="b.time"
+            class="pill"
+            :class="{ active: beliefFilter === b.time }"
+            @click="beliefFilter = b.time"
+          >„{{ b.belief }}“<span class="pill-count"> · {{ b.count }}</span></button>
+        </div>
 
-      <div class="pill-row">
-        <button
-          v-for="f in filters"
-          :key="f.key"
-          class="pill"
-          :class="{ active: tab === f.key }"
-          @click="tab = f.key"
-        >{{ f.label }}<span class="pill-count"> · {{ f.count }}</span></button>
+        <div class="pill-row">
+          <button
+            v-for="f in filters"
+            :key="f.key"
+            class="pill"
+            :class="{ active: tab === f.key }"
+            @click="tab = f.key"
+          >{{ f.label }}<span class="pill-count"> · {{ f.count }}</span></button>
+        </div>
       </div>
 
       <div v-if="filteredRows.length === 0" class="list-empty">

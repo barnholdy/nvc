@@ -1,35 +1,37 @@
 <template>
   <div class="dark-page">
     <v-content>
-      <div class="screen-title-row">
-        <h1 class="screen-title">Überzeugungen</h1>
-        <div class="screen-actions">
-          <button class="screen-add" @click="$router.push('/settings')" aria-label="Einstellungen">
-            <v-icon color="#8e8e93">settings</v-icon>
-          </button>
+      <div class="screen-header">
+        <div class="screen-title-row">
+          <h1 class="screen-title">Überzeugungen</h1>
+          <div class="screen-actions">
+            <button class="screen-add" @click="$router.push('/settings')" aria-label="Einstellungen">
+              <v-icon color="#8e8e93">settings</v-icon>
+            </button>
+          </div>
         </div>
-      </div>
 
-      <!-- Counts on the filter, so the shape of the whole is readable before
-           anything is opened. -->
-      <div class="pill-row">
-        <!-- Compact strips the card back to what a belief is and where it
-             stands; everything written about it stays one tap away. -->
-        <button
-          class="pill pill-icon"
-          :class="{ active: compact }"
-          :aria-label="compact ? 'Ausführliche Ansicht' : 'Kompakte Ansicht'"
-          @click="compact = !compact"
-        >
-          <v-icon small>{{ compact ? 'unfold_more' : 'unfold_less' }}</v-icon>
-        </button>
-        <button
-          v-for="f in filters"
-          :key="f.key"
-          class="pill"
-          :class="{ active: tab === f.key }"
-          @click="tab = f.key"
-        >{{ f.label }}<span class="pill-count"> · {{ f.count }}</span></button>
+        <!-- Counts on the filter, so the shape of the whole is readable before
+             anything is opened. -->
+        <div class="pill-row">
+          <!-- Compact strips the card back to what a belief is and where it
+               stands; everything written about it stays one tap away. -->
+          <button
+            class="pill pill-icon"
+            :class="{ active: compact }"
+            :aria-label="compact ? 'Ausführliche Ansicht' : 'Kompakte Ansicht'"
+            @click="compact = !compact"
+          >
+            <v-icon small>{{ compact ? 'unfold_more' : 'unfold_less' }}</v-icon>
+          </button>
+          <button
+            v-for="f in filters"
+            :key="f.key"
+            class="pill"
+            :class="{ active: tab === f.key }"
+            @click="tab = f.key"
+          >{{ f.label }}<span class="pill-count"> · {{ f.count }}</span></button>
+        </div>
       </div>
 
       <div v-if="filteredBeliefs.length === 0" class="list-empty">

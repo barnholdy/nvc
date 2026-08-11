@@ -1,32 +1,34 @@
 <template>
   <div class="dark-page">
     <v-content>
-      <div class="screen-title-row">
-        <h1 class="screen-title">Verlauf</h1>
-        <div class="screen-actions">
-          <button class="screen-add" @click="$router.push('/add-pattern')" aria-label="Neue Situation">+</button>
-          <button class="screen-add" @click="$router.push('/settings')" aria-label="Einstellungen">
-            <v-icon color="#8e8e93">settings</v-icon>
-          </button>
+      <div class="screen-header">
+        <div class="screen-title-row">
+          <h1 class="screen-title">Verlauf</h1>
+          <div class="screen-actions">
+            <button class="screen-add" @click="$router.push('/add-pattern')" aria-label="Neue Situation">+</button>
+            <button class="screen-add" @click="$router.push('/settings')" aria-label="Einstellungen">
+              <v-icon color="#8e8e93">settings</v-icon>
+            </button>
+          </div>
         </div>
-      </div>
 
-      <!-- Filtering by belief rather than by state: this screen is a record of
-           what happened, and the question it answers is which belief keeps
-           turning up. -->
-      <div class="pill-row">
-        <button
-          class="pill"
-          :class="{ active: beliefFilter === null }"
-          @click="beliefFilter = null"
-        >Alle</button>
-        <button
-          v-for="b in filterBeliefs"
-          :key="b.time"
-          class="pill"
-          :class="{ active: beliefFilter === b.time }"
-          @click="beliefFilter = b.time"
-        >„{{ b.belief }}“<span class="pill-count"> · {{ b.count }}</span></button>
+        <!-- Filtering by belief rather than by state: this screen is a record of
+             what happened, and the question it answers is which belief keeps
+             turning up. -->
+        <div class="pill-row">
+          <button
+            class="pill"
+            :class="{ active: beliefFilter === null }"
+            @click="beliefFilter = null"
+          >Alle</button>
+          <button
+            v-for="b in filterBeliefs"
+            :key="b.time"
+            class="pill"
+            :class="{ active: beliefFilter === b.time }"
+            @click="beliefFilter = b.time"
+          >„{{ b.belief }}“<span class="pill-count"> · {{ b.count }}</span></button>
+        </div>
       </div>
 
       <div v-if="!filtered.length" class="list-empty">

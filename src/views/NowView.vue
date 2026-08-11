@@ -1,12 +1,14 @@
 <template>
   <div class="dark-page">
     <v-content>
-      <div class="screen-title-row">
-        <h1 class="screen-title">Jetzt</h1>
-        <div class="screen-actions">
-          <button class="screen-add" @click="$router.push('/settings')" aria-label="Einstellungen">
-            <v-icon color="#8e8e93">settings</v-icon>
-          </button>
+      <div class="screen-header">
+        <div class="screen-title-row">
+          <h1 class="screen-title">Jetzt</h1>
+          <div class="screen-actions">
+            <button class="screen-add" @click="$router.push('/settings')" aria-label="Einstellungen">
+              <v-icon color="#8e8e93">settings</v-icon>
+            </button>
+          </div>
         </div>
       </div>
 
