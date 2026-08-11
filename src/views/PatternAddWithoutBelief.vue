@@ -2,7 +2,7 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Neue Reaktion</h1>
-      <p class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
+      <belief-quote :text="belief" class="mt-1"></belief-quote>
       <belief-context :exceptions="exceptions"></belief-context>
       <need-words
         class="body-1 grey--text mt-2 wizard-prompt"
@@ -28,6 +28,7 @@
 <script>
 import BeliefContext from '@/views/BeliefContext.vue';
 import NeedWords from '@/components/NeedWords.vue';
+import BeliefQuote from '@/components/BeliefQuote.vue';
 
 const TAIL = ' Wie würdest du in eine Begegnung gehen? Was würdest du tun oder lassen?';
 const PROMPT_PREFIX = 'Stell dir einen Tag vor, an dem diese Überzeugung einfach nicht existiert. '
@@ -40,7 +41,7 @@ const PROMPT_FALLBACK = 'Stell dir einen Tag vor, an dem diese Überzeugung einf
 
 export default {
   name: 'pattern-add-without-belief',
-  components: { BeliefContext, NeedWords },
+  components: { BeliefContext, NeedWords, BeliefQuote },
   props: {
     belief: { type: String, default: '' },
     // The need(s) this belief was a strategy for. Named in the prompt, because
@@ -63,9 +64,3 @@ export default {
   },
 };
 </script>
-
-<style scoped lang="scss">
-.belief-quote {
-  font-style: italic;
-}
-</style>

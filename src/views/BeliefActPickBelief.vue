@@ -17,25 +17,14 @@
         :class="{ selected: b.time === selected }"
         @click="pick(b.time)"
       >
-        <span class="belief-text">{{ b.belief }}</span>
+        <span class="belief-text">„{{ b.belief }}“</span>
         <!-- The same two numbers the Überzeugungen list shows, so the choice
              can be made here instead of from memory. -->
-        <template v-if="credibility(b) !== null">
-          <span class="pick-label">Glaubwürdigkeit</span>
-          <span class="slider-row">
-            <span class="slider-end-label">0</span>
-            <input
-              type="range"
-              min="0"
-              max="10"
-              step="0.1"
-              :value="credibility(b)"
-              class="readonly-slider"
-              disabled
-            />
-            <span class="slider-end-label">10</span>
-          </span>
-        </template>
+        <div v-if="credibility(b) !== null" class="score-row">
+          <span class="score-value">{{ round(credibility(b)) }}</span>
+          <span class="score-max">/10</span>
+          <span class="score-label">Glaubwürdigkeit</span>
+        </div>
         <span class="pick-meta">{{ situationLabel(b) }}</span>
       </button>
 
@@ -65,6 +54,8 @@ export default {
     credibility(belief) {
       return beliefCredibility(this.patterns, belief);
     },
+    // One decimal, German comma — the same rounding the list cards use.
+    round(v) { return String(Math.round(v * 10) / 10).replace('.', ','); },
     situationCount(belief) {
       return situationsForBelief(this.patterns, belief.time).length;
     },
@@ -106,59 +97,11 @@ export default {
   }
 }
 .belief-text { display: block; }
-.pick-label {
-  display: block;
-  font-size: 0.68rem;
-  color: #8e8e93;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 600;
-  margin: 10px 0 6px;
-}
 .pick-meta {
   display: block;
   font-size: 0.78rem;
   color: #8e8e93;
   margin-top: 8px;
-}
-.slider-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 4px;
-}
-.slider-end-label {
-  font-size: 0.78rem;
-  color: #8e8e93;
-  flex-shrink: 0;
-}
-/* Shows a recorded value — deliberately not interactive, so a tap anywhere on
-   the button still selects the belief. */
-.readonly-slider {
-  flex: 1;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 4px;
-  border-radius: 2px;
-  background: #3a3a3c;
-  outline: none;
-  opacity: 1;
-  pointer-events: none;
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: #4ade80;
-  }
-  &::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    border: none;
-    border-radius: 50%;
-    background: #4ade80;
-  }
 }
 .empty-text {
   font-size: 0.875rem;

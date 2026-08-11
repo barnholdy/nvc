@@ -4,48 +4,27 @@
       <h1 class="headline font-weight-regular">Situation</h1>
       <!-- Both ends of what this action tests, each with the standing it has
            right now — the question below asks you to act as if the second one
-           held instead of the first. -->
-      <template v-if="entry">
-        <p class="step-label mt-3">Überzeugung</p>
-        <p class="quote">„{{ entry.belief }}“</p>
-        <template v-if="beliefTruth !== null">
-          <p class="step-label mt-2">Glaubwürdigkeit</p>
-          <div class="slider-row">
-            <span class="slider-end-label">0</span>
-            <input
-              type="range"
-              min="0"
-              max="10"
-              step="0.1"
-              :value="beliefTruth"
-              class="readonly-slider"
-              disabled
-            />
-            <span class="slider-end-label">10</span>
-          </div>
-        </template>
-      </template>
+           held instead of the first. Same treatment the lists give them: a
+           quote with its score, an affirmation in its box. -->
+      <belief-quote
+        v-if="entry"
+        label="Überzeugung"
+        :text="entry.belief"
+        :credibility="beliefTruth"
+        class="mt-3"
+      ></belief-quote>
 
-      <template v-if="affirmationText">
-        <p class="step-label mt-3">Affirmation</p>
-        <p class="quote">„{{ affirmationText }}“</p>
-        <template v-if="affirmationTruth !== null">
-          <p class="step-label mt-2">Glaubwürdigkeit</p>
-          <div class="slider-row">
-            <span class="slider-end-label">0</span>
-            <input
-              type="range"
-              min="0"
-              max="10"
-              step="0.1"
-              :value="affirmationTruth"
-              class="readonly-slider"
-              disabled
-            />
-            <span class="slider-end-label">10</span>
-          </div>
-        </template>
-      </template>
+      <div v-if="affirmationText" class="aff-box mt-3">
+        <p class="aff-label">Affirmation</p>
+        <p class="aff-text">„{{ affirmationText }}“</p>
+        <div v-if="affirmationTruth !== null" class="aff-foot">
+          <span class="aff-score">
+            <span class="aff-value">{{ round(affirmationTruth) }}</span>
+            <span class="aff-max">/10</span>
+            <span class="aff-word">Glaubwürdigkeit</span>
+          </span>
+        </div>
+      </div>
 
       <action-prompt :belief="entry" class="mt-4"></action-prompt>
     </v-flex>
@@ -117,13 +96,14 @@
 <script>
 import ActionPrompt from '@/components/ActionPrompt.vue';
 import SituationRows from '@/components/SituationRows.vue';
+import BeliefQuote from '@/components/BeliefQuote.vue';
 import { askClaude, loadApiKey, saveApiKey, parseLines } from '@/utils/ai';
 import { buildActionPrompt, SUGGESTION_COUNT } from '@/utils/actionSuggestions';
 import { beliefCredibility, affirmationCredibility } from '@/utils/credibility';
 
 export default {
   name: 'belief-act-situation',
-  components: { ActionPrompt, SituationRows },
+  components: { ActionPrompt, SituationRows, BeliefQuote },
   props: {
     // The whole belief, because the prompt names its need, its new feelings and
     // its affirmation.
@@ -168,6 +148,8 @@ export default {
     text(val) { this.$emit('changed', val); },
   },
   methods: {
+    // One decimal, German comma — the same rounding the list cards use.
+    round(v) { return String(Math.round(v * 10) / 10).replace('.', ','); },
     // A suggestion lands in the field, where it can still be reworded — the
     // same way the affirmation step treats its suggestions.
     use(suggestion) {
@@ -206,60 +188,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.belief-quote { font-style: italic; }
-.step-label {
-  font-size: 0.68rem;
-  color: #8e8e93;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin: 0 0 4px;
-  font-weight: 600;
-}
-.quote {
-  font-size: 0.95rem;
-  color: #ebebf5;
-  font-style: italic;
-  line-height: 1.45;
-  margin: 0;
-}
-.slider-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 4px;
-}
-.slider-end-label {
-  font-size: 0.78rem;
-  color: #8e8e93;
-  flex-shrink: 0;
-}
-/* Shows a recorded value — deliberately not interactive. */
-.readonly-slider {
-  flex: 1;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 4px;
-  border-radius: 2px;
-  background: #3a3a3c;
-  outline: none;
-  opacity: 1;
-  pointer-events: none;
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: #4ade80;
-  }
-  &::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    border: none;
-    border-radius: 50%;
-    background: #4ade80;
-  }
-}
 /* Full-width rows rather than chips: a suggestion is a whole sentence, and a
    chip would either wrap badly or push the line off the screen. */
 .suggestion-row {

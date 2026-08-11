@@ -2,7 +2,7 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Affirmation</h1>
-      <p v-if="belief" class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
+      <belief-quote v-if="belief" :text="belief" class="mt-1"></belief-quote>
       <belief-context :exceptions="exceptions" :perspective="withoutBelief"></belief-context>
 
       <!-- Needs and feelings are named inside the question, not listed above
@@ -113,6 +113,7 @@
 import BeliefContext from '@/views/BeliefContext.vue';
 import FeelingWords from '@/components/FeelingWords.vue';
 import NeedWords from '@/components/NeedWords.vue';
+import BeliefQuote from '@/components/BeliefQuote.vue';
 import { normalizeTruth, truthHint } from '@/utils/affirmationTruth';
 
 const ASK = 'Formuliere einen Satz, der zu dieser gefühlten neuen Reaktion passt. '
@@ -122,7 +123,7 @@ const ASK = 'Formuliere einen Satz, der zu dieser gefühlten neuen Reaktion pass
 
 export default {
   name: 'pattern-change-affirmation',
-  components: { BeliefContext, FeelingWords, NeedWords },
+  components: { BeliefContext, FeelingWords, NeedWords, BeliefQuote },
   props: {
     belief: { type: String, default: '' },
     // Written in the wizard's first step, carried forward as context.
@@ -254,7 +255,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.belief-quote { font-style: italic; }
 .slider-row {
   display: flex;
   align-items: center;

@@ -2,7 +2,7 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Bedürfnis</h1>
-      <p class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
+      <belief-quote :text="belief" class="mt-1"></belief-quote>
 
       <belief-context :reaction="reaction" :origin="origin"></belief-context>
 
@@ -31,6 +31,7 @@
 import BeliefContext from '@/views/BeliefContext.vue';
 import FeelingWords from '@/components/FeelingWords.vue';
 import NeedPicker from '@/components/NeedPicker.vue';
+import BeliefQuote from '@/components/BeliefQuote.vue';
 import { MAX_NEEDS } from '@/utils/needs';
 
 // What the prompt says before the pick: the belief made sense at the time, and
@@ -48,7 +49,7 @@ const PROMPT_FALLBACK = 'Diese Überzeugung hatte damals einen guten Grund. Sie 
 // Empathie step, where the material is picked up again anyway.
 export default {
   name: 'belief-add-gift',
-  components: { BeliefContext, FeelingWords, NeedPicker },
+  components: { BeliefContext, FeelingWords, NeedPicker, BeliefQuote },
   props: {
     belief: { type: String, default: '' },
     reaction: { type: String, default: '' },
@@ -64,7 +65,3 @@ export default {
   },
 };
 </script>
-
-<style scoped lang="scss">
-.belief-quote { font-style: italic; }
-</style>

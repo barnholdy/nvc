@@ -1098,26 +1098,25 @@ export default {
 .gap-dot-real { background: #6aaef7; }
 .gap-delta { margin-left: auto; font-weight: 600; }
 
+/* Same outline chip Verlauf uses for its belief tags: content-width, not a
+   stretched block — a label, not a section of the card. */
 .belief-chip {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  background: #2c2c2e;
-  border-radius: 12px;
-  padding: 11px 14px;
+  gap: 8px;
+  max-width: 100%;
+  min-width: 0;
+  background: #1c1c1e;
+  border: 1px solid #2c2c2e;
+  border-radius: 999px;
+  padding: 7px 13px;
   margin-top: 14px;
+  font-size: 0.85rem;
+  color: #8e8e93;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
 }
-.belief-chip-text {
-  flex: 1;
-  min-width: 0;
-  font-size: 0.9rem;
-  color: #8e8e93;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.belief-chip-score { font-size: 0.85rem; color: #636366; flex-shrink: 0; }
+.belief-chip-text { min-width: 0; overflow-wrap: anywhere; }
+.belief-chip-score { color: #636366; flex-shrink: 0; white-space: nowrap; }
 </style>

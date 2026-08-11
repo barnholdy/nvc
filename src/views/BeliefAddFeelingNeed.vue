@@ -2,7 +2,7 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">{{ headlineText }}</h1>
-      <p class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
+      <belief-quote :text="belief" class="mt-1"></belief-quote>
 
       <!-- What was written a step or two earlier. Picking feelings is easier
            with the reaction still in view than from memory. -->
@@ -90,6 +90,7 @@
 
 <script>
 import BeliefContext from '@/views/BeliefContext.vue';
+import BeliefQuote from '@/components/BeliefQuote.vue';
 import { emotionColor, emotionValence, emotionIdForFeeling } from '@/utils/emotions';
 
 // The Gefühl tree. Bedürfnisse used to be picked here too, through the same
@@ -97,7 +98,7 @@ import { emotionColor, emotionValence, emotionIdForFeeling } from '@/utils/emoti
 // now, so this one only does one thing.
 export default {
   name: 'belief-add-feeling-need',
-  components: { BeliefContext },
+  components: { BeliefContext, BeliefQuote },
   props: {
     belief: { type: String, default: '' },
     // The reaction from the earlier step, shown read-only for context.
@@ -238,7 +239,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.belief-quote { font-style: italic; }
 .limit-hint {
   font-size: 0.8rem;
   color: #636366;

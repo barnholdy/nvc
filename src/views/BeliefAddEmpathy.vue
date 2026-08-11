@@ -2,7 +2,7 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Empathie bekommen</h1>
-      <p class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
+      <belief-quote :text="belief" class="mt-1"></belief-quote>
 
       <!-- The same ground the previous step stood on, so nothing has to be
            recalled from memory before asking for a mirror. -->
@@ -32,6 +32,7 @@
 <script>
 import BeliefContext from '@/views/BeliefContext.vue';
 import EmpathyPanel from '@/components/EmpathyPanel.vue';
+import BeliefQuote from '@/components/BeliefQuote.vue';
 import { colorForFeeling, dedupeByName, sortByEmotion } from '@/utils/emotions';
 import { colorForNeed, sortNeeds } from '@/utils/needs';
 
@@ -39,7 +40,7 @@ import { colorForNeed, sortNeeds } from '@/utils/needs';
 // before the wizard closes it again.
 export default {
   name: 'belief-add-empathy',
-  components: { BeliefContext, EmpathyPanel },
+  components: { BeliefContext, EmpathyPanel, BeliefQuote },
   props: {
     // Everything the wizard has collected so far, so the request reflects this
     // run rather than what was last saved.
@@ -115,7 +116,3 @@ export default {
   },
 };
 </script>
-
-<style scoped lang="scss">
-.belief-quote { font-style: italic; }
-</style>

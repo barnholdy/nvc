@@ -2,15 +2,11 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Absolutheit prüfen</h1>
-      <p class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
-
-      <!-- What the situations say, before the step asks you to doubt it. Only
-           when there is something to say — a number without a rating behind it
-           would claim an answer nobody gave. -->
-      <p v-if="percent !== null" class="body-1 white--text mt-3">
-        Basierend auf vergangenen Situationen hältst du die Überzeugung für
-        {{ percent }} % glaubwürdig.
-      </p>
+      <!-- The same number the lists show — what the situations say, before the
+           step asks you to doubt it. Nothing renders when there is nothing to
+           say: a number without a rating behind it would claim an answer
+           nobody gave. -->
+      <belief-quote :text="belief" :credibility="truth" class="mt-1"></belief-quote>
 
       <p class="body-1 grey--text mt-3 wizard-prompt">Stimmt diese Überzeugung wirklich in jeder Situation? Nenne 2–3 konkrete Momente, in denen das nicht der Fall war.</p>
     </v-flex>
@@ -28,10 +24,11 @@
 </template>
 
 <script>
-import { truthPercent } from '@/utils/beliefTrend';
+import BeliefQuote from '@/components/BeliefQuote.vue';
 
 export default {
   name: 'belief-change-absoluteness',
+  components: { BeliefQuote },
   props: {
     belief: { type: String, default: '' },
     // Average of every rating this belief collected in the Situationen wizard.
@@ -42,17 +39,8 @@ export default {
   data() {
     return { text: this.initialValue };
   },
-  computed: {
-    percent() { return truthPercent(this.truth); },
-  },
   watch: {
     text(val) { this.$emit('changed', val); },
   },
 };
 </script>
-
-<style scoped lang="scss">
-.belief-quote {
-  font-style: italic;
-}
-</style>

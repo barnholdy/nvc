@@ -2,7 +2,7 @@
   <v-layout column>
     <v-flex class="mt-2 mb-3">
       <h1 class="headline font-weight-regular">Ursprung</h1>
-      <p class="subheading grey--text belief-quote mt-1">„{{ belief }}“</p>
+      <belief-quote :text="belief" class="mt-1"></belief-quote>
 
       <!-- No needs here: they are picked on the next step. The feelings
            are named in the question itself rather than listed above it. -->
@@ -33,6 +33,7 @@
 <script>
 import BeliefContext from '@/views/BeliefContext.vue';
 import FeelingWords from '@/components/FeelingWords.vue';
+import BeliefQuote from '@/components/BeliefQuote.vue';
 
 const QUESTION = 'wann hast du diese Überzeugung zum ersten Mal gelernt? Welche frühere '
   + 'Erfahrung hat sie plausibel gemacht? Was hat dir diese Überzeugung damals ermöglicht?';
@@ -42,7 +43,7 @@ const QUESTION = 'wann hast du diese Überzeugung zum ersten Mal gelernt? Welche
 // now, where it can be answered by tapping instead of writing.
 export default {
   name: 'belief-add-origin',
-  components: { BeliefContext, FeelingWords },
+  components: { BeliefContext, FeelingWords, BeliefQuote },
   props: {
     belief: { type: String, default: '' },
     reaction: { type: String, default: '' },
@@ -66,7 +67,3 @@ export default {
   },
 };
 </script>
-
-<style scoped lang="scss">
-.belief-quote { font-style: italic; }
-</style>
