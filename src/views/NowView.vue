@@ -12,6 +12,20 @@
         </div>
       </div>
 
+      <!-- Above everything, and always there: writing down what just happened
+           is the one thing that does not depend on anything already being in
+           the app. -->
+      <div class="card capture-card" @click="$router.push('/add-pattern')">
+        <svg class="capture-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path :d="captureIcon" fill="currentColor"></path>
+        </svg>
+        <div class="capture-body">
+          <p class="capture-title">Situation erfassen</p>
+          <p class="capture-sub">Was ist dir gerade begegnet?</p>
+        </div>
+        <v-icon class="detail-chevron">chevron_right</v-icon>
+      </div>
+
       <div v-if="!tileSections.length && !practiseSection && !trendRows.length" class="list-empty">
         <span class="list-empty-icon">✅</span>
         <p class="list-empty-title">Nichts offen</p>
@@ -152,6 +166,7 @@ import {
 import {
   affirmationCredibility, beliefCredibility, beliefRows, affirmationRows,
 } from '@/utils/credibility';
+import { mdiLightningBolt } from '@mdi/js';
 import NavIcon from '@/components/NavIcon.vue';
 import TrendChart from '@/components/TrendChart.vue';
 import ProfileStats from '@/components/ProfileStats.vue';
@@ -186,6 +201,9 @@ export default {
     };
   },
   computed: {
+    // A situation is the moment something struck — the bolt this app used for
+    // Situationen before the nav went to a history icon.
+    captureIcon() { return mdiLightningBolt; },
     beliefs() { return this.$store.getters.beliefs; },
     patterns() { return this.$store.getters.patterns; },
     rows() { return collectExperiments(this.beliefs); },
@@ -445,6 +463,37 @@ export default {
   text-transform: uppercase;
   color: #8e8e93;
   margin: 18px 20px 8px;
+}
+
+/* The one action that always applies, so it gets the full width and sits
+   above every count. */
+.capture-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 4px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  &:active { opacity: 0.7; }
+}
+.capture-icon {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  color: #4ade80;
+}
+.capture-body { flex: 1; min-width: 0; }
+.capture-title {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #fff;
+  line-height: 1.3;
+  margin: 0;
+}
+.capture-sub {
+  font-size: 0.88rem;
+  color: #8e8e93;
+  margin: 3px 0 0;
 }
 
 /* Two-column count tiles: a label, a number, the verb that acts on it — no
