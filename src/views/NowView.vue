@@ -45,43 +45,62 @@
 
       <profile-stats></profile-stats>
 
-      <div v-if="!sections.length && !trendRows.length" class="list-empty">
+      <div v-if="!tileSections.length && !practiseSection && !trendRows.length" class="list-empty">
         <span class="list-empty-icon">✅</span>
         <p class="list-empty-title">Nichts offen</p>
         <p class="list-empty-sub">Lege eine Situation an, wenn dir etwas begegnet.</p>
       </div>
 
-      <!-- One block per kind of next step, one card per thing to do. A block
-           with nothing in it is not shown at all: an empty list is not news. -->
-      <template v-for="section in sections">
-        <p :key="section.key + '-head'" class="section-head">
-          {{ section.count }} {{ section.title }}
-        </p>
-
-        <div
-          v-for="item in section.items"
-          :key="item.key"
-          class="card now-card"
-          @click="section.run(item)"
-        >
-          <div class="now-line">
-            <div class="now-body">
-              <p class="now-title">{{ item.text }}</p>
-              <p v-if="item.sub" class="now-sub">{{ item.sub }}</p>
+      <!-- Five kinds of next step, as count tiles: which belief or action to
+           work on is picked in the list the tile opens, not previewed here. -->
+      <template v-if="tileSections.length">
+        <p class="section-head">Handlungen &amp; Überzeugungen</p>
+        <div class="tile-grid">
+          <div
+            v-for="section in tileSections"
+            :key="section.key"
+            class="tile-card"
+            @click="section.more()"
+          >
+            <div class="tile-top">
+              <p class="tile-label">{{ section.tileLabel }}</p>
+              <v-icon class="detail-chevron">chevron_right</v-icon>
             </div>
-            <button class="now-btn" @click.stop="section.run(item)">{{ section.action }}</button>
+            <p class="tile-count">
+              <span class="tile-number">{{ section.count }}</span>
+              <span class="tile-action">{{ section.action }}</span>
+            </p>
           </div>
-          <span v-if="item.chip" class="now-chip">{{ item.chip }}</span>
+        </div>
+      </template>
+
+      <!-- Affirmations stay a pick-one grid: which sentence to say again is
+           the point, not just how many there are. -->
+      <template v-if="practiseSection">
+        <p class="section-head">{{ practiseSection.count }} {{ practiseSection.title }}</p>
+        <div class="practise-grid">
+          <div
+            v-for="item in practiseSection.items"
+            :key="item.key"
+            class="card practise-card"
+            @click="practiseSection.run(item)"
+          >
+            <p class="practise-title">{{ item.text }}</p>
+            <p class="now-sub">{{ item.sub }}</p>
+            <button
+              class="now-btn"
+              @click.stop="practiseSection.run(item)"
+            >{{ practiseSection.action }}</button>
+          </div>
         </div>
 
         <!-- Only when there is more than what is shown. -->
         <div
-          v-if="section.count > section.top"
-          :key="section.key + '-more'"
+          v-if="practiseSection.count > practiseSection.top"
           class="now-more"
-          @click="section.more()"
+          @click="practiseSection.more()"
         >
-          <span>{{ section.count - section.top }} weitere anzeigen</span>
+          <span>{{ practiseSection.count - practiseSection.top }} weitere anzeigen</span>
           <v-icon class="detail-chevron">chevron_right</v-icon>
         </div>
       </template>
@@ -127,7 +146,6 @@ import {
   experimentDisplayState,
   experimentsOf,
   isPlanned,
-  isDue,
   experimentState,
 } from '@/utils/experiment';
 import {
@@ -139,11 +157,11 @@ import ProfileStats from '@/components/ProfileStats.vue';
 import PatternGroups from '@/components/PatternGroups.vue';
 import EmpathyBlock from '@/components/EmpathyBlock.vue';
 
-// The rest is one tap away in the list that owns it. Showing everything would
-// turn this screen back into those lists. Most blocks show one — the single
-// next thing — while the two that are a matter of picking rather than
-// finishing show a few to pick from.
-const TOP = 3;
+// The rest is one tap away in the list that owns it. The five belief and
+// action blocks are count tiles now — a number and a verb, no item to slice.
+// Affirmations stay a grid to pick from: four fills it before "more" is
+// offered.
+const TOP = 4;
 const ONE = 1;
 const PRACTICE_KEY = 'nvc.amen';
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -283,10 +301,12 @@ export default {
         const days = last ? Math.floor((this.now - last) / DAY_MS) : null;
         return {
           key: `a${a.text}`,
-          text: a.text,
+          text: `„${a.text}“`,
           // No overdue chip here: an affirmation is not a deadline, and the
-          // sub-line already says when it was last said.
-          sub: `Affirmation · ${this.sinceLabel(days)}`,
+          // sub-line already says when it was last said. No "Affirmation ·"
+          // prefix either — the grid sits under its own heading, which
+          // already says what these are.
+          sub: this.sinceLabel(days),
           aff: a,
         };
       };
@@ -301,12 +321,10 @@ export default {
           key: 'evaluate',
           top: ONE,
           title: 'geplante Handlungen auswerten',
+          tileLabel: 'Geplante Handlungen',
           action: 'Auswerten',
           count: this.plannedExperiments.length,
-          items: this.plannedExperiments.map(r => Object.assign(experiment(r), {
-            // isDue is the same seven-day mark the Handlungen list uses.
-            chip: isDue(r.experiment, this.now) ? 'überfällig' : null,
-          })),
+          items: this.plannedExperiments.map(experiment),
           // Evaluating happens in the Handlungen list, which owns that wizard.
           run: item => this.$router.push({
             path: '/actions',
@@ -318,6 +336,7 @@ export default {
           key: 'plan',
           top: ONE,
           title: 'neue Handlungen planen',
+          tileLabel: 'Neue Handlungen',
           action: 'Planen',
           count: this.openExperiments.length,
           items: this.openExperiments.map(experiment),
@@ -330,6 +349,7 @@ export default {
           key: 'act',
           top: ONE,
           title: 'gewandelte Überzeugungen handeln',
+          tileLabel: 'Gewandelte Überzeugungen',
           action: 'Handeln',
           count: this.byStatus.done.length,
           items: this.byStatus.done.map(b => belief(b)),
@@ -348,8 +368,9 @@ export default {
         },
         {
           key: 'change',
-          top: TOP,
+          top: ONE,
           title: 'ergründete Überzeugungen wandeln',
+          tileLabel: 'Ergründete Überzeugungen',
           action: 'Wandeln',
           count: this.byStatus.working.length,
           items: this.byStatus.working.map(b => belief(b)),
@@ -360,6 +381,7 @@ export default {
           key: 'explore',
           top: ONE,
           title: 'neue Überzeugungen ergründen',
+          tileLabel: 'Neue Überzeugungen',
           action: 'Ergründen',
           count: this.byStatus.open.length,
           items: this.byStatus.open.map(b => belief(b)),
@@ -371,6 +393,15 @@ export default {
       return all
         .filter(x => x.count > 0)
         .map(x => Object.assign({}, x, { items: x.items.slice(0, x.top) }));
+    },
+    // The five belief and action blocks, rendered as tiles.
+    tileSections() {
+      return this.sections.filter(s => s.key !== 'practise');
+    },
+    // Affirmations, rendered as a grid — kept apart because picking which
+    // sentence to say again is the point, not a count.
+    practiseSection() {
+      return this.sections.find(s => s.key === 'practise') || null;
     },
   },
   methods: {
@@ -412,24 +443,95 @@ export default {
   margin: 18px 20px 8px;
 }
 
-.now-card {
+/* Two-column count tiles: a label, a number, the verb that acts on it — no
+   item preview, because picking which one happens in the list the tile
+   opens. */
+.tile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 0 14px 12px;
+}
+.tile-card {
+  background: #141416;
+  border-radius: 18px;
+  padding: 16px 16px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  &:active { opacity: 0.7; }
+  /* Without this a grid column widens to fit whatever its content asks for —
+     a long label word, an icon before its font has loaded — and pushes the
+     second column off the screen. */
+  min-width: 0;
+}
+.tile-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 6px;
+  min-width: 0;
+}
+.tile-label {
+  font-size: 0.85rem;
+  color: #8e8e93;
+  line-height: 1.3;
+  margin: 0;
+  min-width: 0;
+  /* Reserves two lines so a one-line label does not leave a shorter tile
+     than its neighbour. */
+  min-height: 2.6em;
+}
+.tile-count {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 14px 0 0;
+}
+.tile-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+.tile-action {
+  font-size: 1rem;
+  color: #fff;
+  font-weight: 500;
+}
+
+/* Two-column affirmation cards: quote, last-practised line, Üben button. */
+.practise-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 0 14px 4px;
+}
+.practise-card {
+  margin: 0;
+  min-width: 0;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.7; }
 }
-.now-line {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-.now-body { flex: 1; min-width: 0; }
-.now-title {
-  font-size: 1.05rem;
+.practise-title {
+  font-size: 0.95rem;
   font-weight: 400;
   color: #fff;
   line-height: 1.35;
-  margin: 0;
+  margin: 0 0 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
+.practise-card .now-sub {
+  white-space: normal;
+  margin-bottom: 12px;
+}
+
 .now-sub {
   font-size: 0.88rem;
   color: #8e8e93;
@@ -448,15 +550,6 @@ export default {
   font-size: 0.95rem;
   padding: 9px 20px;
   cursor: pointer;
-}
-.now-chip {
-  display: inline-block;
-  margin-top: 12px;
-  border: 1px solid #fd9927;
-  border-radius: 8px;
-  color: #fd9927;
-  font-size: 0.85rem;
-  padding: 5px 12px;
 }
 /* A belief is a sentence, so its chip needs a ceiling or one chip fills the
    whole row. */

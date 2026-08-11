@@ -778,6 +778,11 @@ html { overflow-x: hidden; }
   flex-shrink: 0;
   color: #48484a !important;
   font-size: 1.05rem !important;
+  /* Reserve the glyph box: until the icon font arrives, the ligature renders
+     as its own word — wide enough to blow out a grid column that has no
+     min-width to fall back on. */
+  width: 1.05rem;
+  overflow: hidden;
 }
 /* Once open the answer needs the full width, so the label sits above it. */
 .detail-row.open {
