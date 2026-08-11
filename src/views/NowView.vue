@@ -74,6 +74,10 @@
         </div>
       </template>
 
+      <!-- What keeps coming up across everything, under the trends: the same
+           look back, one level wider. -->
+      <profile-stats></profile-stats>
+
       <div class="list-bottom-space"></div>
     </v-content>
 
@@ -118,6 +122,7 @@ import {
 } from '@/utils/credibility';
 import NavIcon from '@/components/NavIcon.vue';
 import TrendChart from '@/components/TrendChart.vue';
+import ProfileStats from '@/components/ProfileStats.vue';
 
 // Three is enough to start on; the rest is one tap away in the list that owns
 // them. Showing everything would turn this screen back into those lists.
@@ -135,7 +140,9 @@ function readPractised() {
 
 export default {
   name: 'now-view',
-  components: { AffirmationPractice, NavIcon, TrendChart },
+  components: {
+    AffirmationPractice, NavIcon, TrendChart, ProfileStats,
+  },
   data() {
     return {
       practising: null, practised: readPractised(), now: Date.now(), trendKey: null,
