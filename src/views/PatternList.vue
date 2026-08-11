@@ -63,7 +63,10 @@
           >
             <div
               class="timeline-row"
-              :class="{ 'timeline-last': entry.time === group.entries[group.entries.length - 1].time }"
+              :class="{
+                'timeline-first': entry.time === group.entries[0].time,
+                'timeline-last': entry.time === group.entries[group.entries.length - 1].time,
+              }"
             >
               <span class="timeline-dot"></span>
               <div class="timeline-body">
@@ -391,22 +394,28 @@ export default {
   gap: 14px;
   padding: 4px 20px 18px;
   background: #000;
-  /* Each entry draws its own piece of thread, from its dot down into the next
-     entry's dot. Drawn once from the first dot as one long line it carried on
-     straight through the month headings in between. The last entry of a month
-     has nothing below it to reach, so it draws none — and that has to be said
-     explicitly, because every row is an only child of its own wrapper and
-     :last-child would therefore match all of them. */
-  &::before {
+  /* Each entry draws the thread across its own box only, in two halves that
+     meet at its dot: never past its own edges, because every row paints an
+     opaque background and a later sibling would cover anything that hung over
+     into it — which is exactly the gap that used to appear above each dot.
+     The halves are dropped at the ends of a month so the thread does not run
+     through the heading in between. First and last have to be said
+     explicitly: every row is an only child of its own wrapper, so
+     :first-child and :last-child would match all of them. */
+  &::before,
+  &::after {
     content: '';
     position: absolute;
     left: 24px;
-    top: 17px;
-    bottom: -17px;
     width: 1px;
     background: #2c2c2e;
   }
+  /* Dot centre downwards. */
+  &::before { top: 14px; bottom: 0; }
+  /* Row top down to the dot centre. */
+  &::after { top: 0; height: 14px; }
   &.timeline-last::before { display: none; }
+  &.timeline-first::after { display: none; }
 }
 .timeline-dot {
   position: relative;

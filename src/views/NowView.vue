@@ -12,13 +12,38 @@
         </div>
       </div>
 
-      <!-- Above everything: what the beliefs have in common is the frame the
-           rest of the screen sits in. -->
-      <pattern-groups></pattern-groups>
+      <!-- What has moved, before what is still to do. -->
+      <template v-if="trendRows.length">
+        <p class="section-head">Trends</p>
 
-      <!-- Directly under the patterns: the same material, read back to you
-           rather than counted. -->
-      <empathy-block></empathy-block>
+        <!-- Two levels of chip: which kind of thing, then which one. -->
+        <div class="pill-row">
+          <button
+            v-for="t in trendTabs"
+            :key="t.key"
+            class="pill"
+            :class="{ active: t.key === shownTrendTab }"
+            @click="trendTab = t.key; trendKey = null"
+          >{{ t.label }}<span class="pill-count"> · {{ t.rows.length }}</span></button>
+        </div>
+
+        <div class="pill-row">
+          <button
+            v-for="r in tabRows"
+            :key="r.key"
+            class="pill trend-pill"
+            :class="{ active: r.key === shownTrendKey }"
+            @click="trendKey = r.key"
+          >{{ r.short }}<span class="pill-count"> · {{ r.points.length }}</span></button>
+        </div>
+
+        <div v-if="shownTrend" class="card">
+          <p class="card-title">„{{ shownTrend.text }}“</p>
+          <trend-chart :row="shownTrend" :inverted="shownTrend.inverted"></trend-chart>
+        </div>
+      </template>
+
+      <profile-stats></profile-stats>
 
       <div v-if="!sections.length && !trendRows.length" class="list-empty">
         <span class="list-empty-icon">✅</span>
@@ -49,44 +74,22 @@
           <span v-if="item.chip" class="now-chip">{{ item.chip }}</span>
         </div>
 
-        <!-- Only when there is more than the three shown. -->
+        <!-- Only when there is more than what is shown. -->
         <div
-          v-if="section.count > TOP"
+          v-if="section.count > section.top"
           :key="section.key + '-more'"
           class="now-more"
           @click="section.more()"
         >
-          <span>{{ section.count - TOP }} weitere anzeigen</span>
+          <span>{{ section.count - section.top }} weitere anzeigen</span>
           <v-icon class="detail-chevron">chevron_right</v-icon>
         </div>
       </template>
 
-      <!-- Last, and deliberately so: everything above is what to do next,
-           this is what has moved so far. One chart at a time — a wall of them
-           is a report, and nobody reads a report on their phone. -->
-      <template v-if="trendRows.length">
-        <p class="section-head">Trends</p>
-
-        <div class="pill-row">
-          <button
-            v-for="r in trendRows"
-            :key="r.key"
-            class="pill trend-pill"
-            :class="{ active: r.key === shownTrendKey }"
-            @click="trendKey = r.key"
-          >{{ r.short }}<span class="pill-count"> · {{ r.points.length }}</span></button>
-        </div>
-
-        <div class="card">
-          <p class="card-title">„{{ shownTrend.text }}“</p>
-          <p class="now-sub trend-kind">{{ shownTrend.kind }}</p>
-          <trend-chart :row="shownTrend" :inverted="shownTrend.inverted"></trend-chart>
-        </div>
-      </template>
-
-      <!-- What keeps coming up across everything, under the trends: the same
-           look back, one level wider. -->
-      <profile-stats></profile-stats>
+      <!-- Last: what the beliefs have in common, and the same material read
+           back to you. Both are a look around, not a next step. -->
+      <pattern-groups></pattern-groups>
+      <empathy-block></empathy-block>
 
       <div class="list-bottom-space"></div>
     </v-content>
@@ -136,9 +139,12 @@ import ProfileStats from '@/components/ProfileStats.vue';
 import PatternGroups from '@/components/PatternGroups.vue';
 import EmpathyBlock from '@/components/EmpathyBlock.vue';
 
-// Three is enough to start on; the rest is one tap away in the list that owns
-// them. Showing everything would turn this screen back into those lists.
+// The rest is one tap away in the list that owns it. Showing everything would
+// turn this screen back into those lists. Most blocks show one — the single
+// next thing — while the two that are a matter of picking rather than
+// finishing show a few to pick from.
 const TOP = 3;
+const ONE = 1;
 const PRACTICE_KEY = 'nvc.amen';
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -157,11 +163,10 @@ export default {
   },
   data() {
     return {
-      practising: null, practised: readPractised(), now: Date.now(), trendKey: null,
+      practising: null, practised: readPractised(), now: Date.now(), trendKey: null, trendTab: null,
     };
   },
   computed: {
-    TOP() { return TOP; },
     beliefs() { return this.$store.getters.beliefs; },
     patterns() { return this.$store.getters.patterns; },
     rows() { return collectExperiments(this.beliefs); },
@@ -227,15 +232,32 @@ export default {
         }));
       return beliefs.concat(affirmations);
     },
-    // The chosen chip, or the first one — a chip that vanished (a rating
-    // undone elsewhere) must not leave the block blank.
+    // Grouped by kind first: a belief and an affirmation are read on opposite
+    // scales, so mixing them in one row invites reading the wrong direction.
+    trendTabs() {
+      return [
+        { key: 'beliefs', label: 'Überzeugungen', rows: this.trendRows.filter(r => !r.inverted) },
+        { key: 'affirmations', label: 'Affirmationen', rows: this.trendRows.filter(r => r.inverted) },
+      ].filter(t => t.rows.length);
+    },
+    shownTrendTab() {
+      const tabs = this.trendTabs;
+      if (!tabs.length) return null;
+      return tabs.some(t => t.key === this.trendTab) ? this.trendTab : tabs[0].key;
+    },
+    tabRows() {
+      const tab = this.trendTabs.find(t => t.key === this.shownTrendTab);
+      return tab ? tab.rows : [];
+    },
+    // The chosen chip, or the first one in the chosen group — a chip that
+    // vanished (a rating undone elsewhere) must not leave the block blank.
     shownTrendKey() {
-      const rows = this.trendRows;
+      const rows = this.tabRows;
       if (!rows.length) return null;
       return rows.some(r => r.key === this.trendKey) ? this.trendKey : rows[0].key;
     },
     shownTrend() {
-      return this.trendRows.find(r => r.key === this.shownTrendKey) || null;
+      return this.tabRows.find(r => r.key === this.shownTrendKey) || null;
     },
     openExperiments() {
       return this.rows.filter(r => experimentState(r.experiment) !== 'evaluated'
@@ -274,14 +296,14 @@ export default {
         sub: `Handlung · „${r.beliefText}“`,
         row: r,
       });
-      const run = list => list.slice(0, TOP);
       const all = [
         {
           key: 'evaluate',
+          top: ONE,
           title: 'geplante Handlungen auswerten',
           action: 'Auswerten',
           count: this.plannedExperiments.length,
-          items: run(this.plannedExperiments).map(r => Object.assign(experiment(r), {
+          items: this.plannedExperiments.map(r => Object.assign(experiment(r), {
             // isDue is the same seven-day mark the Handlungen list uses.
             chip: isDue(r.experiment, this.now) ? 'überfällig' : null,
           })),
@@ -294,10 +316,11 @@ export default {
         },
         {
           key: 'plan',
+          top: ONE,
           title: 'neue Handlungen planen',
           action: 'Planen',
           count: this.openExperiments.length,
-          items: run(this.openExperiments).map(experiment),
+          items: this.openExperiments.map(experiment),
           run: item => this.$router.push(
             `/act-belief/${item.row.beliefTime}/${item.row.experiment.id}`,
           ),
@@ -305,42 +328,49 @@ export default {
         },
         {
           key: 'act',
+          top: ONE,
           title: 'gewandelte Überzeugungen handeln',
           action: 'Handeln',
           count: this.byStatus.done.length,
-          items: run(this.byStatus.done).map(b => belief(b)),
+          items: this.byStatus.done.map(b => belief(b)),
           run: item => this.$router.push(`/act-belief/${item.entry.time}`),
           more: () => this.$router.push({ path: '/beliefs', query: { tab: 'done' } }),
         },
         {
           key: 'practise',
+          top: TOP,
           title: this.affirmations.length === 1 ? 'Affirmation üben' : 'Affirmationen üben',
           action: 'Üben',
           count: this.affirmations.length,
-          items: run(this.affirmations).map(affirmation),
+          items: this.affirmations.map(affirmation),
           run: item => this.startPractice(item.aff),
           more: () => this.$router.push('/beliefs'),
         },
         {
           key: 'change',
+          top: TOP,
           title: 'ergründete Überzeugungen wandeln',
           action: 'Wandeln',
           count: this.byStatus.working.length,
-          items: run(this.byStatus.working).map(b => belief(b)),
+          items: this.byStatus.working.map(b => belief(b)),
           run: item => this.$router.push(`/change-belief/${item.entry.time}`),
           more: () => this.$router.push({ path: '/beliefs', query: { tab: 'working' } }),
         },
         {
           key: 'explore',
+          top: ONE,
           title: 'neue Überzeugungen ergründen',
           action: 'Ergründen',
           count: this.byStatus.open.length,
-          items: run(this.byStatus.open).map(b => belief(b)),
+          items: this.byStatus.open.map(b => belief(b)),
           run: item => this.$router.push(`/edit-belief/${item.entry.time}`),
           more: () => this.$router.push({ path: '/beliefs', query: { tab: 'open' } }),
         },
       ];
-      return all.filter(s => s.count > 0);
+      // Cut to size here, once, rather than at every call site.
+      return all
+        .filter(x => x.count > 0)
+        .map(x => Object.assign({}, x, { items: x.items.slice(0, x.top) }));
     },
   },
   methods: {

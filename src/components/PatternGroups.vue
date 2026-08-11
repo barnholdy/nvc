@@ -1,13 +1,15 @@
 <template>
   <div v-if="beliefs.length">
-    <p class="section-head">Muster &amp; Auflösung</p>
+    <p class="section-head">Meine Muster</p>
 
     <!-- One card per cluster: the name the analysis gave it, and the beliefs
          that fell into it as chips. -->
     <div v-for="(k, i) in patternGroups" :key="i" class="card">
       <p class="card-title">{{ k.title }}</p>
       <div class="group-chips">
-        <span v-for="(b, j) in k.beliefs" :key="j" class="group-chip">„{{ b }}“</span>
+        <span v-for="(b, j) in k.beliefs" :key="j" class="group-chip">
+          „{{ b.text }}“<span v-if="b.credibility !== null" class="chip-score"> · {{ b.credibility }}/10</span>
+        </span>
       </div>
     </div>
 
@@ -36,6 +38,8 @@
 </template>
 
 <script>
+import { beliefCredibility } from '@/utils/credibility';
+
 // Quotes, case, spacing and a trailing period are all the analysis is likely to
 // change when it repeats a belief back — none of them make it a different one.
 function normalizeBelief(text) {
@@ -74,9 +78,18 @@ export default {
       this.beliefs.forEach((b) => {
         if (b && b.belief) byText[normalizeBelief(b.belief)] = b;
       });
+      const patterns = this.$store.getters.patterns;
       return this.kernmuster.map(k => ({
         title: k.title,
-        beliefs: ((k && k.beliefs) || []).map(t => (byText[normalizeBelief(t)] || {}).belief || t),
+        beliefs: ((k && k.beliefs) || []).map((t) => {
+          const belief = byText[normalizeBelief(t)];
+          const c = belief ? beliefCredibility(patterns, belief) : null;
+          return {
+            text: belief ? belief.belief : t,
+            // One decimal, German comma — the same number the cards show.
+            credibility: c === null ? null : String(Math.round(c * 10) / 10).replace('.', ','),
+          };
+        }),
       }));
     },
     subline() {
@@ -173,11 +186,15 @@ export default {
 .group-chip {
   font-size: 0.85rem;
   color: #8e8e93;
+  white-space: nowrap;
   border: 1px solid #3a3a3c;
   border-radius: 999px;
   padding: 5px 12px;
   line-height: 1.3;
 }
+
+/* The number is the quieter half of the chip. */
+.chip-score { color: #636366; }
 
 .now-card {
   cursor: pointer;
