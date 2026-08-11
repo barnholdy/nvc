@@ -7,9 +7,14 @@
     <div v-for="(k, i) in patternGroups" :key="i" class="card">
       <p class="card-title">{{ k.title }}</p>
       <div class="group-chips">
-        <span v-for="(b, j) in k.beliefs" :key="j" class="group-chip">
-          „{{ b.text }}“<span v-if="b.credibility !== null" class="chip-score"> · {{ b.credibility }}/10</span>
-        </span>
+        <span
+          v-for="(b, j) in k.beliefs"
+          :key="j"
+          class="group-chip"
+        >„{{ b.text }}“<span
+          v-if="b.credibility !== null"
+          class="chip-score"
+        > · {{ b.credibility }}/10</span></span>
       </div>
     </div>
 
@@ -182,19 +187,23 @@ export default {
   margin-top: 12px;
 }
 /* Outline, like the feeling chips: a belief in a cluster is a label, not a
-   button. */
+   button. A belief is a whole sentence, so the chip wraps rather than running
+   off the card — rounded ends still read as one chip across two lines. */
 .group-chip {
   font-size: 0.85rem;
   color: #8e8e93;
-  white-space: nowrap;
   border: 1px solid #3a3a3c;
-  border-radius: 999px;
+  border-radius: 14px;
   padding: 5px 12px;
-  line-height: 1.3;
+  line-height: 1.35;
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
-/* The number is the quieter half of the chip. */
-.chip-score { color: #636366; }
+/* The number is the quieter half of the chip, and never wraps away from the
+   sentence it belongs to. */
+.chip-score { color: #636366; white-space: nowrap; }
 
 .now-card {
   cursor: pointer;
