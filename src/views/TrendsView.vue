@@ -1,51 +1,48 @@
 <template>
   <div class="dark-page">
-    <v-toolbar color="#000" dark flat app>
-      <v-btn icon @click="$router.back()">
-        <v-icon color="#4ade80">arrow_back</v-icon>
-      </v-btn>
-      <v-toolbar-title>Trends</v-toolbar-title>
-    </v-toolbar>
-
     <v-content>
-      <div class="intro-card">
-        <span class="intro-icon">📉</span>
-        <p class="intro-title">Für wie glaubwürdig hältst du sie?</p>
-        <p class="intro-text">{{ introText }}</p>
+      <div class="screen-title-row">
+        <h1 class="screen-title">Trends</h1>
+        <div class="screen-actions">
+          <button class="screen-add" @click="$router.back()" aria-label="Zurück">
+            <v-icon color="#8e8e93">close</v-icon>
+          </button>
+        </div>
       </div>
 
-      <div class="segment-row">
+      <!-- The same two-way split the rest of the app uses for filters. -->
+      <div class="pill-row">
         <button
-          class="seg-tab"
+          class="pill"
           :class="{ active: tab === 'beliefs' }"
           @click="tab = 'beliefs'"
-        >Überzeugungen</button>
+        >Überzeugungen<span class="pill-count"> · {{ beliefCount }}</span></button>
         <button
-          class="seg-tab"
+          class="pill"
           :class="{ active: tab === 'affirmations' }"
           @click="tab = 'affirmations'"
-        >Affirmationen</button>
+        >Affirmationen<span class="pill-count"> · {{ affirmationCount }}</span></button>
       </div>
 
-      <div v-if="!rows.length" class="empty-state">
-        <span class="empty-icon">📉</span>
-        <p class="empty-title">Noch keine Bewertungen</p>
-        <p class="empty-sub">{{ emptyText }}</p>
+      <div v-if="!rows.length" class="list-empty">
+        <span class="list-empty-icon">📉</span>
+        <p class="list-empty-title">Noch keine Bewertungen</p>
+        <p class="list-empty-sub">{{ emptyText }}</p>
       </div>
 
       <template v-else>
-        <p class="section-header">{{ trendCount }} mit Verlauf · {{ rows.length }} bewertet</p>
+        <p class="section-head">{{ trendCount }} mit Verlauf · {{ rows.length }} bewertet</p>
 
-        <div v-for="row in rows" :key="row.key" class="trend-card">
-          <p class="trend-belief">{{ row.text }}</p>
+        <div v-for="row in rows" :key="row.key" class="card">
+          <p class="card-title">„{{ row.text }}“</p>
 
           <div class="trend-badges">
-            <span class="badge-pill">
+            <span class="card-pill">
               {{ row.points.length }} {{ row.points.length === 1 ? 'Bewertung' : 'Bewertungen' }}
             </span>
             <span
               v-if="row.hasTrend"
-              class="badge-pill"
+              class="card-pill"
               :style="{ color: deltaColor(row.delta), borderColor: deltaColor(row.delta) }"
             >{{ deltaLabel(row.delta) }}</span>
           </div>
@@ -88,7 +85,7 @@
         </div>
       </template>
 
-      <div class="bottom-space"></div>
+      <div class="list-bottom-space"></div>
     </v-content>
   </div>
 </template>
@@ -121,6 +118,11 @@ export default {
   },
   computed: {
     isBeliefs() { return this.tab === 'beliefs'; },
+    beliefCount() {
+      const store = this.$store.getters;
+      return beliefRows(store.patterns, store.beliefs).length;
+    },
+    affirmationCount() { return affirmationRows(this.$store.getters.beliefs).length; },
     rows() {
       const store = this.$store.getters;
       return this.isBeliefs
@@ -129,16 +131,6 @@ export default {
     },
     trendCount() {
       return this.rows.filter(r => r.hasTrend).length;
-    },
-    introText() {
-      return this.isBeliefs
-        ? 'Jedes Mal, wenn du eine Überzeugung zu einer Situation hinzufügst oder eine '
-          + 'Handlung auswertest, hältst du fest, für wie glaubwürdig du sie gerade hältst. '
-          + 'Nebeneinander gestellt wird sichtbar, was sich bewegt — nach unten ist die '
-          + 'Richtung, in die du arbeitest.'
-        : 'Beim Wandeln und beim Auswerten einer Handlung hältst du fest, für wie '
-          + 'glaubwürdig sich eine Affirmation anfühlt. Hier stehen diese Werte '
-          + 'nebeneinander — nach oben ist die Richtung, in die du arbeitest.';
     },
     emptyText() {
       return this.isBeliefs
@@ -197,60 +189,21 @@ export default {
   min-height: 100vh;
 }
 
-.intro-card {
-  background: #1c1c1e;
-  border-radius: 12px;
-  margin: 16px;
-  padding: 16px;
-}
-.intro-icon { font-size: 1.6rem; display: block; margin-bottom: 8px; }
-.intro-title {
-  font-size: 1rem;
-  color: #fff;
-  font-weight: 600;
-  margin: 0 0 6px;
-}
-.intro-text {
-  font-size: 0.8rem;
-  color: #8e8e93;
-  line-height: 1.5;
-  margin: 0;
-}
-
-.section-header {
-  font-size: 0.75rem;
-  color: #8e8e93;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  font-weight: 600;
-  margin: 20px 20px 6px;
-}
-
-.trend-card {
-  background: #1c1c1e;
-  border-radius: 12px;
-  margin: 0 16px 12px;
-  padding: 14px 16px;
-}
-.trend-belief {
-  font-size: 0.95rem;
-  color: #fff;
+/* Small grey capitals, same as the headings on Jetzt. */
+.section-head {
+  font-size: 0.72rem;
   font-weight: 500;
-  line-height: 1.4;
-  margin: 0 0 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8e8e93;
+  margin: 18px 20px 8px;
 }
+
 .trend-badges {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 14px;
-}
-.badge-pill {
-  font-size: 0.7rem;
-  color: #8e8e93;
-  border: 1px solid #3a3a3c;
-  border-radius: 999px;
-  padding: 2px 9px;
+  margin: 10px 0 14px;
 }
 
 .chart-row {
@@ -340,48 +293,10 @@ export default {
   white-space: nowrap;
 }
 
-.segment-row {
-  display: flex;
-  padding: 0 16px 16px;
-  border-bottom: 1px solid #2c2c2e;
-  margin-bottom: 4px;
-}
-.seg-tab {
-  flex: 1;
-  background: none;
-  border: none;
-  padding: 8px 2px;
-  font-size: 0.85rem;
-  color: #8e8e93;
-  cursor: pointer;
-  position: relative;
-  font-family: inherit;
-  -webkit-tap-highlight-color: transparent;
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -1px; left: 0; right: 0;
-    height: 2px;
-    background: transparent;
-    border-radius: 2px;
-  }
-  &.active { color: #fff; font-weight: 600; &::after { background: #4ade80; } }
-}
-
 .trend-hint {
   font-size: 0.72rem;
   color: #636366;
   line-height: 1.45;
   margin: 12px 0 0;
 }
-
-.empty-state {
-  text-align: center;
-  padding: 40px 32px;
-}
-.empty-icon { font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 16px; }
-.empty-title { font-size: 1.1rem; color: #fff; font-weight: 600; margin: 0 0 6px; }
-.empty-sub { font-size: 0.875rem; color: #8e8e93; margin: 0; line-height: 1.5; }
-
-.bottom-space { height: 24px; }
 </style>

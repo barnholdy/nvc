@@ -51,6 +51,21 @@
         </div>
       </template>
 
+      <!-- Last, and deliberately so: everything above is what to do next,
+           this is what has moved so far. -->
+      <template v-if="trendSummary">
+        <p class="section-head">Trends</p>
+        <div class="card now-card" @click="$router.push('/trends')">
+          <div class="now-line">
+            <div class="now-body">
+              <p class="now-title">Glaubwürdigkeit im Verlauf</p>
+              <p class="now-sub">{{ trendSummary }}</p>
+            </div>
+            <button class="now-btn" @click.stop="$router.push('/trends')">Ansehen</button>
+          </div>
+        </div>
+      </template>
+
       <div class="list-bottom-space"></div>
     </v-content>
 
@@ -90,15 +105,15 @@ import {
   isDue,
   experimentState,
 } from '@/utils/experiment';
-import { affirmationCredibility, beliefCredibility } from '@/utils/credibility';
+import {
+  affirmationCredibility, beliefCredibility, beliefRows, affirmationRows,
+} from '@/utils/credibility';
 
 // Three is enough to start on; the rest is one tap away in the list that owns
 // them. Showing everything would turn this screen back into those lists.
 const TOP = 3;
 const PRACTICE_KEY = 'nvc.amen';
 const DAY_MS = 24 * 60 * 60 * 1000;
-// A sentence you have not said in a week has stopped being a practice.
-const PRACTICE_DUE_DAYS = 7;
 
 function readPractised() {
   try {
@@ -158,6 +173,17 @@ export default {
         return ca - cb;
       });
     },
+    // Nothing to show until something has been rated twice; one reading is a
+    // number, not a trend.
+    trendSummary() {
+      const b = beliefRows(this.patterns, this.beliefs).filter(r => r.hasTrend).length;
+      const a = affirmationRows(this.beliefs).filter(r => r.hasTrend).length;
+      if (!b && !a) return null;
+      const parts = [];
+      if (b) parts.push(`${b} ${b === 1 ? 'Überzeugung' : 'Überzeugungen'}`);
+      if (a) parts.push(`${a} ${a === 1 ? 'Affirmation' : 'Affirmationen'}`);
+      return `${parts.join(' · ')} mit Verlauf`;
+    },
     openExperiments() {
       return this.rows.filter(r => experimentState(r.experiment) !== 'evaluated'
         && !isPlanned(r.experiment));
@@ -183,10 +209,9 @@ export default {
         return {
           key: `a${a.text}`,
           text: a.text,
+          // No overdue chip here: an affirmation is not a deadline, and the
+          // sub-line already says when it was last said.
           sub: `Affirmation · ${this.sinceLabel(days)}`,
-          // Orange only when it is actually overdue — a chip on everything is
-          // a chip on nothing.
-          chip: days === null || days >= PRACTICE_DUE_DAYS ? 'überfällig' : null,
           aff: a,
         };
       };
@@ -199,22 +224,31 @@ export default {
       const run = list => list.slice(0, TOP);
       const all = [
         {
-          key: 'explore',
-          title: 'neue Überzeugungen ergründen',
-          action: 'Ergründen',
-          count: this.byStatus.open.length,
-          items: run(this.byStatus.open).map(b => belief(b)),
-          run: item => this.$router.push(`/edit-belief/${item.entry.time}`),
-          more: () => this.$router.push({ path: '/beliefs', query: { tab: 'open' } }),
+          key: 'evaluate',
+          title: 'geplante Handlungen auswerten',
+          action: 'Auswerten',
+          count: this.plannedExperiments.length,
+          items: run(this.plannedExperiments).map(r => Object.assign(experiment(r), {
+            // isDue is the same seven-day mark the Handlungen list uses.
+            chip: isDue(r.experiment, this.now) ? 'überfällig' : null,
+          })),
+          // Evaluating happens in the Handlungen list, which owns that wizard.
+          run: item => this.$router.push({
+            path: '/actions',
+            query: { open: String(item.row.experiment.id) },
+          }),
+          more: () => this.$router.push({ path: '/actions', query: { tab: 'planned' } }),
         },
         {
-          key: 'change',
-          title: 'ergründete Überzeugungen wandeln',
-          action: 'Wandeln',
-          count: this.byStatus.working.length,
-          items: run(this.byStatus.working).map(b => belief(b)),
-          run: item => this.$router.push(`/change-belief/${item.entry.time}`),
-          more: () => this.$router.push({ path: '/beliefs', query: { tab: 'working' } }),
+          key: 'plan',
+          title: 'neue Handlungen planen',
+          action: 'Planen',
+          count: this.openExperiments.length,
+          items: run(this.openExperiments).map(experiment),
+          run: item => this.$router.push(
+            `/act-belief/${item.row.beliefTime}/${item.row.experiment.id}`,
+          ),
+          more: () => this.$router.push({ path: '/actions', query: { tab: 'open' } }),
         },
         {
           key: 'act',
@@ -235,31 +269,22 @@ export default {
           more: () => this.$router.push('/beliefs'),
         },
         {
-          key: 'plan',
-          title: 'neue Handlungen planen',
-          action: 'Planen',
-          count: this.openExperiments.length,
-          items: run(this.openExperiments).map(experiment),
-          run: item => this.$router.push(
-            `/act-belief/${item.row.beliefTime}/${item.row.experiment.id}`,
-          ),
-          more: () => this.$router.push({ path: '/actions', query: { tab: 'open' } }),
+          key: 'change',
+          title: 'ergründete Überzeugungen wandeln',
+          action: 'Wandeln',
+          count: this.byStatus.working.length,
+          items: run(this.byStatus.working).map(b => belief(b)),
+          run: item => this.$router.push(`/change-belief/${item.entry.time}`),
+          more: () => this.$router.push({ path: '/beliefs', query: { tab: 'working' } }),
         },
         {
-          key: 'evaluate',
-          title: 'geplante Handlungen auswerten',
-          action: 'Auswerten',
-          count: this.plannedExperiments.length,
-          items: run(this.plannedExperiments).map(r => Object.assign(experiment(r), {
-            // isDue is the same seven-day mark the Handlungen list uses.
-            chip: isDue(r.experiment, this.now) ? 'überfällig' : null,
-          })),
-          // Evaluating happens in the Handlungen list, which owns that wizard.
-          run: item => this.$router.push({
-            path: '/actions',
-            query: { open: String(item.row.experiment.id) },
-          }),
-          more: () => this.$router.push({ path: '/actions', query: { tab: 'planned' } }),
+          key: 'explore',
+          title: 'neue Überzeugungen ergründen',
+          action: 'Ergründen',
+          count: this.byStatus.open.length,
+          items: run(this.byStatus.open).map(b => belief(b)),
+          run: item => this.$router.push(`/edit-belief/${item.entry.time}`),
+          more: () => this.$router.push({ path: '/beliefs', query: { tab: 'open' } }),
         },
       ];
       return all.filter(s => s.count > 0);

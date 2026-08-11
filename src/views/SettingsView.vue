@@ -18,14 +18,6 @@
           </div>
           <v-icon color="#4ade80">person_outline</v-icon>
         </div>
-        <div class="settings-sep"></div>
-        <div class="settings-row tappable" @click="$router.push('/trends')">
-          <div class="settings-row-body">
-            <p class="settings-label">Trends</p>
-            <p class="settings-sub">Für wie wahr du Überzeugungen über die Zeit hältst</p>
-          </div>
-          <v-icon color="#4ade80">show_chart</v-icon>
-        </div>
       </div>
 
       <!-- KI -->

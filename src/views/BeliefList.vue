@@ -3,9 +3,11 @@
     <v-content>
       <div class="screen-title-row">
         <h1 class="screen-title">Überzeugungen</h1>
-        <button class="screen-add" @click="$router.push('/settings')" aria-label="Einstellungen">
-          <v-icon color="#8e8e93">settings</v-icon>
-        </button>
+        <div class="screen-actions">
+          <button class="screen-add" @click="$router.push('/settings')" aria-label="Einstellungen">
+            <v-icon color="#8e8e93">settings</v-icon>
+          </button>
+        </div>
       </div>
 
       <!-- Counts on the filter, so the shape of the whole is readable before
