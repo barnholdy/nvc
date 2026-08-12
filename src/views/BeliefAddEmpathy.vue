@@ -23,7 +23,9 @@
       <empathy-panel
         :entry="entryForPrompt"
         :initialText="initialValue"
-        @changed="$emit('changed', $event)">
+        :initialReflection="initialReflection"
+        @changed="$emit('changed', $event)"
+        @reflectionChanged="$emit('reflectionChanged', $event)">
       </empathy-panel>
     </v-flex>
   </v-layout>
@@ -51,6 +53,7 @@ export default {
     needs: { type: Array, default: () => [] },
     origin: { type: String, default: '' },
     initialValue: { type: String, default: '' },
+    initialReflection: { type: String, default: '' },
   },
   computed: {
     // Taxonomy order, like every other sentence that lists feelings or needs.
@@ -95,7 +98,8 @@ export default {
       }
       parts.push({
         text: ' gebracht. Heute darfst du prüfen, ob du sie noch brauchst.'
-          + ' Lass dir einfühlsam spiegeln, was du gerade erlebst.',
+          + ' Lass dir einfühlsam spiegeln, was du gerade erlebst.'
+          + ' Schau, was du davon annehmen willst.',
       });
       return parts;
     },

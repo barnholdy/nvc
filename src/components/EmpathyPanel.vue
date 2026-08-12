@@ -26,6 +26,20 @@
     <p v-if="errorMsg" class="caption red--text mt-1">{{ errorMsg }}</p>
 
     <div v-if="text !== null" class="empathy-rendered md-content mt-3" v-html="renderMd(text)"></div>
+
+    <!-- The question the mirroring is for: not what was said, but what of it
+         is worth keeping. Only meaningful once there is something to answer. -->
+    <template v-if="text !== null">
+      <p class="reflection-label mt-4">Was möchtest du davon annehmen?</p>
+      <v-textarea
+        v-model="reflection"
+        placeholder="..."
+        auto-grow
+        rows="3"
+        hide-details
+        @input="$emit('reflectionChanged', reflection)"
+      ></v-textarea>
+    </template>
   </div>
 </template>
 
@@ -41,10 +55,12 @@ export default {
     // The belief to reflect on, as stored.
     entry: { type: Object, default: null },
     initialText: { type: String, default: '' },
+    initialReflection: { type: String, default: '' },
   },
   data() {
     return {
       text: this.initialText || null,
+      reflection: this.initialReflection || '',
       isLoading: false,
       errorMsg: '',
       showApiKeyInput: false,
@@ -162,6 +178,11 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.reflection-label {
+  font-size: 0.9rem;
+  color: #8e8e93;
+  margin: 0 0 4px;
+}
 .empathy-rendered {
   font-size: 0.95rem;
   color: #ebebf5;

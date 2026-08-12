@@ -83,7 +83,9 @@
           :needs="selectedNeeds"
           :origin="origin"
           :initialValue="empathy"
-          @changed="empathy = $event">
+          :initialReflection="empathyReflection"
+          @changed="empathy = $event"
+          @reflectionChanged="empathyReflection = $event">
         </belief-add-empathy>
 
         <belief-add-grounding v-show="step === 9"></belief-add-grounding>
@@ -180,6 +182,7 @@ export default {
       storedArc: arc,
       storedOrigin: reflection.origin || '',
       empathy: editEntry ? editEntry.empathy || '' : '',
+      empathyReflection: editEntry ? editEntry.empathyReflection || '' : '',
       // The need is picked inside the origin phase now, so leaving the phase
       // has to be able to put back what was saved before.
       storedNeeds: editEntry ? editEntry.needs || [] : [],
@@ -260,6 +263,9 @@ export default {
         needs: withOrigin ? this.selectedNeeds : this.storedNeeds,
         // Generated inside the origin phase, so it is kept with it.
         empathy: withOrigin ? this.empathy : (this.editEntry ? this.editEntry.empathy || '' : ''),
+        empathyReflection: withOrigin
+          ? this.empathyReflection
+          : (this.editEntry ? this.editEntry.empathyReflection || '' : ''),
         reflection: this.buildReflection(withOrigin),
       };
       const saved = this.isEditMode ? Object.assign({}, this.editEntry, payload) : payload;

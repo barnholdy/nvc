@@ -169,6 +169,12 @@
           >
             <span class="detail-label">Empathie</span>
             <p class="detail-value" :class="{ open: isOpen(entry, 'empathy') }">{{ entry.empathy }}</p>
+            <!-- What was kept from the mirroring, not the mirroring itself —
+                 set apart with its own label so the two voices stay distinct. -->
+            <div v-if="isOpen(entry, 'empathy') && entry.empathyReflection" class="empathy-reflection">
+              <p class="empathy-reflection-label">Was du annehmen willst</p>
+              <p class="empathy-reflection-text">{{ entry.empathyReflection }}</p>
+            </div>
             <v-icon v-if="!isOpen(entry, 'empathy')" class="detail-chevron">chevron_right</v-icon>
           </div>
 
@@ -560,6 +566,30 @@ export default {
 
 
 .mt-2 { margin-top: 8px !important; }
+
+/* Its own voice: quieter than the mirrored text above it, set apart by a
+   rule rather than a box — a second box would compete with the empathy text
+   itself for attention. */
+.empathy-reflection {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #2c2c2e;
+}
+.empathy-reflection-label {
+  font-size: 0.68rem;
+  color: #8e8e93;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+.empathy-reflection-text {
+  font-size: 0.95rem;
+  color: #ebebf5;
+  line-height: 1.5;
+  margin: 0;
+  white-space: pre-wrap;
+}
 
 /* Without the row list above it the box would butt straight against the
    trend line, which is a number, not a heading. */
