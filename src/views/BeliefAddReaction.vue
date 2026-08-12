@@ -1,29 +1,27 @@
 <template>
-  <v-layout column>
-    <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">Reaktion</h1>
-      <belief-quote :text="belief" class="mt-1"></belief-quote>
-      <p class="body-1 grey--text mt-2 wizard-prompt">Wer bist du mit dieser Überzeugung? Wie reagierst du, was passiert, wenn du sie für wahr hältst?</p>
-    </v-flex>
-    <v-flex>
-      <v-text-field
-        placeholder="..."
-        v-model="text"
-        multi-line
-        rows="8"
-        @focus="$emit('focussed')"
-        @blur="$emit('blurred')"
-      ></v-text-field>
-    </v-flex>
-  </v-layout>
+  <div>
+    <wizard-context :quote="belief"></wizard-context>
+    <p class="wizard-question">Wer bist du mit dieser Überzeugung?</p>
+    <p class="wizard-body">
+      Wie reagierst du, was passiert, wenn du sie für wahr hältst?
+    </p>
+    <input-card
+      v-model="text"
+      label="Deine Reaktion"
+      :rows="3"
+      @focussed="$emit('focussed')"
+      @blurred="$emit('blurred')"
+    ></input-card>
+  </div>
 </template>
 
 <script>
-import BeliefQuote from '@/components/BeliefQuote.vue';
+import WizardContext from '@/components/WizardContext.vue';
+import InputCard from '@/components/InputCard.vue';
 
 export default {
   name: 'belief-add-reaction',
-  components: { BeliefQuote },
+  components: { WizardContext, InputCard },
   props: {
     belief: { type: String, default: '' },
     initialValue: { type: String, default: '' },

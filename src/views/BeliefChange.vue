@@ -1,26 +1,14 @@
 <template>
-  <div>
-    <v-toolbar color="white" app>
-      <v-btn v-if="step === 1" icon @click="close">
-        <v-icon>close</v-icon>
-      </v-btn>
-      <v-btn v-else icon @click="prevStep">
-        <v-icon>chevron_left</v-icon>
-      </v-btn>
-      <v-toolbar-title>Überzeugung wandeln</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <span class="grey--text body-1">{{ step }} / {{ totalSteps }}</span>
-    </v-toolbar>
+  <div class="wizard-page">
     <v-content>
-      <v-container class="mb-5">
+      <wizard-header title="Überzeugung wandeln" :step="step" :total="totalSteps"></wizard-header>
+      <div>
         <belief-change-absoluteness
           v-show="step === 1"
           :belief="entry ? entry.belief : ''"
           :truth="situationTruth"
           :initialValue="exceptions"
-          @changed="exceptions = $event"
-          @focussed="isFooterFixed = false"
-          @blurred="isFooterFixed = true">
+          @changed="exceptions = $event">
         </belief-change-absoluteness>
 
         <pattern-add-without-belief
@@ -29,15 +17,13 @@
           :needs="entry ? entry.needs || [] : []"
           :exceptions="exceptions"
           :initialValue="withoutBelief"
-          @changed="withoutBelief = $event"
-          @focussed="isFooterFixed = false"
-          @blurred="isFooterFixed = true">
+          @changed="withoutBelief = $event">
         </pattern-add-without-belief>
 
         <belief-add-feeling-need
           v-show="step === 3"
-          headline="Neue Gefühle"
-          prompt="Bleib einen Moment in dieser Vorstellung. Was passiert im Körper? Wird etwas leichter, weiter, wärmer — oder bleibt es gleich?"
+          headline="Was passiert im Körper?"
+          prompt="Bleib einen Moment in dieser Vorstellung. Wird etwas leichter, weiter, wärmer — oder bleibt es gleich?"
           :belief="entry ? entry.belief : ''"
           :exceptions="exceptions"
           :perspective="withoutBelief"
@@ -45,26 +31,25 @@
           :initialFeelings="withoutBeliefFeelings"
           :maxSelections="MAX_FEELINGS"
           @change="withoutBeliefFeelings = $event">
-          <v-flex slot="beforeList" class="mb-4">
-            <p class="body-1 grey--text mb-2 wizard-prompt">Wie stark ist diese Empfindung gerade? 0 = nichts, 10 = deutlich.</p>
-            <div class="slider-row">
-              <span class="slider-end-label">0</span>
-              <input type="range" min="0" max="10" v-model.number="bodyIntensity" class="intensity-slider" />
-              <span class="slider-end-label">10</span>
-            </div>
-            <p class="slider-value-label">{{ bodyIntensity }}</p>
+          <div slot="beforeList">
+            <meter-card
+              :value="bodyIntensity"
+              label="Körperempfindung"
+              minLabel="nichts"
+              maxLabel="deutlich"
+              @input="bodyIntensity = $event"
+            ></meter-card>
+
             <div v-if="bodyIntensity < INTENSITY_THRESHOLD" class="intensity-hint">
               <p class="intensity-hint-text">
                 Noch zu weit weg. Gehen wir kleiner: Wo kannst du die neue Reaktion so ändern,
                 dass sie greifbarer für dich wird?
               </p>
-              <v-btn small flat color="primary" class="ml-0" @click="goToStep(2)">
-                <v-icon small left>chevron_left</v-icon>
-                Zurück zur neuen Reaktion
-              </v-btn>
+              <button class="card-btn" @click="goToStep(2)">Zurück zur neuen Reaktion</button>
             </div>
-            <p class="body-1 grey--text mt-4 mb-0 wizard-prompt">Was fühlst du?</p>
-          </v-flex>
+
+            <p class="wizard-question">Was fühlst du?</p>
+          </div>
         </belief-add-feeling-need>
 
         <pattern-change-affirmation
@@ -76,29 +61,18 @@
           :needs="entry && entry.needs ? entry.needs : []"
           :initialAffirmations="affirmations"
           :allAffirmations="allAffirmations"
-          @changed="affirmations = $event"
-          @focussed="isFooterFixed = false"
-          @blurred="isFooterFixed = true">
+          @changed="affirmations = $event">
         </pattern-change-affirmation>
-      </v-container>
-
-      <v-footer :fixed="isFooterFixed" color="white elevation-3" height="44">
-        <v-btn
-          v-if="step < totalSteps"
-          :disabled="!isStepComplete"
-          @click="nextStep"
-          block large color="primary">
-          weiter
-        </v-btn>
-        <v-btn
-          v-else
-          :disabled="!isStepComplete"
-          @click="save"
-          block large color="primary">
-          speichern
-        </v-btn>
-      </v-footer>
+      </div>
+      <div class="wizard-bottom-space"></div>
     </v-content>
+
+    <wizard-footer
+      :disabled="!isStepComplete"
+      :nextLabel="step < totalSteps ? 'Weiter' : 'Speichern'"
+      @back="back"
+      @next="step < totalSteps ? nextStep() : save()"
+    ></wizard-footer>
   </div>
 </template>
 
@@ -109,6 +83,9 @@ import BeliefAddFeelingNeed from '@/views/BeliefAddFeelingNeed.vue';
 import { MAX_FEELINGS } from '@/utils/emotions';
 import { beliefCredibility } from '@/utils/credibility';
 import PatternChangeAffirmation from '@/views/PatternChangeAffirmation.vue';
+import WizardHeader from '@/components/WizardHeader.vue';
+import WizardFooter from '@/components/WizardFooter.vue';
+import MeterCard from '@/components/MeterCard.vue';
 import { beliefStatus } from '@/utils/beliefStatus';
 import taxonomy from '../assets/taxonomy.json';
 
@@ -125,6 +102,9 @@ export default {
     PatternAddWithoutBelief,
     BeliefAddFeelingNeed,
     PatternChangeAffirmation,
+    WizardHeader,
+    WizardFooter,
+    MeterCard,
   },
   data() {
     const entry = this.$store.getters.beliefs
@@ -143,7 +123,6 @@ export default {
       // One affirmation per belief. Older entries can carry more; the wizard
       // only ever shows the first, so saving must not write the rest back.
       affirmations: entry ? (entry.affirmations || []).slice(0, 1) : [],
-      isFooterFixed: true,
     };
   },
   computed: {
@@ -189,6 +168,11 @@ export default {
       this.step = step;
       this.$vuetify.goTo(0, { duration: 0 });
     },
+    // On the first step there is nothing to go back to but the way out.
+    back() {
+      if (this.step === 1) this.close();
+      else this.prevStep();
+    },
     save() {
       const saved = Object.assign({}, this.entry, {
         affirmations: this.affirmations,
@@ -217,61 +201,20 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.slider-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 4px;
-}
-.slider-end-label {
-  font-size: 0.78rem;
-  color: #8e8e93;
-  flex-shrink: 0;
-}
-.intensity-slider {
-  flex: 1;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 4px;
-  border-radius: 2px;
-  background: #3a3a3c;
-  outline: none;
-  cursor: pointer;
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background: #4ade80;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-  }
-  &::-moz-range-thumb {
-    width: 26px;
-    height: 26px;
-    border: none;
-    border-radius: 50%;
-    background: #4ade80;
-    cursor: pointer;
-  }
-}
-.slider-value-label {
-  text-align: center;
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 8px 0 0;
-}
+/* Orange, like everywhere else the app says "this needs attention". Sits in
+   the page's own margin, not the card grid, because it belongs to the meter
+   above it. */
 .intensity-hint {
-  margin-top: 12px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1.5px solid #fd9927;
+  margin: 12px 14px 0;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid #fd9927;
 }
 .intensity-hint-text {
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   color: #8e8e93;
   line-height: 1.5;
-  margin: 0 0 6px;
+  margin: 0 0 10px;
 }
+.intensity-hint .card-btn { border-color: #fd9927; color: #fd9927; }
 </style>

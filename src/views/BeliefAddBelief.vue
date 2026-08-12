@@ -1,28 +1,26 @@
 <template>
-  <v-layout column>
-    <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">Überzeugung</h1>
-      <p class="body-1 grey--text mt-2 wizard-prompt">Was ist deine Überzeugung, die du für wahr hältst?</p>
-    </v-flex>
-    <v-flex>
-      <!-- Same size as the affirmation field: a belief is a sentence, not a
-           label, and the box should say so. -->
-      <v-textarea
-        placeholder="..."
-        v-model="belief"
-        auto-grow
-        rows="4"
-        hide-details
-        @focus="$emit('focussed')"
-        @blur="$emit('blurred')"
-      ></v-textarea>
-    </v-flex>
-  </v-layout>
+  <div>
+    <p class="wizard-question">Was hältst du für wahr?</p>
+    <p class="wizard-body">
+      Ein Satz über dich, die anderen oder die Welt, den du im Moment für wahr hältst.
+    </p>
+    <input-card
+      v-model="belief"
+      label="Deine Überzeugung"
+      placeholder="Ich bin..."
+      :rows="3"
+      @focussed="$emit('focussed')"
+      @blurred="$emit('blurred')"
+    ></input-card>
+  </div>
 </template>
 
 <script>
+import InputCard from '@/components/InputCard.vue';
+
 export default {
   name: 'belief-add-belief',
+  components: { InputCard },
   props: {
     initialValue: { type: String, default: '' },
   },

@@ -1,12 +1,12 @@
 <template>
-  <v-flex>
-    <p v-if="limitHint" class="limit-hint" :class="{ 'over-limit': isOverLimit }">{{ limitHint }}</p>
+  <div>
+    <p v-if="limitHint" class="wizard-note" :class="{ 'over-limit': isOverLimit }">{{ limitHint }}</p>
 
     <!-- Suggestions land as selections in the tree below rather than as a
          separate strip, so there is only ever one place a need is chosen. -->
     <div class="suggest-row">
       <template v-if="showApiKeyInput">
-        <p class="caption grey--text mb-1">Anthropic API Key eingeben, um Vorschläge zu generieren:</p>
+        <p class="wizard-note">Anthropic API Key eingeben, um Vorschläge zu generieren:</p>
         <v-text-field
           v-model="apiKeyInput"
           label="API Key"
@@ -35,75 +35,69 @@
       </template>
     </div>
 
-    <p v-if="suggestNote" class="suggest-hint">{{ suggestNote }}</p>
+    <p v-if="suggestNote" class="wizard-note">{{ suggestNote }}</p>
+    <p v-if="errorMsg" class="wizard-note error-text">{{ errorMsg }}</p>
 
-    <p v-if="errorMsg" class="caption error-text">{{ errorMsg }}</p>
-
-    <div
-      v-for="cat in categories"
-      :key="cat.id"
-      class="need-card mb-2"
-      :style="{ borderColor: categoryColor(cat.id) }"
-    >
-      <div class="need-card-header" @click="toggleCategory(cat.id)">
-        <span class="need-emoji">{{ categoryEmoji(cat.id) }}</span>
-        <div class="need-row-body">
-          <span class="need-row-label" :style="{ color: categoryColor(cat.id) }">{{ cat.label }}</span>
-          <div v-if="selectedIn(cat).length" class="need-selections">
-            <span
-              v-for="item in selectedIn(cat)"
-              :key="'s-' + item.name"
-              class="need-sel-chip"
-              :style="{ backgroundColor: categoryColor(cat.id), color: '#000' }"
-              @click.stop="toggle(item.name)"
-            >{{ item.name }}<span class="chip-x">×</span></span>
-          </div>
-        </div>
-        <v-icon small :color="categoryColor(cat.id)">
-          {{ isCategoryOpen(cat.id) ? 'expand_less' : 'expand_more' }}
+    <div v-for="cat in categories" :key="cat.id" class="pick-card">
+      <div class="pick-head" @click="toggleCategory(cat.id)">
+        <span class="pick-dot" :style="{ background: categoryColor(cat.id) }"></span>
+        <span class="pick-name">{{ cat.label }}</span>
+        <span class="pick-count">
+          {{ selectedIn(cat).length ? selectedIn(cat).length + '/' : '' }}{{ categoryTotal(cat) }}
+        </span>
+        <v-icon class="detail-chevron">
+          {{ isCategoryOpen(cat.id) ? 'expand_more' : 'chevron_right' }}
         </v-icon>
       </div>
 
-      <div v-if="isCategoryOpen(cat.id)" class="need-card-body">
+      <!-- What is already chosen stays visible whether the group is open or
+           not: it is the answer, the tree is only the way to it. -->
+      <div v-if="selectedIn(cat).length" class="pick-chips">
+        <span
+          v-for="item in selectedIn(cat)"
+          :key="'s-' + item.name"
+          class="pick-chip"
+          :style="{ color: categoryColor(cat.id) }"
+          @click.stop="toggle(item.name)"
+        >{{ item.name }}<span class="pick-chip-x">×</span></span>
+      </div>
+
+      <div v-if="isCategoryOpen(cat.id)" class="pick-body">
         <div v-for="c in cat.cluster" :key="c.id">
-          <div class="cluster-row" @click.stop="toggleCluster(c.id)">
+          <div class="pick-cluster" @click.stop="toggleCluster(c.id)">
             <!-- The bar reports what is chosen in this cluster, the way the
                  feeling clusters report theirs. -->
             <span
               v-if="countIn(c) > 0"
-              class="cluster-fill"
+              class="pick-cluster-fill"
               :style="{ width: pctIn(c) + '%', background: categoryColor(cat.id) }"
             ></span>
-            <span class="cluster-label">{{ c.label }}</span>
-            <span v-if="countIn(c) > 0" class="cluster-count">
+            <span class="pick-cluster-label">{{ c.label }}</span>
+            <span v-if="countIn(c) > 0" class="pick-cluster-count">
               {{ countIn(c) }}/{{ c.beduerfnisse.length }}
             </span>
           </div>
 
-          <div v-if="isClusterOpen(c.id)" class="selection-section">
-            <div class="chips-wrap">
-              <span
-                v-for="name in c.beduerfnisse"
-                :key="name"
-                class="my-chip"
-                :style="isSelected(name)
-                  ? { backgroundColor: categoryColor(cat.id), color: '#000' }
-                  : { backgroundColor: '#3a3a3c', color: categoryColor(cat.id) }"
-                @click.stop="toggle(name)"
-              >{{ name }}</span>
-            </div>
+          <div v-if="isClusterOpen(c.id)" class="pick-chips pick-chips-open">
+            <!-- Chosen words carry the group's colour; the rest stay quiet. -->
+            <span
+              v-for="name in c.beduerfnisse"
+              :key="name"
+              class="pick-chip"
+              :style="{ color: isSelected(name) ? categoryColor(cat.id) : '#8e8e93' }"
+              @click.stop="toggle(name)"
+            >{{ name }}</span>
           </div>
         </div>
       </div>
     </div>
-  </v-flex>
+  </div>
 </template>
 
 <script>
 import {
   needCategories,
   needCategoryColor,
-  needCategoryEmoji,
   categoryIdForNeed,
   sortNeeds,
   ALL_NEED_NAMES,
@@ -162,7 +156,13 @@ export default {
   },
   methods: {
     categoryColor: function(id) { return needCategoryColor(id); },
-    categoryEmoji: function(id) { return needCategoryEmoji(id); },
+    // How many needs the group holds altogether — the denominator the header
+    // counts against.
+    categoryTotal: function(cat) {
+      return (cat.cluster || []).reduce(function(sum, c) {
+        return sum + ((c.beduerfnisse || []).length);
+      }, 0);
+    },
     isCategoryOpen: function(id) { return this.activeCategoryId === id; },
     isClusterOpen: function(id) { return this.activeClusterId === id; },
     toggleCategory: function(id) {
@@ -285,123 +285,10 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.limit-hint {
-  font-size: 0.8rem;
-  color: #636366;
-  margin: 10px 0 12px;
-  &.over-limit {
-    color: #fd9927;
-    font-weight: 600;
-  }
-}
-.suggest-row { margin-bottom: 4px; }
+.suggest-row { margin: 0 16px 4px; }
 .action-row { display: flex; align-items: center; gap: 8px; }
-.suggest-hint {
-  font-size: 0.78rem;
-  color: #8e8e93;
-  margin: 2px 0 14px;
-}
-.error-text { color: #ff453a; }
-
-.need-card {
-  border: 1.5px solid;
-  border-radius: 12px;
-  background: #1c1c1e;
-  overflow: hidden;
-  -webkit-tap-highlight-color: transparent;
-}
-.need-card-header {
-  display: flex;
-  align-items: center;
-  padding: 12px 14px;
-  cursor: pointer;
-}
-.need-emoji {
-  font-size: 1.35rem;
-  margin-right: 12px;
-  flex-shrink: 0;
-}
-.need-row-body {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-.need-row-label {
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-.need-selections {
-  display: flex;
-  flex-wrap: wrap;
-  margin-top: 6px;
-}
-.need-sel-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 9px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  margin: 2px 4px 2px 0;
-  cursor: pointer;
-}
-.chip-x {
-  margin-left: 5px;
-  font-size: 0.9rem;
-  line-height: 1;
-  opacity: 0.65;
-}
-
-.need-card-body {
-  border-top: 1px solid #2c2c2e;
-}
-.cluster-row {
-  position: relative;
-  display: flex;
-  align-items: center;
-  padding: 10px 14px;
-  border-bottom: 1px solid #2c2c2e;
-  cursor: pointer;
-  overflow: hidden;
-}
-.cluster-fill {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  opacity: 0.18;
-}
-.cluster-label {
-  position: relative;
-  font-size: 0.875rem;
-  color: #ebebf5;
-  flex: 1;
-}
-.cluster-count {
-  position: relative;
-  font-size: 0.72rem;
-  color: #8e8e93;
-  flex-shrink: 0;
-  margin-left: 8px;
-}
-.selection-section {
-  padding: 10px 14px 12px;
-  border-bottom: 1px solid #2c2c2e;
-}
-.chips-wrap {
-  display: flex;
-  flex-wrap: wrap;
-}
-.my-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  margin: 3px 4px 3px 0;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
+/* Turns orange once the recommendation is exceeded — the way forward is
+   blocked at that point and needs a reason on screen. */
+.over-limit { color: #fd9927; font-weight: 600; }
+.error-text { color: #ff453a !important; }
 </style>

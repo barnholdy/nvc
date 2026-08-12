@@ -1,33 +1,23 @@
 <template>
-  <div>
-    <v-toolbar color="white" app>
-      <v-btn v-if="step === 1" icon @click="close">
-        <v-icon>close</v-icon>
-      </v-btn>
-      <v-btn v-else icon @click="prevStep">
-        <v-icon>chevron_left</v-icon>
-      </v-btn>
-      <v-toolbar-title>{{ isEditMode ? 'Überzeugung ergründen' : 'Neue Überzeugung' }}</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <span class="grey--text body-1">{{ step }} / {{ totalSteps }}</span>
-    </v-toolbar>
+  <div class="wizard-page">
     <v-content>
-      <v-container class="mb-5">
+      <wizard-header
+        :title="isEditMode ? 'Überzeugung ergründen' : 'Neue Überzeugung'"
+        :step="step"
+        :total="totalSteps"
+      ></wizard-header>
+      <div>
         <belief-add-belief
           v-show="step === 1"
           :initialValue="belief"
-          @beliefChanged="belief = $event"
-          @focussed="isFooterFixed = false"
-          @blurred="isFooterFixed = true">
+          @beliefChanged="belief = $event">
         </belief-add-belief>
 
         <belief-add-reaction
           v-show="step === 2"
           :belief="belief"
           :initialValue="withBelief"
-          @changed="withBelief = $event"
-          @focussed="isFooterFixed = false"
-          @blurred="isFooterFixed = true">
+          @changed="withBelief = $event">
         </belief-add-reaction>
 
         <belief-add-arrive
@@ -54,9 +44,7 @@
           :reaction="withBelief"
           :feelings="selectedFeelings"
           :initialValue="origin"
-          @changed="origin = $event"
-          @focussed="isFooterFixed = false"
-          @blurred="isFooterFixed = true">
+          @changed="origin = $event">
         </belief-add-origin>
 
         <!-- The need and the reframe are one screen now: mounted when the user
@@ -95,32 +83,23 @@
           :initialValue="mood"
           @changed="mood = $event">
         </belief-add-check>
-      </v-container>
-
-      <v-footer :fixed="isFooterFixed" color="white elevation-3" :height="footerHeight">
-        <div v-if="step === READINESS_STEP" class="gate-actions">
-          <v-btn @click="nextStep" block large color="primary">Jetzt anschauen</v-btn>
-          <button type="button" class="later-btn" @click="saveWithoutOrigin">später</button>
-        </div>
-        <div v-else class="footer-single">
-          <v-btn
-            v-if="step < totalSteps"
-            :disabled="!isStepComplete"
-            @click="nextStep"
-            block large color="primary">
-            {{ nextLabel }}
-          </v-btn>
-          <v-btn
-            v-else
-            :disabled="!isStepComplete"
-            @click="saveWithOrigin"
-            block large color="primary">
-            Speichern
-          </v-btn>
-        </div>
-      </v-footer>
-
+      </div>
+      <div class="wizard-bottom-space"></div>
     </v-content>
+
+    <!-- The readiness gate is the one step with a real choice rather than a
+         way on: look at it now, or save what there is and stop here. -->
+    <div v-if="step === READINESS_STEP" class="wizard-footer gate-footer">
+      <button class="wizard-next" @click="nextStep">Jetzt anschauen</button>
+      <button type="button" class="later-btn" @click="saveWithoutOrigin">später</button>
+    </div>
+    <wizard-footer
+      v-else
+      :disabled="!isStepComplete"
+      :nextLabel="step < totalSteps ? 'Weiter' : 'Speichern'"
+      @back="back"
+      @next="step < totalSteps ? nextStep() : saveWithOrigin()"
+    ></wizard-footer>
   </div>
 </template>
 
@@ -135,6 +114,8 @@ import BeliefAddGift from '@/views/BeliefAddGift.vue';
 import BeliefAddEmpathy from '@/views/BeliefAddEmpathy.vue';
 import BeliefAddGrounding from '@/views/BeliefAddGrounding.vue';
 import BeliefAddCheck from '@/views/BeliefAddCheck.vue';
+import WizardHeader from '@/components/WizardHeader.vue';
+import WizardFooter from '@/components/WizardFooter.vue';
 import { beliefStatus } from '@/utils/beliefStatus';
 import { normalizeOriginArc } from '@/utils/originArc';
 import { MAX_FEELINGS, joinNames } from '@/utils/emotions';
@@ -159,6 +140,8 @@ export default {
     BeliefAddEmpathy,
     BeliefAddGrounding,
     BeliefAddCheck,
+    WizardHeader,
+    WizardFooter,
   },
   data() {
     const editEntry = this.$store.getters.beliefs
@@ -188,7 +171,6 @@ export default {
       storedNeeds: editEntry ? editEntry.needs || [] : [],
       hasEnteredOriginPhase: false,
       savedTab: 'open',
-      isFooterFixed: true,
     };
   },
   computed: {
@@ -208,13 +190,6 @@ export default {
       if (this.step === TOTAL_STEPS) return !!this.mood;
       return true;
     },
-    // Steps 1-4 kept their lower-case label; the origin phase uses the spec's.
-    nextLabel() {
-      return this.step < READINESS_STEP ? 'weiter' : 'Weiter';
-    },
-    footerHeight() {
-      return this.step === READINESS_STEP ? 96 : 44;
-    },
     // The chosen needs are the gift: the answer to what this belief once did
     // for you, which can be more than one thing.
     gift() {
@@ -230,6 +205,11 @@ export default {
     prevStep() {
       this.step -= 1;
       this.$vuetify.goTo(0, { duration: 0 });
+    },
+    // On the first step there is nothing to go back to but the way out.
+    back() {
+      if (this.step === 1) this.close();
+      else this.prevStep();
     },
     saveWithOrigin() { this.persist(true); },
     saveWithoutOrigin() { this.persist(false); },
@@ -290,19 +270,19 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.footer-single { width: 100%; }
-.gate-actions {
-  width: 100%;
-  padding: 4px 0 6px;
+/* The gate offers a choice rather than a way on, so its two options stack. */
+.gate-footer {
+  flex-direction: column;
+  gap: 4px;
 }
 .later-btn {
-  display: block;
   width: 100%;
   background: none;
   border: none;
   color: #8e8e93;
-  font-size: 0.9rem;
-  padding: 8px 0 0;
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 10px 0 2px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   &:focus-visible {
@@ -310,5 +290,4 @@ export default {
     outline-offset: 2px;
   }
 }
-
 </style>

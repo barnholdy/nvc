@@ -1,96 +1,84 @@
 <template>
-  <v-layout column>
-    <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">{{ headlineText }}</h1>
-      <belief-quote :text="belief" class="mt-1"></belief-quote>
+  <div>
+    <!-- What was written a step or two earlier. Picking feelings is easier
+         with the reaction still in view than from memory. -->
+    <wizard-context
+      :quote="belief"
+      :exceptions="exceptions"
+      :perspective="perspective"
+      :reaction="reaction"
+      :origin="contextOrigin">
+    </wizard-context>
 
-      <!-- What was written a step or two earlier. Picking feelings is easier
-           with the reaction still in view than from memory. -->
-      <belief-context
-        :exceptions="exceptions"
-        :perspective="perspective"
-        :reaction="reaction"
-        :origin="contextOrigin">
-      </belief-context>
-
-      <p class="body-1 grey--text mt-3 wizard-prompt">{{ promptText }}</p>
-    </v-flex>
+    <p class="wizard-question">{{ headlineText }}</p>
+    <p class="wizard-body">{{ promptText }}</p>
 
     <!-- Optional block between the prompt and the list -->
     <slot name="beforeList"></slot>
 
     <!-- Directly above the list it belongs to, and so below whatever the slot
          asked last — in the wandeln wizard that is "Was fühlst du?". -->
-    <p v-if="limitHint" class="limit-hint" :class="{ 'over-limit': isOverLimit }">{{ limitHint }}</p>
+    <p v-if="limitHint" class="wizard-note" :class="{ 'over-limit': isOverLimit }">{{ limitHint }}</p>
 
-    <v-flex>
-      <div
-        v-for="e in taxonomy.grundemotionen"
-        :key="e.id"
-        class="emotion-card mb-2"
-        :style="{ borderColor: emotionColor(e.id) }"
-      >
-        <!-- Header -->
-        <div class="emotion-card-header" @click="toggleEmotion(e.id)">
-          <span class="emotion-emoji">{{ emotionEmoji(e.id) }}</span>
-          <div class="emotion-row-body">
-            <span class="emotion-row-label" :style="{ color: emotionColor(e.id) }">{{ e.label }}</span>
-            <span class="emotion-row-desc">{{ e.beschreibung }}</span>
-            <div v-if="selectedFeelingsFor(e.id).length > 0" class="emotion-selections">
-              <span
-                v-for="item in selectedFeelingsFor(e.id)"
-                :key="'f-' + item.name"
-                class="emotion-sel-chip emotion-sel-chip--removable"
-                :style="{ backgroundColor: emotionColor(e.id), color: '#000' }"
-                @click.stop="toggleFeeling(item.name, item.emotionId)"
-              >{{ item.name }}<span class="chip-x">×</span></span>
-            </div>
+    <div v-for="e in taxonomy.grundemotionen" :key="e.id" class="pick-card">
+      <div class="pick-head" @click="toggleEmotion(e.id)">
+        <span class="pick-dot" :style="{ background: emotionColor(e.id) }"></span>
+        <span class="pick-name">{{ e.label }}</span>
+        <span class="pick-count">
+          {{ selectedFeelingsFor(e.id).length ? selectedFeelingsFor(e.id).length + '/' : '' }}{{ emotionTotal(e) }}
+        </span>
+        <v-icon class="detail-chevron">
+          {{ isEmotionOpen(e.id) ? 'expand_more' : 'chevron_right' }}
+        </v-icon>
+      </div>
+
+      <p class="pick-desc">{{ e.beschreibung }}</p>
+
+      <!-- What is already chosen stays visible whether the group is open or
+           not: it is the answer, the tree is only the way to it. -->
+      <div v-if="selectedFeelingsFor(e.id).length" class="pick-chips">
+        <span
+          v-for="item in selectedFeelingsFor(e.id)"
+          :key="'f-' + item.name"
+          class="pick-chip"
+          :style="{ color: emotionColor(e.id) }"
+          @click.stop="toggleFeeling(item.name, item.emotionId)"
+        >{{ item.name }}<span class="pick-chip-x">×</span></span>
+      </div>
+
+      <div v-if="isEmotionOpen(e.id)" class="pick-body">
+        <div v-for="c in e.unterkategorien" :key="c.id">
+          <div class="pick-cluster" @click.stop="toggleCluster(c.id)">
+            <span
+              v-if="clusterFeelingCount(c) > 0"
+              class="pick-cluster-fill"
+              :style="{ width: clusterPct(c) + '%', background: emotionColor(e.id) }"
+            ></span>
+            <span class="pick-cluster-label">{{ c.label }}</span>
+            <span v-if="clusterFeelingCount(c) > 0" class="pick-cluster-count">
+              {{ clusterFeelingCount(c) }}/{{ clusterFeelingTotal(c) }}
+            </span>
           </div>
-          <v-icon small :color="emotionColor(e.id)">{{ isEmotionOpen(e.id) ? 'expand_less' : 'expand_more' }}</v-icon>
-        </div>
 
-        <!-- Clusters (when emotion is expanded) -->
-        <div v-if="isEmotionOpen(e.id)" class="emotion-card-body">
-          <div v-for="c in e.unterkategorien" :key="c.id">
-
-            <div class="cluster-row" @click.stop="toggleCluster(c.id)">
-              <span
-                v-if="clusterFeelingCount(c) > 0"
-                class="cluster-fill"
-                :style="{ width: clusterPct(c) + '%', background: emotionColor(e.id) }"
-              ></span>
-              <span class="cluster-label">{{ c.label }}</span>
-              <span v-if="clusterFeelingCount(c) > 0" class="cluster-count">
-                {{ clusterFeelingCount(c) }}/{{ clusterFeelingTotal(c) }}
-              </span>
-            </div>
-
-            <!-- Selectable items (when cluster is expanded) -->
-            <div v-if="isClusterOpen(c.id)" class="selection-section">
-              <div class="chips-wrap">
-                <span
-                  v-for="item in (c.gefuehle || [])"
-                  :key="item.name"
-                  class="my-chip"
-                  :style="isSelectedFeeling(item.name)
-                    ? { backgroundColor: emotionColor(e.id), color: '#000' }
-                    : { backgroundColor: '#3a3a3c', color: emotionColor(e.id) }"
-                  @click.stop="toggleFeeling(item.name, e.id)"
-                >{{ item.name }}</span>
-              </div>
-            </div>
-
+          <div v-if="isClusterOpen(c.id)" class="pick-chips pick-chips-open">
+            <!-- Chosen words carry the group's colour; the rest stay quiet, so
+                 what is already picked still reads as the answer. -->
+            <span
+              v-for="item in (c.gefuehle || [])"
+              :key="item.name"
+              class="pick-chip"
+              :style="{ color: isSelectedFeeling(item.name) ? emotionColor(e.id) : '#8e8e93' }"
+              @click.stop="toggleFeeling(item.name, e.id)"
+            >{{ item.name }}</span>
           </div>
         </div>
       </div>
-
-    </v-flex>
-  </v-layout>
+    </div>
+  </div>
 </template>
 
 <script>
-import BeliefContext from '@/views/BeliefContext.vue';
-import BeliefQuote from '@/components/BeliefQuote.vue';
+import WizardContext from '@/components/WizardContext.vue';
 import { emotionColor, emotionValence, emotionIdForFeeling } from '@/utils/emotions';
 
 // The Gefühl tree. Bedürfnisse used to be picked here too, through the same
@@ -98,7 +86,7 @@ import { emotionColor, emotionValence, emotionIdForFeeling } from '@/utils/emoti
 // now, so this one only does one thing.
 export default {
   name: 'belief-add-feeling-need',
-  components: { BeliefContext, BeliefQuote },
+  components: { WizardContext },
   props: {
     belief: { type: String, default: '' },
     // The reaction from the earlier step, shown read-only for context.
@@ -223,139 +211,19 @@ export default {
     emotionColor: function(id) {
       return emotionColor(id);
     },
-    emotionEmoji: function(id) {
-      var map = {
-        freude: '😊',
-        traurigkeit: '😢',
-        wut: '😠',
-        angst: '😰',
-        ueberraschung: '😮',
-        ekel: '🤢',
-      };
-      return map[id] || '😶';
+    // How many feelings the group holds altogether — the denominator the
+    // header counts against.
+    emotionTotal: function(e) {
+      return (e.unterkategorien || []).reduce(function(sum, c) {
+        return sum + ((c.gefuehle || []).length);
+      }, 0);
     },
   },
 };
 </script>
 
 <style scoped lang="scss">
-.limit-hint {
-  font-size: 0.8rem;
-  color: #636366;
-  margin: 10px 0 12px;
-  &.over-limit {
-    color: #fd9927;
-    font-weight: 600;
-  }
-}
-
-.emotion-card {
-  border: 1.5px solid;
-  border-radius: 12px;
-  background: #1c1c1e;
-  overflow: hidden;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.emotion-card-header {
-  display: flex;
-  align-items: center;
-  padding: 13px 14px;
-  cursor: pointer;
-  &:active { background: #2c2c2e; }
-}
-
-.emotion-emoji {
-  font-size: 1.6rem;
-  margin-right: 12px;
-  flex-shrink: 0;
-  line-height: 1;
-}
-
-.emotion-row-body { flex: 1; min-width: 0; }
-.emotion-row-label { display: block; font-weight: 600; font-size: 0.95rem; }
-.emotion-row-desc { display: block; font-size: 0.78rem; color: #8e8e93; margin-top: 2px; }
-.emotion-selections { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
-
-.emotion-sel-chip {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 0.72rem;
-  font-weight: 600;
-}
-.emotion-sel-chip--removable {
-  padding-right: 5px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  &:active { opacity: 0.7; }
-}
-.chip-x {
-  margin-left: 5px;
-  font-size: 0.9rem;
-  line-height: 1;
-  vertical-align: -1px;
-  opacity: 0.65;
-}
-
-.emotion-card-body {
-  border-top: 1px solid #2c2c2e;
-}
-
-.cluster-row {
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  padding: 11px 14px 11px 20px;
-  color: #fff;
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 0.88rem;
-  border-top: 1px solid #2c2c2e;
-  -webkit-tap-highlight-color: transparent;
-  &:first-child { border-top: none; }
-  &:active { background: #2c2c2e; }
-}
-
-.cluster-fill {
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  opacity: 0.3;
-  min-width: 10px;
-  transition: width 0.25s ease;
-  pointer-events: none;
-}
-.cluster-label { position: relative; z-index: 1; flex: 1; min-width: 0; }
-.cluster-count {
-  position: relative;
-  z-index: 1;
-  flex-shrink: 0;
-  margin-left: 8px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: #8e8e93;
-}
-
-.selection-section {
-  padding: 12px 14px 10px 20px;
-  background: #111;
-  border-top: 1px solid #2c2c2e;
-}
-
-.chips-wrap { display: flex; flex-wrap: wrap; }
-
-.my-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  cursor: pointer;
-  margin: 3px 4px 3px 0;
-  -webkit-tap-highlight-color: transparent;
-  transition: opacity 0.15s;
-  &:active { opacity: 0.7; }
-}
+/* Turns orange once the recommendation is exceeded — the way forward is
+   blocked at that point and needs a reason on screen. */
+.over-limit { color: #fd9927; font-weight: 600; }
 </style>

@@ -1,18 +1,8 @@
 <template>
-  <div>
-    <v-toolbar color="white" app>
-      <v-btn v-if="step === 1" icon @click="close">
-        <v-icon>close</v-icon>
-      </v-btn>
-      <v-btn v-else icon @click="prevStep">
-        <v-icon>chevron_left</v-icon>
-      </v-btn>
-      <v-toolbar-title>Handlung planen</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <span class="grey--text body-1">{{ step }} / {{ totalSteps }}</span>
-    </v-toolbar>
+  <div class="wizard-page">
     <v-content>
-      <v-container class="mb-5">
+      <wizard-header title="Handlung planen" :step="step" :total="totalSteps"></wizard-header>
+      <div>
         <!-- Only when the wizard was opened without a belief, from the
              Handlungen list. -->
         <belief-act-pick-belief
@@ -31,37 +21,25 @@
           :patterns="allPatterns"
           :allBeliefs="everyBelief"
           :initialValue="experiment.situation"
-          @changed="experiment.situation = $event"
-          @focussed="isFooterFixed = false"
-          @blurred="isFooterFixed = true">
+          @changed="experiment.situation = $event">
         </belief-act-situation>
 
         <belief-act-fear
           v-show="step === fearStep"
           :situation="experiment.situation"
           :experiment="experiment"
-          @changed="onFearChanged"
-          @focussed="isFooterFixed = false"
-          @blurred="isFooterFixed = true">
+          @changed="onFearChanged">
         </belief-act-fear>
-      </v-container>
-
-      <v-footer :fixed="isFooterFixed" color="white elevation-3" height="44">
-        <v-btn
-          v-if="step < totalSteps"
-          :disabled="!isStepComplete"
-          @click="nextStep"
-          block large color="primary">
-          weiter
-        </v-btn>
-        <v-btn
-          v-else
-          @click="save"
-          block large color="primary">
-          speichern
-        </v-btn>
-      </v-footer>
+      </div>
+      <div class="wizard-bottom-space"></div>
     </v-content>
+
+    <wizard-footer
+      :disabled="step < totalSteps && !isStepComplete"
+      :nextLabel="step < totalSteps ? 'Weiter' : 'Speichern'"
+      @back="back"
+      @next="step < totalSteps ? nextStep() : save()"
+    ></wizard-footer>
   </div>
 </template>
 
@@ -69,6 +47,8 @@
 import BeliefActPickBelief from '@/views/BeliefActPickBelief.vue';
 import BeliefActSituation from '@/views/BeliefActSituation.vue';
 import BeliefActFear from '@/views/BeliefActFear.vue';
+import WizardHeader from '@/components/WizardHeader.vue';
+import WizardFooter from '@/components/WizardFooter.vue';
 import { createExperiment, isPlanned } from '@/utils/experiment';
 import { beliefStatus } from '@/utils/beliefStatus';
 import { beliefCredibility } from '@/utils/credibility';
@@ -84,6 +64,8 @@ export default {
     BeliefActPickBelief,
     BeliefActSituation,
     BeliefActFear,
+    WizardHeader,
+    WizardFooter,
   },
   data() {
     // Without a :time in the route the wizard starts one step earlier and asks
@@ -108,7 +90,6 @@ export default {
       experiment: existing
         ? Object.assign({}, existing)
         : createExperiment(Date.now()),
-      isFooterFixed: true,
     };
   },
   computed: {
@@ -179,6 +160,11 @@ export default {
     prevStep() {
       this.step -= 1;
       this.$vuetify.goTo(0, { duration: 0 });
+    },
+    // On the first step there is nothing to go back to but the way out.
+    back() {
+      if (this.step === 1) this.close();
+      else this.prevStep();
     },
     // Stamp plannedAt once steps 1+2 are complete — that starts the 7-day clock
     // and locks the anchor.

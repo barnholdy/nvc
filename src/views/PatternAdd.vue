@@ -1,66 +1,53 @@
 <template>
-  <div>
-    <v-toolbar color="white" app>
-      <v-btn v-if="step === 1" icon @click="close">
-        <v-icon>close</v-icon>
-      </v-btn>
-      <v-btn v-else icon @click="prevStep">
-        <v-icon>chevron_left</v-icon>
-      </v-btn>
-      <v-toolbar-title>{{ isEditMode ? 'Situation bearbeiten' : 'Neue Situation' }}</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <span class="grey--text body-1">{{ step }} / {{ totalSteps }}</span>
-    </v-toolbar>
+  <div class="wizard-page">
     <v-content>
-      <v-container class="mb-5">
-        <pattern-add-trigger
-          v-show="step === 1"
-          :initialValue="trigger"
-          @changed="trigger = $event"
-          @focussed="isFooterFixed = false"
-          @blurred="isFooterFixed = true">
-        </pattern-add-trigger>
+      <wizard-header
+        :title="isEditMode ? 'Situation bearbeiten' : 'Neue Situation'"
+        :step="step"
+        :total="totalSteps"
+      ></wizard-header>
 
-        <pattern-add-beliefs
-          v-show="step === 2"
-          :allBeliefs="allBeliefs"
-          :selectedBeliefIds="selectedBeliefIds"
-          :initialTruths="beliefTruths"
-          :trigger="trigger"
-          @changed="selectedBeliefIds = $event"
-          @truthsChanged="beliefTruths = $event">
-        </pattern-add-beliefs>
-      </v-container>
+      <pattern-add-trigger
+        v-show="step === 1"
+        :initialValue="trigger"
+        @changed="trigger = $event">
+      </pattern-add-trigger>
 
-      <v-footer :fixed="isFooterFixed" color="white elevation-3" height="44">
-        <v-btn
-          v-if="step < totalSteps"
-          :disabled="!isStepComplete"
-          @click="nextStep"
-          block large color="primary">
-          weiter
-        </v-btn>
-        <v-btn
-          v-else
-          :disabled="!isStepComplete"
-          @click="save"
-          block large color="primary">
-          speichern
-        </v-btn>
-      </v-footer>
+      <pattern-add-beliefs
+        v-show="step === 2"
+        :allBeliefs="allBeliefs"
+        :selectedBeliefIds="selectedBeliefIds"
+        :initialTruths="beliefTruths"
+        :trigger="trigger"
+        @changed="selectedBeliefIds = $event"
+        @truthsChanged="beliefTruths = $event">
+      </pattern-add-beliefs>
+
+      <div class="wizard-bottom-space"></div>
     </v-content>
+
+    <wizard-footer
+      :disabled="!isStepComplete"
+      :nextLabel="step < totalSteps ? 'Weiter' : 'Speichern'"
+      @back="back"
+      @next="step < totalSteps ? nextStep() : save()"
+    ></wizard-footer>
   </div>
 </template>
 
 <script>
 import PatternAddTrigger from '@/views/PatternAddTrigger.vue';
 import PatternAddBeliefs from '@/views/PatternAddBeliefs.vue';
+import WizardHeader from '@/components/WizardHeader.vue';
+import WizardFooter from '@/components/WizardFooter.vue';
 
 export default {
   name: 'pattern-add',
   components: {
     PatternAddTrigger,
     PatternAddBeliefs,
+    WizardHeader,
+    WizardFooter,
   },
   data() {
     var editEntry = this.$store.getters.patterns
@@ -72,7 +59,6 @@ export default {
       trigger: editEntry ? editEntry.trigger || '' : '',
       selectedBeliefIds: editEntry ? editEntry.beliefs || [] : [],
       beliefTruths: editEntry ? editEntry.beliefTruths || {} : {},
-      isFooterFixed: true,
     };
   },
   computed: {
@@ -95,6 +81,11 @@ export default {
     prevStep() {
       this.step -= 1;
       this.$vuetify.goTo(0, { duration: 0 });
+    },
+    // On the first step there is nothing to go back to but the way out.
+    back() {
+      if (this.step === 1) this.close();
+      else this.prevStep();
     },
     save() {
       var payload = {

@@ -1,91 +1,78 @@
 <template>
-  <v-layout column>
-    <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">Überzeugungen</h1>
-      <!-- The situation this step is about, labelled the same way every other
-           wizard step labels the text it carries forward. -->
-      <belief-context :situation="trigger"></belief-context>
-      <p class="body-1 grey--text mt-3 wizard-prompt">Welche tiefer liegenden Überzeugungen sind damit verbunden?</p>
+  <div>
+    <!-- The situation this step is about, labelled the same way every other
+         wizard step labels the text it carries forward. -->
+    <wizard-context label="Situation" :quote="trigger"></wizard-context>
 
-      <!-- Writing a new one is the answer to the question above, so it sits
-           directly under it rather than below the list of existing ones. -->
-      <div class="new-belief mt-3">
-        <template v-if="showNewInput">
-          <!-- Each rung the laddering has already climbed, oldest first. Kept
-               in view so the chain reads as one thought, not a series of
-               unrelated fields. -->
-          <p v-for="(rung, i) in ladder" :key="i" class="ladder-rung">„{{ rung }}“</p>
+    <p class="wizard-question">Welche Überzeugungen stecken dahinter?</p>
+    <p class="wizard-body">Welche tiefer liegenden Überzeugungen sind damit verbunden?</p>
 
-          <p v-if="ladder.length" class="body-1 grey--text mt-2 wizard-prompt">{{ DEEPER_QUESTION }}</p>
+    <!-- Writing a new one is the answer to the question above, so it sits
+         directly under it rather than below the list of existing ones. -->
+    <div class="new-belief">
+      <template v-if="showNewInput">
+        <!-- Each rung the laddering has already climbed, oldest first. Kept in
+             view so the chain reads as one thought, not a series of unrelated
+             fields. -->
+        <p v-for="(rung, i) in ladder" :key="i" class="ladder-rung">„{{ rung }}“</p>
 
-          <v-text-field
-            v-model="newBeliefText"
-            :label="ladder.length ? 'Antwort' : 'Neue Überzeugung'"
-            :placeholder="ladder.length ? '' : 'Ich bin nicht gut genug...'"
-            single-line
-            hide-details
-            class="mb-2"
-            @keyup.enter="createBelief"
-          ></v-text-field>
+        <p v-if="ladder.length" class="wizard-body ladder-question">{{ DEEPER_QUESTION }}</p>
 
-          <!-- Two ways on: one more rung down, or stop here and keep what
-               stands. Only the last rung becomes the belief. -->
-          <v-btn small flat class="ladder-quiet" :disabled="!hasText" @click="goDeeper">Tiefer gehen</v-btn>
-          <v-btn small flat color="primary" :disabled="!hasText" @click="createBelief">Hinzufügen</v-btn>
-          <v-btn small flat class="ladder-quiet" @click="cancelNew">Abbrechen</v-btn>
-        </template>
-        <template v-else>
-          <v-btn small flat color="primary" @click="showNewInput = true">
-            <v-icon small left>add</v-icon>
-            Neue Überzeugung
-          </v-btn>
-        </template>
-      </div>
-    </v-flex>
+        <input-card
+          v-model="newBeliefText"
+          :label="ladder.length ? 'Deine Antwort' : 'Neue Überzeugung'"
+          :placeholder="ladder.length ? '…' : 'Ich bin nicht gut genug...'"
+          :rows="2"
+        ></input-card>
 
-    <v-flex v-if="selectedBeliefObjects.length" class="mb-2">
-      <div v-for="b in selectedBeliefObjects" :key="b.time" class="belief-row">
-        <div class="belief-head">
-          <p class="belief-text">{{ b.belief }}</p>
+        <!-- Two ways on: one more rung down, or stop here and keep what
+             stands. Only the last rung becomes the belief. -->
+        <div class="ladder-actions">
+          <button class="card-btn ladder-quiet" :disabled="!hasText" @click="goDeeper">Tiefer gehen</button>
+          <button class="card-btn" :disabled="!hasText" @click="createBelief">Hinzufügen</button>
+          <button class="card-btn ladder-quiet" @click="cancelNew">Abbrechen</button>
+        </div>
+      </template>
+      <template v-else>
+        <button class="card-btn new-belief-btn" @click="showNewInput = true">Neue Überzeugung</button>
+      </template>
+    </div>
+
+    <template v-if="selectedBeliefObjects.length">
+      <p class="wizard-question">Wie glaubwürdig sind sie gerade?</p>
+      <div v-for="b in selectedBeliefObjects" :key="b.time">
+        <div class="card belief-head-card">
+          <p class="card-title">„{{ b.belief }}“</p>
           <button class="belief-remove" @click="removeSelected(b.time)">
             <v-icon small color="#ff453a">close</v-icon>
           </button>
         </div>
-        <p class="truth-question">Für wie glaubwürdig hältst du die Überzeugung?</p>
-        <div class="slider-row">
-          <span class="slider-end-label">0</span>
-          <input
-            type="range"
-            min="0"
-            max="10"
-            :value="truthOf(b.time)"
-            class="truth-slider"
-            @input="setTruth(b.time, $event.target.value)"
-          />
-          <span class="slider-end-label">10</span>
-        </div>
-        <p class="slider-value-label">{{ truthOf(b.time) }}</p>
+        <meter-card
+          :value="truthOf(b.time)"
+          label="Glaubwürdigkeit"
+          minLabel="gar nicht"
+          maxLabel="völlig"
+          @input="setTruth(b.time, $event)"
+        ></meter-card>
       </div>
-    </v-flex>
+    </template>
 
-    <v-flex class="mt-1">
-      <div v-if="unselectedBeliefs.length" class="available-chips mt-2">
-        <p class="caption grey--text mb-1">Hinzufügen:</p>
-        <div class="chip-list">
-          <v-chip
-            v-for="b in unselectedBeliefs"
-            :key="b.time"
-            class="available-chip"
-            @click="addBelief(b.time)"
-          >{{ b.belief }}</v-chip>
-        </div>
-      </div>
-    </v-flex>
-  </v-layout>
+    <template v-if="unselectedBeliefs.length">
+      <p class="wizard-question">Schon erfasste Überzeugungen</p>
+      <div
+        v-for="b in unselectedBeliefs"
+        :key="b.time"
+        class="card available-card"
+        @click="addBelief(b.time)"
+      >„{{ b.belief }}“</div>
+    </template>
+  </div>
 </template>
 
 <script>
-import BeliefContext from '@/views/BeliefContext.vue';
+import WizardContext from '@/components/WizardContext.vue';
+import InputCard from '@/components/InputCard.vue';
+import MeterCard from '@/components/MeterCard.vue';
 
 const TRUTH_DEFAULT = 5;
 
@@ -96,7 +83,7 @@ const DEEPER_QUESTION = 'Angenommen, das stimmt — was würde das über dich be
 
 export default {
   name: 'pattern-add-beliefs',
-  components: { BeliefContext },
+  components: { WizardContext, InputCard, MeterCard },
   props: {
     allBeliefs: { type: Array, default: function() { return []; } },
     selectedBeliefIds: { type: Array, default: function() { return []; } },
@@ -144,7 +131,7 @@ export default {
       return typeof v === 'number' ? v : TRUTH_DEFAULT;
     },
     setTruth(time, value) {
-      this.$set(this.truths, time, parseInt(value, 10));
+      this.$set(this.truths, time, Number(value));
       this.emitTruths();
     },
     emitTruths() {
@@ -190,11 +177,8 @@ export default {
 </script>
 
 <style scoped lang="scss">
-/* App.vue paints every flat button green via .v-btn:not(.primary):not(.red),
-   which outranks Vuetify's own colour prop — so all three options here would
-   read as equally weighty. Only Hinzufügen ends the ladder, so it keeps the
-   accent and these two step back. Needs the extra class to outrank that rule. */
-.new-belief .v-btn.ladder-quiet { color: #8e8e93 !important; }
+.new-belief { margin: 0 0 4px; }
+.new-belief-btn { margin: 0 16px; }
 
 /* The rungs already climbed. Quieter than the field below them: they are what
    was said on the way here, not what is being answered now. */
@@ -202,29 +186,35 @@ export default {
   font-size: 0.9rem;
   color: #8e8e93;
   line-height: 1.4;
-  margin: 0 0 6px;
+  margin: 0 16px 6px;
   padding-left: 10px;
   border-left: 2px solid #2c2c2e;
   word-break: break-word;
 }
-
-.belief-row {
-  padding: 12px 0;
-  border-top: 1px solid #2c2c2e;
-  &:first-of-type { border-top: none; }
+.ladder-question { margin-top: 10px; }
+.ladder-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 16px;
 }
-.belief-head {
+/* Only Hinzufügen ends the ladder, so the other two step back. */
+.ladder-quiet { border-color: #3a3a3c; color: #8e8e93; }
+.card-btn:disabled { opacity: 0.4; cursor: default; }
+
+/* The belief and its rating are one block, so the card above the meter loses
+   its bottom margin. */
+.belief-head-card {
   display: flex;
   align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
-.belief-text {
-  flex: 1;
-  min-width: 0;
-  font-size: 0.95rem;
-  color: #ebebf5;
-  line-height: 1.4;
-  margin: 0;
-  word-break: break-word;
+.belief-head-card + .meter-card {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 .belief-remove {
   background: none;
@@ -232,70 +222,16 @@ export default {
   padding: 2px 4px;
   cursor: pointer;
   flex-shrink: 0;
-  margin-left: 8px;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
 }
-.truth-question {
-  font-size: 0.8rem;
+
+.available-card {
+  font-size: 0.95rem;
+  line-height: 1.45;
   color: #8e8e93;
-  margin: 8px 0 4px;
-}
-.slider-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 4px;
-}
-.slider-end-label {
-  font-size: 0.72rem;
-  color: #636366;
-  flex-shrink: 0;
-}
-.truth-slider {
-  flex: 1;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 4px;
-  border-radius: 2px;
-  background: #3a3a3c;
-  outline: none;
   cursor: pointer;
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: #4ade80;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-  }
-  &::-moz-range-thumb {
-    width: 24px;
-    height: 24px;
-    border: none;
-    border-radius: 50%;
-    background: #4ade80;
-    cursor: pointer;
-  }
-}
-.slider-value-label {
-  text-align: center;
-  font-size: 1rem;
-  font-weight: 600;
-  margin: 6px 0 0;
-}
-.available-chips { margin-top: 8px; }
-.chip-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.available-chip {
-  cursor: pointer;
-  white-space: normal;
-  height: auto !important;
-  padding: 4px 10px !important;
+  -webkit-tap-highlight-color: transparent;
+  &:active { opacity: 0.6; }
 }
 </style>

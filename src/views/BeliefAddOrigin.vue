@@ -1,39 +1,32 @@
 <template>
-  <v-layout column>
-    <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">Ursprung</h1>
-      <belief-quote :text="belief" class="mt-1"></belief-quote>
+  <div>
+    <!-- No needs here: they are picked on the next step. The feelings are
+         named in the sentence under the question rather than listed above it. -->
+    <wizard-context :quote="belief" :reaction="reaction"></wizard-context>
 
-      <!-- No needs here: they are picked on the next step. The feelings
-           are named in the question itself rather than listed above it. -->
-      <belief-context :reaction="reaction"></belief-context>
+    <p class="wizard-question">Wo kommt das her?</p>
+    <feeling-words
+      class="wizard-body"
+      :feelings="feelings"
+      prefix="Die Überzeugung lässt dich "
+      :suffix="withFeelingsSuffix"
+      :fallback="plainQuestion">
+    </feeling-words>
 
-      <feeling-words
-        class="body-1 white--text mt-3 wizard-prompt"
-        :feelings="feelings"
-        prefix="Die Überzeugung lässt dich "
-        :suffix="withFeelingsSuffix"
-        :fallback="plainQuestion">
-      </feeling-words>
-    </v-flex>
-    <v-flex>
-      <v-textarea
-        placeholder="..."
-        v-model="text"
-        auto-grow
-        rows="9"
-        hide-details
-        @focus="$emit('focussed')"
-        @blur="$emit('blurred')"
-      ></v-textarea>
-    </v-flex>
-  </v-layout>
+    <input-card
+      v-model="text"
+      label="Der Ursprung"
+      :rows="3"
+      @focussed="$emit('focussed')"
+      @blurred="$emit('blurred')"
+    ></input-card>
+  </div>
 </template>
 
 <script>
-import BeliefContext from '@/views/BeliefContext.vue';
+import WizardContext from '@/components/WizardContext.vue';
 import FeelingWords from '@/components/FeelingWords.vue';
-import BeliefQuote from '@/components/BeliefQuote.vue';
+import InputCard from '@/components/InputCard.vue';
 
 const QUESTION = 'wann hast du diese Überzeugung zum ersten Mal gelernt? Welche frühere '
   + 'Erfahrung hat sie plausibel gemacht? Was hat dir diese Überzeugung damals ermöglicht?';
@@ -43,7 +36,7 @@ const QUESTION = 'wann hast du diese Überzeugung zum ersten Mal gelernt? Welche
 // now, where it can be answered by tapping instead of writing.
 export default {
   name: 'belief-add-origin',
-  components: { BeliefContext, FeelingWords, BeliefQuote },
+  components: { WizardContext, FeelingWords, InputCard },
   props: {
     belief: { type: String, default: '' },
     reaction: { type: String, default: '' },

@@ -259,6 +259,300 @@ html { overflow-x: hidden; }
 }
 .v-chip .v-icon { color: #8e8e93 !important; }
 
+/* ─── Wizards ───
+   The steps borrow the list screens' language: a dark page, cards with the
+   same radius and fill, the same detail rows, the same outline buttons. What
+   is particular to a wizard is the frame — a title with a progress bar above,
+   two ways on below — and the shape of a question. */
+.wizard-page {
+  background: #000;
+  min-height: 100vh;
+}
+/* Holds its place while the step scrolls under it, like the list headers. */
+.wizard-head {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background: #000;
+  padding: 6px 16px 12px;
+}
+.wizard-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 12px;
+  letter-spacing: -0.02em;
+}
+/* One segment per step: how far along is a shape, not a fraction to read. */
+.wizard-steps {
+  display: flex;
+  gap: 6px;
+}
+.wizard-step {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: #2c2c2e;
+  transition: background 0.25s ease;
+  &.done { background: #4ade80; }
+}
+
+/* What the step asks. Large and white — it is the one thing on the screen
+   that has to be read before anything else can be answered. */
+.wizard-question {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.3;
+  margin: 22px 16px 10px;
+}
+/* The elaboration under the question. */
+.wizard-body {
+  font-size: 1rem;
+  color: #8e8e93;
+  line-height: 1.55;
+  margin: 0 16px 14px;
+}
+/* Quieter still: a rule of thumb, a count, a caveat. */
+.wizard-note {
+  font-size: 0.85rem;
+  color: #636366;
+  line-height: 1.5;
+  margin: 0 16px 12px;
+}
+.wizard-note strong, .wizard-body strong { color: #fff; font-weight: 600; }
+/* Clears the fixed footer. */
+.wizard-bottom-space { height: 96px; }
+
+/* Two ways on, always in the same place. */
+.wizard-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px;
+  /* Not calc(12px + env(...)): the build's cssnano cannot parse env() inside
+     calc(). The bare fallback covers phones without an inset. */
+  padding-bottom: env(safe-area-inset-bottom, 12px);
+  background: #000;
+  border-top: 1px solid #1c1c1e;
+}
+.wizard-back {
+  flex: 0 0 auto;
+  background: none;
+  border: 1px solid #3a3a3c;
+  border-radius: 999px;
+  color: #8e8e93;
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 13px 28px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  &:active { opacity: 0.6; }
+}
+.wizard-next {
+  flex: 1;
+  background: #4ade80;
+  border: none;
+  border-radius: 999px;
+  color: #000;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 13px 20px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  &:active { opacity: 0.8; }
+  &:disabled { background: #2c2c2e; color: #636366; cursor: default; }
+}
+
+/* The answer field, set apart by a green edge the way a saved affirmation is:
+   this is the part of the screen that is yours to write. */
+.input-card {
+  background: #0e0e0f;
+  border: 1px solid #4ade80;
+  border-radius: 18px;
+  margin: 0 14px 12px;
+  padding: 14px 16px;
+}
+.input-card-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.68rem;
+  color: #4ade80;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  margin: 0 0 8px;
+  .v-icon { color: #4ade80 !important; font-size: 0.95rem !important; }
+}
+.input-card-field {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  outline: none;
+  resize: none;
+  color: #fff;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  padding: 0;
+  &::placeholder { color: #48484a; }
+}
+
+/* A recorded number and the scale it sits on. */
+.meter-card { padding: 16px 18px 14px; }
+.meter-head {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin-bottom: 12px;
+}
+.meter-value { font-size: 2rem; font-weight: 700; color: #fff; line-height: 1; }
+.meter-max { font-size: 0.9rem; color: #636366; }
+.meter-label { font-size: 0.9rem; color: #8e8e93; margin-left: auto; }
+.meter-ends {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: #636366;
+  margin-top: 8px;
+}
+.meter-hint {
+  font-size: 0.82rem;
+  color: #8e8e93;
+  line-height: 1.5;
+  margin: 12px 0 0;
+  text-align: center;
+}
+.meter-slider {
+  display: block;
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: #2c2c2e;
+  outline: none;
+  cursor: pointer;
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #4ade80;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  }
+  &::-moz-range-thumb {
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 50%;
+    background: #4ade80;
+    cursor: pointer;
+  }
+  &:disabled {
+    cursor: default;
+    &::-webkit-slider-thumb { cursor: default; }
+  }
+}
+
+/* A group to open and pick from — feelings, needs. Same card as everywhere;
+   the colour lives in a dot and in what is already chosen, not in a border. */
+.pick-card {
+  background: #141416;
+  border-radius: 18px;
+  margin: 0 14px 10px;
+  overflow: hidden;
+}
+.pick-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.pick-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.pick-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #fff;
+}
+.pick-count { font-size: 0.9rem; color: #8e8e93; flex-shrink: 0; }
+.pick-desc {
+  font-size: 0.88rem;
+  color: #8e8e93;
+  line-height: 1.45;
+  margin: 0 16px 12px;
+}
+.pick-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 16px 14px;
+}
+/* Outline, like every other chip in the app since the redesign. */
+.pick-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 6px 13px;
+  font-size: 0.92rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  &:active { opacity: 0.6; }
+}
+.pick-chip-x { opacity: 0.7; font-size: 0.95rem; line-height: 1; }
+.pick-body { border-top: 1px solid #2c2c2e; }
+.pick-cluster {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #2c2c2e;
+  cursor: pointer;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  &:last-child { border-bottom: none; }
+}
+.pick-cluster-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  opacity: 0.16;
+}
+.pick-cluster-label {
+  position: relative;
+  flex: 1;
+  font-size: 0.95rem;
+  color: #ebebf5;
+}
+.pick-cluster-count {
+  position: relative;
+  font-size: 0.8rem;
+  color: #8e8e93;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
 /* The question a wizard step asks, wherever it is asked. */
 .wizard-prompt { font-weight: 600 !important; }
 

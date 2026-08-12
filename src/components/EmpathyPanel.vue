@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div class="empathy-panel">
     <template v-if="showApiKeyInput">
-      <p class="caption grey--text mb-1">Anthropic API Key eingeben, um Empathie zu generieren:</p>
+      <p class="wizard-note">Anthropic API Key eingeben, um Empathie zu generieren:</p>
       <v-text-field
         v-model="apiKeyInput"
         label="API Key"
@@ -29,27 +29,26 @@
       </div>
     </template>
 
-    <p v-if="errorMsg" class="caption red--text mt-1">{{ errorMsg }}</p>
+    <p v-if="errorMsg" class="wizard-note error-text">{{ errorMsg }}</p>
 
-    <div v-if="text !== null" class="empathy-rendered md-content mt-3" v-html="renderMd(text)"></div>
+    <div v-if="text !== null" class="card empathy-rendered md-content" v-html="renderMd(text)"></div>
 
     <!-- The question the mirroring is for: not what was said, but what of it
          is worth keeping. Only meaningful once there is something to answer. -->
     <template v-if="text !== null">
-      <p class="body-1 white--text mt-4 wizard-prompt">Was möchtest du davon annehmen?</p>
-      <v-textarea
+      <p class="wizard-question">Was möchtest du davon annehmen?</p>
+      <input-card
         v-model="reflection"
-        placeholder="..."
-        auto-grow
-        rows="3"
-        hide-details
+        label="Was du annehmen willst"
+        :rows="3"
         @input="$emit('reflectionChanged', reflection)"
-      ></v-textarea>
+      ></input-card>
     </template>
   </div>
 </template>
 
 <script>
+import InputCard from '@/components/InputCard.vue';
 import { dedupeByName } from '@/utils/emotions';
 import { situationsForBelief } from '@/utils/patterns';
 
@@ -57,6 +56,7 @@ import { situationsForBelief } from '@/utils/patterns';
 // that offers it ask in exactly the same way.
 export default {
   name: 'empathy-panel',
+  components: { InputCard },
   props: {
     // The belief to reflect on, as stored.
     entry: { type: Object, default: null },
@@ -184,14 +184,20 @@ export default {
 </script>
 
 <style scoped lang="scss">
+/* The button and the key prompt sit in the page's own margin; everything
+   below them is a card and carries its own. */
+.empathy-panel > .action-row,
+.empathy-panel > .wizard-note,
+.empathy-panel > .v-input,
+.empathy-panel > .v-btn { margin-left: 16px; margin-right: 16px; }
 .action-row { display: flex; align-items: center; gap: 8px; }
+.error-text { color: #ff453a !important; }
+
 .empathy-rendered {
+  margin-top: 12px;
   font-size: 0.95rem;
   color: #ebebf5;
   line-height: 1.7;
-  background: #1c1c1e;
-  border-radius: 12px;
-  padding: 16px;
 }
 .md-content {
   h1, h2, h3 { color: #fff; font-weight: 700; margin: 0 0 6px; line-height: 1.3; }

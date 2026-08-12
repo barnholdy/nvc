@@ -1,14 +1,12 @@
 <template>
-  <v-layout column>
-    <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">Zurück ins Jetzt</h1>
-      <p class="body-1 white--text mt-3 wizard-prompt">
-        Bevor du speicherst: einen Moment zurück ins Jetzt. Atme ruhig mit dem Kreis mit.
-      </p>
-    </v-flex>
+  <div>
+    <p class="wizard-question">Zurück ins Jetzt.</p>
+    <p class="wizard-body">
+      Bevor du speicherst: einen Moment zurück ins Jetzt. Atme ruhig mit dem Kreis mit.
+    </p>
 
     <breath-circle></breath-circle>
-  </v-layout>
+  </div>
 </template>
 
 <script>

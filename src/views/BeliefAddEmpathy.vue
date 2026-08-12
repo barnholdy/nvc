@@ -1,40 +1,34 @@
 <template>
-  <v-layout column>
-    <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">Empathie bekommen</h1>
-      <belief-quote :text="belief" class="mt-1"></belief-quote>
+  <div>
+    <!-- The same ground the previous step stood on, so nothing has to be
+         recalled from memory before asking for a mirror. -->
+    <wizard-context :quote="belief" :reaction="reaction" :origin="origin"></wizard-context>
 
-      <!-- The same ground the previous step stood on, so nothing has to be
-           recalled from memory before asking for a mirror. -->
-      <belief-context :reaction="reaction" :origin="origin"></belief-context>
+    <p class="wizard-question">Lass dir spiegeln, was du erlebst.</p>
 
-      <!-- The reframe and the ask are one block: the sentence only lands if it
-           is read in one go. Assembled in JS, like every other sentence naming
-           feelings or needs — the template's whitespace handling would eat the
-           spaces around the coloured spans. -->
-      <p class="body-1 white--text mt-4 wizard-prompt"><span
-        v-for="(seg, i) in reframeSegments"
-        :key="i"
-        :style="seg.color ? { color: seg.color, fontWeight: 600 } : null"
-      >{{ seg.text }}</span></p>
-    </v-flex>
+    <!-- The reframe and the ask are one block: the sentence only lands if it
+         is read in one go. Assembled in JS, like every other sentence naming
+         feelings or needs — the template's whitespace handling would eat the
+         spaces around the coloured spans. -->
+    <p class="wizard-body"><span
+      v-for="(seg, i) in reframeSegments"
+      :key="i"
+      :style="seg.color ? { color: seg.color, fontWeight: 600 } : null"
+    >{{ seg.text }}</span></p>
 
-    <v-flex>
-      <empathy-panel
-        :entry="entryForPrompt"
-        :initialText="initialValue"
-        :initialReflection="initialReflection"
-        @changed="$emit('changed', $event)"
-        @reflectionChanged="$emit('reflectionChanged', $event)">
-      </empathy-panel>
-    </v-flex>
-  </v-layout>
+    <empathy-panel
+      :entry="entryForPrompt"
+      :initialText="initialValue"
+      :initialReflection="initialReflection"
+      @changed="$emit('changed', $event)"
+      @reflectionChanged="$emit('reflectionChanged', $event)">
+    </empathy-panel>
+  </div>
 </template>
 
 <script>
-import BeliefContext from '@/views/BeliefContext.vue';
+import WizardContext from '@/components/WizardContext.vue';
 import EmpathyPanel from '@/components/EmpathyPanel.vue';
-import BeliefQuote from '@/components/BeliefQuote.vue';
 import { colorForFeeling, dedupeByName, sortByEmotion } from '@/utils/emotions';
 import { colorForNeed, sortNeeds } from '@/utils/needs';
 
@@ -42,7 +36,7 @@ import { colorForNeed, sortNeeds } from '@/utils/needs';
 // before the wizard closes it again.
 export default {
   name: 'belief-add-empathy',
-  components: { BeliefContext, EmpathyPanel, BeliefQuote },
+  components: { WizardContext, EmpathyPanel },
   props: {
     // Everything the wizard has collected so far, so the request reflects this
     // run rather than what was last saved.

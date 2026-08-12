@@ -1,25 +1,26 @@
 <template>
-  <v-layout column>
-    <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">Situation</h1>
-      <p class="body-1 grey--text mt-1 wizard-prompt">Erfasse eine Situation, in der du deiner Ansicht nach unverhältnismäßig stark reagiert hast. Was ist äußerlich passiert?</p>
-    </v-flex>
-    <v-flex>
-      <v-text-field
-        placeholder="..."
-        v-model="text"
-        multi-line
-        rows="8"
-        @focus="$emit('focussed')"
-        @blur="$emit('blurred')"
-      ></v-text-field>
-    </v-flex>
-  </v-layout>
+  <div>
+    <p class="wizard-question">Was ist äußerlich passiert?</p>
+    <p class="wizard-body">
+      Erfasse eine Situation, in der du deiner Ansicht nach unverhältnismäßig stark
+      reagiert hast.
+    </p>
+    <input-card
+      v-model="text"
+      label="Die Situation"
+      :rows="3"
+      @focussed="$emit('focussed')"
+      @blurred="$emit('blurred')"
+    ></input-card>
+  </div>
 </template>
 
 <script>
+import InputCard from '@/components/InputCard.vue';
+
 export default {
   name: 'pattern-add-trigger',
+  components: { InputCard },
   props: {
     initialValue: { type: String, default: '' },
   },
@@ -32,5 +33,3 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
-</style>

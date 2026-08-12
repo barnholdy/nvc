@@ -1,67 +1,52 @@
 <template>
-  <v-layout column>
-    <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">Befürchtung</h1>
-      <belief-context :situation="situation"></belief-context>
-      <p class="body-1 grey--text mt-2 wizard-prompt">
-        Was genau befürchtest du, wenn du das tust? Sei präzise: Wer reagiert wie?
-      </p>
-    </v-flex>
+  <div>
+    <wizard-context label="Situation" :quote="situation"></wizard-context>
 
-    <v-flex>
-      <v-text-field
-        placeholder="..."
-        v-model="fear"
-        multi-line
-        rows="5"
-        hide-details
-        :disabled="isLocked"
-        @focus="$emit('focussed')"
-        @blur="$emit('blurred')"
-      ></v-text-field>
+    <p class="wizard-question">Was befürchtest du?</p>
+    <p class="wizard-body">Sei präzise: Wer reagiert wie, wenn du das tust?</p>
 
-      <p class="body-1 grey--text mt-4 mb-2 wizard-prompt">
-        Wie stark erwartest du, dass diese Befürchtung eintritt?
-      </p>
+    <input-card
+      v-model="fear"
+      label="Deine Befürchtung"
+      :rows="3"
+      @focussed="$emit('focussed')"
+      @blurred="$emit('blurred')"
+    ></input-card>
 
-      <template v-if="isLocked">
-        <div class="locked-anchor">
-          <span class="locked-value">{{ fearExpected }}</span>
-          <span class="locked-note">
-            Festgeschrieben am {{ plannedAtLabel }} — bleibt unverändert, damit der
-            spätere Vergleich etwas wert ist.
-          </span>
-        </div>
+    <p class="wizard-question">Wie stark erwartest du, dass sie eintritt?</p>
+
+    <meter-card
+      :value="fearExpected"
+      label="Erwartet"
+      :readonly="isLocked"
+      minLabel="gar nicht"
+      maxLabel="genau so schlimm"
+      :color="isLocked ? '#fd9927' : ''"
+      @input="fearExpected = $event"
+    >
+      <template v-if="isLocked" slot="hint">
+        Festgeschrieben am {{ plannedAtLabel }} — bleibt unverändert, damit der spätere
+        Vergleich etwas wert ist.
       </template>
-      <template v-else>
-        <div class="slider-row">
-          <span class="slider-end-label">0</span>
-          <input type="range" min="0" max="10" v-model.number="fearExpected" class="fear-slider" />
-          <span class="slider-end-label">10</span>
-        </div>
-        <p class="slider-value-label">{{ fearExpected }}</p>
-        <div class="scale-legend">
-          <span>0 = gar nicht</span>
-          <span>10 = genau so schlimm wie befürchtet</span>
-        </div>
-      </template>
+    </meter-card>
 
-      <p class="outlook-text mt-4">
-        Danach führst du genau das aus — nicht mehr, nicht weniger. Der Impuls, im letzten
-        Moment doch ins alte Muster zu kippen, ist die Überzeugung selbst. Bemerke ihn,
-        folge ihm nicht. Das Ergebnis trägst du später unter „Handlungen“ ein.
-      </p>
-    </v-flex>
-  </v-layout>
+    <p class="wizard-note">
+      Danach führst du genau das aus — nicht mehr, nicht weniger. Der Impuls, im letzten
+      Moment doch ins alte Muster zu kippen, ist die Überzeugung selbst. Bemerke ihn,
+      folge ihm nicht. Das Ergebnis trägst du später unter „Handlungen“ ein.
+    </p>
+  </div>
 </template>
 
 <script>
 import moment from 'moment';
-import BeliefContext from '@/views/BeliefContext.vue';
+import WizardContext from '@/components/WizardContext.vue';
+import InputCard from '@/components/InputCard.vue';
+import MeterCard from '@/components/MeterCard.vue';
 
 export default {
   name: 'belief-act-fear',
-  components: { BeliefContext },
+  components: { WizardContext, InputCard, MeterCard },
   props: {
     situation: { type: String, default: '' },
     experiment: { type: Object, required: true },
@@ -95,84 +80,3 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
-.outlook-text {
-  font-size: 0.85rem;
-  color: #8e8e93;
-  line-height: 1.5;
-  margin: 0;
-}
-
-.slider-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 4px;
-}
-.slider-end-label {
-  font-size: 0.78rem;
-  color: #8e8e93;
-  flex-shrink: 0;
-}
-.fear-slider {
-  flex: 1;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 4px;
-  border-radius: 2px;
-  background: #3a3a3c;
-  outline: none;
-  cursor: pointer;
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background: #4ade80;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-  }
-  &::-moz-range-thumb {
-    width: 26px;
-    height: 26px;
-    border: none;
-    border-radius: 50%;
-    background: #4ade80;
-    cursor: pointer;
-  }
-}
-.slider-value-label {
-  text-align: center;
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 8px 0 0;
-}
-.scale-legend {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.72rem;
-  color: #636366;
-  margin-top: 2px;
-}
-
-.locked-anchor {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1.5px solid #fd9927;
-}
-.locked-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #fd9927;
-  flex-shrink: 0;
-}
-.locked-note {
-  font-size: 0.78rem;
-  color: #8e8e93;
-  line-height: 1.45;
-}
-</style>

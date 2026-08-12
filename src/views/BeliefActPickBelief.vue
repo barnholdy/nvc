@@ -1,37 +1,31 @@
 <template>
-  <v-layout column>
-    <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">Überzeugung</h1>
-      <p class="body-1 grey--text mt-2 wizard-prompt">
-        Welche Überzeugung willst du mit dieser Handlung an der Realität testen?
-      </p>
-    </v-flex>
+  <div>
+    <p class="wizard-question">Welche Überzeugung willst du testen?</p>
+    <p class="wizard-body">
+      Mit dieser Handlung stellst du sie an der Realität auf die Probe.
+    </p>
 
-    <v-flex>
-      <p v-if="!beliefs.length" class="empty-text">Noch keine gewandelte Überzeugung.</p>
-      <button
-        v-for="b in beliefs"
-        :key="b.time"
-        type="button"
-        class="belief-btn"
-        :class="{ selected: b.time === selected }"
-        @click="pick(b.time)"
-      >
-        <span class="belief-text">„{{ b.belief }}“</span>
-        <!-- The same two numbers the Überzeugungen list shows, so the choice
-             can be made here instead of from memory. -->
-        <div v-if="credibility(b) !== null" class="score-row">
-          <span class="score-value">{{ round(credibility(b)) }}</span>
-          <span class="score-max">/10</span>
-          <span class="score-label">Glaubwürdigkeit</span>
-        </div>
-        <span class="pick-meta">{{ situationLabel(b) }}</span>
-      </button>
+    <p v-if="!beliefs.length" class="wizard-note">Noch keine gewandelte Überzeugung.</p>
 
-      <!-- Says why the list is as short as it is. -->
-      <p class="footnote">Wandle Überzeugungen, um sie hier zum Handeln auszuwählen.</p>
-    </v-flex>
-  </v-layout>
+    <div
+      v-for="b in beliefs"
+      :key="b.time"
+      class="card pick-belief"
+      :class="{ selected: b.time === selected }"
+      @click="pick(b.time)"
+    >
+      <p class="card-title">„{{ b.belief }}“</p>
+      <div v-if="credibility(b) !== null" class="score-row">
+        <span class="score-value">{{ round(credibility(b)) }}</span>
+        <span class="score-max">/10</span>
+        <span class="score-label">Glaubwürdigkeit</span>
+      </div>
+      <span class="card-pill">{{ situationLabel(b) }}</span>
+    </div>
+
+    <!-- Says why the list is as short as it is. -->
+    <p class="wizard-note">Wandle Überzeugungen, um sie hier zum Handeln auszuwählen.</p>
+  </div>
 </template>
 
 <script>
@@ -73,45 +67,15 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.belief-btn {
-  display: block;
-  width: 100%;
-  text-align: left;
-  font-size: 0.95rem;
-  line-height: 1.4;
-  color: #ebebf5;
-  background: #1c1c1e;
-  border: 1.5px solid transparent;
-  border-radius: 12px;
-  padding: 14px 16px;
-  margin-bottom: 10px;
+/* The chosen one takes the accent edge; the rest stay plain cards. */
+.pick-belief {
   cursor: pointer;
+  border: 1px solid transparent;
   -webkit-tap-highlight-color: transparent;
-  &:focus-visible {
-    outline: 2px solid #4ade80;
-    outline-offset: 2px;
-  }
+  &:active { opacity: 0.7; }
   &.selected {
     border-color: #4ade80;
-    .belief-text { color: #4ade80; font-weight: 600; }
+    .card-title { color: #4ade80; }
   }
-}
-.belief-text { display: block; }
-.pick-meta {
-  display: block;
-  font-size: 0.78rem;
-  color: #8e8e93;
-  margin-top: 8px;
-}
-.empty-text {
-  font-size: 0.875rem;
-  color: #8e8e93;
-  margin: 0;
-}
-.footnote {
-  font-size: 0.8rem;
-  color: #636366;
-  line-height: 1.5;
-  margin: 12px 0 0;
 }
 </style>

@@ -1,34 +1,30 @@
 <template>
-  <v-layout column>
-    <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">Neue Reaktion</h1>
-      <belief-quote :text="belief" class="mt-1"></belief-quote>
-      <belief-context :exceptions="exceptions"></belief-context>
-      <need-words
-        class="body-1 grey--text mt-2 wizard-prompt"
-        :needs="needs"
-        :prefix="PROMPT_PREFIX"
-        :suffix="PROMPT_SUFFIX"
-        :fallback="PROMPT_FALLBACK">
-      </need-words>
-    </v-flex>
-    <v-flex>
-      <v-text-field
-        placeholder="..."
-        v-model="text"
-        multi-line
-        rows="8"
-        @focus="$emit('focussed')"
-        @blur="$emit('blurred')"
-      ></v-text-field>
-    </v-flex>
-  </v-layout>
+  <div>
+    <wizard-context :quote="belief" :exceptions="exceptions"></wizard-context>
+
+    <p class="wizard-question">Was wärst du ohne sie?</p>
+    <need-words
+      class="wizard-body"
+      :needs="needs"
+      :prefix="PROMPT_PREFIX"
+      :suffix="PROMPT_SUFFIX"
+      :fallback="PROMPT_FALLBACK">
+    </need-words>
+
+    <input-card
+      v-model="text"
+      label="Deine neue Reaktion"
+      :rows="3"
+      @focussed="$emit('focussed')"
+      @blurred="$emit('blurred')"
+    ></input-card>
+  </div>
 </template>
 
 <script>
-import BeliefContext from '@/views/BeliefContext.vue';
+import WizardContext from '@/components/WizardContext.vue';
 import NeedWords from '@/components/NeedWords.vue';
-import BeliefQuote from '@/components/BeliefQuote.vue';
+import InputCard from '@/components/InputCard.vue';
 
 const TAIL = ' Wie würdest du in eine Begegnung gehen? Was würdest du tun oder lassen?';
 const PROMPT_PREFIX = 'Stell dir einen Tag vor, an dem diese Überzeugung einfach nicht existiert. '
@@ -41,7 +37,7 @@ const PROMPT_FALLBACK = 'Stell dir einen Tag vor, an dem diese Überzeugung einf
 
 export default {
   name: 'pattern-add-without-belief',
-  components: { BeliefContext, NeedWords, BeliefQuote },
+  components: { WizardContext, NeedWords, InputCard },
   props: {
     belief: { type: String, default: '' },
     // The need(s) this belief was a strategy for. Named in the prompt, because

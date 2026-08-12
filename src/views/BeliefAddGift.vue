@@ -1,19 +1,15 @@
 <template>
-  <v-layout column>
-    <v-flex class="mt-2 mb-3">
-      <h1 class="headline font-weight-regular">Bedürfnis</h1>
-      <belief-quote :text="belief" class="mt-1"></belief-quote>
+  <div>
+    <wizard-context :quote="belief" :reaction="reaction" :origin="origin"></wizard-context>
 
-      <belief-context :reaction="reaction" :origin="origin"></belief-context>
-
-      <feeling-words
-        class="body-1 white--text mt-3 wizard-prompt"
-        :feelings="feelings"
-        :prefix="PROMPT_PREFIX"
-        :suffix="PROMPT_SUFFIX"
-        :fallback="PROMPT_FALLBACK">
-      </feeling-words>
-    </v-flex>
+    <p class="wizard-question">Wonach hast du dich gesehnt?</p>
+    <feeling-words
+      class="wizard-body"
+      :feelings="feelings"
+      :prefix="PROMPT_PREFIX"
+      :suffix="PROMPT_SUFFIX"
+      :fallback="PROMPT_FALLBACK">
+    </feeling-words>
 
     <need-picker
       :initialNeeds="initialNeeds"
@@ -24,14 +20,13 @@
       :feelings="feelings"
       @change="$emit('change', $event)">
     </need-picker>
-  </v-layout>
+  </div>
 </template>
 
 <script>
-import BeliefContext from '@/views/BeliefContext.vue';
+import WizardContext from '@/components/WizardContext.vue';
 import FeelingWords from '@/components/FeelingWords.vue';
 import NeedPicker from '@/components/NeedPicker.vue';
-import BeliefQuote from '@/components/BeliefQuote.vue';
 import { MAX_NEEDS } from '@/utils/needs';
 
 // What the prompt says before the pick: the belief made sense at the time, and
@@ -49,7 +44,7 @@ const PROMPT_FALLBACK = 'Diese Überzeugung hatte damals einen guten Grund. Sie 
 // Empathie step, where the material is picked up again anyway.
 export default {
   name: 'belief-add-gift',
-  components: { BeliefContext, FeelingWords, NeedPicker, BeliefQuote },
+  components: { WizardContext, FeelingWords, NeedPicker },
   props: {
     belief: { type: String, default: '' },
     reaction: { type: String, default: '' },

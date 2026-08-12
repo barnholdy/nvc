@@ -2,7 +2,7 @@
   <div>
     <!-- Assembled in JS so the coloured words sit inside the sentence without
          the template's whitespace handling eating the spaces around them. -->
-    <p class="body-1 grey--text mb-2 wizard-prompt"><span v-for="(seg, i) in segments" :key="i" :style="seg.color ? { color: seg.color, fontWeight: 600 } : null">{{ seg.text }}</span></p>
+    <p class="wizard-body"><span v-for="(seg, i) in segments" :key="i" :style="seg.color ? { color: seg.color, fontWeight: 600 } : null">{{ seg.text }}</span></p>
   </div>
 </template>
 
