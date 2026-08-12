@@ -28,6 +28,16 @@
         </div>
 
         <div class="pill-row">
+          <!-- Compact strips the card back to what a run is and how it stood;
+               Befürchtung, was passiert ist and was es sagt stay one tap away. -->
+          <button
+            class="pill pill-icon"
+            :class="{ active: compact }"
+            :aria-label="compact ? 'Ausführliche Ansicht' : 'Kompakte Ansicht'"
+            @click="compact = !compact"
+          >
+            <v-icon small>{{ compact ? 'unfold_more' : 'unfold_less' }}</v-icon>
+          </button>
           <button
             v-for="f in filters"
             :key="f.key"
@@ -124,10 +134,10 @@
             </div>
           </template>
 
-          <div class="card-sep"></div>
+          <div v-if="!compact" class="card-sep"></div>
 
           <div
-            v-if="row.experiment.fear"
+            v-if="!compact && row.experiment.fear"
             class="detail-row"
             :class="{ open: isOpen(row, 'fear') }"
             @click.stop="toggleRow(row, 'fear')"
@@ -138,7 +148,7 @@
           </div>
 
           <div
-            v-if="row.experiment.outcome"
+            v-if="!compact && row.experiment.outcome"
             class="detail-row"
             :class="{ open: isOpen(row, 'outcome') }"
             @click.stop="toggleRow(row, 'outcome')"
@@ -149,7 +159,7 @@
           </div>
 
           <div
-            v-if="row.experiment.learning"
+            v-if="!compact && row.experiment.learning"
             class="detail-row"
             :class="{ open: isOpen(row, 'learning') }"
             @click.stop="toggleRow(row, 'learning')"
@@ -215,17 +225,17 @@
               <experiment-recall :fear="resultFear" :outcome="resultOutcome"></experiment-recall>
 
               <div class="card gap-card" :style="{ borderColor: gapColor(resultGap) }">
-                <p class="gap-line">
-                  Deine Erwartung war
-                  <span class="gap-num">{{ resultExpected }}</span>,
-                  real waren es
-                  <span class="gap-num" :style="{ color: gapColor(resultGap) }">{{ resultActual }}</span>.
-                </p>
-                <p class="gap-delta" :style="{ color: gapColor(resultGap) }">
-                  <template v-if="resultGap > 0">{{ resultGap }} Punkte weniger schlimm als befürchtet</template>
-                  <template v-else-if="resultGap === 0">Genau wie befürchtet</template>
-                  <template v-else>{{ Math.abs(resultGap) }} Punkte schlimmer als befürchtet</template>
-                </p>
+                <div class="gap-bar">
+                  <span class="gap-fill gap-expected" :style="{ width: pct(resultExpected) }"></span>
+                  <span class="gap-fill gap-real" :style="{ width: pct(resultActual) }"></span>
+                </div>
+                <div class="gap-legend">
+                  <span class="gap-key"><i class="gap-dot gap-dot-expected"></i>erwartet {{ resultExpected }}</span>
+                  <span class="gap-key"><i class="gap-dot gap-dot-real"></i>real {{ resultActual }}</span>
+                  <span class="gap-delta" :style="{ color: gapColor(resultGap) }">
+                    {{ resultGap > 0 ? '−' : '+' }}{{ Math.abs(resultGap) }}
+                  </span>
+                </div>
               </div>
 
               <p class="wizard-question">Was sagt dir das?</p>
@@ -234,25 +244,20 @@
 
             <div v-show="resultStep === 4">
               <wizard-context label="Situation" :quote="resultSituation"></wizard-context>
-              <experiment-recall :fear="resultFear" :outcome="resultOutcome"></experiment-recall>
+              <experiment-recall :fear="resultFear" :outcome="resultOutcome" :learning="resultLearning"></experiment-recall>
 
-              <!-- The measurement and what it meant, before asking what the
-                   body makes of it. -->
+              <!-- Same bar the Handlungen list draws for a finished run. -->
               <div class="card gap-card" :style="{ borderColor: gapColor(resultGap) }">
-                <p class="gap-line">
-                  Deine Erwartung war
-                  <span class="gap-num">{{ resultExpected }}</span>,
-                  real waren es
-                  <span class="gap-num" :style="{ color: gapColor(resultGap) }">{{ resultActual }}</span>.
-                </p>
-                <p class="gap-delta" :style="{ color: gapColor(resultGap) }">
-                  <template v-if="resultGap > 0">{{ resultGap }} Punkte weniger schlimm als befürchtet</template>
-                  <template v-else-if="resultGap === 0">Genau wie befürchtet</template>
-                  <template v-else>{{ Math.abs(resultGap) }} Punkte schlimmer als befürchtet</template>
-                </p>
-                <div v-if="resultLearning.trim()" class="gap-learning">
-                  <p class="result-recall-label">Das sagt mir</p>
-                  <p class="result-recall-text">{{ resultLearning }}</p>
+                <div class="gap-bar">
+                  <span class="gap-fill gap-expected" :style="{ width: pct(resultExpected) }"></span>
+                  <span class="gap-fill gap-real" :style="{ width: pct(resultActual) }"></span>
+                </div>
+                <div class="gap-legend">
+                  <span class="gap-key"><i class="gap-dot gap-dot-expected"></i>erwartet {{ resultExpected }}</span>
+                  <span class="gap-key"><i class="gap-dot gap-dot-real"></i>real {{ resultActual }}</span>
+                  <span class="gap-delta" :style="{ color: gapColor(resultGap) }">
+                    {{ resultGap > 0 ? '−' : '+' }}{{ Math.abs(resultGap) }}
+                  </span>
                 </div>
               </div>
 
@@ -353,6 +358,8 @@ import { beliefStatusLabel, beliefStatusColor } from '@/utils/beliefStatus';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 import NavIcon from '@/components/NavIcon.vue';
 
+const COMPACT_KEY = 'nvc.actionsCompact';
+
 function triggerConfetti() {
   var canvas = document.createElement('canvas');
   canvas.width = window.innerWidth;
@@ -404,6 +411,9 @@ export default {
       // Which written answer is unfolded, keyed by experiment and row: every
       // card is open at once now, so one shared index would not do.
       openRows: {},
+      // Remembered, so the choice survives leaving the list and coming back —
+      // the same key pattern the Überzeugungen list uses for its own toggle.
+      compact: localStorage.getItem(COMPACT_KEY) === '1',
       beliefFilter: null,
       sw: { openIdx: null, handleHeight: 0, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
       now: Date.now(),
@@ -425,6 +435,7 @@ export default {
     '$route.query.belief': function() { this.applyBeliefQuery(); },
     tab() { this.sw.openIdx = null; this.sw.openDir = null; },
     beliefFilter() { this.sw.openIdx = null; this.sw.openDir = null; },
+    compact(v) { localStorage.setItem(COMPACT_KEY, v ? '1' : '0'); },
   },
   computed: {
     // The panels reach only as far down as the part that answers the
@@ -841,27 +852,6 @@ export default {
 /* The two credibility readings at the end: a short quote above each meter,
    in the same voice a wizard-note uses elsewhere. */
 .pole { margin-bottom: 8px; }
-/* What the gap meant, inside the same box that measured it rather than
-   floating below as its own note. */
-.gap-learning {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-}
-.result-recall-label {
-  font-size: 0.68rem;
-  color: #8e8e93;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 600;
-  margin: 0 0 6px;
-}
-.result-recall-text {
-  font-size: 0.95rem;
-  color: #ebebf5;
-  line-height: 1.5;
-  margin: 0;
-}
 
 /* Same chip look as the affirmation step of the change wizard */
 .selected-chips {
@@ -891,10 +881,11 @@ export default {
 .gap-card {
   border: 1px solid;
   transition: border-color 0.2s ease;
+  /* .gap-bar's own margin-top holds it away from whatever precedes it in the
+     list row; here it is the card's first child, so the card's own padding
+     already does that job. */
+  .gap-bar { margin-top: 0; }
 }
-.gap-line { font-size: 0.95rem; color: #ebebf5; margin: 0; line-height: 1.5; }
-.gap-num { font-weight: 700; }
-.gap-delta { font-size: 0.875rem; font-weight: 600; margin: 6px 0 0; }
 
 .confirm-dialog { border-radius: 14px !important; overflow: hidden; }
 .confirm-title {
