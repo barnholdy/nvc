@@ -227,6 +227,13 @@ html { overflow-x: hidden; }
 .v-overlay {
   background: rgba(0,0,0,0.7) !important;
 }
+/* Vuetify gives a fullscreen dialog its own overflow-y, but iOS Safari only
+   hands it real touch scrolling with this — the same fix the sideways pill
+   row already needed. Without it a wizard run inside a dialog renders fine
+   but the finger never moves it. */
+.v-dialog--fullscreen {
+  -webkit-overflow-scrolling: touch;
+}
 .v-dialog .v-card {
   background: #2c2c2e !important;
   border-radius: 14px !important;
@@ -299,26 +306,29 @@ html { overflow-x: hidden; }
 
 /* What the step asks. Large and white — it is the one thing on the screen
    that has to be read before anything else can be answered. */
+/* Same left/right inset as the cards' own text (14px margin + 16-18px
+   padding) — the question, its body and its notes read as one column with
+   the cards around them, not a narrower strip bleeding closer to the edge. */
 .wizard-question {
   font-size: 1.35rem;
   font-weight: 700;
   color: #fff;
   line-height: 1.3;
-  margin: 22px 16px 10px;
+  margin: 22px 32px 10px;
 }
 /* The elaboration under the question. */
 .wizard-body {
   font-size: 1rem;
   color: #8e8e93;
   line-height: 1.55;
-  margin: 0 16px 14px;
+  margin: 0 32px 16px;
 }
 /* Quieter still: a rule of thumb, a count, a caveat. */
 .wizard-note {
   font-size: 0.85rem;
   color: #636366;
   line-height: 1.5;
-  margin: 0 16px 12px;
+  margin: 0 32px 14px;
 }
 .wizard-note strong, .wizard-body strong { color: #fff; font-weight: 600; }
 /* Clears the fixed footer. */
@@ -530,8 +540,13 @@ html { overflow-x: hidden; }
   cursor: pointer;
   overflow: hidden;
   -webkit-tap-highlight-color: transparent;
-  &:last-child { border-bottom: none; }
 }
+/* Each cluster sits in its own wrapper (its open chip list is a sibling, not
+   a child), so `.pick-cluster:last-child` would always match — it is always
+   the only element of that class in its own wrapper. The true last cluster
+   is found through the wrapper instead. */
+.pick-body > div:last-child > .pick-cluster { border-bottom: none; }
+.pick-body > div:last-child > .pick-chips-open { border-bottom: none; }
 .pick-cluster-fill {
   position: absolute;
   left: 0;

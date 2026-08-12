@@ -838,17 +838,6 @@ export default {
 .empty-title { font-size: 1.1rem; color: #fff; font-weight: 600; margin: 0 0 6px; }
 .empty-sub { font-size: 0.875rem; color: #8e8e93; margin: 0; }
 
-// Toolbar and footer stay put, the middle scrolls. Without this the later steps
-// are simply cut off at the bottom of the screen with no way to reach them.
-.wizard-page {
-  background: #000;
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  display: flex;
-  flex-direction: column;
-}
-// Neither may shrink: the middle scrolls, these two stay put.
 /* The two credibility readings at the end: a short quote above each meter,
    in the same voice a wizard-note uses elsewhere. */
 .pole { margin-bottom: 8px; }
