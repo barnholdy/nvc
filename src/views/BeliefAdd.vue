@@ -90,7 +90,10 @@
     <!-- The readiness gate is the one step with a real choice rather than a
          way on: look at it now, or save what there is and stop here. -->
     <div v-if="step === READINESS_STEP" class="wizard-footer gate-footer">
-      <button class="wizard-next" @click="nextStep">Jetzt anschauen</button>
+      <div class="gate-row">
+        <button class="wizard-back" @click="back">Zurück</button>
+        <button class="wizard-next" @click="nextStep">Jetzt anschauen</button>
+      </div>
       <button type="button" class="later-btn" @click="saveWithoutOrigin">später</button>
     </div>
     <wizard-footer
@@ -274,6 +277,10 @@ export default {
 .gate-footer {
   flex-direction: column;
   gap: 4px;
+}
+.gate-row {
+  display: flex;
+  gap: 10px;
 }
 .later-btn {
   width: 100%;

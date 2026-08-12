@@ -51,7 +51,3 @@ export default {
   },
 };
 </script>
-
-<style scoped lang="scss">
-p { margin: 0; }
-</style>

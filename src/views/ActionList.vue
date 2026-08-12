@@ -250,11 +250,11 @@
                   <template v-else-if="resultGap === 0">Genau wie befürchtet</template>
                   <template v-else>{{ Math.abs(resultGap) }} Punkte schlimmer als befürchtet</template>
                 </p>
+                <div v-if="resultLearning.trim()" class="gap-learning">
+                  <p class="result-recall-label">Das sagt mir</p>
+                  <p class="result-recall-text">{{ resultLearning }}</p>
+                </div>
               </div>
-              <template v-if="resultLearning.trim()">
-                <p class="result-recall-label">Das sagt mir</p>
-                <p class="wizard-note result-recall-text">{{ resultLearning }}</p>
-              </template>
 
               <p class="wizard-question">Wie glaubwürdig fühlen sich die Sätze an?</p>
               <p class="wizard-body">Fühle in dich hinein.</p>
@@ -841,15 +841,27 @@ export default {
 /* The two credibility readings at the end: a short quote above each meter,
    in the same voice a wizard-note uses elsewhere. */
 .pole { margin-bottom: 8px; }
+/* What the gap meant, inside the same box that measured it rather than
+   floating below as its own note. */
+.gap-learning {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
 .result-recall-label {
   font-size: 0.68rem;
   color: #8e8e93;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-weight: 600;
-  margin: 18px 16px 6px;
+  margin: 0 0 6px;
 }
-.result-recall-text { margin-top: -6px; }
+.result-recall-text {
+  font-size: 0.95rem;
+  color: #ebebf5;
+  line-height: 1.5;
+  margin: 0;
+}
 
 /* Same chip look as the affirmation step of the change wizard */
 .selected-chips {

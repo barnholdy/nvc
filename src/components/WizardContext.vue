@@ -17,11 +17,11 @@
       v-for="row in rows"
       :key="row.key"
       class="detail-row"
-      :class="{ open: open === row.key, 'wc-first': !quote && row === rows[0] }"
+      :class="{ open: isOpen(row.key), 'wc-first': !quote && row === rows[0] }"
       @click="toggle(row.key)"
     >
       <span class="detail-label">{{ row.label }}</span>
-      <template v-if="open === row.key">
+      <template v-if="isOpen(row.key)">
         <p v-if="row.text" class="detail-value open">{{ row.text }}</p>
         <feeling-chips
           v-if="row.chips.length"
@@ -67,7 +67,10 @@ export default {
     needs: { type: Array, default: () => [] },
   },
   data() {
-    return { open: null };
+    // Keyed independently per row, the way the belief cards' own detail rows
+    // remember which of theirs are open — so opening one here does not close
+    // another.
+    return { openKeys: {} };
   },
   computed: {
     score() {
@@ -103,7 +106,10 @@ export default {
     },
   },
   methods: {
-    toggle(key) { this.open = this.open === key ? null : key; },
+    isOpen(key) { return !!this.openKeys[key]; },
+    toggle(key) {
+      this.openKeys = Object.assign({}, this.openKeys, { [key]: !this.openKeys[key] });
+    },
   },
 };
 </script>

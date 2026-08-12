@@ -77,9 +77,11 @@
       <div
         v-for="(s, i) in suggestions"
         :key="i"
-        class="card suggestion-card"
+        class="aff-box aff-pick"
         @click="use(s)"
-      >{{ s }}</div>
+      >
+        <p class="aff-text">„{{ s }}“</p>
+      </div>
     </template>
 
     <!-- Only meaningful once there is a sentence to read aloud -->
@@ -264,16 +266,6 @@ export default {
 .aff-pick {
   cursor: pointer;
   margin-bottom: 10px;
-  -webkit-tap-highlight-color: transparent;
-  &:active { opacity: 0.6; }
-}
-
-/* Full-width cards rather than chips: a suggestion is a whole sentence. */
-.suggestion-card {
-  font-size: 0.95rem;
-  line-height: 1.45;
-  color: #ebebf5;
-  cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
 }
