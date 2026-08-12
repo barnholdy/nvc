@@ -75,7 +75,7 @@ export default new Router({
       name: 'settings',
       component: () => import('./views/SettingsView.vue'),
     },
-    { path: '*', redirect: '/patterns' },
+    { path: '*', redirect: '/now' },
   ],
   scrollBehavior() {
     return { x: 0, y: 0 };

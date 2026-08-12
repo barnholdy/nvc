@@ -38,21 +38,6 @@
       </div>
 
       <template v-else>
-        <!-- What this month actually looked like. The belief cards count every
-             situation ever; this counts only the ones just recorded, which is a
-             different question and the reason this card exists. -->
-        <div v-if="summary" class="card summary-card">
-          <p class="summary-head">{{ summary.month }} · {{ summary.total }} {{ summary.total === 1 ? 'Situation' : 'Situationen' }} erfasst</p>
-          <p class="summary-claim">„{{ summary.top.belief }}“ taucht in {{ summary.top.count }} von {{ summary.total }} auf.</p>
-          <div v-for="row in summary.rows" :key="row.time" class="summary-row">
-            <span class="summary-belief">„{{ row.belief }}“</span>
-            <span class="summary-track">
-              <span class="summary-fill" :style="{ width: barWidth(row.count, summary.top.count) }"></span>
-            </span>
-            <span class="summary-count">{{ row.count }}</span>
-          </div>
-        </div>
-
         <template v-for="group in groups">
           <p :key="group.key" class="month-head">{{ group.label }}</p>
 
@@ -63,10 +48,7 @@
           >
             <div
               class="timeline-row"
-              :class="{
-                'timeline-first': entry.time === group.entries[0].time,
-                'timeline-last': entry.time === group.entries[group.entries.length - 1].time,
-              }"
+              :class="{ 'timeline-first': entry.time === group.entries[0].time }"
             >
               <span class="timeline-dot"></span>
               <div class="timeline-body">
@@ -199,31 +181,6 @@ export default {
       });
       return out;
     },
-    // The most recent month with anything in it, counted by belief.
-    summary() {
-      const first = this.groups[0];
-      if (!first || !first.entries.length) return null;
-      const counts = {};
-      first.entries.forEach((entry) => {
-        (entry.beliefs || []).forEach((id) => { counts[id] = (counts[id] || 0) + 1; });
-      });
-      const beliefs = this.$store.getters.beliefs;
-      const rows = Object.keys(counts)
-        .map((id) => {
-          const b = beliefs.find(x => String(x.time) === String(id));
-          return b ? { time: b.time, belief: b.belief, count: counts[id] } : null;
-        })
-        .filter(Boolean)
-        .sort((a, b) => b.count - a.count);
-      if (!rows.length) return null;
-      moment.locale('de');
-      return {
-        month: moment(first.entries[0].time).format('MMMM'),
-        total: first.entries.length,
-        rows,
-        top: rows[0],
-      };
-    },
   },
   mounted() {
     this.applyBeliefQuery();
@@ -275,9 +232,6 @@ export default {
       return list.length > 0 && list.every(isComplete);
     },
     truthOf(entry, belief) { return beliefTruthIn(entry, belief); },
-    barWidth(count, max) {
-      return `${max ? Math.max(6, (count / max) * 100) : 0}%`;
-    },
     dayLabel(time) {
       moment.locale('de');
       return moment(time).format('D. MMM').toUpperCase();
@@ -341,41 +295,6 @@ export default {
 <style scoped lang="scss">
 .dark-page { background: #000; min-height: 100vh; }
 
-.summary-card { padding-bottom: 16px; }
-.summary-head { font-size: 0.9rem; color: #8e8e93; margin: 0 0 10px; }
-.summary-claim {
-  font-size: 1.15rem;
-  color: #fff;
-  line-height: 1.35;
-  margin: 0 0 16px;
-  font-weight: 500;
-}
-.summary-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-.summary-belief {
-  flex: 1;
-  min-width: 0;
-  font-size: 0.95rem;
-  color: #ebebf5;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.summary-track {
-  width: 90px;
-  height: 6px;
-  border-radius: 999px;
-  background: #2c2c2e;
-  flex-shrink: 0;
-  overflow: hidden;
-}
-.summary-fill { display: block; height: 100%; background: #48484a; border-radius: 999px; }
-.summary-count { width: 18px; text-align: right; font-size: 0.9rem; color: #8e8e93; flex-shrink: 0; }
-
 .month-head {
   font-size: 0.72rem;
   letter-spacing: 0.1em;
@@ -398,10 +317,11 @@ export default {
      meet at its dot: never past its own edges, because every row paints an
      opaque background and a later sibling would cover anything that hung over
      into it — which is exactly the gap that used to appear above each dot.
-     The halves are dropped at the ends of a month so the thread does not run
-     through the heading in between. First and last have to be said
-     explicitly: every row is an only child of its own wrapper, so
-     :first-child and :last-child would match all of them. */
+     Below the last dot of a month the lower half still draws — it just has
+     nothing left to connect to, the same way the line above the very first
+     dot would have nothing to connect to, so that half alone stays dropped.
+     First has to be said explicitly: every row is an only child of its own
+     wrapper, so :first-child would match all of them. */
   &::before,
   &::after {
     content: '';
@@ -414,7 +334,6 @@ export default {
   &::before { top: 14px; bottom: 0; }
   /* Row top down to the dot centre. */
   &::after { top: 0; height: 14px; }
-  &.timeline-last::before { display: none; }
   &.timeline-first::after { display: none; }
 }
 .timeline-dot {
