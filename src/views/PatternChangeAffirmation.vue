@@ -35,6 +35,54 @@
       ></v-textarea>
     </v-flex>
 
+    <!-- Getting a suggestion is the next thing to try once the field is
+         empty or stuck — directly under it, not after the rating below. -->
+    <v-flex class="mb-3">
+      <template v-if="showApiKeyInput">
+        <p class="caption grey--text mb-1">Anthropic API Key eingeben, um Vorschläge zu generieren:</p>
+        <v-text-field
+          v-model="apiKeyInput"
+          label="API Key"
+          type="password"
+          single-line
+          hide-details
+          class="mb-2"
+        ></v-text-field>
+        <v-btn small flat color="primary" :disabled="!apiKeyInput" @click="saveApiKey">Speichern & generieren</v-btn>
+        <v-btn small flat color="grey" @click="showApiKeyInput = false">Abbrechen</v-btn>
+      </template>
+      <template v-else>
+        <div class="action-row">
+          <v-progress-circular
+            v-if="isLoading"
+            indeterminate
+            color="#4ade80"
+            size="20"
+            width="2"
+          ></v-progress-circular>
+          <button v-else class="card-btn" @click="generateSuggestions">Vorschläge bekommen</button>
+          <v-btn v-if="apiKey" small flat icon @click="showApiKeyInput = true" title="API Key ändern">
+            <v-icon small color="grey lighten-1">settings</v-icon>
+          </v-btn>
+        </div>
+      </template>
+
+      <template v-if="suggestions.length">
+        <p class="caption grey--text mt-3 mb-1">Tippe auf einen Vorschlag, um ihn zu übernehmen:</p>
+        <div class="suggestions">
+          <v-chip
+            v-for="(s, i) in suggestions"
+            :key="i"
+            small
+            class="suggestion-chip"
+            @click="use(s)"
+          >{{ s }}</v-chip>
+        </div>
+      </template>
+
+      <p v-if="errorMsg" class="caption red--text mt-1">{{ errorMsg }}</p>
+    </v-flex>
+
     <!-- Only meaningful once there is a sentence to read aloud -->
     <v-flex v-if="hasText" class="mb-4">
       <p class="body-1 grey--text mt-4 mb-3 wizard-prompt">
@@ -53,58 +101,21 @@
       </div>
     </v-flex>
 
+    <!-- Same box the belief and action cards use for a saved affirmation —
+         minus the label (these are candidates, not "the" affirmation yet)
+         and minus Üben (there is nothing recorded here to practise). -->
     <v-flex v-if="otherAffirmations.length" class="mt-1">
-      <p class="caption grey--text mb-1">Aus deinen Affirmationen übernehmen:</p>
-      <div class="chip-list">
-        <v-chip
+      <p class="caption grey--text mb-2">Aus deinen Affirmationen übernehmen:</p>
+      <div class="aff-pool">
+        <div
           v-for="a in otherAffirmations"
           :key="a.text"
-          class="available-chip"
+          class="aff-box aff-pick"
           @click="use(a.text)"
-        >{{ a.text }}</v-chip>
+        >
+          <p class="aff-text">„{{ a.text }}“</p>
+        </div>
       </div>
-    </v-flex>
-
-    <v-flex class="mt-3">
-      <template v-if="showApiKeyInput">
-        <p class="caption grey--text mb-1">Anthropic API Key eingeben, um Vorschläge zu generieren:</p>
-        <v-text-field
-          v-model="apiKeyInput"
-          label="API Key"
-          type="password"
-          single-line
-          hide-details
-          class="mb-2"
-        ></v-text-field>
-        <v-btn small flat color="primary" :disabled="!apiKeyInput" @click="saveApiKey">Speichern & generieren</v-btn>
-        <v-btn small flat color="grey" @click="showApiKeyInput = false">Abbrechen</v-btn>
-      </template>
-      <template v-else>
-        <v-btn small flat color="primary" :loading="isLoading" @click="generateSuggestions">
-          <v-icon small left>lightbulb_outline</v-icon>
-          Vorschläge
-        </v-btn>
-        <v-btn v-if="apiKey" small flat icon @click="showApiKeyInput = true" title="API Key ändern">
-          <v-icon small color="grey lighten-1">settings</v-icon>
-        </v-btn>
-      </template>
-    </v-flex>
-
-    <v-flex v-if="suggestions.length" class="mt-2">
-      <p class="caption grey--text mb-1">Tippe auf einen Vorschlag, um ihn zu übernehmen:</p>
-      <div class="suggestions">
-        <v-chip
-          v-for="(s, i) in suggestions"
-          :key="i"
-          small
-          class="suggestion-chip"
-          @click="use(s)"
-        >{{ s }}</v-chip>
-      </div>
-    </v-flex>
-
-    <v-flex v-if="errorMsg" class="mt-1">
-      <p class="caption red--text">{{ errorMsg }}</p>
     </v-flex>
   </v-layout>
 </template>
@@ -337,16 +348,16 @@ export default {
   height: auto !important;
   padding: 4px 10px !important;
 }
-.available-chips { margin-top: 8px; }
-.chip-list {
+.action-row { display: flex; align-items: center; gap: 8px; }
+
+.aff-pool {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-direction: column;
+  gap: 10px;
 }
-.available-chip {
+.aff-pick {
   cursor: pointer;
-  white-space: normal;
-  height: auto !important;
-  padding: 4px 10px !important;
+  -webkit-tap-highlight-color: transparent;
+  &:active { opacity: 0.6; }
 }
 </style>
