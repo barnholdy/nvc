@@ -11,7 +11,7 @@
     </wizard-context>
 
     <p class="wizard-question">{{ headlineText }}</p>
-    <p class="wizard-body">{{ promptText }}</p>
+    <p v-if="promptText" class="wizard-body">{{ promptText }}</p>
 
     <!-- Optional block between the prompt and the list -->
     <slot name="beforeList"></slot>
@@ -61,13 +61,14 @@
           </div>
 
           <div v-if="isClusterOpen(c.id)" class="pick-chips pick-chips-open">
-            <!-- Chosen words carry the group's colour; the rest stay quiet, so
-                 what is already picked still reads as the answer. -->
+            <!-- Every word carries the group's colour; chosen ones fill with
+                 it so what is already picked still reads as the answer. -->
             <span
               v-for="item in (c.gefuehle || [])"
               :key="item.name"
               class="pick-chip"
-              :style="{ color: isSelectedFeeling(item.name) ? emotionColor(e.id) : '#8e8e93' }"
+              :class="{ chosen: isSelectedFeeling(item.name) }"
+              :style="chipStyle(item.name, e.id)"
               @click.stop="toggleFeeling(item.name, e.id)"
             >{{ item.name }}</span>
           </div>
@@ -115,8 +116,10 @@ export default {
     };
   },
   computed: {
+    // Ergründen has no separate heading and question — the question is the
+    // heading. Wandeln passes both, since it already has its own body line.
     headlineText: function() {
-      return this.headline || 'Gefühle';
+      return this.headline || 'Was fühlst du, wenn die Überzeugung wahr ist?';
     },
     chosenCount: function() {
       return this.selFeelings.length;
@@ -136,8 +139,10 @@ export default {
       return 'Wähle bis zu ' + this.maxSelections + ' — ' + this.chosenCount + ' von '
         + this.maxSelections + ' gewählt.';
     },
+    // Only Wandeln passes a prompt — Ergründen already asked its question as
+    // the heading and has nothing left to add underneath it.
     promptText: function() {
-      return this.prompt || 'Was fühlst du, wenn die Überzeugung wahr ist?';
+      return this.prompt;
     },
   },
   methods: {
@@ -210,6 +215,15 @@ export default {
 
     emotionColor: function(id) {
       return emotionColor(id);
+    },
+    // Every word in a group carries its colour; a chosen one fills with it so
+    // it still reads as the answer once the group is a wall of chips.
+    chipStyle: function(name, emotionId) {
+      var color = emotionColor(emotionId);
+      if (this.isSelectedFeeling(name)) {
+        return { backgroundColor: color, borderColor: color, color: '#000' };
+      }
+      return { color: color };
     },
     // How many feelings the group holds altogether — the denominator the
     // header counts against.

@@ -4,7 +4,7 @@
       :quote="belief"
       :exceptions="exceptions"
       :perspective="withoutBelief"
-      :needs="needs"
+      :perspective-feelings="withoutBeliefFeelings"
     ></wizard-context>
 
     <p class="wizard-question">Formuliere deinen Satz.</p>

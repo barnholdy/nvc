@@ -79,12 +79,14 @@
           </div>
 
           <div v-if="isClusterOpen(c.id)" class="pick-chips pick-chips-open">
-            <!-- Chosen words carry the group's colour; the rest stay quiet. -->
+            <!-- Every word carries the group's colour; chosen ones fill with
+                 it so what is already picked still reads as the answer. -->
             <span
               v-for="name in c.beduerfnisse"
               :key="name"
               class="pick-chip"
-              :style="{ color: isSelected(name) ? categoryColor(cat.id) : '#8e8e93' }"
+              :class="{ chosen: isSelected(name) }"
+              :style="chipStyle(name, cat.id)"
               @click.stop="toggle(name)"
             >{{ name }}</span>
           </div>
@@ -156,6 +158,15 @@ export default {
   },
   methods: {
     categoryColor: function(id) { return needCategoryColor(id); },
+    // Every word in a group carries its colour; a chosen one fills with it so
+    // it still reads as the answer once the group is a wall of chips.
+    chipStyle: function(name, catId) {
+      var color = needCategoryColor(catId);
+      if (this.isSelected(name)) {
+        return { backgroundColor: color, borderColor: color, color: '#000' };
+      }
+      return { color: color };
+    },
     // How many needs the group holds altogether — the denominator the header
     // counts against.
     categoryTotal: function(cat) {

@@ -183,6 +183,11 @@ export default {
 </script>
 
 <style scoped lang="scss">
+/* .aff-box carries no side margin of its own — everywhere else it appears
+   nested inside a .card, which already indents it. Here it stands alone at
+   the top level, so it needs the same side margin every other block on this
+   page has. */
+.aff-box { margin: 0 14px 12px; }
 .suggest-block { margin: 0 16px; }
 .action-row { display: flex; align-items: center; gap: 8px; }
 .error-text { color: #ff453a !important; }

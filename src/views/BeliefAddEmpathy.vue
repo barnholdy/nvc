@@ -2,7 +2,13 @@
   <div>
     <!-- The same ground the previous step stood on, so nothing has to be
          recalled from memory before asking for a mirror. -->
-    <wizard-context :quote="belief" :reaction="reaction" :origin="origin"></wizard-context>
+    <wizard-context
+      :quote="belief"
+      :reaction="reaction"
+      :reaction-feelings="feelings"
+      :origin="origin"
+      :needs="needs"
+    ></wizard-context>
 
     <p class="wizard-question">Lass dir spiegeln, was du erlebst.</p>
 

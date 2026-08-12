@@ -64,7 +64,14 @@
         :key="b.time"
         class="card available-card"
         @click="addBelief(b.time)"
-      >„{{ b.belief }}“</div>
+      >
+        <p class="card-title available-title">„{{ b.belief }}“</p>
+        <div v-if="credibilityOf(b) !== null" class="score-row">
+          <span class="score-value">{{ round(credibilityOf(b)) }}</span>
+          <span class="score-max">/10</span>
+          <span class="score-label">Glaubwürdigkeit</span>
+        </div>
+      </div>
     </template>
   </div>
 </template>
@@ -73,6 +80,7 @@
 import WizardContext from '@/components/WizardContext.vue';
 import InputCard from '@/components/InputCard.vue';
 import MeterCard from '@/components/MeterCard.vue';
+import { beliefCredibility } from '@/utils/credibility';
 
 const TRUTH_DEFAULT = 5;
 
@@ -86,6 +94,9 @@ export default {
   components: { WizardContext, InputCard, MeterCard },
   props: {
     allBeliefs: { type: Array, default: function() { return []; } },
+    // For the credibility shown on "schon erfasste" beliefs — the same
+    // average the belief cards show, not a rating taken here.
+    patterns: { type: Array, default: function() { return []; } },
     selectedBeliefIds: { type: Array, default: function() { return []; } },
     initialTruths: { type: Object, default: function() { return {}; } },
     trigger: { type: String, default: '' },
@@ -124,6 +135,8 @@ export default {
     },
   },
   methods: {
+    credibilityOf(belief) { return beliefCredibility(this.patterns, belief); },
+    round(v) { return String(Math.round(v * 10) / 10).replace('.', ','); },
     // The rating belongs to this situation, not to the belief: the same belief
     // rated again later is what makes a trend.
     truthOf(time) {
@@ -227,11 +240,9 @@ export default {
 }
 
 .available-card {
-  font-size: 0.95rem;
-  line-height: 1.45;
-  color: #8e8e93;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
 }
+.available-title { color: #ebebf5; }
 </style>

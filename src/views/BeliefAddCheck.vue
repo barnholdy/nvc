@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p class="wizard-question">Wie geht\'s dir gerade?</p>
+    <p class="wizard-question">Wie geht es dir gerade?</p>
     <p class="wizard-body">Kurz gespürt — dann bist du fertig.</p>
 
     <div class="mood-list">

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="card">
     <div v-for="p in situations" :key="p.time" class="situation-row">
       <p class="situation-text">{{ p.trigger }}</p>
     </div>
@@ -19,9 +19,10 @@ export default {
 
 <style scoped lang="scss">
 .situation-row {
-  padding: 8px 0;
+  padding: 10px 0;
   border-top: 1px solid #2c2c2e;
-  &:first-of-type { border-top: none; }
+  &:first-of-type { border-top: none; padding-top: 0; }
+  &:last-of-type { padding-bottom: 0; }
 }
 .situation-text {
   font-size: 0.95rem;

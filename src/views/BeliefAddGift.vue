@@ -1,6 +1,11 @@
 <template>
   <div>
-    <wizard-context :quote="belief" :reaction="reaction" :origin="origin"></wizard-context>
+    <wizard-context
+      :quote="belief"
+      :reaction="reaction"
+      :reaction-feelings="feelings"
+      :origin="origin"
+    ></wizard-context>
 
     <p class="wizard-question">Wonach hast du dich gesehnt?</p>
     <feeling-words

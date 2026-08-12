@@ -186,193 +186,117 @@
       <!-- Step 4: result and comparison -->
       <v-dialog v-model="isResultDialogShowing" fullscreen>
         <div v-if="isResultDialogShowing" class="wizard-page">
-          <!-- A real toolbar, minus the `app` prop: inside a dialog that would
-               register with the page layout behind it. -->
-          <v-toolbar color="#000" dark flat class="wizard-bar">
-            <v-btn icon @click="resultStep === 1 ? cancelResult() : resultStep--">
-              <v-icon>{{ resultStep === 1 ? 'close' : 'chevron_left' }}</v-icon>
-            </v-btn>
-            <v-toolbar-title>Handlung auswerten</v-toolbar-title>
-            <v-spacer></v-spacer>
-            <span class="grey--text body-1">{{ resultStep }} / 4</span>
-          </v-toolbar>
-          <div class="wizard-scroll">
-            <v-container class="mb-5">
-              <!-- Facts first, deliberately before any rating -->
-              <v-layout v-show="resultStep === 1" column>
-                <v-flex class="mt-2 mb-3">
-                  <h1 class="headline font-weight-regular">Was ist passiert?</h1>
-                  <belief-context :situation="resultSituation"></belief-context>
-                  <p class="body-1 grey--text mt-2 wizard-prompt">
-                    Was ist tatsächlich passiert? Beschreibe es, bevor du es bewertest.
-                  </p>
-                </v-flex>
-                <v-flex>
-                  <v-textarea v-model="resultOutcome" placeholder="..." auto-grow rows="6" hide-details></v-textarea>
-                </v-flex>
-              </v-layout>
+          <wizard-header title="Handlung auswerten" :step="resultStep" :total="4"></wizard-header>
 
-              <!-- The fear is shown again: rating it from memory is guesswork -->
-              <v-layout v-show="resultStep === 2" column>
-                <v-flex class="mt-2 mb-3">
-                  <h1 class="headline font-weight-regular">Abgleich</h1>
-                  <belief-context :situation="resultSituation"></belief-context>
-                </v-flex>
+            <div v-show="resultStep === 1">
+              <wizard-context label="Situation" :quote="resultSituation"></wizard-context>
+              <p class="wizard-question">Was ist tatsächlich passiert?</p>
+              <p class="wizard-body">Beschreibe es, bevor du es bewertest.</p>
+              <input-card v-model="resultOutcome" label="Was ist passiert" :rows="4"></input-card>
+            </div>
 
-                <!-- The fear itself, but not the number: seeing the old rating
-                     would anchor the new one. -->
-                <experiment-recall
-                  :fear="resultFear"
-                  :outcome="resultOutcome"
-                ></experiment-recall>
+            <!-- The fear is shown again: rating it from memory is guesswork -->
+            <div v-show="resultStep === 2">
+              <wizard-context label="Situation" :quote="resultSituation"></wizard-context>
+              <experiment-recall :fear="resultFear" :outcome="resultOutcome"></experiment-recall>
 
-                <v-flex>
-                  <p class="body-1 grey--text mb-2 wizard-prompt">
-                    Wie stark ist deine Befürchtung tatsächlich eingetreten?
-                  </p>
-                  <div class="slider-row">
-                    <span class="slider-end-label">0</span>
-                    <input type="range" min="0" max="10" v-model.number="resultActual" class="fear-slider" />
-                    <span class="slider-end-label">10</span>
-                  </div>
-                  <p class="slider-value-label">{{ resultActual }}</p>
-                  <div class="scale-legend">
-                    <span>0 = gar nicht</span>
-                    <span>10 = genau so schlimm wie erwartet</span>
-                  </div>
-                </v-flex>
-              </v-layout>
+              <p class="wizard-question">Wie stark ist deine Befürchtung tatsächlich eingetreten?</p>
+              <meter-card
+                :value="resultActual"
+                label="Tatsächlich eingetreten"
+                minLabel="gar nicht"
+                maxLabel="genau so schlimm"
+                @input="resultActual = $event"
+              ></meter-card>
+            </div>
 
-              <v-layout v-show="resultStep === 3" column>
-                <v-flex class="mt-2 mb-3">
-                  <h1 class="headline font-weight-regular">Reflexion</h1>
-                  <belief-context :situation="resultSituation"></belief-context>
-                </v-flex>
+            <div v-show="resultStep === 3">
+              <wizard-context label="Situation" :quote="resultSituation"></wizard-context>
+              <experiment-recall :fear="resultFear" :outcome="resultOutcome"></experiment-recall>
 
-                <experiment-recall
-                  :fear="resultFear"
-                  :outcome="resultOutcome"
-                ></experiment-recall>
+              <div class="card gap-card" :style="{ borderColor: gapColor(resultGap) }">
+                <p class="gap-line">
+                  Deine Erwartung war
+                  <span class="gap-num">{{ resultExpected }}</span>,
+                  real waren es
+                  <span class="gap-num" :style="{ color: gapColor(resultGap) }">{{ resultActual }}</span>.
+                </p>
+                <p class="gap-delta" :style="{ color: gapColor(resultGap) }">
+                  <template v-if="resultGap > 0">{{ resultGap }} Punkte weniger schlimm als befürchtet</template>
+                  <template v-else-if="resultGap === 0">Genau wie befürchtet</template>
+                  <template v-else>{{ Math.abs(resultGap) }} Punkte schlimmer als befürchtet</template>
+                </p>
+              </div>
 
-                <v-flex>
-                  <div class="gap-box" :style="{ borderColor: gapColor(resultGap) }">
-                    <p class="gap-line">
-                      Deine Erwartung war
-                      <span class="gap-num">{{ resultExpected }}</span>,
-                      real waren es
-                      <span class="gap-num" :style="{ color: gapColor(resultGap) }">{{ resultActual }}</span>.
-                    </p>
-                    <p class="gap-delta" :style="{ color: gapColor(resultGap) }">
-                      <template v-if="resultGap > 0">{{ resultGap }} Punkte weniger schlimm als befürchtet</template>
-                      <template v-else-if="resultGap === 0">Genau wie befürchtet</template>
-                      <template v-else>{{ Math.abs(resultGap) }} Punkte schlimmer als befürchtet</template>
-                    </p>
-                  </div>
-                  <p class="body-1 grey--text mt-4 mb-2 wizard-prompt">Was sagt dir das?</p>
-                  <v-textarea
-                    v-model="resultLearning"
-                    placeholder="..."
-                    auto-grow
-                    rows="4"
-                    hide-details
-                  ></v-textarea>
-                </v-flex>
-              </v-layout>
+              <p class="wizard-question">Was sagt dir das?</p>
+              <input-card v-model="resultLearning" label="Deine Erkenntnis" :rows="3"></input-card>
+            </div>
 
-              <v-layout v-show="resultStep === 4" column>
-                <v-flex class="mt-2 mb-3">
-                  <h1 class="headline font-weight-regular">Affirmation</h1>
-                  <belief-context :situation="resultSituation"></belief-context>
-                </v-flex>
+            <div v-show="resultStep === 4">
+              <wizard-context label="Situation" :quote="resultSituation"></wizard-context>
+              <experiment-recall :fear="resultFear" :outcome="resultOutcome"></experiment-recall>
 
-                <experiment-recall
-                  :fear="resultFear"
-                  :outcome="resultOutcome"
-                ></experiment-recall>
+              <!-- The measurement and what it meant, before asking what the
+                   body makes of it. -->
+              <div class="card gap-card" :style="{ borderColor: gapColor(resultGap) }">
+                <p class="gap-line">
+                  Deine Erwartung war
+                  <span class="gap-num">{{ resultExpected }}</span>,
+                  real waren es
+                  <span class="gap-num" :style="{ color: gapColor(resultGap) }">{{ resultActual }}</span>.
+                </p>
+                <p class="gap-delta" :style="{ color: gapColor(resultGap) }">
+                  <template v-if="resultGap > 0">{{ resultGap }} Punkte weniger schlimm als befürchtet</template>
+                  <template v-else-if="resultGap === 0">Genau wie befürchtet</template>
+                  <template v-else>{{ Math.abs(resultGap) }} Punkte schlimmer als befürchtet</template>
+                </p>
+              </div>
+              <template v-if="resultLearning.trim()">
+                <p class="result-recall-label">Das sagt mir</p>
+                <p class="wizard-note result-recall-text">{{ resultLearning }}</p>
+              </template>
 
-                <!-- The measurement and what it meant, before asking what the
-                     body makes of it. -->
-                <v-flex class="mb-3">
-                  <div class="gap-box" :style="{ borderColor: gapColor(resultGap) }">
-                    <p class="gap-line">
-                      Deine Erwartung war
-                      <span class="gap-num">{{ resultExpected }}</span>,
-                      real waren es
-                      <span class="gap-num" :style="{ color: gapColor(resultGap) }">{{ resultActual }}</span>.
-                    </p>
-                    <p class="gap-delta" :style="{ color: gapColor(resultGap) }">
-                      <template v-if="resultGap > 0">{{ resultGap }} Punkte weniger schlimm als befürchtet</template>
-                      <template v-else-if="resultGap === 0">Genau wie befürchtet</template>
-                      <template v-else>{{ Math.abs(resultGap) }} Punkte schlimmer als befürchtet</template>
-                    </p>
-                  </div>
-                  <template v-if="resultLearning.trim()">
-                    <p class="expand-label mt-3">Das sagt mir</p>
-                    <p class="recall-text">{{ resultLearning }}</p>
-                  </template>
-                </v-flex>
+              <p class="wizard-question">Wie glaubwürdig fühlen sich die Sätze an?</p>
+              <p class="wizard-body">Fühle in dich hinein.</p>
 
-                <v-flex class="mb-3">
-                  <p class="body-1 grey--text wizard-prompt">
-                    Fühle in dich hinein. Für wie glaubwürdig hält dein Körper die Sätze?
-                  </p>
-                </v-flex>
+              <!-- Two scales, not one: the old sentence can lose credibility
+                   without the new one gaining any, and a single slider
+                   between them could not say that. -->
+              <template v-if="resultAffirmationText">
+                <p class="wizard-note pole">{{ resultBeliefText }}</p>
+                <meter-card
+                  :value="resultBeliefTruth"
+                  label="Glaubwürdigkeit Überzeugung"
+                  minLabel="gar nicht"
+                  maxLabel="völlig"
+                  @input="resultBeliefTruth = $event"
+                ></meter-card>
 
-                <!-- Two scales, not one: the old sentence can lose credibility
-                     without the new one gaining any, and a single slider
-                     between them could not say that. -->
-                <v-flex v-if="resultAffirmationText" class="mb-3">
-                  <p class="expand-label">Glaubwürdigkeit Überzeugung</p>
-                  <p class="pole">{{ resultBeliefText }}</p>
-                  <div class="slider-row">
-                    <span class="slider-end-label">0</span>
-                    <input
-                      type="range"
-                      min="0"
-                      max="10"
-                      v-model.number="resultBeliefTruth"
-                      class="fear-slider"
-                    />
-                    <span class="slider-end-label">10</span>
-                  </div>
-                  <p class="slider-value-label">{{ resultBeliefTruth }}</p>
+                <p class="wizard-note pole">{{ resultAffirmationText }}</p>
+                <meter-card
+                  :value="resultAffirmationTruth"
+                  label="Glaubwürdigkeit Affirmation"
+                  minLabel="gar nicht"
+                  maxLabel="völlig"
+                  @input="resultAffirmationTruth = $event"
+                ></meter-card>
+              </template>
+              <p v-else class="wizard-note">
+                Diese Überzeugung hat noch keine Affirmation — du findest sie im Wizard
+                „Überzeugung wandeln“.
+              </p>
+            </div>
 
-                  <p class="expand-label mt-3">Glaubwürdigkeit Affirmation</p>
-                  <p class="pole">{{ resultAffirmationText }}</p>
-                  <div class="slider-row">
-                    <span class="slider-end-label">0</span>
-                    <input
-                      type="range"
-                      min="0"
-                      max="10"
-                      v-model.number="resultAffirmationTruth"
-                      class="fear-slider"
-                    />
-                    <span class="slider-end-label">10</span>
-                  </div>
-                  <p class="slider-value-label">{{ resultAffirmationTruth }}</p>
-                </v-flex>
-                <v-flex v-else>
-                  <p class="empty-hint">
-                    Diese Überzeugung hat noch keine Affirmation — du findest sie im Wizard
-                    „Überzeugung wandeln“.
-                  </p>
-                </v-flex>
+            <div class="wizard-bottom-space"></div>
 
-              </v-layout>
-            </v-container>
-          </div>
-          <v-footer color="white elevation-3" height="44" class="wizard-footer">
-            <v-btn
-              v-if="resultStep < 4"
-              :disabled="resultStep === 1 && !resultOutcome.trim()"
-              @click="resultStep += 1"
-              block large color="primary"
-            >weiter</v-btn>
-            <v-btn v-else @click="saveResult" block large color="primary">speichern</v-btn>
-          </v-footer>
+          <wizard-footer
+            :disabled="resultStep === 1 && !resultOutcome.trim()"
+            :nextLabel="resultStep < 4 ? 'Weiter' : 'Speichern'"
+            @back="resultStep === 1 ? cancelResult() : resultStep--"
+            @next="resultStep < 4 ? resultStep++ : saveResult()"
+          ></wizard-footer>
         </div>
-      </v-dialog>
+      </v-dialog>      </v-dialog>
 
       <v-dialog v-model="isDeleteDialogShowing" width="300">
         <v-card class="confirm-dialog">
@@ -406,7 +330,11 @@
 <script>
 import moment from 'moment';
 import ExperimentRecall from '@/views/ExperimentRecall.vue';
-import BeliefContext from '@/views/BeliefContext.vue';
+import WizardHeader from '@/components/WizardHeader.vue';
+import WizardFooter from '@/components/WizardFooter.vue';
+import WizardContext from '@/components/WizardContext.vue';
+import InputCard from '@/components/InputCard.vue';
+import MeterCard from '@/components/MeterCard.vue';
 import {
   EXPERIMENT_DISPLAY_STATES,
   EXPERIMENT_DISPLAY_LABELS,
@@ -463,7 +391,9 @@ function triggerConfetti() {
 
 export default {
   name: 'action-list',
-  components: { ExperimentRecall, BeliefContext, NavIcon },
+  components: {
+    ExperimentRecall, NavIcon, WizardHeader, WizardFooter, WizardContext, InputCard, MeterCard,
+  },
   data() {
     return {
       // Planned experiments are the ones waiting on you, so they open first;
@@ -919,105 +849,18 @@ export default {
   flex-direction: column;
 }
 // Neither may shrink: the middle scrolls, these two stay put.
-.wizard-bar { flex-shrink: 0; }
-.wizard-scroll {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-.wizard-footer { flex-shrink: 0; }
-
-.pole {
-  font-size: 0.95rem;
-  line-height: 1.5;
-  color: #ebebf5;
-  margin: 0 0 6px;
-}
-.empty-hint {
-  font-size: 0.875rem;
+/* The two credibility readings at the end: a short quote above each meter,
+   in the same voice a wizard-note uses elsewhere. */
+.pole { margin-bottom: 8px; }
+.result-recall-label {
+  font-size: 0.68rem;
   color: #8e8e93;
-  line-height: 1.5;
-  margin: 0;
-}
-.slider-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 4px;
-}
-.slider-end-label {
-  font-size: 0.78rem;
-  color: #8e8e93;
-  flex-shrink: 0;
-}
-.fear-slider {
-  flex: 1;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 4px;
-  border-radius: 2px;
-  background: #3a3a3c;
-  outline: none;
-  cursor: pointer;
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background: #4ade80;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-  }
-  &::-moz-range-thumb {
-    width: 26px;
-    height: 26px;
-    border: none;
-    border-radius: 50%;
-    background: #4ade80;
-    cursor: pointer;
-  }
-}
-/* Shows a recorded value — deliberately not interactive. */
-.readonly-slider {
-  flex: 1;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 4px;
-  border-radius: 2px;
-  background: #3a3a3c;
-  outline: none;
-  opacity: 1;
-  pointer-events: none;
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: #4ade80;
-  }
-  &::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    border: none;
-    border-radius: 50%;
-    background: #4ade80;
-  }
-}
-.slider-value-label {
-  text-align: center;
-  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
   font-weight: 600;
-  margin: 8px 0 0;
+  margin: 18px 16px 6px;
 }
-.scale-legend {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.72rem;
-  color: #636366;
-  margin-top: 2px;
-}
+.result-recall-text { margin-top: -6px; }
 
 /* Same chip look as the affirmation step of the change wizard */
 .selected-chips {
@@ -1042,10 +885,10 @@ export default {
   padding: 4px 10px !important;
 }
 
-.gap-box {
-  padding: 14px;
-  border-radius: 12px;
-  border: 1.5px solid;
+/* .card already gives the radius, background and side margin; this only adds
+   the state-coloured edge that says how big the surprise was. */
+.gap-card {
+  border: 1px solid;
   transition: border-color 0.2s ease;
 }
 .gap-line { font-size: 0.95rem; color: #ebebf5; margin: 0; line-height: 1.5; }

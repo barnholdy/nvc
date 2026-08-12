@@ -16,6 +16,7 @@
       <pattern-add-beliefs
         v-show="step === 2"
         :allBeliefs="allBeliefs"
+        :patterns="allPatterns"
         :selectedBeliefIds="selectedBeliefIds"
         :initialTruths="beliefTruths"
         :trigger="trigger"
@@ -67,6 +68,11 @@ export default {
     },
     allBeliefs() {
       return this.$store.getters.beliefs;
+    },
+    // So the "schon erfasst" list can show the same credibility number the
+    // belief cards do.
+    allPatterns() {
+      return this.$store.getters.patterns;
     },
     isStepComplete() {
       if (this.step === 2) return this.selectedBeliefIds.length > 0;

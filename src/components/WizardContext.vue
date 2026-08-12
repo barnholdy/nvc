@@ -21,15 +21,20 @@
       @click="toggle(row.key)"
     >
       <span class="detail-label">{{ row.label }}</span>
-      <p v-if="row.text" class="detail-value" :class="{ open: open === row.key }">{{ row.text }}</p>
-      <feeling-chips
-        v-else-if="open === row.key"
-        :items="row.items"
-        :type="row.type"
-        flat
-      ></feeling-chips>
-      <p v-else class="detail-value">{{ row.summary }}</p>
-      <v-icon v-if="open !== row.key" class="detail-chevron">chevron_right</v-icon>
+      <template v-if="open === row.key">
+        <p v-if="row.text" class="detail-value open">{{ row.text }}</p>
+        <feeling-chips
+          v-if="row.chips.length"
+          :items="row.chips"
+          :type="row.chipType"
+          flat
+          :class="{ 'mt-2': row.text }"
+        ></feeling-chips>
+      </template>
+      <template v-else>
+        <p class="detail-value">{{ row.summary }}</p>
+        <v-icon class="detail-chevron">chevron_right</v-icon>
+      </template>
     </div>
   </div>
 </template>
@@ -51,9 +56,14 @@ export default {
     situation: { type: String, default: '' },
     exceptions: { type: String, default: '' },
     perspective: { type: String, default: '' },
+    // Feelings that belong with "Neue Reaktion" — the wandeln wizard's new
+    // ones, shown inside that same row rather than as a row of their own.
+    perspectiveFeelings: { type: Array, default: () => [] },
     reaction: { type: String, default: '' },
+    // Feelings that belong with "Reaktion" — shown the same combined way the
+    // belief cards show them.
+    reactionFeelings: { type: Array, default: () => [] },
     origin: { type: String, default: '' },
-    feelings: { type: Array, default: () => [] },
     needs: { type: Array, default: () => [] },
   },
   data() {
@@ -66,32 +76,29 @@ export default {
     },
     rows() {
       const out = [];
-      const text = (key, label, value) => {
-        if (value) out.push({ key, label, text: value });
+      // A row can hold plain text, a set of chips, or — Reaktion and Neue
+      // Reaktion — both at once, exactly like the belief cards' own detail
+      // rows: the summary line falls back to the chip names when there is no
+      // text to show instead.
+      const row = (key, label, opts) => {
+        const text = opts.text || '';
+        const chips = opts.chips || [];
+        if (!text && !chips.length) return;
+        out.push({
+          key,
+          label,
+          text,
+          chips,
+          chipType: opts.chipType || 'feelings',
+          summary: text || chips.map(c => c.name).join(' · '),
+        });
       };
-      text('situation', 'Situation', this.situation);
-      text('exceptions', 'Ausnahmen', this.exceptions);
-      text('perspective', 'Neue Reaktion', this.perspective);
-      text('reaction', 'Reaktion', this.reaction);
-      text('origin', 'Ursprung', this.origin);
-      if (this.feelings.length) {
-        out.push({
-          key: 'feelings',
-          label: 'Gefühle',
-          items: this.feelings,
-          type: 'feelings',
-          summary: this.feelings.map(f => f.name).join(' · '),
-        });
-      }
-      if (this.needs.length) {
-        out.push({
-          key: 'needs',
-          label: 'Bedürfnisse',
-          items: this.needs,
-          type: 'needs',
-          summary: this.needs.map(n => n.name).join(' · '),
-        });
-      }
+      row('situation', 'Situation', { text: this.situation });
+      row('exceptions', 'Ausnahmen', { text: this.exceptions });
+      row('perspective', 'Neue Reaktion', { text: this.perspective, chips: this.perspectiveFeelings });
+      row('reaction', 'Reaktion', { text: this.reaction, chips: this.reactionFeelings });
+      row('origin', 'Ursprung', { text: this.origin });
+      row('needs', 'Bedürfnisse', { chips: this.needs, chipType: 'needs' });
       return out;
     },
   },

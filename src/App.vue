@@ -552,6 +552,13 @@ html { overflow-x: hidden; }
   flex-shrink: 0;
   margin-left: 8px;
 }
+/* An open cluster's words are their own block between two rows, not a strip
+   floating between them — a rule under it holds it apart from the next
+   cluster the same way every closed row already holds itself apart. */
+.pick-chips-open {
+  padding-top: 12px;
+  border-bottom: 1px solid #2c2c2e;
+}
 
 /* The question a wizard step asks, wherever it is asked. */
 .wizard-prompt { font-weight: 600 !important; }

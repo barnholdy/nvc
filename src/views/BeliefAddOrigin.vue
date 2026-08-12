@@ -2,7 +2,7 @@
   <div>
     <!-- No needs here: they are picked on the next step. The feelings are
          named in the sentence under the question rather than listed above it. -->
-    <wizard-context :quote="belief" :reaction="reaction"></wizard-context>
+    <wizard-context :quote="belief" :reaction="reaction" :reaction-feelings="feelings"></wizard-context>
 
     <p class="wizard-question">Wo kommt das her?</p>
     <feeling-words
