@@ -30,7 +30,7 @@
     <!-- The question the mirroring is for: not what was said, but what of it
          is worth keeping. Only meaningful once there is something to answer. -->
     <template v-if="text !== null">
-      <p class="reflection-label mt-4">Was möchtest du davon annehmen?</p>
+      <p class="body-1 white--text mt-4 wizard-prompt">Was möchtest du davon annehmen?</p>
       <v-textarea
         v-model="reflection"
         placeholder="..."
@@ -178,11 +178,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.reflection-label {
-  font-size: 0.9rem;
-  color: #8e8e93;
-  margin: 0 0 4px;
-}
 .empathy-rendered {
   font-size: 0.95rem;
   color: #ebebf5;
