@@ -1056,6 +1056,38 @@ html { overflow-x: hidden; }
 
 .card-sep { height: 1px; background: #2c2c2e; margin: 14px 0 0; }
 
+/* One track, two fills: the fear laid over what reality turned out to be, so
+   the difference is the part of the bar that is only orange. Shared by the
+   Handlungen list's own rows and the result wizard's recap card. */
+.gap-bar {
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  background: #2c2c2e;
+  margin-top: 16px;
+  overflow: hidden;
+}
+.gap-fill {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  border-radius: 999px;
+}
+.gap-expected { background: #fd9927; }
+.gap-real { background: #6aaef7; }
+.gap-legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: #8e8e93;
+}
+.gap-key { display: flex; align-items: center; gap: 6px; }
+.gap-dot { width: 9px; height: 9px; border-radius: 3px; display: inline-block; }
+.gap-dot-expected { background: #fd9927; }
+.gap-dot-real { background: #6aaef7; }
+.gap-delta { margin-left: auto; font-weight: 600; }
+
 /* A written answer, folded to one line until it is asked for. */
 .detail-row {
   display: flex;

@@ -169,7 +169,7 @@
             <v-icon v-if="!isOpen(row, 'learning')" class="detail-chevron">chevron_right</v-icon>
           </div>
 
-          <div v-if="affirmationOf(row)" class="aff-box">
+          <div v-if="affirmationOf(row)" class="aff-box" :class="{ 'aff-box-loose': compact }">
             <p class="aff-label">Affirmation</p>
             <p class="aff-text">„{{ affirmationOf(row) }}“</p>
             <div class="aff-foot" v-if="affirmationTruth(row) !== null">
@@ -207,8 +207,12 @@
 
             <!-- The fear is shown again: rating it from memory is guesswork -->
             <div v-show="resultStep === 2">
-              <wizard-context label="Situation" :quote="resultSituation"></wizard-context>
-              <experiment-recall :fear="resultFear" :outcome="resultOutcome"></experiment-recall>
+              <wizard-context
+                label="Situation"
+                :quote="resultSituation"
+                :fear="resultFear"
+                :outcome="resultOutcome"
+              ></wizard-context>
 
               <p class="wizard-question">Wie stark ist deine Befürchtung tatsächlich eingetreten?</p>
               <meter-card
@@ -221,45 +225,29 @@
             </div>
 
             <div v-show="resultStep === 3">
-              <wizard-context label="Situation" :quote="resultSituation"></wizard-context>
-              <experiment-recall :fear="resultFear" :outcome="resultOutcome"></experiment-recall>
-
-              <div class="card gap-card" :style="{ borderColor: gapColor(resultGap) }">
-                <div class="gap-bar">
-                  <span class="gap-fill gap-expected" :style="{ width: pct(resultExpected) }"></span>
-                  <span class="gap-fill gap-real" :style="{ width: pct(resultActual) }"></span>
-                </div>
-                <div class="gap-legend">
-                  <span class="gap-key"><i class="gap-dot gap-dot-expected"></i>erwartet {{ resultExpected }}</span>
-                  <span class="gap-key"><i class="gap-dot gap-dot-real"></i>real {{ resultActual }}</span>
-                  <span class="gap-delta" :style="{ color: gapColor(resultGap) }">
-                    {{ resultGap > 0 ? '−' : '+' }}{{ Math.abs(resultGap) }}
-                  </span>
-                </div>
-              </div>
+              <wizard-context
+                label="Situation"
+                :quote="resultSituation"
+                :fear="resultFear"
+                :outcome="resultOutcome"
+                :fear-expected="resultExpected"
+                :fear-actual="resultActual"
+              ></wizard-context>
 
               <p class="wizard-question">Was sagt dir das?</p>
               <input-card v-model="resultLearning" label="Deine Erkenntnis" :rows="3"></input-card>
             </div>
 
             <div v-show="resultStep === 4">
-              <wizard-context label="Situation" :quote="resultSituation"></wizard-context>
-              <experiment-recall :fear="resultFear" :outcome="resultOutcome" :learning="resultLearning"></experiment-recall>
-
-              <!-- Same bar the Handlungen list draws for a finished run. -->
-              <div class="card gap-card" :style="{ borderColor: gapColor(resultGap) }">
-                <div class="gap-bar">
-                  <span class="gap-fill gap-expected" :style="{ width: pct(resultExpected) }"></span>
-                  <span class="gap-fill gap-real" :style="{ width: pct(resultActual) }"></span>
-                </div>
-                <div class="gap-legend">
-                  <span class="gap-key"><i class="gap-dot gap-dot-expected"></i>erwartet {{ resultExpected }}</span>
-                  <span class="gap-key"><i class="gap-dot gap-dot-real"></i>real {{ resultActual }}</span>
-                  <span class="gap-delta" :style="{ color: gapColor(resultGap) }">
-                    {{ resultGap > 0 ? '−' : '+' }}{{ Math.abs(resultGap) }}
-                  </span>
-                </div>
-              </div>
+              <wizard-context
+                label="Situation"
+                :quote="resultSituation"
+                :fear="resultFear"
+                :outcome="resultOutcome"
+                :learning="resultLearning"
+                :fear-expected="resultExpected"
+                :fear-actual="resultActual"
+              ></wizard-context>
 
               <p class="wizard-question">Wie glaubwürdig fühlen sich die Sätze an?</p>
               <p class="wizard-body">Fühle in dich hinein.</p>
@@ -334,7 +322,6 @@
 
 <script>
 import moment from 'moment';
-import ExperimentRecall from '@/views/ExperimentRecall.vue';
 import WizardHeader from '@/components/WizardHeader.vue';
 import WizardFooter from '@/components/WizardFooter.vue';
 import WizardContext from '@/components/WizardContext.vue';
@@ -399,7 +386,7 @@ function triggerConfetti() {
 export default {
   name: 'action-list',
   components: {
-    ExperimentRecall, NavIcon, WizardHeader, WizardFooter, WizardContext, InputCard, MeterCard,
+    NavIcon, WizardHeader, WizardFooter, WizardContext, InputCard, MeterCard,
   },
   data() {
     return {
@@ -503,10 +490,6 @@ export default {
     },
     resultBeliefText() {
       return this.resultRow ? this.resultRow.beliefText : '';
-    },
-    resultGap() {
-      if (this.resultExpected === null) return 0;
-      return this.resultExpected - this.resultActual;
     },
   },
   mounted() {
@@ -876,16 +859,10 @@ export default {
   padding: 4px 10px !important;
 }
 
-/* .card already gives the radius, background and side margin; this only adds
-   the state-coloured edge that says how big the surprise was. */
-.gap-card {
-  border: 1px solid;
-  transition: border-color 0.2s ease;
-  /* .gap-bar's own margin-top holds it away from whatever precedes it in the
-     list row; here it is the card's first child, so the card's own padding
-     already does that job. */
-  .gap-bar { margin-top: 0; }
-}
+/* Compact hides the row's own detail rows and their separator, which is
+   what normally holds the affirmation box away from the bar above it —
+   same fix the Überzeugungen list uses for the same reason. */
+.aff-box-loose { margin-top: 14px !important; }
 
 .confirm-dialog { border-radius: 14px !important; overflow: hidden; }
 .confirm-title {
@@ -902,36 +879,8 @@ export default {
 
 .due-hint { font-size: 0.85rem; color: #fd9927; margin: 10px 0 0; }
 
-/* One track, two fills: the fear laid over what reality turned out to be, so
-   the difference is the part of the bar that is only orange. */
-.gap-bar {
-  position: relative;
-  height: 10px;
-  border-radius: 999px;
-  background: #2c2c2e;
-  margin-top: 16px;
-  overflow: hidden;
-}
-.gap-fill {
-  position: absolute;
-  top: 0; left: 0; bottom: 0;
-  border-radius: 999px;
-}
-.gap-expected { background: #fd9927; }
-.gap-real { background: #6aaef7; }
-.gap-legend {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-top: 10px;
-  font-size: 0.85rem;
-  color: #8e8e93;
-}
-.gap-key { display: flex; align-items: center; gap: 6px; }
-.gap-dot { width: 9px; height: 9px; border-radius: 3px; display: inline-block; }
-.gap-dot-expected { background: #fd9927; }
-.gap-dot-real { background: #6aaef7; }
-.gap-delta { margin-left: auto; font-weight: 600; }
+/* .gap-bar and friends are global now — the result wizard's own context
+   card draws the same bar. */
 
 /* Same outline chip Verlauf uses for its belief tags: content-width, not a
    stretched block — a label, not a section of the card. */
