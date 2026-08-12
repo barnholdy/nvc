@@ -19,13 +19,19 @@
         <v-btn small flat color="grey" @click="showApiKeyInput = false">Abbrechen</v-btn>
       </template>
       <template v-else>
-        <v-btn small flat color="primary" class="ml-0" :loading="isLoading" @click="generateSuggestions">
-          <v-icon small left>lightbulb_outline</v-icon>
-          Vorschläge
-        </v-btn>
-        <v-btn v-if="apiKey" small flat icon @click="showApiKeyInput = true" title="API Key ändern">
-          <v-icon small color="grey lighten-1">settings</v-icon>
-        </v-btn>
+        <div class="action-row">
+          <v-progress-circular
+            v-if="isLoading"
+            indeterminate
+            color="#4ade80"
+            size="20"
+            width="2"
+          ></v-progress-circular>
+          <button v-else class="card-btn" @click="generateSuggestions">Vorschläge bekommen</button>
+          <v-btn v-if="apiKey" small flat icon @click="showApiKeyInput = true" title="API Key ändern">
+            <v-icon small color="grey lighten-1">settings</v-icon>
+          </v-btn>
+        </div>
       </template>
     </div>
 
@@ -289,6 +295,7 @@ export default {
   }
 }
 .suggest-row { margin-bottom: 4px; }
+.action-row { display: flex; align-items: center; gap: 8px; }
 .suggest-hint {
   font-size: 0.78rem;
   color: #8e8e93;
