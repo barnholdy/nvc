@@ -14,13 +14,19 @@
       <v-btn small flat color="grey" @click="showApiKeyInput = false">Abbrechen</v-btn>
     </template>
     <template v-else>
-      <v-btn flat color="primary" :loading="isLoading" @click="generate">
-        <v-icon left>favorite_border</v-icon>
-        Empathie bekommen
-      </v-btn>
-      <v-btn v-if="apiKey" small flat icon @click="showApiKeyInput = true" title="API Key ändern">
-        <v-icon small color="grey lighten-1">settings</v-icon>
-      </v-btn>
+      <div class="action-row">
+        <v-progress-circular
+          v-if="isLoading"
+          indeterminate
+          color="#4ade80"
+          size="20"
+          width="2"
+        ></v-progress-circular>
+        <button v-else class="card-btn" @click="generate">Empathie bekommen</button>
+        <v-btn v-if="apiKey" small flat icon @click="showApiKeyInput = true" title="API Key ändern">
+          <v-icon small color="grey lighten-1">settings</v-icon>
+        </v-btn>
+      </div>
     </template>
 
     <p v-if="errorMsg" class="caption red--text mt-1">{{ errorMsg }}</p>
@@ -178,6 +184,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.action-row { display: flex; align-items: center; gap: 8px; }
 .empathy-rendered {
   font-size: 0.95rem;
   color: #ebebf5;
