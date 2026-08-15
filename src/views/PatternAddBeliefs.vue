@@ -38,6 +38,19 @@
       </template>
     </div>
 
+    <!-- Common starting points, for whoever cannot yet put their own into
+         words. Tapping one adds it straight away, the same way tapping an
+         already-captured belief below does. -->
+    <template v-if="!showNewInput && suggestedBeliefs.length">
+      <p class="wizard-question">Anregungen</p>
+      <div
+        v-for="text in suggestedBeliefs"
+        :key="text"
+        class="card suggestion-card"
+        @click="addSuggestion(text)"
+      >{{ text }}</div>
+    </template>
+
     <template v-if="selectedBeliefObjects.length">
       <p class="wizard-question">Wie glaubwürdig sind sie gerade?</p>
       <div v-for="b in selectedBeliefObjects" :key="b.time">
@@ -89,6 +102,22 @@ const TRUTH_DEFAULT = 5;
 // answer in turn.
 const DEEPER_QUESTION = 'Angenommen, das stimmt — was würde das über dich bedeuten?';
 
+// Common core beliefs, for whoever is staring at the blank field. Offered
+// as a starting point, not a diagnosis — tapping one adds it exactly like
+// writing it in would.
+const CORE_BELIEF_SUGGESTIONS = [
+  'Ich bin nicht gut genug.',
+  'Ich bin nicht liebenswert.',
+  'Ich werde verlassen.',
+  'Ich muss perfekt sein, um akzeptiert zu werden.',
+  'Ich bin machtlos.',
+  'Die Welt ist gefährlich.',
+  'Ich bin verantwortlich für die Gefühle anderer.',
+  'Meine Bedürfnisse zählen nicht.',
+  'Ich muss es allen recht machen.',
+  'Fehler sind inakzeptabel.',
+];
+
 export default {
   name: 'pattern-add-beliefs',
   components: { WizardContext, InputCard, MeterCard },
@@ -125,6 +154,16 @@ export default {
       var selectedIds = this.selectedIds;
       return this.allBeliefs.filter(function(b) {
         return selectedIds.indexOf(b.time) === -1;
+      });
+    },
+    // Whatever is already a real belief has its own card above — offering it
+    // again here would just be a second, less informative way to add it.
+    suggestedBeliefs() {
+      var have = this.allBeliefs.map(function(b) {
+        return (b.belief || '').trim().toLowerCase();
+      });
+      return CORE_BELIEF_SUGGESTIONS.filter(function(text) {
+        return have.indexOf(text.toLowerCase()) === -1;
       });
     },
   },
@@ -184,6 +223,13 @@ export default {
       this.$store.dispatch('saveBelief', { time: time, belief: this.newBeliefText.trim() });
       this.selectedIds = this.selectedIds.concat([time]);
       this.resetNew();
+    },
+    // One tap: the suggestion becomes a real belief and is selected, same as
+    // finishing the ladder does for whatever was typed by hand.
+    addSuggestion(text) {
+      var time = +new Date();
+      this.$store.dispatch('saveBelief', { time: time, belief: text });
+      this.selectedIds = this.selectedIds.concat([time]);
     },
   },
 };
@@ -245,4 +291,14 @@ export default {
   &:active { opacity: 0.6; }
 }
 .available-title { color: #ebebf5; }
+
+/* Full-width cards rather than chips: a suggestion is a whole sentence. */
+.suggestion-card {
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: #ebebf5;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  &:active { opacity: 0.6; }
+}
 </style>

@@ -6,79 +6,64 @@
     <router-view :key="$route.fullPath"/>
 
     <transition name="ob-fade">
-      <div v-if="showOnboarding" class="ob-overlay" @click.self="null">
-        <div class="ob-card">
-          <div class="ob-slides">
+      <div v-if="showOnboarding" class="ob-overlay wizard-page">
+        <wizard-header title="Willkommen" :step="obStep" :total="3"></wizard-header>
 
-            <!-- Slide 1: Wie es funktioniert -->
-            <div v-show="obStep === 1" class="ob-slide">
-              <span class="ob-icon">🧭</span>
-              <h2 class="ob-title">Wie die App funktioniert</h2>
-              <p class="ob-text">
-                Diese App begleitet dich dabei, dein inneres Betriebssystem zu verstehen und zu verändern — in vier Schritten:
-              </p>
-              <div class="ob-steps">
-                <div class="ob-step-row"><span class="ob-step-icon">⚡</span><span><strong>Situationen</strong> — Erkenne Auslöser und Muster in deinem Alltag.</span></div>
-                <div class="ob-step-row"><span class="ob-step-icon">💡</span><span><strong>Überzeugungen</strong> — Benenne die Glaubenssätze dahinter und wie sie sich anfühlen.</span></div>
-                <div class="ob-step-row"><span class="ob-step-icon">✨</span><span><strong>Affirmationen</strong> — Formuliere neue, kraftvolle Perspektiven im Präsens.</span></div>
-                <div class="ob-step-row"><span class="ob-step-icon">🎯</span><span><strong>Handlungen</strong> — Setze konkrete Schritte um und verankere die Veränderung.</span></div>
-              </div>
-            </div>
-
-            <!-- Slide 2: Sicherheitshinweis -->
-            <div v-show="obStep === 2" class="ob-slide">
-              <span class="ob-icon">💙</span>
-              <h2 class="ob-title">Ein ehrlicher Hinweis</h2>
-              <p class="ob-text">
-                Diese App berührt persönliche Überzeugungen, Gefühle und Selbstbild. Das kann heilsam sein — manchmal aber auch Belastendes aufwühlen.
-              </p>
-              <p class="ob-text">
-                <strong>Sie ersetzt keine Therapie oder professionelle Begleitung.</strong> Wenn du in einer Krise bist oder professionelle Unterstützung brauchst:
-              </p>
-              <div class="ob-contact-box">
-                <p class="ob-contact-row">📞 <strong>{{ support.name }}</strong><br><span class="ob-contact-detail">{{ support.phone }} — {{ support.availability }}</span></p>
-                <p class="ob-contact-row">🌐 <strong>Online-Beratung</strong><br><span class="ob-contact-detail">{{ support.online }}</span></p>
-              </div>
-            </div>
-
-            <!-- Slide 3: Datenschutz & KI -->
-            <div v-show="obStep === 3" class="ob-slide">
-              <span class="ob-icon">🔒</span>
-              <h2 class="ob-title">Deine Daten &amp; KI</h2>
-              <p class="ob-text">
-                Alle deine Einträge werden <strong>ausschließlich lokal</strong> in deinem Browser gespeichert — kein Server, kein Konto, keine Synchronisation.
-              </p>
-              <div class="ob-privacy-box">
-                <div class="ob-privacy-row">
-                  <span class="ob-priv-label">Lokal gespeichert</span>
-                  <span class="ob-priv-val">Überzeugungen, Affirmationen, Handlungen, Situationen</span>
-                </div>
-                <div class="ob-privacy-divider"></div>
-                <div class="ob-privacy-row">
-                  <span class="ob-priv-label">KI-Verarbeitung</span>
-                  <span class="ob-priv-val">Wenn du die Empathie-Funktion nutzt, werden deine Eingaben zur Verarbeitung an die Anthropic API übertragen. Es gelten <strong>Anthropics Datenschutzrichtlinien</strong>. Du kannst die Funktion jederzeit weglassen.</span>
-                </div>
-                <div class="ob-privacy-divider"></div>
-                <div class="ob-privacy-row">
-                  <span class="ob-priv-label">API Key</span>
-                  <span class="ob-priv-val">Wird nur lokal auf deinem Gerät gespeichert.</span>
-                </div>
-              </div>
+        <div
+          class="ob-slides"
+          @touchstart="obTouchStart"
+          @touchmove="obTouchMove"
+          @touchend="obTouchEnd"
+        >
+          <!-- Slide 1: Wie es funktioniert -->
+          <div v-show="obStep === 1">
+            <p class="wizard-question">Wie die App funktioniert</p>
+            <p class="wizard-body">
+              Diese App begleitet dich dabei, dein inneres Betriebssystem zu verstehen und zu verändern — in vier Schritten:
+            </p>
+            <div class="card">
+              <div class="ob-row"><span class="ob-row-label">Situationen</span><p class="ob-row-text">Erkenne Auslöser und Muster in deinem Alltag.</p></div>
+              <div class="ob-row"><span class="ob-row-label">Überzeugungen</span><p class="ob-row-text">Benenne die Glaubenssätze dahinter und wie sie sich anfühlen.</p></div>
+              <div class="ob-row"><span class="ob-row-label">Affirmationen</span><p class="ob-row-text">Formuliere neue, kraftvolle Perspektiven im Präsens.</p></div>
+              <div class="ob-row"><span class="ob-row-label">Handlungen</span><p class="ob-row-text">Setze konkrete Schritte um und verankere die Veränderung.</p></div>
             </div>
           </div>
 
-          <!-- Dots -->
-          <div class="ob-dots">
-            <span v-for="n in 3" :key="n" class="ob-dot" :class="{ active: obStep === n }"></span>
+          <!-- Slide 2: Sicherheitshinweis -->
+          <div v-show="obStep === 2">
+            <p class="wizard-question">Ein ehrlicher Hinweis</p>
+            <p class="wizard-body">
+              Diese App berührt persönliche Überzeugungen, Gefühle und Selbstbild. Das kann heilsam sein — manchmal aber auch Belastendes aufwühlen.
+            </p>
+            <p class="wizard-body">
+              <strong>Sie ersetzt keine Therapie oder professionelle Begleitung.</strong> Wenn du in einer Krise bist oder professionelle Unterstützung brauchst:
+            </p>
+            <div class="card">
+              <div class="ob-row"><span class="ob-row-label">{{ support.name }}</span><p class="ob-row-text">{{ support.phone }} — {{ support.availability }}</p></div>
+              <div class="ob-row"><span class="ob-row-label">Online-Beratung</span><p class="ob-row-text">{{ support.online }}</p></div>
+            </div>
           </div>
 
-          <!-- Actions -->
-          <div class="ob-actions">
-            <button v-if="obStep < 3" class="ob-btn-ghost" @click="obStep++">Überspringen</button>
-            <button v-if="obStep < 3" class="ob-btn-primary" @click="obStep++">Weiter</button>
-            <button v-if="obStep === 3" class="ob-btn-primary ob-btn-full" @click="finishOnboarding">Los geht's</button>
+          <!-- Slide 3: Datenschutz & KI -->
+          <div v-show="obStep === 3">
+            <p class="wizard-question">Deine Daten &amp; KI</p>
+            <p class="wizard-body">
+              Alle deine Einträge werden <strong>ausschließlich lokal</strong> in deinem Browser gespeichert — kein Server, kein Konto, keine Synchronisation.
+            </p>
+            <div class="card">
+              <div class="ob-row"><span class="ob-row-label">Lokal gespeichert</span><p class="ob-row-text">Überzeugungen, Affirmationen, Handlungen, Situationen</p></div>
+              <div class="ob-row"><span class="ob-row-label">KI-Verarbeitung</span><p class="ob-row-text">Wenn du die Empathie-Funktion nutzt, werden deine Eingaben zur Verarbeitung an die Anthropic API übertragen. Es gelten <strong>Anthropics Datenschutzrichtlinien</strong>. Du kannst die Funktion jederzeit weglassen.</p></div>
+              <div class="ob-row"><span class="ob-row-label">API Key</span><p class="ob-row-text">Wird nur lokal auf deinem Gerät gespeichert.</p></div>
+            </div>
           </div>
         </div>
+
+        <div class="wizard-bottom-space"></div>
+        <wizard-footer
+          :nextLabel="obStep < 3 ? 'Weiter' : 'Los geht\'s'"
+          @back="obBack"
+          @next="obNext"
+        ></wizard-footer>
       </div>
     </transition>
   </v-app>
@@ -86,22 +71,58 @@
 
 <script>
 import { SUPPORT_RESOURCE } from '@/utils/support';
+import WizardHeader from '@/components/WizardHeader.vue';
+import WizardFooter from '@/components/WizardFooter.vue';
 
 const ONBOARDING_KEY = 'nvc.onboarded';
 
 export default {
   name: 'app',
+  components: { WizardHeader, WizardFooter },
   data() {
     return {
       support: SUPPORT_RESOURCE,
       showOnboarding: !localStorage.getItem(ONBOARDING_KEY),
       obStep: 1,
+      obSw: { startX: 0, startY: 0, dx: 0, isH: null, drag: false },
     };
   },
   methods: {
     finishOnboarding() {
       localStorage.setItem(ONBOARDING_KEY, '1');
       this.showOnboarding = false;
+    },
+    // On the last slide, on is the same "done" the primary button reaches.
+    obNext() {
+      if (this.obStep < 3) this.obStep += 1;
+      else this.finishOnboarding();
+    },
+    // Nothing precedes the first slide but the way out — the same rule
+    // every other wizard's own back button follows.
+    obBack() {
+      if (this.obStep > 1) this.obStep -= 1;
+      else this.finishOnboarding();
+    },
+    obTouchStart(e) {
+      const t = e.touches[0];
+      this.obSw.startX = t.clientX; this.obSw.startY = t.clientY;
+      this.obSw.dx = 0; this.obSw.isH = null; this.obSw.drag = false;
+    },
+    obTouchMove(e) {
+      const t = e.touches[0];
+      const dx = t.clientX - this.obSw.startX, dy = t.clientY - this.obSw.startY;
+      if (this.obSw.isH === null && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
+        this.obSw.isH = Math.abs(dx) > Math.abs(dy) * 1.5;
+      }
+      if (!this.obSw.isH) return;
+      this.obSw.dx = dx; this.obSw.drag = true;
+    },
+    obTouchEnd() {
+      if (this.obSw.drag) {
+        if (this.obSw.dx < -50) this.obNext();
+        else if (this.obSw.dx > 50) this.obBack();
+      }
+      this.obSw.dx = 0; this.obSw.drag = false; this.obSw.isH = null;
     },
   },
   created() {
@@ -691,138 +712,34 @@ html { overflow-x: hidden; }
 .v-container { background: transparent !important; }
 .v-content__wrap { background: #000 !important; }
 
-/* ─── Onboarding overlay ─── */
+/* ─── Onboarding overlay ───
+   Same frame every wizard uses — a title with a progress bar, cards on
+   black, two ways on below — so the first thing anyone sees already looks
+   like the app they are about to use. */
 .ob-overlay {
   position: fixed;
   inset: 0;
   z-index: 9000;
-  background: rgba(0, 0, 0, 0.82);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding-bottom: env(safe-area-inset-bottom, 0);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
-@media (min-height: 600px) {
-  .ob-overlay { align-items: center; }
+.ob-row {
+  padding: 12px 0;
+  border-top: 1px solid #2c2c2e;
+  &:first-child { border-top: none; }
 }
-.ob-card {
-  background: #1c1c1e;
-  border-radius: 24px 24px 16px 16px;
-  width: 100%;
-  max-width: 480px;
-  padding: 28px 24px 20px;
-  box-shadow: 0 -8px 40px rgba(0,0,0,0.6);
-  display: flex;
-  flex-direction: column;
-}
-@media (min-height: 600px) {
-  .ob-card { border-radius: 24px; }
-}
-.ob-slides { min-height: 340px; }
-.ob-slide { display: flex; flex-direction: column; }
-.ob-icon { font-size: 2.6rem; margin-bottom: 12px; line-height: 1; }
-.ob-title {
-  font-size: 1.25rem;
-  font-weight: 700;
+.ob-row-label {
+  display: block;
   color: #fff;
-  margin: 0 0 12px;
-  letter-spacing: -0.3px;
-}
-.ob-text {
-  font-size: 0.9rem;
-  color: #ebebf5;
-  line-height: 1.65;
-  margin: 0 0 10px;
-}
-.ob-steps { margin-top: 8px; display: flex; flex-direction: column; gap: 10px; }
-.ob-step-row {
-  display: flex;
-  gap: 10px;
-  font-size: 0.875rem;
-  color: #ebebf5;
-  line-height: 1.5;
-  align-items: flex-start;
-}
-.ob-step-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
-.ob-contact-box {
-  background: #2c2c2e;
-  border-radius: 12px;
-  padding: 14px 16px;
-  margin-top: 6px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.ob-contact-row {
-  margin: 0;
-  font-size: 0.875rem;
-  color: #ebebf5;
-  line-height: 1.5;
-}
-.ob-contact-detail { color: #8e8e93; font-size: 0.82rem; }
-.ob-privacy-box {
-  background: #2c2c2e;
-  border-radius: 12px;
-  padding: 4px 0;
-  margin-top: 10px;
-}
-.ob-privacy-row {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  padding: 11px 16px;
-}
-.ob-privacy-divider { height: 1px; background: #3a3a3c; margin: 0; }
-.ob-priv-label {
-  font-size: 0.72rem;
-  color: #8e8e93;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
   font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
 }
-.ob-priv-val { font-size: 0.85rem; color: #ebebf5; line-height: 1.5; }
-.ob-dots {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  margin: 20px 0 16px;
-}
-.ob-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: #3a3a3c;
-  transition: background 0.2s;
-  &.active { background: #4ade80; }
-}
-.ob-actions {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-.ob-btn-primary {
-  background: #4ade80;
-  color: #000;
-  border: none;
-  border-radius: 12px;
-  padding: 13px 24px;
-  font-size: 1rem;
-  font-weight: 700;
-  font-family: inherit;
-  cursor: pointer;
-  margin-left: auto;
-  -webkit-tap-highlight-color: transparent;
-  &:active { background: #3dcc70; transform: scale(0.98); }
-}
-.ob-btn-full { width: 100%; margin-left: 0; }
-.ob-btn-ghost {
-  background: none;
-  border: none;
-  color: #636366;
-  font-size: 0.9rem;
-  font-family: inherit;
-  cursor: pointer;
-  padding: 13px 0;
-  -webkit-tap-highlight-color: transparent;
+.ob-row-text {
+  color: #8e8e93;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin: 0;
 }
 .ob-fade-enter-active, .ob-fade-leave-active { transition: opacity 0.25s; }
 .ob-fade-enter, .ob-fade-leave-to { opacity: 0; }
