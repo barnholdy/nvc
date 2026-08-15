@@ -75,6 +75,7 @@ export default {
       return this.$store.getters.patterns;
     },
     isStepComplete() {
+      if (this.step === 1) return this.trigger.trim() !== '';
       if (this.step === 2) return this.selectedBeliefIds.length > 0;
       return true;
     },
