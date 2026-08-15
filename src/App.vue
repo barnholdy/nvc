@@ -19,13 +19,30 @@
           <div v-show="obStep === 1">
             <p class="wizard-question">Wie die App funktioniert</p>
             <p class="wizard-body">
-              Diese App begleitet dich dabei, dein inneres Betriebssystem zu verstehen und zu verändern — in vier Schritten:
+              Diese App begleitet dich dabei, dein inneres Betriebssystem zu verstehen und zu verändern — in drei Schritten:
             </p>
             <div class="card">
-              <div class="ob-row"><span class="ob-row-label">Situationen</span><p class="ob-row-text">Erkenne Auslöser und Muster in deinem Alltag.</p></div>
-              <div class="ob-row"><span class="ob-row-label">Überzeugungen</span><p class="ob-row-text">Benenne die Glaubenssätze dahinter und wie sie sich anfühlen.</p></div>
-              <div class="ob-row"><span class="ob-row-label">Affirmationen</span><p class="ob-row-text">Formuliere neue, kraftvolle Perspektiven im Präsens.</p></div>
-              <div class="ob-row"><span class="ob-row-label">Handlungen</span><p class="ob-row-text">Setze konkrete Schritte um und verankere die Veränderung.</p></div>
+              <div class="ob-row">
+                <div class="ob-row-head">
+                  <nav-icon name="patterns" class="ob-row-icon"></nav-icon>
+                  <span class="ob-row-label">Verlauf</span>
+                </div>
+                <p class="ob-row-text">Erfasse Auslöser in Situationen deines Alltags.</p>
+              </div>
+              <div class="ob-row">
+                <div class="ob-row-head">
+                  <nav-icon name="beliefs" class="ob-row-icon"></nav-icon>
+                  <span class="ob-row-label">Überzeugungen</span>
+                </div>
+                <p class="ob-row-text">Ergründe die Überzeugungen hinter den Auslösern und wandle sie in positive Affirmationen.</p>
+              </div>
+              <div class="ob-row">
+                <div class="ob-row-head">
+                  <nav-icon name="actions" class="ob-row-icon"></nav-icon>
+                  <span class="ob-row-label">Handlungen</span>
+                </div>
+                <p class="ob-row-text">Überprüfe die Glaubwürdigkeit deiner Überzeugungen in konkreten Handlungsexperimenten.</p>
+              </div>
             </div>
           </div>
 
@@ -73,12 +90,13 @@
 import { SUPPORT_RESOURCE } from '@/utils/support';
 import WizardHeader from '@/components/WizardHeader.vue';
 import WizardFooter from '@/components/WizardFooter.vue';
+import NavIcon from '@/components/NavIcon.vue';
 
 const ONBOARDING_KEY = 'nvc.onboarded';
 
 export default {
   name: 'app',
-  components: { WizardHeader, WizardFooter },
+  components: { WizardHeader, WizardFooter, NavIcon },
   data() {
     return {
       support: SUPPORT_RESOURCE,
@@ -728,12 +746,19 @@ html { overflow-x: hidden; }
   border-top: 1px solid #2c2c2e;
   &:first-child { border-top: none; }
 }
+.ob-row-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+/* Same 24px box the bottom bar's own icons use — recognisable as the same
+   icon, not a shrunken copy of it. */
+.ob-row-icon { color: #4ade80; flex-shrink: 0; }
 .ob-row-label {
-  display: block;
   color: #fff;
   font-weight: 600;
   font-size: 0.95rem;
-  margin-bottom: 4px;
 }
 .ob-row-text {
   color: #8e8e93;

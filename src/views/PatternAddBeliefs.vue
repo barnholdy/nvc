@@ -225,12 +225,11 @@ export default {
       this.selectedIds = this.selectedIds.concat([time]);
       this.resetNew();
     },
-    // One tap: the suggestion becomes a real belief and is selected, same as
-    // finishing the ladder does for whatever was typed by hand.
+    // Lands in the field rather than becoming a belief straight away — a
+    // starting point that can still be reworded, the same way a suggestion
+    // is used everywhere else in the app.
     addSuggestion(text) {
-      var time = +new Date();
-      this.$store.dispatch('saveBelief', { time: time, belief: text });
-      this.selectedIds = this.selectedIds.concat([time]);
+      this.newBeliefText = text;
     },
   },
 };
