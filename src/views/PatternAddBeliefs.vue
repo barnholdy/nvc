@@ -39,9 +39,10 @@
     </div>
 
     <!-- Common starting points, for whoever cannot yet put their own into
-         words. Tapping one adds it straight away, the same way tapping an
+         words. Offered once they have said they want to write one, not
+         before — tapping one adds it straight away, the same way tapping an
          already-captured belief below does. -->
-    <template v-if="!showNewInput && suggestedBeliefs.length">
+    <template v-if="showNewInput && suggestedBeliefs.length">
       <p class="wizard-question">Anregungen</p>
       <div
         v-for="text in suggestedBeliefs"
