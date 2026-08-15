@@ -49,7 +49,6 @@
       </div>
 
       <div v-if="filteredRows.length === 0" class="list-empty">
-        <span class="list-empty-icon">🎯</span>
         <p class="list-empty-title">Keine Einträge</p>
         <p class="list-empty-sub">{{ emptyText }}</p>
       </div>

@@ -32,7 +32,6 @@
       </div>
 
       <div v-if="!filtered.length" class="list-empty">
-        <span class="list-empty-icon">⚡</span>
         <p class="list-empty-title">Noch keine Situationen</p>
         <p class="list-empty-sub">Tippe auf + um eine neue Situation hinzuzufügen.</p>
       </div>

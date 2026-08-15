@@ -35,7 +35,6 @@
       </div>
 
       <div v-if="filteredBeliefs.length === 0" class="list-empty">
-        <span class="list-empty-icon">💡</span>
         <p class="list-empty-title">Keine Einträge</p>
         <p class="list-empty-sub">{{ emptyText }}</p>
       </div>

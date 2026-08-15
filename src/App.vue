@@ -1192,7 +1192,6 @@ html { overflow-x: hidden; }
   text-align: center;
   padding: 4rem 2rem;
 }
-.list-empty-icon { font-size: 2.6rem; display: block; margin-bottom: 14px; opacity: 0.5; }
 .list-empty-title { font-size: 1.05rem; color: #fff; font-weight: 600; margin: 0 0 6px; }
 .list-empty-sub { font-size: 0.9rem; color: #8e8e93; margin: 0; line-height: 1.5; }
 

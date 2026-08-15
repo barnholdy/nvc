@@ -27,7 +27,6 @@
       </div>
 
       <div v-if="!tileSections.length && !practiseSection && !trendRows.length" class="list-empty">
-        <span class="list-empty-icon">✅</span>
         <p class="list-empty-title">Nichts offen</p>
         <p class="list-empty-sub">Lege eine Situation an, wenn dir etwas begegnet.</p>
       </div>
