@@ -85,6 +85,9 @@
         <p v-if="stageLabel(s.stage)" class="aff-label">{{ stageLabel(s.stage) }}</p>
         <p class="aff-text">„{{ s.text }}“</p>
       </div>
+      <!-- How to tell which of them is yours — instruction, not a candidate,
+           so it sits outside the list rather than in it. -->
+      <p v-if="checkHint" class="wizard-note">{{ checkHint }}</p>
     </template>
 
     <!-- Only meaningful once there is a sentence to read aloud -->
@@ -147,24 +150,34 @@ function stageMix(credibility) {
   const c = Math.round(credibility);
   if (c >= 8) return [4, 4, 2, 0];
   if (c >= 6) return [2, 4, 3, 1];
-  if (c >= 3) return [1, 3, 4, 2];
+  if (c >= 4) return [1, 3, 4, 2];
   return [0, 2, 4, 4];
 }
+
+// The closing line is instruction, not a sentence to adopt, so it is pulled
+// out rather than offered as an eleventh suggestion.
+const CHECK_LINE = /^["„]?Prüfung:\s*/i;
 
 // "1. Ich merke, dass… (2)" → { text, stage }. A line the model numbered or
 // annotated differently still yields its sentence rather than being dropped.
 function parseSuggestions(reply) {
-  return String(reply || '')
+  const lines = String(reply || '')
     .split('\n')
     .map(s => s.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const m = line.match(/^\d+[.)]?\s*(.+?)\s*\((\d)\)$/);
-      if (m) return { text: m[1].trim(), stage: Number(m[2]) };
-      return { text: line.replace(/^\d+[.)]\s*/, '').trim(), stage: null };
-    })
-    .filter(s => s.text)
-    .slice(0, SUGGESTION_COUNT);
+    .filter(Boolean);
+  const checkLine = lines.find(l => CHECK_LINE.test(l)) || '';
+  return {
+    check: checkLine.replace(CHECK_LINE, '').replace(/["“]$/, '').trim(),
+    suggestions: lines
+      .filter(l => !CHECK_LINE.test(l))
+      .map((line) => {
+        const m = line.match(/^\d+[.)]?\s*(.+?)\s*\((\d)\)$/);
+        if (m) return { text: m[1].trim(), stage: Number(m[2]) };
+        return { text: line.replace(/^\d+[.)]\s*/, '').trim(), stage: null };
+      })
+      .filter(s => s.text)
+      .slice(0, SUGGESTION_COUNT),
+  };
 }
 
 export default {
@@ -210,6 +223,8 @@ export default {
       count: initial.length ? initial[0].count : 1,
       truth: normalizeTruth(initial.length ? initial[0].resonance : undefined),
       suggestions: [],
+      // The closing line the model returns after the list.
+      checkHint: '',
       isLoading: false,
       errorMsg: '',
       showApiKeyInput: false,
@@ -291,15 +306,31 @@ export default {
         '(3) Erfahrungsnah – stützt sich direkt auf meine genannten Ausnahmen',
         '(4) Fest – die neue Überzeugung als klare Aussage',
         '',
-        'GEWICHTUNG',
-        'Je glaubwürdiger der alte Satz noch ist, desto mehr Sätze der niedrigen Stufen.',
-        'Verteile die ' + SUGGESTION_COUNT + ' Sätze genau so: '
+        'GEWICHTUNG NACH GLAUBWÜRDIGKEIT',
+        'Je höher die Glaubwürdigkeit des alten Satzes, desto mehr Sätze der',
+        'niedrigen Stufen. Verteile die ' + SUGGESTION_COUNT + ' Sätze genau so: '
           + mix[0] + '× Stufe 1, ' + mix[1] + '× Stufe 2, '
           + mix[2] + '× Stufe 3, ' + mix[3] + '× Stufe 4.',
         '',
+        'REGELN',
+        '- Kurz. Maximal 15 Wörter pro Satz.',
+        '- Keine Umkehrung ins Gegenteil, keine Superlative, keine Selbstlob-Formeln.',
+        '- Mindestens 3 Sätze müssen konkret an meine genannten Ausnahmen anknüpfen.',
+        '- Mindestens 1 Satz greift das genannte Bedürfnis auf.',
+        '- Mindestens 1 Satz adressiert die alte Reaktion und die neue.',
+        '- Der Ursprung darf einordnen ("das war einmal nötig"), aber du deutest',
+        '  nichts hinein, was ich nicht geschrieben habe.',
+        '- Keine Wiederholungen und keine bloßen Umformulierungen desselben Satzes.',
+        '- Keine Beschwichtigung, kein Zuspruch, keine Einleitung, kein Fazit.',
+        '- Antworte auf Deutsch. Nur die Liste.',
+        '',
         'FORMAT',
         'Eine Zeile pro Satz, exakt so: 1. <Satz> (<Stufe>)',
-        'Keine Einleitung, keine Überschriften, keine Leerzeilen, kein weiterer Text.',
+        '',
+        'ABSCHLUSS',
+        'Nach der Liste genau eine Zeile:',
+        '"Prüfung: Sag den Satz laut. Kalt = zu abstrakt. Sofortiges Nein = eine',
+        'Stufe tiefer. Leichtes Zögern = richtig."',
       );
       return lines.join('\n');
     },
@@ -311,6 +342,7 @@ export default {
       this.isLoading = true;
       this.errorMsg = '';
       this.suggestions = [];
+      this.checkHint = '';
       try {
         const res = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
@@ -332,7 +364,9 @@ export default {
           throw new Error((err.error && err.error.message) || `Fehler ${res.status}`);
         }
         const data = await res.json();
-        this.suggestions = parseSuggestions(data.content[0].text);
+        const parsed = parseSuggestions(data.content[0].text);
+        this.suggestions = parsed.suggestions;
+        this.checkHint = parsed.check;
       } catch (e) {
         this.errorMsg = e.message || 'Vorschläge konnten nicht geladen werden.';
       } finally {
