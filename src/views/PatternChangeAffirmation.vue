@@ -72,15 +72,18 @@
       <p v-if="errorMsg" class="wizard-note error-text">{{ errorMsg }}</p>
     </div>
 
+    <!-- Ordered from tentative to settled: the first ones claim least, and
+         how far down the list you can go says where you actually stand. -->
     <template v-if="suggestions.length">
       <p class="wizard-note">Tippe auf einen Vorschlag, um ihn zu übernehmen:</p>
       <div
         v-for="(s, i) in suggestions"
         :key="i"
         class="aff-box aff-pick"
-        @click="use(s)"
+        @click="use(s.text)"
       >
-        <p class="aff-text">„{{ s }}“</p>
+        <p v-if="stageLabel(s.stage)" class="aff-label">{{ stageLabel(s.stage) }}</p>
+        <p class="aff-text">„{{ s.text }}“</p>
       </div>
     </template>
 
@@ -126,11 +129,56 @@ import InputCard from '@/components/InputCard.vue';
 import MeterCard from '@/components/MeterCard.vue';
 import { normalizeTruth, truthHint } from '@/utils/affirmationTruth';
 
+// Four ways to say the same thing, from tentative to settled. A sentence that
+// claims more than someone can currently believe gets rejected on sight, so
+// the mix is weighted by how hard the old belief is still held: the more
+// credible it still is, the more the suggestions stay near the tentative end.
+const STAGE_LABELS = {
+  1: 'Tastend',
+  2: 'Differenzierend',
+  3: 'Erfahrungsnah',
+  4: 'Fest',
+};
+const SUGGESTION_COUNT = 10;
+
+// Each row sums to SUGGESTION_COUNT: stage 1, 2, 3, 4.
+function stageMix(credibility) {
+  if (credibility === null || credibility === undefined) return [1, 3, 4, 2];
+  const c = Math.round(credibility);
+  if (c >= 8) return [4, 4, 2, 0];
+  if (c >= 6) return [2, 4, 3, 1];
+  if (c >= 3) return [1, 3, 4, 2];
+  return [0, 2, 4, 4];
+}
+
+// "1. Ich merke, dass… (2)" → { text, stage }. A line the model numbered or
+// annotated differently still yields its sentence rather than being dropped.
+function parseSuggestions(reply) {
+  return String(reply || '')
+    .split('\n')
+    .map(s => s.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const m = line.match(/^\d+[.)]?\s*(.+?)\s*\((\d)\)$/);
+      if (m) return { text: m[1].trim(), stage: Number(m[2]) };
+      return { text: line.replace(/^\d+[.)]\s*/, '').trim(), stage: null };
+    })
+    .filter(s => s.text)
+    .slice(0, SUGGESTION_COUNT);
+}
+
 export default {
   name: 'pattern-change-affirmation',
   components: { WizardContext, FeelingWords, NeedWords, InputCard, MeterCard },
   props: {
     belief: { type: String, default: '' },
+    // Everything the suggestion prompt reads the old belief from: how hard it
+    // is still held, what it does, where it came from and what it felt like.
+    // Null credibility means nothing was ever rated.
+    credibility: { type: Number, default: null },
+    reaction: { type: String, default: '' },
+    origin: { type: String, default: '' },
+    originFeelings: { type: Array, default: function() { return []; } },
     // Written in the wizard's first step, carried forward as context.
     exceptions: { type: String, default: '' },
     withoutBelief: { type: String, default: '' },
@@ -196,6 +244,9 @@ export default {
     use(text) {
       this.text = text;
     },
+    // Blank for a line the model annotated in some other way — the sentence
+    // still stands on its own.
+    stageLabel(stage) { return STAGE_LABELS[stage] || ''; },
     saveApiKey() {
       this.apiKey = this.apiKeyInput;
       localStorage.setItem('nvc.apiKey', this.apiKey);
@@ -204,15 +255,52 @@ export default {
       this.generateSuggestions();
     },
     buildSuggestionsPrompt() {
-      var lines = ['Du hilfst dabei, positive Affirmationen zu formulieren.'];
-      if (this.withoutBelief) {
-        lines.push('Neue Reaktion: "' + this.withoutBelief + '"');
-      } else {
-        lines.push('Glaubenssatz: "' + this.belief + '"');
+      const names = list => (list || []).map(x => x && x.name).filter(Boolean).join(', ');
+      const mix = stageMix(this.credibility);
+      const lines = [
+        'ROLLE',
+        'Du generierst Alternativsätze zu einer Kernüberzeugung, nach dem Modell der',
+        'Schematherapie (Young). Du bist kein Therapeut, diagnostizierst nicht und',
+        'deutest nichts über das Eingegebene hinaus.',
+        '',
+        'INPUT',
+        '- Überzeugung: "' + this.belief + '"',
+      ];
+      // Only what was actually filled in: an empty label invites the model to
+      // invent something to fill it.
+      if (this.credibility !== null && this.credibility !== undefined) {
+        lines.push('- Glaubwürdigkeit: ' + Math.round(this.credibility) + ' von 10');
       }
-      var feelingNames = (this.withoutBeliefFeelings || []).map(function(f) { return f.name; }).join(', ');
-      if (feelingNames) lines.push('Gefühle dabei: ' + feelingNames);
-      lines.push('Generiere genau 5 kurze positive Affirmationen (je max. 12 Wörter) als Ich-Aussagen im Präsens. Inspirierend, konkret, auf die neue Reaktion bezogen.\nNur die 5 Sätze, einer pro Zeile, ohne Nummerierung.');
+      if (this.reaction) lines.push('- Reaktion: "' + this.reaction + '"');
+      if (this.origin) lines.push('- Ursprung: "' + this.origin + '"');
+      if (names(this.originFeelings)) lines.push('- Gefühle dabei: ' + names(this.originFeelings));
+      if (names(this.needs)) lines.push('- Bedürfnisse: ' + names(this.needs));
+      if (this.exceptions) lines.push('- Ausnahmen: "' + this.exceptions + '"');
+      if (this.withoutBelief) lines.push('- Neue Reaktion: "' + this.withoutBelief + '"');
+      if (names(this.withoutBeliefFeelings)) {
+        lines.push('- Gefühle dabei: ' + names(this.withoutBeliefFeelings));
+      }
+      lines.push(
+        '',
+        'OUTPUT',
+        'Genau ' + SUGGESTION_COUNT + ' Sätze in Ich-Form, nummeriert, mit Stufenangabe in Klammern.',
+        '',
+        'Die 4 Stufen:',
+        '(1) Tastend – benennt das Muster, behauptet nichts. "Ich merke, dass…", "Ich prüfe, ob…"',
+        '(2) Differenzierend – trennt die verkoppelten Konzepte voneinander',
+        '(3) Erfahrungsnah – stützt sich direkt auf meine genannten Ausnahmen',
+        '(4) Fest – die neue Überzeugung als klare Aussage',
+        '',
+        'GEWICHTUNG',
+        'Je glaubwürdiger der alte Satz noch ist, desto mehr Sätze der niedrigen Stufen.',
+        'Verteile die ' + SUGGESTION_COUNT + ' Sätze genau so: '
+          + mix[0] + '× Stufe 1, ' + mix[1] + '× Stufe 2, '
+          + mix[2] + '× Stufe 3, ' + mix[3] + '× Stufe 4.',
+        '',
+        'FORMAT',
+        'Eine Zeile pro Satz, exakt so: 1. <Satz> (<Stufe>)',
+        'Keine Einleitung, keine Überschriften, keine Leerzeilen, kein weiterer Text.',
+      );
       return lines.join('\n');
     },
     async generateSuggestions() {
@@ -234,7 +322,8 @@ export default {
           },
           body: JSON.stringify({
             model: 'claude-haiku-4-5-20251001',
-            max_tokens: 300,
+            // Ten German sentences plus their numbering and stage marks.
+            max_tokens: 1000,
             messages: [{ role: 'user', content: this.buildSuggestionsPrompt() }],
           }),
         });
@@ -243,11 +332,7 @@ export default {
           throw new Error((err.error && err.error.message) || `Fehler ${res.status}`);
         }
         const data = await res.json();
-        this.suggestions = data.content[0].text
-          .split('\n')
-          .map(s => s.trim())
-          .filter(s => s.length > 0)
-          .slice(0, 5);
+        this.suggestions = parseSuggestions(data.content[0].text);
       } catch (e) {
         this.errorMsg = e.message || 'Vorschläge konnten nicht geladen werden.';
       } finally {

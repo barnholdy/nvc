@@ -1,6 +1,6 @@
 <template>
   <div>
-    <wizard-context :quote="belief.belief" :credibility="beliefTruth"></wizard-context>
+    <journal-context :belief="belief" :patterns="patterns" :allBeliefs="allBeliefs"></journal-context>
 
     <p class="wizard-question">Gibt es ein „Ja, aber“?</p>
     <p class="wizard-body">Platz für den Einwand, der sofort dagegenhält — er gehört dazu, muss dich aber nicht aufhalten.</p>
@@ -17,25 +17,20 @@
 </template>
 
 <script>
-import WizardContext from '@/components/WizardContext.vue';
+import JournalContext from '@/components/JournalContext.vue';
 import InputCard from '@/components/InputCard.vue';
-import { beliefCredibility } from '@/utils/credibility';
 
 export default {
   name: 'journal-add-note',
-  components: { WizardContext, InputCard },
+  components: { JournalContext, InputCard },
   props: {
     belief: { type: Object, required: true },
     patterns: { type: Array, default: () => [] },
+    allBeliefs: { type: Array, default: () => [] },
     initialValue: { type: String, default: '' },
   },
   data() {
     return { text: this.initialValue };
-  },
-  computed: {
-    beliefTruth() {
-      return beliefCredibility(this.patterns, this.belief);
-    },
   },
   watch: {
     text(val) { this.$emit('changed', val); },

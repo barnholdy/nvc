@@ -55,6 +55,10 @@
         <pattern-change-affirmation
           v-show="step === 4"
           :belief="entry ? entry.belief : ''"
+          :credibility="situationTruth"
+          :reaction="entry ? entry.withBelief || '' : ''"
+          :origin="entry && entry.reflection ? entry.reflection.origin || '' : ''"
+          :originFeelings="entry && entry.feelings ? entry.feelings : []"
           :exceptions="exceptions"
           :withoutBelief="withoutBelief"
           :withoutBeliefFeelings="withoutBeliefFeelings"

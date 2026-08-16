@@ -1,6 +1,6 @@
 <template>
   <div>
-    <wizard-context :quote="belief.belief" :credibility="beliefTruth"></wizard-context>
+    <journal-context :belief="belief" :patterns="patterns" :allBeliefs="allBeliefs"></journal-context>
 
     <p class="wizard-question">Passt es zur alten oder zur neuen Überzeugung?</p>
     <p class="wizard-body">Wozu passt dieses Beispiel besser?</p>
@@ -36,18 +36,18 @@
 </template>
 
 <script>
-import WizardContext from '@/components/WizardContext.vue';
+import JournalContext from '@/components/JournalContext.vue';
 import MeterCard from '@/components/MeterCard.vue';
-import { beliefCredibility } from '@/utils/credibility';
 
 const DEFAULT_CREDIBILITY = 5;
 
 export default {
   name: 'journal-add-fit',
-  components: { WizardContext, MeterCard },
+  components: { JournalContext, MeterCard },
   props: {
     belief: { type: Object, required: true },
     patterns: { type: Array, default: () => [] },
+    allBeliefs: { type: Array, default: () => [] },
     initialFit: { type: String, default: '' },
     initialCredibility: { type: Number, default: null },
   },
@@ -60,9 +60,6 @@ export default {
     };
   },
   computed: {
-    beliefTruth() {
-      return beliefCredibility(this.patterns, this.belief);
-    },
     affirmationText() {
       return (this.belief.affirmations || []).map(a => a && a.text).filter(Boolean).join(' · ');
     },

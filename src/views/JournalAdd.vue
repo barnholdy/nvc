@@ -20,6 +20,7 @@
           v-show="step === 2"
           :belief="belief"
           :patterns="allPatterns"
+          :allBeliefs="allBeliefs"
           :initialValue="fact"
           @changed="fact = $event">
         </journal-add-fact>
@@ -29,6 +30,7 @@
           v-show="step === 3"
           :belief="belief"
           :patterns="allPatterns"
+          :allBeliefs="allBeliefs"
           :fact="fact"
           :initialValue="meaning"
           @changed="meaning = $event">
@@ -39,6 +41,7 @@
           v-show="step === 4"
           :belief="belief"
           :patterns="allPatterns"
+          :allBeliefs="allBeliefs"
           :initialFit="fit"
           :initialCredibility="credibility"
           @changed="onFitChanged">
@@ -49,6 +52,7 @@
           v-show="step === 5"
           :belief="belief"
           :patterns="allPatterns"
+          :allBeliefs="allBeliefs"
           :initialValue="note"
           @changed="note = $event">
         </journal-add-note>
