@@ -315,6 +315,9 @@
       <v-btn flat color="primary" to="/actions">
         <nav-icon name="actions"></nav-icon>
       </v-btn>
+      <v-btn flat color="grey" to="/journal">
+        <nav-icon name="journal"></nav-icon>
+      </v-btn>
     </v-bottom-nav>
   </div>
 </template>

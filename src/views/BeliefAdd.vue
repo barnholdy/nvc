@@ -17,7 +17,9 @@
           v-show="step === 2"
           :belief="belief"
           :initialValue="withBelief"
-          @changed="withBelief = $event">
+          :initialCoping="coping"
+          @changed="withBelief = $event"
+          @copingChanged="coping = $event">
         </belief-add-reaction>
 
         <belief-add-arrive
@@ -162,6 +164,7 @@ export default {
       selectedFeelings: editEntry ? editEntry.feelings || [] : [],
       selectedNeeds: editEntry ? editEntry.needs || [] : [],
       withBelief: editEntry ? editEntry.withBelief || '' : '',
+      coping: editEntry ? editEntry.coping || '' : '',
       origin: reflection.origin || '',
       grounding: arc.grounding,
       mood: arc.mood,
@@ -242,6 +245,7 @@ export default {
         belief: this.belief,
         feelings: this.selectedFeelings,
         withBelief: this.withBelief,
+        coping: this.coping,
         // The need belongs to the origin phase now and is dropped with it.
         needs: withOrigin ? this.selectedNeeds : this.storedNeeds,
         // Generated inside the origin phase, so it is kept with it.

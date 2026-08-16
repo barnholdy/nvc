@@ -5,11 +5,11 @@
 </template>
 
 <script>
-// The bottom bar wants four icons the Material Icons font does not have, so
-// these four come from Material Design Icons as bare path data — four strings
-// rather than another font file.
+// The bottom bar wants icons the Material Icons font does not have, so these
+// come from Material Design Icons as bare path data — strings rather than
+// another font file.
 import {
-  mdiViewDashboard, mdiHistory, mdiVanish, mdiFlask,
+  mdiViewDashboard, mdiHistory, mdiVanish, mdiFlask, mdiBookOpenPageVariant,
 } from '@mdi/js';
 
 const PATHS = {
@@ -17,6 +17,7 @@ const PATHS = {
   patterns: mdiHistory,
   beliefs: mdiVanish,
   actions: mdiFlask,
+  journal: mdiBookOpenPageVariant,
 };
 
 export default {

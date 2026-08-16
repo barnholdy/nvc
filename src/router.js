@@ -75,6 +75,21 @@ export default new Router({
       name: 'settings',
       component: () => import('./views/SettingsView.vue'),
     },
+    {
+      path: '/journal',
+      name: 'journal',
+      component: () => import('./views/JournalList.vue'),
+    },
+    {
+      path: '/add-journal',
+      name: 'add-journal',
+      component: () => import('./views/JournalAdd.vue'),
+    },
+    {
+      path: '/edit-journal/:time',
+      name: 'edit-journal',
+      component: () => import('./views/JournalAdd.vue'),
+    },
     { path: '*', redirect: '/now' },
   ],
   scrollBehavior() {

@@ -157,6 +157,7 @@ export default {
       const data = {
         patterns: this.$store.getters.patterns,
         beliefs: this.$store.getters.beliefs,
+        journal: this.$store.getters.journal,
         amen: tryParse('nvc.amen') || {},
         globalEmpathy: tryParse('nvc.globalEmpathy'),
         affirmationStatus: tryParse('nvc.affirmationStatus') || {},
@@ -195,6 +196,7 @@ export default {
           }
           localStorage.setItem('nvc.patterns', JSON.stringify(data.patterns));
           localStorage.setItem('nvc.beliefs', JSON.stringify(data.beliefs));
+          if (Array.isArray(data.journal)) localStorage.setItem('nvc.journal', JSON.stringify(data.journal));
           if (data.amen) localStorage.setItem('nvc.amen', JSON.stringify(data.amen));
           if (data.globalEmpathy) localStorage.setItem('nvc.globalEmpathy', JSON.stringify(data.globalEmpathy));
           if (data.affirmationStatus) localStorage.setItem('nvc.affirmationStatus', JSON.stringify(data.affirmationStatus));
@@ -207,6 +209,7 @@ export default {
           // backup put un-migrated data straight into the running app.
           this.$store.dispatch('loadPatterns');
           this.$store.dispatch('loadBeliefs');
+          this.$store.dispatch('loadJournal');
           this.importSuccess = true;
         } catch (err) {
           this.importError = 'Datei konnte nicht gelesen werden.';
@@ -228,8 +231,10 @@ export default {
       this.showResetDialog = false;
       this.$store.commit('setPatterns', []);
       this.$store.commit('setBeliefs', []);
+      this.$store.commit('setJournal', []);
       localStorage.removeItem('nvc.patterns');
       localStorage.removeItem('nvc.beliefs');
+      localStorage.removeItem('nvc.journal');
       localStorage.removeItem('nvc.globalEmpathy');
       localStorage.removeItem('nvc.amen');
       localStorage.removeItem('nvc.onboarded');
