@@ -5,7 +5,7 @@
     <wizard-context label="Situation" :quote="trigger"></wizard-context>
 
     <p class="wizard-question">Welche Überzeugungen stecken dahinter?</p>
-    <p class="wizard-body">Welche tiefer liegenden Überzeugungen sind damit verbunden?</p>
+    <p class="wizard-body">Welche tiefer liegenden Überzeugungen sind damit verbunden? Sie wird in der Regel beim Aussprechen eine Emotion auslösen. Schreibe in Ich-Form.</p>
 
     <!-- Writing a new one is the answer to the question above, so it sits
          directly under it rather than below the list of existing ones. -->
