@@ -26,44 +26,24 @@
         <v-icon class="detail-chevron">chevron_right</v-icon>
       </div>
 
-      <div v-if="!tileSections.length && !practiseSection && !trendRows.length" class="list-empty">
+      <!-- A pause before the lists below ask anything of you. -->
+      <p class="section-head">Komme an</p>
+      <breath-circle></breath-circle>
+
+      <div v-if="!topTileSection && !practiseSection && !trendRows.length" class="list-empty">
         <p class="list-empty-title">Nichts offen</p>
         <p class="list-empty-sub">Lege eine Situation an, wenn dir etwas begegnet.</p>
       </div>
 
-      <!-- What to do next, first. Five kinds of next step, as count tiles:
-           which belief or action to work on is picked in the list the tile
-           opens, not previewed here. -->
-      <template v-if="tileSections.length">
-        <p class="section-head">Handlungen &amp; Überzeugungen</p>
-        <div class="tile-grid">
-          <div
-            v-for="section in tileSections"
-            :key="section.key"
-            class="tile-card"
-            @click="section.more()"
-          >
-            <div class="tile-top">
-              <p class="tile-label">{{ section.tileLabel }}</p>
-              <v-icon class="detail-chevron">chevron_right</v-icon>
-            </div>
-            <p class="tile-count">
-              <span class="tile-number">{{ section.count }}</span>
-              <span class="tile-action">{{ section.action }}</span>
-            </p>
-          </div>
-        </div>
-      </template>
-
-      <!-- Affirmations stay a pick-one grid: which sentence to say again is
-           the point, not just how many there are. -->
+      <!-- Affirmations first: saying one again is the lightest next step, and
+           just the one that has waited longest, not a grid to choose from. -->
       <template v-if="practiseSection">
-        <p class="section-head">{{ practiseSection.count }} {{ practiseSection.title }}</p>
+        <p class="section-head">{{ practiseSection.title }}</p>
         <div class="practise-grid">
           <div
             v-for="item in practiseSection.items"
             :key="item.key"
-            class="card practise-card"
+            class="card practise-card practise-card-wide"
             @click="practiseSection.run(item)"
           >
             <p class="practise-title">{{ item.text }}</p>
@@ -83,6 +63,29 @@
         >
           <span>{{ practiseSection.count - practiseSection.top }} weitere anzeigen</span>
           <v-icon class="detail-chevron">chevron_right</v-icon>
+        </div>
+      </template>
+
+      <!-- What to do next otherwise — just the one nearest step, not all five
+           at once: whichever kind comes first in the section order below.
+           Which belief or action to work on is picked in the list the tile
+           opens, not previewed here. -->
+      <template v-if="topTileSection">
+        <p class="section-head">Handlungen &amp; Überzeugungen</p>
+        <div class="tile-grid">
+          <div
+            class="tile-card tile-card-wide"
+            @click="topTileSection.more()"
+          >
+            <div class="tile-top">
+              <p class="tile-label">{{ topTileSection.tileLabel }}</p>
+              <v-icon class="detail-chevron">chevron_right</v-icon>
+            </div>
+            <p class="tile-count">
+              <span class="tile-number">{{ topTileSection.count }}</span>
+              <span class="tile-action">{{ topTileSection.action }}</span>
+            </p>
+          </div>
         </div>
       </template>
 
@@ -163,7 +166,7 @@ import {
   experimentState,
 } from '@/utils/experiment';
 import {
-  affirmationCredibility, beliefCredibility, beliefRows, affirmationRows,
+  beliefCredibility, beliefRows, affirmationRows,
 } from '@/utils/credibility';
 import { mdiLightningBolt } from '@mdi/js';
 import NavIcon from '@/components/NavIcon.vue';
@@ -171,12 +174,11 @@ import TrendChart from '@/components/TrendChart.vue';
 import ProfileStats from '@/components/ProfileStats.vue';
 import PatternGroups from '@/components/PatternGroups.vue';
 import EmpathyBlock from '@/components/EmpathyBlock.vue';
+import BreathCircle from '@/components/BreathCircle.vue';
 
 // The rest is one tap away in the list that owns it. The five belief and
-// action blocks are count tiles now — a number and a verb, no item to slice.
-// Affirmations stay a grid to pick from: four fills it before "more" is
-// offered.
-const TOP = 4;
+// action blocks, and the affirmation to practise, are all narrowed to just
+// the one nearest thing now — a single next step, not a list to choose from.
 const ONE = 1;
 const PRACTICE_KEY = 'nvc.amen';
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -192,7 +194,7 @@ function readPractised() {
 export default {
   name: 'now-view',
   components: {
-    AffirmationPractice, NavIcon, TrendChart, ProfileStats, PatternGroups, EmpathyBlock,
+    AffirmationPractice, NavIcon, TrendChart, ProfileStats, PatternGroups, EmpathyBlock, BreathCircle,
   },
   data() {
     return {
@@ -225,7 +227,7 @@ export default {
       return out;
     },
     // Every sentence that exists, least believed first — the one you believe
-    // least is the one most worth saying again.
+    // least recently said is the one most worth saying again.
     // Only from beliefs that have actually been transformed: an affirmation
     // written earlier in the process belongs to the wandeln wizard that wrote
     // it, not to this list of sentences worth practising.
@@ -238,14 +240,14 @@ export default {
             text: a.text,
             feelings: ((b.reflection || {}).withoutBeliefFeelings) || [],
             needs: b.needs || [],
-            credibility: affirmationCredibility(this.beliefs, a.text),
           };
         });
       });
+      // Never practised sorts first — longer ago than any real gap could be.
       return Object.values(map).sort((a, b) => {
-        const ca = a.credibility === null ? Infinity : a.credibility;
-        const cb = b.credibility === null ? Infinity : b.credibility;
-        return ca - cb;
+        const la = this.practised[a.text] || 0;
+        const lb = this.practised[b.text] || 0;
+        return la - lb;
       });
     },
     // Nothing to show until something has been rated twice; one reading is a
@@ -379,8 +381,8 @@ export default {
         },
         {
           key: 'practise',
-          top: TOP,
-          title: this.affirmations.length === 1 ? 'Affirmation üben' : 'Affirmationen üben',
+          top: ONE,
+          title: 'Affirmation üben',
           action: 'Üben',
           count: this.affirmations.length,
           items: this.affirmations.map(affirmation),
@@ -415,9 +417,14 @@ export default {
         .filter(x => x.count > 0)
         .map(x => Object.assign({}, x, { items: x.items.slice(0, x.top) }));
     },
-    // The five belief and action blocks, rendered as tiles.
+    // The five belief and action blocks, in the order above.
     tileSections() {
       return this.sections.filter(s => s.key !== 'practise');
+    },
+    // Only the nearest one is shown — the first that actually has something
+    // in it, in that same order.
+    topTileSection() {
+      return this.tileSections[0] || null;
     },
     // Affirmations, rendered as a grid — kept apart because picking which
     // sentence to say again is the point, not a count.
@@ -519,6 +526,9 @@ export default {
      second column off the screen. */
   min-width: 0;
 }
+/* Only one tile shows now, so it takes the row the grid would otherwise
+   split between two — same padding and line-heights, just the full width. */
+.tile-card-wide { grid-column: 1 / -1; }
 .tile-top {
   display: flex;
   align-items: flex-start;
@@ -554,13 +564,15 @@ export default {
   font-weight: 500;
 }
 
-/* Two-column affirmation cards: quote, last-practised line, Üben button. */
+/* Card grid the tiles above also use — only one affirmation ever lands in
+   it now, so it always takes the full width. */
 .practise-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin: 0 14px 4px;
 }
+.practise-card-wide { grid-column: 1 / -1; }
 .practise-card {
   margin: 0;
   min-width: 0;
