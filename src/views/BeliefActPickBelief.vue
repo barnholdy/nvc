@@ -39,6 +39,7 @@ export default {
   props: {
     beliefs: { type: Array, default: () => [] },
     patterns: { type: Array, default: () => [] },
+    journal: { type: Array, default: () => [] },
     initialValue: { type: Number, default: null },
   },
   data() {
@@ -46,7 +47,7 @@ export default {
   },
   methods: {
     credibility(belief) {
-      return beliefCredibility(this.patterns, belief);
+      return beliefCredibility(this.patterns, belief, this.journal);
     },
     // One decimal, German comma — the same rounding the list cards use.
     round(v) { return String(Math.round(v * 10) / 10).replace('.', ','); },

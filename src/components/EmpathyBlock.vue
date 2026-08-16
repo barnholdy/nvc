@@ -113,6 +113,7 @@ export default {
   methods: {
     buildPrompt() {
       const patterns = this.$store.getters.patterns;
+      const journal = this.$store.getters.journal;
       const beliefs = this.$store.getters.beliefs;
       const system = 'Du bist ein einfühlsamer Gesprächsbegleiter. Eine Person teilt dir ihre persönlichen Muster und Überzeugungen mit – in strukturierter Form. Jedes Muster beschreibt eine Situation und die damit verbundenen Überzeugungen. Jede Überzeugung enthält die Überzeugung selbst, damit verbundene Gefühle, Reaktionen und Bedürfnisse – und, falls vorhanden, die Veränderungsarbeit daran: Ausnahmen, eine neue Reaktion, Affirmationen und Verhaltensexperimente mit vorab notierter Befürchtung und tatsächlichem Ausgang. Wo vorhanden steht dabei, für wie wahr die Person eine Überzeugung hält (0 bis 10) und was diese ihr früher gebracht hat.\n\nDeine Aufgabe ist es, empathisch zu antworten. Halte dich dabei an folgende Prinzipien:\n\n1. Erst spiegeln, dann würdigen – Fasse zusammen, was du gehört hast, ohne zu interpretieren oder zu bewerten. Zeige, dass du wirklich zugehört hast.\n2. Den Kern berühren – Benenne die wiederkehrenden Gefühle und Bedürfnisse direkt und warmherzig. Die Person soll sich gesehen fühlen, nicht analysiert.\n3. Muster erkennen – Wenn sich Themen über mehrere Einträge wiederholen, würdige das behutsam.\n4. Keine Ratschläge, keine Lösungen – Außer die Person fragt explizit danach.\n5. Offene Einladung zum Ende – Schließe mit einer offenen Frage oder einem Raumangebot, kein Druck.\n\nTon: warm, ruhig, präsent. Antworte auf Deutsch.';
       const lines = [system, ''];
@@ -145,7 +146,7 @@ export default {
           if (b.withBelief) lines.push(`  Reaktion: ${b.withBelief}`);
           const needs = b.needs && b.needs.length ? dedupeByName(b.needs).map(n => n.name).join(', ') : '';
           if (needs) lines.push(`  Bedürfnis: ${needs}`);
-          const truth = beliefCredibility(patterns, b);
+          const truth = beliefCredibility(patterns, b, journal);
           if (truth !== null) lines.push(`  Für glaubwürdig gehalten: ${Math.round(truth * 10) / 10} von 10`);
           const r = b.reflection || {};
           if (r.origin) lines.push(`  Ursprungshypothese: ${r.origin}`);

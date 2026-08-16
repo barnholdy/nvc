@@ -10,6 +10,7 @@
           v-show="step === 1"
           :beliefs="allBeliefs"
           :patterns="allPatterns"
+          :journal="allJournal"
           :initialValue="beliefTime"
           @changed="beliefTime = $event">
         </belief-act-pick-belief>
@@ -19,6 +20,7 @@
           :entry="entry"
           :situations="situations"
           :patterns="allPatterns"
+          :journal="allJournal"
           :allBeliefs="everyBelief"
           :initialValue="experiment.situation"
           @changed="experiment.situation = $event">
@@ -100,11 +102,12 @@ export default {
     // present one is the one worth testing next.
     allBeliefs() {
       const patterns = this.$store.getters.patterns;
+      const journal = this.$store.getters.journal;
       return this.$store.getters.beliefs
         .filter(b => ACTIONABLE_STATUSES.indexOf(beliefStatus(b)) !== -1)
         .map(b => ({
           belief: b,
-          credibility: beliefCredibility(patterns, b),
+          credibility: beliefCredibility(patterns, b, journal),
           situations: situationsForBelief(patterns, b.time).length,
         }))
         .sort((x, y) => {
@@ -127,6 +130,9 @@ export default {
     // The pick step reads credibility and situation counts off these.
     allPatterns() {
       return this.$store.getters.patterns;
+    },
+    allJournal() {
+      return this.$store.getters.journal;
     },
     // Unfiltered, unlike allBeliefs above: the suggestion prompt needs every
     // action that already exists, wherever it sits, so none is proposed twice.

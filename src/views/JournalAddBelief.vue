@@ -36,6 +36,7 @@ export default {
   props: {
     allBeliefs: { type: Array, default: () => [] },
     patterns: { type: Array, default: () => [] },
+    journal: { type: Array, default: () => [] },
     initialValue: { type: Number, default: null },
   },
   data() {
@@ -49,7 +50,7 @@ export default {
   },
   methods: {
     credibility(belief) {
-      return beliefCredibility(this.patterns, belief);
+      return beliefCredibility(this.patterns, belief, this.journal);
     },
     round(v) { return String(Math.round(v * 10) / 10).replace('.', ','); },
     affirmationOf(belief) {

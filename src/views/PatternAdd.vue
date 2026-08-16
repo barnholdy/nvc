@@ -17,6 +17,7 @@
         v-show="step === 2"
         :allBeliefs="allBeliefs"
         :patterns="allPatterns"
+        :journal="allJournal"
         :selectedBeliefIds="selectedBeliefIds"
         :initialTruths="beliefTruths"
         :trigger="trigger"
@@ -73,6 +74,9 @@ export default {
     // belief cards do.
     allPatterns() {
       return this.$store.getters.patterns;
+    },
+    allJournal() {
+      return this.$store.getters.journal;
     },
     isStepComplete() {
       if (this.step === 1) return this.trigger.trim() !== '';

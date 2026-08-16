@@ -127,6 +127,7 @@ export default {
     // For the credibility shown on "schon erfasste" beliefs — the same
     // average the belief cards show, not a rating taken here.
     patterns: { type: Array, default: function() { return []; } },
+    journal: { type: Array, default: function() { return []; } },
     selectedBeliefIds: { type: Array, default: function() { return []; } },
     initialTruths: { type: Object, default: function() { return {}; } },
     trigger: { type: String, default: '' },
@@ -175,7 +176,7 @@ export default {
     },
   },
   methods: {
-    credibilityOf(belief) { return beliefCredibility(this.patterns, belief); },
+    credibilityOf(belief) { return beliefCredibility(this.patterns, belief, this.journal); },
     round(v) { return String(Math.round(v * 10) / 10).replace('.', ','); },
     // The rating belongs to this situation, not to the belief: the same belief
     // rated again later is what makes a trend.

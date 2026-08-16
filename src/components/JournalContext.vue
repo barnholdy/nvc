@@ -37,10 +37,11 @@ export default {
     // Every belief, because an affirmation's standing is averaged across all
     // of them — the same sentence can sit on more than one.
     allBeliefs: { type: Array, default: () => [] },
+    journal: { type: Array, default: () => [] },
   },
   computed: {
     beliefTruth() {
-      return beliefCredibility(this.patterns, this.belief);
+      return beliefCredibility(this.patterns, this.belief, this.journal);
     },
     affirmationText() {
       return (this.belief.affirmations || []).map(a => a && a.text).filter(Boolean).join(' · ');

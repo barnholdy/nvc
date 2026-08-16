@@ -89,24 +89,15 @@
         </div>
       </template>
 
-      <!-- Then what has moved. -->
+      <!-- Then what has moved. One chip per belief: an affirmation is read on
+           the opposite scale, so mixing both in here only invites reading a
+           bar the wrong way round. -->
       <template v-if="trendRows.length">
         <p class="section-head">Trends</p>
 
-        <!-- Two levels of chip: which kind of thing, then which one. -->
         <div class="pill-row">
           <button
-            v-for="t in trendTabs"
-            :key="t.key"
-            class="pill"
-            :class="{ active: t.key === shownTrendTab }"
-            @click="trendTab = t.key; trendKey = null"
-          >{{ t.label }}<span class="pill-count"> · {{ t.rows.length }}</span></button>
-        </div>
-
-        <div class="pill-row">
-          <button
-            v-for="r in tabRows"
+            v-for="r in trendRows"
             :key="r.key"
             class="pill trend-pill"
             :class="{ active: r.key === shownTrendKey }"
@@ -116,7 +107,7 @@
 
         <div v-if="shownTrend" class="card">
           <p class="card-title">„{{ shownTrend.text }}“</p>
-          <trend-chart :row="shownTrend" :inverted="shownTrend.inverted"></trend-chart>
+          <trend-chart :row="shownTrend"></trend-chart>
         </div>
       </template>
 
@@ -169,7 +160,7 @@ import {
   experimentState,
 } from '@/utils/experiment';
 import {
-  beliefCredibility, beliefRows, affirmationRows,
+  beliefCredibility, beliefRows,
 } from '@/utils/credibility';
 import { mdiLightningBolt } from '@mdi/js';
 import NavIcon from '@/components/NavIcon.vue';
@@ -201,7 +192,7 @@ export default {
   },
   data() {
     return {
-      practising: null, practised: readPractised(), now: Date.now(), trendKey: null, trendTab: null,
+      practising: null, practised: readPractised(), now: Date.now(), trendKey: null,
     };
   },
   computed: {
@@ -210,11 +201,13 @@ export default {
     captureIcon() { return mdiLightningBolt; },
     beliefs() { return this.$store.getters.beliefs; },
     patterns() { return this.$store.getters.patterns; },
+    journal() { return this.$store.getters.journal; },
     rows() { return collectExperiments(this.beliefs); },
     // Most believed first: the belief you hold hardest is the one worth
     // touching next.
     byStatus() {
       const patterns = this.patterns;
+      const journal = this.journal;
       const out = { open: [], working: [], done: [] };
       this.beliefs.forEach((b) => {
         const bucket = out[beliefStatus(b)];
@@ -222,8 +215,8 @@ export default {
       });
       Object.keys(out).forEach((k) => {
         out[k].sort((a, b) => {
-          const ca = beliefCredibility(patterns, a);
-          const cb = beliefCredibility(patterns, b);
+          const ca = beliefCredibility(patterns, a, journal);
+          const cb = beliefCredibility(patterns, b, journal);
           return (cb === null ? -1 : cb) - (ca === null ? -1 : ca);
         });
       });
@@ -254,54 +247,23 @@ export default {
       });
     },
     // Nothing to show until something has been rated twice; one reading is a
-    // number, not a trend. Beliefs first — that is the scale the rest of the
-    // screen is about.
+    // number, not a trend. Situations, evaluated actions and journal entries
+    // all rate the same belief on the same scale, so they share a chart.
     trendRows() {
       const shorten = t => (t.length > 28 ? `${t.slice(0, 27)}…` : t);
-      const beliefs = beliefRows(this.patterns, this.beliefs)
+      return beliefRows(this.patterns, this.beliefs, this.journal)
         .filter(r => r.hasTrend)
-        .map(r => Object.assign({}, r, {
-          key: `b${r.key}`,
-          kind: 'Überzeugung',
-          inverted: false,
-          short: shorten(r.text),
-        }));
-      const affirmations = affirmationRows(this.beliefs)
-        .filter(r => r.hasTrend)
-        .map(r => Object.assign({}, r, {
-          key: `a${r.key}`,
-          kind: 'Affirmation',
-          inverted: true,
-          short: shorten(r.text),
-        }));
-      return beliefs.concat(affirmations);
+        .map(r => Object.assign({}, r, { short: shorten(r.text) }));
     },
-    // Grouped by kind first: a belief and an affirmation are read on opposite
-    // scales, so mixing them in one row invites reading the wrong direction.
-    trendTabs() {
-      return [
-        { key: 'beliefs', label: 'Überzeugungen', rows: this.trendRows.filter(r => !r.inverted) },
-        { key: 'affirmations', label: 'Affirmationen', rows: this.trendRows.filter(r => r.inverted) },
-      ].filter(t => t.rows.length);
-    },
-    shownTrendTab() {
-      const tabs = this.trendTabs;
-      if (!tabs.length) return null;
-      return tabs.some(t => t.key === this.trendTab) ? this.trendTab : tabs[0].key;
-    },
-    tabRows() {
-      const tab = this.trendTabs.find(t => t.key === this.shownTrendTab);
-      return tab ? tab.rows : [];
-    },
-    // The chosen chip, or the first one in the chosen group — a chip that
-    // vanished (a rating undone elsewhere) must not leave the block blank.
+    // The chosen chip, or the first one — a chip that vanished (a rating
+    // undone elsewhere) must not leave the block blank.
     shownTrendKey() {
-      const rows = this.tabRows;
+      const rows = this.trendRows;
       if (!rows.length) return null;
       return rows.some(r => r.key === this.trendKey) ? this.trendKey : rows[0].key;
     },
     shownTrend() {
-      return this.tabRows.find(r => r.key === this.shownTrendKey) || null;
+      return this.trendRows.find(r => r.key === this.shownTrendKey) || null;
     },
     openExperiments() {
       return this.rows.filter(r => experimentState(r.experiment) !== 'evaluated'
@@ -312,7 +274,7 @@ export default {
     },
     sections() {
       const belief = (b) => {
-        const c = beliefCredibility(this.patterns, b);
+        const c = beliefCredibility(this.patterns, b, this.journal);
         return {
           key: `b${b.time}`,
           text: `„${b.belief}“`,

@@ -160,10 +160,11 @@ export default {
       const seen = {};
       this.patterns.forEach((p) => { (p.beliefs || []).forEach((id) => { seen[id] = true; }); });
       const patterns = this.$store.getters.patterns;
+      const journal = this.$store.getters.journal;
       return this.$store.getters.beliefs
         .filter(b => seen[b.time])
         .map(b => Object.assign({}, b, {
-          truth: beliefCredibility(patterns, b),
+          truth: beliefCredibility(patterns, b, journal),
           // How many situations it turns up in — the same reading the state
           // chips give, so both rows of chips answer the same question.
           count: this.patterns.filter(pt => (pt.beliefs || []).indexOf(b.time) !== -1).length,

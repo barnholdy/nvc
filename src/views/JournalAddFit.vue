@@ -23,7 +23,7 @@
     </div>
 
     <template v-if="fit">
-      <p class="wizard-question">Wie glaubwürdig ist das für dich?</p>
+      <p class="wizard-question">Wie glaubwürdig fühlt sich die Überzeugung jetzt an?</p>
       <meter-card
         :value="credibilityValue"
         label="Glaubwürdigkeit"

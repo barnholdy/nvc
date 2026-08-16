@@ -91,11 +91,12 @@ export default {
         if (b && b.belief) byText[normalizeBelief(b.belief)] = b;
       });
       const patterns = this.$store.getters.patterns;
+      const journal = this.$store.getters.journal;
       return this.kernmuster.map(k => ({
         title: k.title,
         beliefs: ((k && k.beliefs) || []).map((t) => {
           const belief = byText[normalizeBelief(t)];
-          const c = belief ? beliefCredibility(patterns, belief) : null;
+          const c = belief ? beliefCredibility(patterns, belief, journal) : null;
           return {
             text: belief ? belief.belief : t,
             // One decimal, German comma — the same number the cards show.

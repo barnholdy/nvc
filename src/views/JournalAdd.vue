@@ -11,6 +11,7 @@
           v-show="step === 1"
           :allBeliefs="allBeliefs"
           :patterns="allPatterns"
+          :journal="allJournal"
           :initialValue="beliefTime"
           @changed="beliefTime = $event">
         </journal-add-belief>
@@ -20,6 +21,7 @@
           v-show="step === 2"
           :belief="belief"
           :patterns="allPatterns"
+          :journal="allJournal"
           :allBeliefs="allBeliefs"
           :initialValue="fact"
           @changed="fact = $event">
@@ -30,6 +32,7 @@
           v-show="step === 3"
           :belief="belief"
           :patterns="allPatterns"
+          :journal="allJournal"
           :allBeliefs="allBeliefs"
           :fact="fact"
           :initialValue="meaning"
@@ -41,6 +44,7 @@
           v-show="step === 4"
           :belief="belief"
           :patterns="allPatterns"
+          :journal="allJournal"
           :allBeliefs="allBeliefs"
           :initialFit="fit"
           :initialCredibility="credibility"
@@ -52,6 +56,7 @@
           v-show="step === 5"
           :belief="belief"
           :patterns="allPatterns"
+          :journal="allJournal"
           :allBeliefs="allBeliefs"
           :initialValue="note"
           @changed="note = $event">
@@ -112,6 +117,9 @@ export default {
     },
     allPatterns() {
       return this.$store.getters.patterns;
+    },
+    allJournal() {
+      return this.$store.getters.journal;
     },
     // Resolved on demand: the belief only exists once one has been chosen.
     belief() {

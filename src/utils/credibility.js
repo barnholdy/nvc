@@ -5,8 +5,10 @@
 //
 //   Überzeugung  · every situation it was added to (`pattern.beliefTruths`)
 //                · every evaluated experiment (`experiment.beliefTruth`)
+//                · every journal entry written against it (`entry.credibility`)
 //   Affirmation  · every wandeln process that wrote it (`affirmation.resonance`)
-//                · every evaluated experiment (`experiment.affirmationTruth`)
+//                · every evaluated experiment (`experiment.affirmationTruth`),
+//                  which older data still carries — nothing writes it now
 
 export const SCALE_MAX = 10;
 
@@ -50,8 +52,23 @@ export function beliefTruthIn(pattern, belief) {
   return isRating(value) ? value : null;
 }
 
+// Every journal entry written against one belief. The entry asks the same
+// 0-10 question a situation does, so it counts the same way.
+export function journalPoints(journal, belief) {
+  if (!belief) return [];
+  return list(journal)
+    .filter(e => e && e.beliefTime === belief.time && isRating(e.credibility))
+    .map(e => ({
+      time: e.time,
+      value: e.credibility,
+      source: 'journal',
+      label: e.fact || '',
+      targetId: e.time,
+    }));
+}
+
 // Every reading one belief has collected, oldest first.
-export function beliefPoints(patterns, belief) {
+export function beliefPoints(patterns, belief, journal) {
   if (!belief) return [];
   const points = [];
   list(patterns).forEach((p) => {
@@ -65,7 +82,9 @@ export function beliefPoints(patterns, belief) {
       targetId: p.time,
     });
   });
-  return byTime(points.concat(experimentPoints(belief, 'beliefTruth')));
+  return byTime(points
+    .concat(experimentPoints(belief, 'beliefTruth'))
+    .concat(journalPoints(journal, belief)));
 }
 
 // Which affirmation an experiment rated. Older experiments did not record it,
@@ -110,8 +129,8 @@ export function averageOf(points) {
   return sum / points.length;
 }
 
-export function beliefCredibility(patterns, belief) {
-  return averageOf(beliefPoints(patterns, belief));
+export function beliefCredibility(patterns, belief, journal) {
+  return averageOf(beliefPoints(patterns, belief, journal));
 }
 
 export function affirmationCredibility(beliefs, text) {
@@ -119,11 +138,11 @@ export function affirmationCredibility(beliefs, text) {
 }
 
 // One row per belief that has at least one reading.
-export function beliefRows(patterns, beliefs) {
+export function beliefRows(patterns, beliefs, journal) {
   return rowsFrom(list(beliefs).map(b => ({
     key: b.time,
     text: b.belief,
-    points: beliefPoints(patterns, b),
+    points: beliefPoints(patterns, b, journal),
   })));
 }
 

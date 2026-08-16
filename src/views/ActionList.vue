@@ -248,35 +248,17 @@
                 :fear-actual="resultActual"
               ></wizard-context>
 
-              <p class="wizard-question">Wie glaubwürdig fühlen sich die Sätze an?</p>
+              <p class="wizard-question">Wie glaubwürdig fühlt sich die Überzeugung jetzt an?</p>
               <p class="wizard-body">Fühle in dich hinein.</p>
 
-              <!-- Two scales, not one: the old sentence can lose credibility
-                   without the new one gaining any, and a single slider
-                   between them could not say that. -->
-              <template v-if="resultAffirmationText">
-                <p class="wizard-note pole">{{ resultBeliefText }}</p>
-                <meter-card
-                  :value="resultBeliefTruth"
-                  label="Glaubwürdigkeit Überzeugung"
-                  minLabel="gar nicht"
-                  maxLabel="völlig"
-                  @input="resultBeliefTruth = $event"
-                ></meter-card>
-
-                <p class="wizard-note pole">{{ resultAffirmationText }}</p>
-                <meter-card
-                  :value="resultAffirmationTruth"
-                  label="Glaubwürdigkeit Affirmation"
-                  minLabel="gar nicht"
-                  maxLabel="völlig"
-                  @input="resultAffirmationTruth = $event"
-                ></meter-card>
-              </template>
-              <p v-else class="wizard-note">
-                Diese Überzeugung hat noch keine Affirmation — du findest sie im Wizard
-                „Überzeugung wandeln“.
-              </p>
+              <p class="wizard-note pole">{{ resultBeliefText }}</p>
+              <meter-card
+                :value="resultBeliefTruth"
+                label="Glaubwürdigkeit"
+                minLabel="gar nicht"
+                maxLabel="völlig"
+                @input="resultBeliefTruth = $event"
+              ></meter-card>
             </div>
 
             <div class="wizard-bottom-space"></div>
@@ -414,7 +396,6 @@ export default {
       resultLearning: '',
       // 0 = the old belief still holds, 100 = the affirmation does.
       resultBeliefTruth: 5,
-      resultAffirmationTruth: 5,
       rowToDelete: null,
       isDeleteDialogShowing: false,
     };
@@ -484,11 +465,6 @@ export default {
     },
     resultFear() {
       return this.resultRow ? this.resultRow.experiment.fear : '';
-    },
-    // The belief's own affirmation — the other end of the scale.
-    resultAffirmationText() {
-      const list = (this.resultRow ? (this.beliefOf(this.resultRow) || {}).affirmations : []) || [];
-      return list.map(a => a && a.text).filter(Boolean).join(' · ');
     },
     resultBeliefText() {
       return this.resultRow ? this.resultRow.beliefText : '';
@@ -574,9 +550,6 @@ export default {
       this.resultBeliefTruth = typeof row.experiment.beliefTruth === 'number'
         ? row.experiment.beliefTruth
         : 5;
-      this.resultAffirmationTruth = typeof row.experiment.affirmationTruth === 'number'
-        ? row.experiment.affirmationTruth
-        : 5;
       this.isResultDialogShowing = true;
     },
     cancelResult() {
@@ -587,12 +560,11 @@ export default {
       this.resultActual = 50;
       this.resultLearning = '';
       this.resultBeliefTruth = 5;
-      this.resultAffirmationTruth = 5;
     },
     // The belief's own standing, the same number its row shows in the belief
     // list. The reading this experiment took is shown further down, separately.
     beliefTruth(row) {
-      return beliefCredibility(this.$store.getters.patterns, this.beliefOf(row));
+      return beliefCredibility(this.$store.getters.patterns, this.beliefOf(row), this.$store.getters.journal);
     },
     beliefStatusLabel(belief) { return beliefStatusLabel(belief); },
     beliefStatusColor(belief) { return beliefStatusColor(belief); },
@@ -700,11 +672,9 @@ export default {
         // the two ways it reaches "Gewandelt".
         doneAt: (row && row.experiment.doneAt) || now,
         completedAt: now,
-        // How credible each sentence is after the experiment, on its own scale.
+        // How credible the belief is after the experiment — the same 0-10
+        // question a situation asks, so it counts as another reading of it.
         beliefTruth: this.resultBeliefTruth,
-        affirmationTruth: this.resultAffirmationTruth,
-        // Which affirmation was rated — the belief's may be replaced later.
-        affirmationText: this.resultAffirmationText,
       };
       this.cancelResult();
       if (row) {

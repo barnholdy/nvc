@@ -61,7 +61,7 @@ function otherExperimentLines(allBeliefs, belief) {
   return lines;
 }
 
-export function buildActionPrompt(belief, situations, patterns, allBeliefs) {
+export function buildActionPrompt(belief, situations, patterns, allBeliefs, journal) {
   const b = belief || {};
   const r = b.reflection || {};
   const lines = [
@@ -72,7 +72,7 @@ export function buildActionPrompt(belief, situations, patterns, allBeliefs) {
     `Überzeugung: "${b.belief || ''}"`,
   ];
 
-  const credibility = beliefCredibility(patterns, b);
+  const credibility = beliefCredibility(patterns, b, journal);
   if (credibility !== null) {
     lines.push(`Glaubwürdigkeit der Überzeugung: ${round(credibility)}/10`);
   }

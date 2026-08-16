@@ -107,6 +107,7 @@ export default {
     // Every situation in the app, so the credibility recorded for this belief
     // can be read off them.
     patterns: { type: Array, default: function() { return []; } },
+    journal: { type: Array, default: function() { return []; } },
     // Every belief, so actions already planned elsewhere are not suggested again.
     allBeliefs: { type: Array, default: function() { return []; } },
     initialValue: { type: String, default: '' },
@@ -130,7 +131,7 @@ export default {
     // The same two numbers their own lists show: everything each has been rated
     // at so far, not a reading taken here.
     beliefTruth() {
-      return beliefCredibility(this.patterns, this.entry);
+      return beliefCredibility(this.patterns, this.entry, this.journal);
     },
     affirmationTruth() {
       const list = (this.entry && this.entry.affirmations) || [];
@@ -167,7 +168,7 @@ export default {
       this.suggestions = [];
       try {
         const prompt = buildActionPrompt(
-          this.entry, this.situations, this.patterns, this.allBeliefs,
+          this.entry, this.situations, this.patterns, this.allBeliefs, this.journal,
         );
         const reply = await askClaude(this.apiKey, prompt, { maxTokens: 600 });
         this.suggestions = parseLines(reply, SUGGESTION_COUNT);

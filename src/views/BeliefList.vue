@@ -393,13 +393,13 @@ export default {
     },
     statusLabel(entry) { return beliefStatusLabel(entry); },
     credibility(entry) {
-      return beliefCredibility(this.$store.getters.patterns, entry);
+      return beliefCredibility(this.$store.getters.patterns, entry, this.$store.getters.journal);
     },
     // Only from the second reading on: one number has no direction. The month
     // named is the one the run started in, so "seit Juni" means "since the
     // first time you rated this".
     trendOf(entry) {
-      const points = beliefPoints(this.$store.getters.patterns, entry);
+      const points = beliefPoints(this.$store.getters.patterns, entry, this.$store.getters.journal);
       if (points.length < 2) return null;
       const first = points[0];
       const last = points[points.length - 1];

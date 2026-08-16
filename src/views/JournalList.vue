@@ -11,6 +11,24 @@
             </button>
           </div>
         </div>
+
+        <!-- Which belief is being worked on, the same way the Verlauf list
+             narrows to one. Only worth offering once more than one has an
+             entry. -->
+        <div v-if="filterBeliefs.length > 1" class="pill-row">
+          <button
+            class="pill"
+            :class="{ active: beliefFilter === null }"
+            @click="beliefFilter = null"
+          >Alle</button>
+          <button
+            v-for="b in filterBeliefs"
+            :key="b.time"
+            class="pill"
+            :class="{ active: beliefFilter === b.time }"
+            @click="beliefFilter = b.time"
+          >„{{ b.belief }}“<span class="pill-count"> · {{ b.count }}</span></button>
+        </div>
       </div>
 
       <div v-if="!groups.length" class="list-empty">
@@ -28,10 +46,7 @@
         >
           <div
             class="timeline-row"
-            :class="{
-              'timeline-first': entry.time === group.entries[0].time,
-              'timeline-last': entry.time === group.entries[group.entries.length - 1].time,
-            }"
+            :class="{ 'timeline-first': entry.time === group.entries[0].time }"
           >
             <span class="timeline-dot"></span>
             <div class="timeline-body">
@@ -107,7 +122,7 @@
 
 <script>
 import moment from 'moment';
-import { openQuery } from '@/utils/reveal';
+import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 import NavIcon from '@/components/NavIcon.vue';
 
 export default {
@@ -115,6 +130,7 @@ export default {
   components: { NavIcon },
   data() {
     return {
+      beliefFilter: null,
       entryToDelete: null,
       isDeleteDialogShowing: false,
       sw: { openKey: null, handleHeight: 0, openDir: null, touchKey: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
@@ -124,11 +140,23 @@ export default {
     entries() {
       return this.$store.getters.journal.concat().sort((a, b) => b.time - a.time);
     },
+    filtered() {
+      if (this.beliefFilter === null) return this.entries;
+      return this.entries.filter(e => e.beliefTime === this.beliefFilter);
+    },
+    // Only beliefs an entry was actually written against can filter one.
+    filterBeliefs() {
+      const counts = {};
+      this.entries.forEach((e) => { counts[e.beliefTime] = (counts[e.beliefTime] || 0) + 1; });
+      return this.$store.getters.beliefs
+        .filter(b => counts[b.time])
+        .map(b => ({ time: b.time, belief: b.belief, count: counts[b.time] }));
+    },
     groups() {
       const out = [];
       const index = {};
       moment.locale('de');
-      this.entries.forEach((entry) => {
+      this.filtered.forEach((entry) => {
         const key = moment(entry.time).format('YYYY-MM');
         if (index[key] === undefined) {
           index[key] = out.length;
@@ -139,7 +167,22 @@ export default {
       return out;
     },
   },
+  mounted() {
+    this.revealRequested();
+  },
+  watch: {
+    '$route.query.open': function() { this.revealRequested(); },
+  },
   methods: {
+    // Coming from a trend bar: clear the filter so the row it points at is
+    // actually in the list, then bring it into view.
+    revealRequested() {
+      const id = requestedId(this.$route);
+      if (!id) return;
+      if (!this.entries.some(e => String(e.time) === id)) return;
+      this.beliefFilter = null;
+      this.$nextTick(() => scrollRowIntoView(this.$el, id));
+    },
     isSwiping(key) { return this.sw.openKey === key || this.sw.touchKey === key; },
     beliefOf(entry) {
       return this.$store.getters.beliefs.find(b => b.time === entry.beliefTime);

@@ -37,8 +37,8 @@
               ></div>
             </div>
             <span class="bar-date">{{ shortDate(p.time) }}</span>
-            <!-- Where the reading was taken; the same scale is filled in three
-                 different places. -->
+            <!-- Where the reading was taken; the same scale is filled in
+                 several different places. -->
             <span class="bar-source">{{ sourceLabel(p.source) }}</span>
           </div>
         </div>
@@ -54,12 +54,13 @@ import moment from 'moment';
 import { truthColor, deltaColor, deltaLabel, TRUTH_SCALE_MAX } from '@/utils/beliefTrend';
 import { openQuery } from '@/utils/reveal';
 
-// Which side a reading came from — the same 0-10 question is asked in three
+// Which side a reading came from — the same 0-10 question is asked in several
 // different places, and a bar means something else depending on where.
 const SOURCES = {
   situation: 'Situation',
   wandeln: 'Wandeln',
   action: 'Handlung',
+  journal: 'Tagebuch',
 };
 
 // The list each kind of reading can be followed back into.
@@ -67,6 +68,7 @@ const ROUTES = {
   situation: '/patterns',
   wandeln: '/beliefs',
   action: '/actions',
+  journal: '/journal',
 };
 
 export default {

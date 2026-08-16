@@ -135,7 +135,7 @@ export default {
     // Every reading this belief has collected, averaged — the situations it
     // was rated in and the experiments that were evaluated.
     situationTruth() {
-      return beliefCredibility(this.$store.getters.patterns, this.entry);
+      return beliefCredibility(this.$store.getters.patterns, this.entry, this.$store.getters.journal);
     },
     // Beliefs worked on before the limit existed can hold more than five new
     // feelings; the way forward opens once they are back within it.
