@@ -15,9 +15,7 @@
 
       <div v-if="!groups.length" class="list-empty">
         <p class="list-empty-title">Noch keine Einträge</p>
-        <p class="list-empty-sub">
-          Täglich kleine Gegenbeispiele notieren — dein Schema filtert widersprechende Erfahrungen sonst aktiv weg.
-        </p>
+        <p class="list-empty-sub">Täglich kleine Gegenbeispiele notieren.</p>
       </div>
 
       <template v-for="group in groups">
