@@ -77,8 +77,9 @@
                     </div>
                   </div>
 
-                  <!-- What this situation rated each belief at, and how far
-                       that sits from where the belief stands overall. -->
+                  <!-- What this situation rated each belief at. No trend
+                       here: this screen is the record the trend is read off,
+                       so a chip per row would repeat it once per situation. -->
                   <div v-if="beliefFilter === null" class="timeline-chips">
                     <span
                       v-for="b in beliefsOf(entry)"
@@ -90,11 +91,6 @@
                       <span v-if="truthOf(entry, b) !== null" class="timeline-chip-score">
                         {{ truthOf(entry, b) }}/10
                       </span>
-                      <span
-                        v-if="deltaMark(entry, b)"
-                        class="timeline-chip-trend"
-                        :style="{ color: deltaMark(entry, b).color }"
-                      >{{ deltaMark(entry, b).text }}</span>
                     </span>
                   </div>
                 </div>
@@ -141,8 +137,7 @@
 <script>
 import moment from 'moment';
 import { isComplete } from '@/utils/beliefStatus';
-import { beliefTruthIn, beliefCredibility } from '@/utils/credibility';
-import { deltaColor } from '@/utils/beliefTrend';
+import { beliefTruthIn } from '@/utils/credibility';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 import NavIcon from '@/components/NavIcon.vue';
 
@@ -174,12 +169,9 @@ export default {
     filterBeliefs() {
       const seen = {};
       this.patterns.forEach((p) => { (p.beliefs || []).forEach((id) => { seen[id] = true; }); });
-      const patterns = this.$store.getters.patterns;
-      const journal = this.$store.getters.journal;
       return this.$store.getters.beliefs
         .filter(b => seen[b.time])
         .map(b => Object.assign({}, b, {
-          truth: beliefCredibility(patterns, b, journal),
           // How many situations it turns up in — the same reading the state
           // chips give, so both rows of chips answer the same question.
           count: this.patterns.filter(pt => (pt.beliefs || []).indexOf(b.time) !== -1).length,
@@ -250,23 +242,6 @@ export default {
       return list.length > 0 && list.every(isComplete);
     },
     truthOf(entry, belief) { return beliefTruthIn(entry, belief); },
-    // How far this situation's reading sits from where the belief stands
-    // across all of them. Null when there is nothing to compare, and when it
-    // sits right on it.
-    deltaMark(entry, belief) {
-      const own = beliefTruthIn(entry, belief);
-      if (own === null) return null;
-      const avg = beliefCredibility(
-        this.$store.getters.patterns, belief, this.$store.getters.journal,
-      );
-      if (avg === null) return null;
-      const delta = Math.round((own - avg) * 10) / 10;
-      if (delta === 0) return null;
-      return {
-        text: (delta > 0 ? '+' : '−') + String(Math.abs(delta)).replace('.', ','),
-        color: deltaColor(delta),
-      };
-    },
     dayLabel(time) {
       moment.locale('de');
       return moment(time).format('D. MMM').toUpperCase();
@@ -407,7 +382,6 @@ export default {
   &:active { opacity: 0.6; }
 }
 .timeline-chip-score { color: #636366; flex-shrink: 0; white-space: nowrap; }
-.timeline-chip-trend { font-weight: 600; flex-shrink: 0; white-space: nowrap; }
 
 .confirm-dialog { background: #1c1c1e !important; }
 .confirm-title { color: #fff; font-size: 1rem; justify-content: center; padding: 16px; }

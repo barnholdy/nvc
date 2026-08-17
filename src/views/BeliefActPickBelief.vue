@@ -20,7 +20,10 @@
         <span class="score-max">/10</span>
         <span class="score-label">Glaubwürdigkeit</span>
       </div>
-      <span class="card-pill">{{ situationLabel(b) }}</span>
+      <!-- The sentence the action is meant to act from, the way the journal's
+           own picker shows it. Guarded: a belief can reach "gewandelt" by
+           having been acted on, without an affirmation ever being written. -->
+      <p v-if="affirmationOf(b)" class="pick-belief-aff">„{{ affirmationOf(b) }}“</p>
     </div>
 
     <!-- Says why the list is as short as it is. -->
@@ -32,7 +35,6 @@
 // Only shown when the wizard is opened from the Handlungen list, where no
 // belief has been chosen yet.
 import { beliefCredibility } from '@/utils/credibility';
-import { situationsForBelief } from '@/utils/patterns';
 
 export default {
   name: 'belief-act-pick-belief',
@@ -51,13 +53,8 @@ export default {
     },
     // One decimal, German comma — the same rounding the list cards use.
     round(v) { return String(Math.round(v * 10) / 10).replace('.', ','); },
-    situationCount(belief) {
-      return situationsForBelief(this.patterns, belief.time).length;
-    },
-    situationLabel(belief) {
-      const n = this.situationCount(belief);
-      if (!n) return 'In keiner Situation';
-      return n === 1 ? 'In 1 Situation' : `In ${n} Situationen`;
+    affirmationOf(belief) {
+      return (belief.affirmations || []).map(a => a && a.text).filter(Boolean).join(' · ');
     },
     pick(time) {
       this.selected = time;
@@ -78,5 +75,11 @@ export default {
     border-color: #4ade80;
     .card-title { color: #4ade80; }
   }
+}
+.pick-belief-aff {
+  font-size: 0.88rem;
+  color: #8e8e93;
+  margin: 10px 0 0;
+  line-height: 1.4;
 }
 </style>
