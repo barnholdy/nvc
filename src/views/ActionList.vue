@@ -587,7 +587,7 @@ export default {
     beliefStatusLabel(belief) { return beliefStatusLabel(belief); },
     beliefStatusColor(belief) { return beliefStatusColor(belief); },
     openBelief(row) {
-      this.$router.push({ path: '/beliefs', query: openQuery(row.beliefTime) });
+      this.$router.push({ path: '/beliefs', query: openQuery(row.beliefTime, { top: true }) });
     },
     // One affirmation per belief, so the first is the one — but experiments
     // written before that rule can name their own, and that one wins.

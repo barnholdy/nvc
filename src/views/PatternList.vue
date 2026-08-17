@@ -248,7 +248,7 @@ export default {
     },
     openBelief(belief) {
       this.sw.openKey = null; this.sw.openDir = null;
-      this.$router.push({ path: '/beliefs', query: openQuery(belief.time) });
+      this.$router.push({ path: '/beliefs', query: openQuery(belief.time, { top: true }) });
     },
     editEntry(entry) { this.sw.openKey = null; this.sw.openDir = null; this.$router.push(`/edit-pattern/${entry.time}`); },
     preDelete(entry) { this.sw.openKey = null; this.sw.openDir = null; this.entryToDelete = entry; this.isDeleteDialogShowing = true; },

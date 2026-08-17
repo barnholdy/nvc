@@ -248,7 +248,7 @@ export default {
     },
     openBelief(entry) {
       if (!this.beliefOf(entry)) return;
-      this.$router.push({ path: '/beliefs', query: openQuery(entry.beliefTime) });
+      this.$router.push({ path: '/beliefs', query: openQuery(entry.beliefTime, { top: true }) });
     },
     editEntry(entry) {
       this.sw.openKey = null; this.sw.openDir = null;
