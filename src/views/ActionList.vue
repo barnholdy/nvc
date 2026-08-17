@@ -184,14 +184,14 @@
                the subject here, the belief is what it is aimed at. -->
           <div class="belief-chip" @click.stop="openBelief(row)">
             <span class="belief-chip-text">„{{ row.beliefText }}“</span>
-            <span v-if="beliefTruth(row) !== null" class="belief-chip-score">
-              {{ round(beliefTruth(row)) }}/10
+            <span v-if="rowTruth(row) !== null" class="belief-chip-score">
+              {{ rowTruth(row) }}/10
             </span>
             <span
-              v-if="beliefTrend(row)"
+              v-if="deltaMark(row)"
               class="belief-chip-trend"
-              :style="{ color: beliefTrend(row).color }"
-            >{{ beliefTrend(row).text }}</span>
+              :style="{ color: deltaMark(row).color }"
+            >{{ deltaMark(row).text }}</span>
           </div>
       </div>
 
@@ -329,8 +329,8 @@ import {
   isDue,
   isPlanned,
 } from '@/utils/experiment';
-import { beliefCredibility, affirmationCredibility, beliefPoints } from '@/utils/credibility';
-import { trendMark } from '@/utils/beliefTrend';
+import { beliefCredibility, affirmationCredibility } from '@/utils/credibility';
+import { deltaColor } from '@/utils/beliefTrend';
 import { beliefStatusLabel, beliefStatusColor } from '@/utils/beliefStatus';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 import NavIcon from '@/components/NavIcon.vue';
@@ -572,12 +572,24 @@ export default {
     beliefTruth(row) {
       return beliefCredibility(this.$store.getters.patterns, this.beliefOf(row), this.$store.getters.journal);
     },
-    // Where that belief has moved since its first reading, shortened to fit
-    // the chip — the same trend the belief cards draw in full.
-    beliefTrend(row) {
-      const b = this.beliefOf(row);
-      if (!b) return null;
-      return trendMark(beliefPoints(this.$store.getters.patterns, b, this.$store.getters.journal));
+    // What this run itself rated the belief at, recorded when it was
+    // evaluated. Null while it has not been.
+    rowTruth(row) {
+      const v = row && row.experiment && row.experiment.beliefTruth;
+      return typeof v === 'number' ? v : null;
+    },
+    // How far that reading sits from the belief's average. Null when there is
+    // nothing to compare, and when it sits right on it.
+    deltaMark(row) {
+      const own = this.rowTruth(row);
+      const avg = this.beliefTruth(row);
+      if (own === null || avg === null) return null;
+      const delta = Math.round((own - avg) * 10) / 10;
+      if (delta === 0) return null;
+      return {
+        text: (delta > 0 ? '+' : '−') + String(Math.abs(delta)).replace('.', ','),
+        color: deltaColor(delta),
+      };
     },
     beliefStatusLabel(belief) { return beliefStatusLabel(belief); },
     beliefStatusColor(belief) { return beliefStatusColor(belief); },

@@ -74,24 +74,9 @@
                   <p class="card-title">{{ entry.fact }}</p>
                   <p v-if="entry.meaning" class="journal-meaning">{{ entry.meaning }}</p>
 
-                  <!-- What this entry rated the belief at, against where the
-                       belief stands across every reading it has collected. -->
-                  <div v-if="typeof entry.credibility === 'number'" class="score-row">
-                    <div class="score-main">
-                      <span
-                        class="score-value"
-                        :style="{ color: truthColor(entry.credibility) }"
-                      >{{ entry.credibility }}</span>
-                      <span class="score-max">/10</span>
-                      <span class="score-label">Glaubwürdigkeit</span>
-                    </div>
-                    <div v-if="averageOf(entry) !== null" class="score-side">
-                      <span
-                        class="score-trend"
-                        :style="{ color: deltaColor(deltaOf(entry)) }"
-                      >{{ deltaText(entry) }}</span>
-                    </div>
-                  </div>
+                  <!-- The objection first, then the sentence it is aimed at:
+                       the affirmation gets the last word. -->
+                  <p v-if="entry.note" class="journal-note">„{{ entry.note }}“</p>
 
                   <!-- The sentence this entry is evidence for. -->
                   <div v-if="affirmationOf(entry)" class="aff-box">
@@ -102,20 +87,19 @@
                   <div class="timeline-chips">
                     <span class="timeline-chip" @click.stop="openBelief(entry)">
                       „{{ beliefTextOf(entry) }}“
-                      <span v-if="averageOf(entry) !== null" class="timeline-chip-score">
-                        {{ round(averageOf(entry)) }}/10
+                      <span v-if="typeof entry.credibility === 'number'" class="timeline-chip-score">
+                        {{ entry.credibility }}/10
                       </span>
                       <span
-                        v-if="trendOf(entry)"
+                        v-if="deltaMark(entry)"
                         class="timeline-chip-trend"
-                        :style="{ color: trendOf(entry).color }"
-                      >{{ trendOf(entry).text }}</span>
+                        :style="{ color: deltaMark(entry).color }"
+                      >{{ deltaMark(entry).text }}</span>
                     </span>
                     <span class="fit-mark" :class="entry.fit">
                       <i class="fit-dot"></i>{{ entry.fit === 'new' ? 'Affirmation' : 'Überzeugung' }}
                     </span>
                   </div>
-                  <p v-if="entry.note" class="journal-note">„{{ entry.note }}“</p>
                 </div>
               </div>
             </div>
@@ -160,8 +144,8 @@
 <script>
 import moment from 'moment';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
-import { beliefCredibility, beliefPoints } from '@/utils/credibility';
-import { truthColor, deltaColor, trendMark } from '@/utils/beliefTrend';
+import { beliefCredibility } from '@/utils/credibility';
+import { deltaColor } from '@/utils/beliefTrend';
 import NavIcon from '@/components/NavIcon.vue';
 
 export default {
@@ -242,28 +226,19 @@ export default {
       if (!b) return null;
       return beliefCredibility(this.$store.getters.patterns, b, this.$store.getters.journal);
     },
-    // How far this one reading sits from that average. Rounded to whole
-    // points: the average carries a decimal the readings never had.
-    deltaOf(entry) {
+    // How far this one reading sits from the belief's average. Null when
+    // there is nothing to compare against, and when it sits right on it —
+    // a chip saying "±0" on every first entry would be noise.
+    deltaMark(entry) {
       const avg = this.averageOf(entry);
-      if (avg === null || typeof entry.credibility !== 'number') return 0;
-      return Math.round(entry.credibility - avg);
+      if (avg === null || typeof entry.credibility !== 'number') return null;
+      const delta = Math.round((entry.credibility - avg) * 10) / 10;
+      if (delta === 0) return null;
+      return {
+        text: (delta > 0 ? '+' : '−') + String(Math.abs(delta)).replace('.', ','),
+        color: deltaColor(delta),
+      };
     },
-    deltaText(entry) {
-      const d = this.deltaOf(entry);
-      if (d === 0) return 'wie im Schnitt';
-      return d < 0 ? `${d} zum Schnitt` : `+${d} zum Schnitt`;
-    },
-    // Where the belief has moved since its first reading — the same trend the
-    // belief cards draw, shortened to fit a chip.
-    trendOf(entry) {
-      const b = this.beliefOf(entry);
-      if (!b) return null;
-      return trendMark(beliefPoints(this.$store.getters.patterns, b, this.$store.getters.journal));
-    },
-    truthColor(v) { return truthColor(v); },
-    deltaColor(d) { return deltaColor(d); },
-    round(v) { return String(Math.round(v * 10) / 10).replace('.', ','); },
     dayLabel(time) {
       moment.locale('de');
       return moment(time).format('D. MMM').toUpperCase();
@@ -394,26 +369,6 @@ export default {
   margin: 8px 0 0;
   font-style: italic;
 }
-/* Two columns of different heights, like the belief cards' own score row. */
-.score-row { align-items: center; }
-.score-main {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 6px;
-  flex: 1;
-  min-width: 0;
-}
-.score-side {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-  margin-left: 12px;
-}
-.score-trend { font-size: 0.85rem; font-weight: 600; white-space: nowrap; }
-
 .timeline-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .timeline-chip {
   display: inline-flex;
@@ -453,7 +408,7 @@ export default {
   font-size: 0.85rem;
   color: #636366;
   line-height: 1.4;
-  margin: 10px 0 0;
+  margin: 12px 0 0;
 }
 
 .confirm-dialog { background: #1c1c1e !important; }
