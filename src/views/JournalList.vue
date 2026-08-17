@@ -72,18 +72,17 @@
               </div>
               <p v-if="entry.meaning" class="journal-meaning">{{ entry.meaning }}</p>
               <div class="timeline-chips">
-                <!-- Where the belief stands altogether, the way the Handlungen
-                     cards tag theirs — the reading this entry itself took is
-                     on the chip beside it. -->
+                <!-- What this entry rated the belief at, on the chip naming
+                     the belief it rated — the chip beside it says which of
+                     the two sentences the entry belongs to, nothing more. -->
                 <span class="timeline-chip" @click.stop="openBelief(entry)">
                   „{{ beliefTextOf(entry) }}“
-                  <span v-if="beliefTruthOf(entry) !== null" class="timeline-chip-score">
-                    {{ round(beliefTruthOf(entry)) }}/10
+                  <span v-if="typeof entry.credibility === 'number'" class="timeline-chip-score">
+                    {{ entry.credibility }}/10
                   </span>
                 </span>
                 <span class="fit-chip" :class="entry.fit">
                   {{ entry.fit === 'new' ? 'Neue Affirmation' : 'Alte Überzeugung' }}
-                  <span v-if="typeof entry.credibility === 'number'" class="fit-chip-score"> · {{ entry.credibility }}/10</span>
                 </span>
               </div>
               <p v-if="entry.note" class="journal-note">„{{ entry.note }}“</p>
@@ -129,7 +128,6 @@
 <script>
 import moment from 'moment';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
-import { beliefCredibility } from '@/utils/credibility';
 import NavIcon from '@/components/NavIcon.vue';
 
 export default {
@@ -198,15 +196,6 @@ export default {
       const b = this.beliefOf(entry);
       return b ? b.belief : 'Gelöschte Überzeugung';
     },
-    // The belief's own standing across every reading it has collected — this
-    // entry's rating is one of them.
-    beliefTruthOf(entry) {
-      const b = this.beliefOf(entry);
-      if (!b) return null;
-      return beliefCredibility(this.$store.getters.patterns, b, this.$store.getters.journal);
-    },
-    // One decimal, German comma — the same rounding the list cards use.
-    round(v) { return String(Math.round(v * 10) / 10).replace('.', ','); },
     dayLabel(time) {
       moment.locale('de');
       return moment(time).format('D. MMM').toUpperCase();
@@ -367,7 +356,6 @@ export default {
   &.old { color: #8e8e93; }
   &.new { color: #4ade80; }
 }
-.fit-chip-score { opacity: 0.75; font-weight: 400; }
 .timeline-chip-score { color: #636366; }
 .journal-note {
   font-size: 0.85rem;

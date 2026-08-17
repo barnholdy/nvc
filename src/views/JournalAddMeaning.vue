@@ -1,9 +1,6 @@
 <template>
   <div>
-    <div v-if="fact" class="card fact-recall">
-      <p class="aff-label">Was passiert ist</p>
-      <p class="card-title fact-recall-text">{{ fact }}</p>
-    </div>
+    <journal-recall :fact="fact"></journal-recall>
 
     <p class="wizard-question">Was sagt das über dich?</p>
     <p class="wizard-body">Die Deutung, die sich beim Lesen der Fakten aufdrängt.</p>
@@ -20,10 +17,11 @@
 
 <script>
 import InputCard from '@/components/InputCard.vue';
+import JournalRecall from '@/components/JournalRecall.vue';
 
 export default {
   name: 'journal-add-meaning',
-  components: { InputCard },
+  components: { InputCard, JournalRecall },
   props: {
     fact: { type: String, default: '' },
     initialValue: { type: String, default: '' },
@@ -36,8 +34,3 @@ export default {
   },
 };
 </script>
-
-<style scoped lang="scss">
-.fact-recall { cursor: default; &:active { opacity: 1; } }
-.fact-recall-text { font-size: 0.95rem; font-weight: 400; white-space: pre-wrap; }
-</style>

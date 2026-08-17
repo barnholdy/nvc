@@ -39,6 +39,8 @@
           v-if="belief"
           v-show="step === 4"
           :belief="belief"
+          :fact="fact"
+          :meaning="meaning"
           :initialFit="fit"
           :initialCredibility="credibility"
           @changed="onFitChanged">
@@ -47,6 +49,10 @@
         <journal-add-note
           v-if="belief"
           v-show="step === 5"
+          :fact="fact"
+          :meaning="meaning"
+          :fit="fit"
+          :credibility="credibility"
           :initialValue="note"
           @changed="note = $event">
         </journal-add-note>

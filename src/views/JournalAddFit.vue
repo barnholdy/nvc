@@ -1,5 +1,7 @@
 <template>
   <div>
+    <journal-recall :fact="fact" :meaning="meaning"></journal-recall>
+
     <p class="wizard-question">Passt es zur alten oder zur neuen Überzeugung?</p>
     <p class="wizard-body">Wozu passt dieses Beispiel besser?</p>
 
@@ -35,14 +37,17 @@
 
 <script>
 import MeterCard from '@/components/MeterCard.vue';
+import JournalRecall from '@/components/JournalRecall.vue';
 
 const DEFAULT_CREDIBILITY = 5;
 
 export default {
   name: 'journal-add-fit',
-  components: { MeterCard },
+  components: { MeterCard, JournalRecall },
   props: {
     belief: { type: Object, required: true },
+    fact: { type: String, default: '' },
+    meaning: { type: String, default: '' },
     initialFit: { type: String, default: '' },
     initialCredibility: { type: Number, default: null },
   },
