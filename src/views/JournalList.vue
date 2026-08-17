@@ -51,6 +51,8 @@
             <span class="timeline-dot"></span>
             <div class="timeline-body">
               <p class="timeline-meta">{{ dayLabel(entry.time) }}</p>
+              <!-- The whole card answers the swipe, so it slides off the
+                   buttons the way the belief and action cards do. -->
               <div class="head-swipe">
                 <div v-if="isSwiping(entry.time)" class="swipe-panel left">
                   <div class="swipe-group single swipe-btn-edit">
@@ -62,30 +64,53 @@
                     <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">Löschen</button>
                   </div>
                 </div>
-                <p
-                  class="timeline-text swipe-handle"
+                <div
+                  class="card journal-card swipe-handle"
                   :style="rowSt(entry.time)"
                   @touchstart="tsStart($event, entry.time)"
                   @touchmove="tsMove($event, entry.time)"
                   @touchend="tsEnd($event, entry.time)"
-                >{{ entry.fact }}</p>
+                >
+                  <p class="card-title">{{ entry.fact }}</p>
+                  <p v-if="entry.meaning" class="journal-meaning">{{ entry.meaning }}</p>
+
+                  <!-- What this entry rated the belief at, against where the
+                       belief stands across every reading it has collected. -->
+                  <div v-if="typeof entry.credibility === 'number'" class="score-row">
+                    <div class="score-main">
+                      <span
+                        class="score-value"
+                        :style="{ color: truthColor(entry.credibility) }"
+                      >{{ entry.credibility }}</span>
+                      <span class="score-max">/10</span>
+                      <span class="score-label">Glaubwürdigkeit</span>
+                    </div>
+                    <div v-if="averageOf(entry) !== null" class="score-side">
+                      <span
+                        class="score-trend"
+                        :style="{ color: deltaColor(deltaOf(entry)) }"
+                      >{{ deltaText(entry) }}</span>
+                      <span class="score-avg">Ø {{ round(averageOf(entry)) }}</span>
+                    </div>
+                  </div>
+
+                  <!-- The sentence this entry is evidence for. -->
+                  <div v-if="affirmationOf(entry)" class="aff-box">
+                    <p class="aff-label">Affirmation</p>
+                    <p class="aff-text">„{{ affirmationOf(entry) }}“</p>
+                  </div>
+
+                  <div class="timeline-chips">
+                    <span class="timeline-chip" @click.stop="openBelief(entry)">
+                      „{{ beliefTextOf(entry) }}“
+                    </span>
+                    <span class="fit-chip" :class="entry.fit">
+                      {{ entry.fit === 'new' ? 'Neue Affirmation' : 'Alte Überzeugung' }}
+                    </span>
+                  </div>
+                  <p v-if="entry.note" class="journal-note">„{{ entry.note }}“</p>
+                </div>
               </div>
-              <p v-if="entry.meaning" class="journal-meaning">{{ entry.meaning }}</p>
-              <div class="timeline-chips">
-                <!-- What this entry rated the belief at, on the chip naming
-                     the belief it rated — the chip beside it says which of
-                     the two sentences the entry belongs to, nothing more. -->
-                <span class="timeline-chip" @click.stop="openBelief(entry)">
-                  „{{ beliefTextOf(entry) }}“
-                  <span v-if="typeof entry.credibility === 'number'" class="timeline-chip-score">
-                    {{ entry.credibility }}/10
-                  </span>
-                </span>
-                <span class="fit-chip" :class="entry.fit">
-                  {{ entry.fit === 'new' ? 'Neue Affirmation' : 'Alte Überzeugung' }}
-                </span>
-              </div>
-              <p v-if="entry.note" class="journal-note">„{{ entry.note }}“</p>
             </div>
           </div>
         </div>
@@ -128,6 +153,8 @@
 <script>
 import moment from 'moment';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
+import { beliefCredibility } from '@/utils/credibility';
+import { truthColor, deltaColor } from '@/utils/beliefTrend';
 import NavIcon from '@/components/NavIcon.vue';
 
 export default {
@@ -196,6 +223,33 @@ export default {
       const b = this.beliefOf(entry);
       return b ? b.belief : 'Gelöschte Überzeugung';
     },
+    affirmationOf(entry) {
+      const b = this.beliefOf(entry);
+      if (!b) return '';
+      return (b.affirmations || []).map(a => a && a.text).filter(Boolean).join(' · ');
+    },
+    // Where the belief stands across every reading, this entry's included —
+    // the number the belief list shows as its headline.
+    averageOf(entry) {
+      const b = this.beliefOf(entry);
+      if (!b) return null;
+      return beliefCredibility(this.$store.getters.patterns, b, this.$store.getters.journal);
+    },
+    // How far this one reading sits from that average. Rounded to whole
+    // points: the average carries a decimal the readings never had.
+    deltaOf(entry) {
+      const avg = this.averageOf(entry);
+      if (avg === null || typeof entry.credibility !== 'number') return 0;
+      return Math.round(entry.credibility - avg);
+    },
+    deltaText(entry) {
+      const d = this.deltaOf(entry);
+      if (d === 0) return 'wie im Schnitt';
+      return d < 0 ? `${d} zum Schnitt` : `+${d} zum Schnitt`;
+    },
+    truthColor(v) { return truthColor(v); },
+    deltaColor(d) { return deltaColor(d); },
+    round(v) { return String(Math.round(v * 10) / 10).replace('.', ','); },
     dayLabel(time) {
       moment.locale('de');
       return moment(time).format('D. MMM').toUpperCase();
@@ -278,12 +332,14 @@ export default {
   padding: 0 20px;
 }
 
-/* Same thread the Verlauf timeline draws through its dots. */
+/* Same thread the Verlauf timeline draws through its dots — but each entry
+   is a card on it rather than bare text, so the row gives up the side
+   padding the card supplies itself. */
 .timeline-row {
   position: relative;
   display: flex;
   gap: 14px;
-  padding: 4px 20px 18px;
+  padding: 4px 20px 12px;
   background: #000;
   &::before,
   &::after {
@@ -314,21 +370,38 @@ export default {
   margin: 0 0 6px;
   text-transform: uppercase;
 }
-.head-swipe .swipe-handle { background: #000; }
-.timeline-text {
-  font-size: 1rem;
-  color: #ebebf5;
-  line-height: 1.45;
-  margin: 0 0 8px;
-}
+/* The card is the handle, so it keeps its own fill and radius and only
+   drops the side margin .card carries for a full-width list. */
+.journal-card { margin: 0; }
 .journal-meaning {
   font-size: 0.92rem;
   color: #8e8e93;
   line-height: 1.45;
-  margin: 0 0 10px;
+  margin: 8px 0 0;
   font-style: italic;
 }
-.timeline-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+/* Two columns of different heights, like the belief cards' own score row. */
+.score-row { align-items: center; }
+.score-main {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+.score-side {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  margin-left: 12px;
+}
+.score-trend { font-size: 0.85rem; font-weight: 600; white-space: nowrap; }
+.score-avg { font-size: 0.78rem; color: #636366; white-space: nowrap; }
+
+.timeline-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .timeline-chip {
   display: inline-flex;
   align-items: center;
@@ -356,7 +429,6 @@ export default {
   &.old { color: #8e8e93; }
   &.new { color: #4ade80; }
 }
-.timeline-chip-score { color: #636366; }
 .journal-note {
   font-size: 0.85rem;
   color: #636366;
