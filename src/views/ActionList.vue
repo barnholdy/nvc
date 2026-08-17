@@ -187,6 +187,11 @@
             <span v-if="beliefTruth(row) !== null" class="belief-chip-score">
               {{ round(beliefTruth(row)) }}/10
             </span>
+            <span
+              v-if="beliefTrend(row)"
+              class="belief-chip-trend"
+              :style="{ color: beliefTrend(row).color }"
+            >{{ beliefTrend(row).text }}</span>
           </div>
       </div>
 
@@ -324,7 +329,8 @@ import {
   isDue,
   isPlanned,
 } from '@/utils/experiment';
-import { beliefCredibility, affirmationCredibility } from '@/utils/credibility';
+import { beliefCredibility, affirmationCredibility, beliefPoints } from '@/utils/credibility';
+import { trendMark } from '@/utils/beliefTrend';
 import { beliefStatusLabel, beliefStatusColor } from '@/utils/beliefStatus';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 import NavIcon from '@/components/NavIcon.vue';
@@ -565,6 +571,13 @@ export default {
     // list. The reading this experiment took is shown further down, separately.
     beliefTruth(row) {
       return beliefCredibility(this.$store.getters.patterns, this.beliefOf(row), this.$store.getters.journal);
+    },
+    // Where that belief has moved since its first reading, shortened to fit
+    // the chip — the same trend the belief cards draw in full.
+    beliefTrend(row) {
+      const b = this.beliefOf(row);
+      if (!b) return null;
+      return trendMark(beliefPoints(this.$store.getters.patterns, b, this.$store.getters.journal));
     },
     beliefStatusLabel(belief) { return beliefStatusLabel(belief); },
     beliefStatusColor(belief) { return beliefStatusColor(belief); },
@@ -875,4 +888,5 @@ export default {
 }
 .belief-chip-text { min-width: 0; overflow-wrap: anywhere; }
 .belief-chip-score { color: #636366; flex-shrink: 0; white-space: nowrap; }
+.belief-chip-trend { font-weight: 600; flex-shrink: 0; white-space: nowrap; }
 </style>

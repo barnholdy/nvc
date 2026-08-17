@@ -90,7 +90,6 @@
                         class="score-trend"
                         :style="{ color: deltaColor(deltaOf(entry)) }"
                       >{{ deltaText(entry) }}</span>
-                      <span class="score-avg">Ø {{ round(averageOf(entry)) }}</span>
                     </div>
                   </div>
 
@@ -103,9 +102,17 @@
                   <div class="timeline-chips">
                     <span class="timeline-chip" @click.stop="openBelief(entry)">
                       „{{ beliefTextOf(entry) }}“
+                      <span v-if="averageOf(entry) !== null" class="timeline-chip-score">
+                        {{ round(averageOf(entry)) }}/10
+                      </span>
+                      <span
+                        v-if="trendOf(entry)"
+                        class="timeline-chip-trend"
+                        :style="{ color: trendOf(entry).color }"
+                      >{{ trendOf(entry).text }}</span>
                     </span>
-                    <span class="fit-chip" :class="entry.fit">
-                      {{ entry.fit === 'new' ? 'Neue Affirmation' : 'Alte Überzeugung' }}
+                    <span class="fit-mark" :class="entry.fit">
+                      <i class="fit-dot"></i>{{ entry.fit === 'new' ? 'Affirmation' : 'Überzeugung' }}
                     </span>
                   </div>
                   <p v-if="entry.note" class="journal-note">„{{ entry.note }}“</p>
@@ -153,8 +160,8 @@
 <script>
 import moment from 'moment';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
-import { beliefCredibility } from '@/utils/credibility';
-import { truthColor, deltaColor } from '@/utils/beliefTrend';
+import { beliefCredibility, beliefPoints } from '@/utils/credibility';
+import { truthColor, deltaColor, trendMark } from '@/utils/beliefTrend';
 import NavIcon from '@/components/NavIcon.vue';
 
 export default {
@@ -246,6 +253,13 @@ export default {
       const d = this.deltaOf(entry);
       if (d === 0) return 'wie im Schnitt';
       return d < 0 ? `${d} zum Schnitt` : `+${d} zum Schnitt`;
+    },
+    // Where the belief has moved since its first reading — the same trend the
+    // belief cards draw, shortened to fit a chip.
+    trendOf(entry) {
+      const b = this.beliefOf(entry);
+      if (!b) return null;
+      return trendMark(beliefPoints(this.$store.getters.patterns, b, this.$store.getters.journal));
     },
     truthColor(v) { return truthColor(v); },
     deltaColor(d) { return deltaColor(d); },
@@ -399,7 +413,6 @@ export default {
   margin-left: 12px;
 }
 .score-trend { font-size: 0.85rem; font-weight: 600; white-space: nowrap; }
-.score-avg { font-size: 0.78rem; color: #636366; white-space: nowrap; }
 
 .timeline-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .timeline-chip {
@@ -416,18 +429,25 @@ export default {
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
 }
-/* Old belief in grey, new affirmation in the app's accent — the same
-   red/green convention the gap bar uses for expected vs. real. */
-.fit-chip {
+.timeline-chip-score { color: #636366; flex-shrink: 0; white-space: nowrap; }
+.timeline-chip-trend { font-weight: 600; flex-shrink: 0; white-space: nowrap; }
+
+/* Which of the two sentences this entry speaks for — a mark rather than a
+   chip: it qualifies the entry, it is not a thing to tap. */
+.fit-mark {
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
-  padding: 7px 13px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  border: 1px solid currentColor;
-  &.old { color: #8e8e93; }
-  &.new { color: #4ade80; }
+  gap: 6px;
+  font-size: 0.78rem;
+  color: #636366;
+  &.old .fit-dot { background: #8e8e93; }
+  &.new .fit-dot { background: #4ade80; }
+}
+.fit-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 .journal-note {
   font-size: 0.85rem;
