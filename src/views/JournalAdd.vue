@@ -30,10 +30,6 @@
         <journal-add-meaning
           v-if="belief"
           v-show="step === 3"
-          :belief="belief"
-          :patterns="allPatterns"
-          :journal="allJournal"
-          :allBeliefs="allBeliefs"
           :fact="fact"
           :initialValue="meaning"
           @changed="meaning = $event">
@@ -43,9 +39,6 @@
           v-if="belief"
           v-show="step === 4"
           :belief="belief"
-          :patterns="allPatterns"
-          :journal="allJournal"
-          :allBeliefs="allBeliefs"
           :initialFit="fit"
           :initialCredibility="credibility"
           @changed="onFitChanged">
@@ -54,10 +47,6 @@
         <journal-add-note
           v-if="belief"
           v-show="step === 5"
-          :belief="belief"
-          :patterns="allPatterns"
-          :journal="allJournal"
-          :allBeliefs="allBeliefs"
           :initialValue="note"
           @changed="note = $event">
         </journal-add-note>

@@ -1,6 +1,5 @@
 <template>
   <div>
-    <journal-context :belief="belief" :patterns="patterns" :allBeliefs="allBeliefs"></journal-context>
     <div v-if="fact" class="card fact-recall">
       <p class="aff-label">Was passiert ist</p>
       <p class="card-title fact-recall-text">{{ fact }}</p>
@@ -20,16 +19,12 @@
 </template>
 
 <script>
-import JournalContext from '@/components/JournalContext.vue';
 import InputCard from '@/components/InputCard.vue';
 
 export default {
   name: 'journal-add-meaning',
-  components: { JournalContext, InputCard },
+  components: { InputCard },
   props: {
-    belief: { type: Object, required: true },
-    patterns: { type: Array, default: () => [] },
-    allBeliefs: { type: Array, default: () => [] },
     fact: { type: String, default: '' },
     initialValue: { type: String, default: '' },
   },

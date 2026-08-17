@@ -1,7 +1,5 @@
 <template>
   <div>
-    <journal-context :belief="belief" :patterns="patterns" :allBeliefs="allBeliefs"></journal-context>
-
     <p class="wizard-question">Passt es zur alten oder zur neuen Überzeugung?</p>
     <p class="wizard-body">Wozu passt dieses Beispiel besser?</p>
 
@@ -36,18 +34,15 @@
 </template>
 
 <script>
-import JournalContext from '@/components/JournalContext.vue';
 import MeterCard from '@/components/MeterCard.vue';
 
 const DEFAULT_CREDIBILITY = 5;
 
 export default {
   name: 'journal-add-fit',
-  components: { JournalContext, MeterCard },
+  components: { MeterCard },
   props: {
     belief: { type: Object, required: true },
-    patterns: { type: Array, default: () => [] },
-    allBeliefs: { type: Array, default: () => [] },
     initialFit: { type: String, default: '' },
     initialCredibility: { type: Number, default: null },
   },
