@@ -6,6 +6,7 @@
       :quote="belief"
       :reaction="reaction"
       :reaction-feelings="feelings"
+      :coping="coping"
       :origin="origin"
       :needs="needs"
     ></wizard-context>
@@ -49,6 +50,7 @@ export default {
     entry: { type: Object, default: null },
     belief: { type: String, default: '' },
     reaction: { type: String, default: '' },
+    coping: { type: String, default: '' },
     feelings: { type: Array, default: () => [] },
     needs: { type: Array, default: () => [] },
     origin: { type: String, default: '' },

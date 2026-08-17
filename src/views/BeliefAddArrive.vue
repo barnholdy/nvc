@@ -1,6 +1,6 @@
 <template>
   <div>
-    <wizard-context :quote="belief" :reaction="reaction"></wizard-context>
+    <wizard-context :quote="belief" :reaction="reaction" :coping="coping"></wizard-context>
     <p class="wizard-question">Komm in deinem Körper an.</p>
     <p class="wizard-body">
       Atme ruhig mit dem Kreis mit. Lass es auf dich wirken.
@@ -23,6 +23,7 @@ export default {
   props: {
     belief: { type: String, default: '' },
     reaction: { type: String, default: '' },
+    coping: { type: String, default: '' },
   },
 };
 </script>

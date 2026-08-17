@@ -4,6 +4,7 @@
       :quote="belief"
       :reaction="reaction"
       :reaction-feelings="feelings"
+      :coping="coping"
       :origin="origin"
     ></wizard-context>
 
@@ -53,6 +54,7 @@ export default {
   props: {
     belief: { type: String, default: '' },
     reaction: { type: String, default: '' },
+    coping: { type: String, default: '' },
     feelings: { type: Array, default: () => [] },
     origin: { type: String, default: '' },
     initialNeeds: { type: Array, default: () => [] },

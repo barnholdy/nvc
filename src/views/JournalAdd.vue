@@ -22,7 +22,6 @@
           :belief="belief"
           :patterns="allPatterns"
           :journal="allJournal"
-          :allBeliefs="allBeliefs"
           :initialValue="fact"
           @changed="fact = $event">
         </journal-add-fact>

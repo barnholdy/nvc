@@ -7,6 +7,7 @@
       :exceptions="exceptions"
       :perspective="perspective"
       :reaction="reaction"
+      :coping="coping"
       :origin="contextOrigin">
     </wizard-context>
 
@@ -92,6 +93,7 @@ export default {
     belief: { type: String, default: '' },
     // The reaction from the earlier step, shown read-only for context.
     reaction: { type: String, default: '' },
+    coping: { type: String, default: '' },
     taxonomy: { type: Object, required: true },
     headline: { type: String, default: '' },
     prompt: { type: String, default: '' },

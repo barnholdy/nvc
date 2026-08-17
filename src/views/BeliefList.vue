@@ -108,7 +108,7 @@
           <!-- The order the work happens in: what the belief does, where it
                comes from, what it is for, then what has been put against it. -->
           <div
-            v-if="!compact && (entry.withBelief || feelingsOf(entry).length)"
+            v-if="!compact && (entry.withBelief || feelingsOf(entry).length || copingOf(entry))"
             class="detail-row"
             :class="{ open: isOpen(entry, 'reaction') }"
             @click.stop="toggleRow(entry, 'reaction')"
@@ -123,6 +123,9 @@
                 flat
                 class="mt-2"
               ></feeling-chips>
+              <!-- How the belief is dealt with belongs to the reaction it
+                   shapes, so it unfolds with it. -->
+              <span v-if="copingOf(entry)" class="coping-chip">{{ copingOf(entry) }}</span>
             </template>
             <template v-else>
               <p class="detail-value">{{ entry.withBelief || feelingNames(entry) }}</p>
@@ -219,11 +222,6 @@
             <p class="aff-label">Affirmation</p>
             <p class="aff-text">„{{ affirmationOf(entry).text }}“</p>
             <div class="aff-foot">
-              <span class="aff-score">
-                <span class="aff-value">{{ round(truthOf(affirmationOf(entry))) }}</span>
-                <span class="aff-max">/10</span>
-                <span class="aff-word">Glaubwürdigkeit</span>
-              </span>
               <button class="card-btn" @click.stop="startPractice(entry)">Üben</button>
             </div>
           </div>
@@ -294,9 +292,9 @@ import {
   BELIEF_STATUS_LABELS,
 } from '@/utils/beliefStatus';
 import { experimentsOf, experimentDisplayState } from '@/utils/experiment';
-import { normalizeTruth } from '@/utils/affirmationTruth';
 import { beliefCredibility, beliefPoints } from '@/utils/credibility';
 import { deltaColor } from '@/utils/beliefTrend';
+import { copingLabel } from '@/utils/coping';
 import { requestedId, scrollRowIntoView, scrollRowToTop } from '@/utils/reveal';
 import NavIcon from '@/components/NavIcon.vue';
 
@@ -398,6 +396,7 @@ export default {
     // Only from the second reading on: one number has no direction. The month
     // named is the one the run started in, so "seit Juni" means "since the
     // first time you rated this".
+    copingOf(entry) { return copingLabel(entry && entry.coping); },
     trendOf(entry) {
       const points = beliefPoints(this.$store.getters.patterns, entry, this.$store.getters.journal);
       if (points.length < 2) return null;
@@ -462,7 +461,6 @@ export default {
       const list = Array.isArray(entry.affirmations) ? entry.affirmations : [];
       return list.find(a => a && a.text) || null;
     },
-    truthOf(a) { return normalizeTruth(a.resonance); },
     names(list) { return list.map(x => x && x.name).filter(Boolean).join(' · '); },
     feelingNames(entry) { return this.names(this.feelingsOf(entry)); },
     newFeelingNames(entry) { return this.names(this.newFeelingsOf(entry)); },
@@ -620,6 +618,18 @@ export default {
   font-size: 0.85rem;
   font-weight: 600;
   white-space: nowrap;
+}
+/* Quieter than a feeling chip: it names a strategy, not something picked
+   here, and must not outweigh the reaction it belongs to. */
+.coping-chip {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 8px;
+  border: 1px solid #3a3a3c;
+  border-radius: 999px;
+  padding: 4px 11px;
+  font-size: 0.78rem;
+  color: #8e8e93;
 }
 /* Only the head answers a swipe; the rest of the card scrolls freely. */
 

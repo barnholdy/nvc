@@ -46,6 +46,8 @@
           flat
           :class="{ 'mt-2': row.text }"
         ></feeling-chips>
+        <!-- How the belief is dealt with belongs to the reaction it shapes. -->
+        <span v-if="row.mark" class="coping-chip">{{ row.mark }}</span>
       </template>
       <template v-else>
         <p class="detail-value">{{ row.summary }}</p>
@@ -58,6 +60,7 @@
 <script>
 import FeelingChips from '@/components/FeelingChips.vue';
 import { fearGap, fearGapColor } from '@/utils/experiment';
+import { copingLabel } from '@/utils/coping';
 
 // One card for what the wizard already knows: the thing being worked on, and
 // the answers given so far. Same quote, same score row, same detail rows the
@@ -77,6 +80,8 @@ export default {
     // ones, shown inside that same row rather than as a row of their own.
     perspectiveFeelings: { type: Array, default: () => [] },
     reaction: { type: String, default: '' },
+    // 'erdulden' | 'vermeiden' | 'ueberkompensieren'
+    coping: { type: String, default: '' },
     // Feelings that belong with "Reaktion" — shown the same combined way the
     // belief cards show them.
     reactionFeelings: { type: Array, default: () => [] },
@@ -121,20 +126,26 @@ export default {
       const row = (key, label, opts) => {
         const text = opts.text || '';
         const chips = opts.chips || [];
-        if (!text && !chips.length) return;
+        const mark = opts.mark || '';
+        if (!text && !chips.length && !mark) return;
         out.push({
           key,
           label,
           text,
           chips,
+          mark,
           chipType: opts.chipType || 'feelings',
-          summary: text || chips.map(c => c.name).join(' · '),
+          summary: text || chips.map(c => c.name).join(' · ') || mark,
         });
       };
       row('situation', 'Situation', { text: this.situation });
       row('exceptions', 'Ausnahmen', { text: this.exceptions });
       row('perspective', 'Neue Reaktion', { text: this.perspective, chips: this.perspectiveFeelings });
-      row('reaction', 'Reaktion', { text: this.reaction, chips: this.reactionFeelings });
+      row('reaction', 'Reaktion', {
+        text: this.reaction,
+        chips: this.reactionFeelings,
+        mark: copingLabel(this.coping),
+      });
       row('origin', 'Ursprung', { text: this.origin });
       row('needs', 'Bedürfnisse', { chips: this.needs, chipType: 'needs' });
       row('fear', 'Befürchtung', { text: this.fear });
@@ -168,6 +179,18 @@ export default {
 .wc-quote {
   margin: 0;
   white-space: pre-wrap;
+}
+/* Quieter than a feeling chip: it names a strategy, not something chosen
+   here, and it must not outweigh the reaction it belongs to. */
+.coping-chip {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 8px;
+  border: 1px solid #3a3a3c;
+  border-radius: 999px;
+  padding: 4px 11px;
+  font-size: 0.78rem;
+  color: #8e8e93;
 }
 /* The first row only needs a rule above it when a quote sits there. */
 .detail-row:first-child { border-top: none; }

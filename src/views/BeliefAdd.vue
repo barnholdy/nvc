@@ -25,13 +25,15 @@
         <belief-add-arrive
           v-show="step === 3"
           :belief="belief"
-          :reaction="withBelief">
+          :reaction="withBelief"
+          :coping="coping">
         </belief-add-arrive>
 
         <belief-add-feeling-need
           v-show="step === 4"
           :belief="belief"
           :reaction="withBelief"
+          :coping="coping"
           :taxonomy="taxonomy"
           :initialFeelings="selectedFeelings"
           :maxSelections="MAX_FEELINGS"
@@ -44,6 +46,7 @@
           v-show="step === 6"
           :belief="belief"
           :reaction="withBelief"
+          :coping="coping"
           :feelings="selectedFeelings"
           :initialValue="origin"
           @changed="origin = $event">
@@ -56,6 +59,7 @@
           v-show="step === 7"
           :belief="belief"
           :reaction="withBelief"
+          :coping="coping"
           :feelings="selectedFeelings"
           :origin="origin"
           :initialNeeds="selectedNeeds"
@@ -69,6 +73,7 @@
           :entry="editEntry"
           :belief="belief"
           :reaction="withBelief"
+          :coping="coping"
           :feelings="selectedFeelings"
           :needs="selectedNeeds"
           :origin="origin"

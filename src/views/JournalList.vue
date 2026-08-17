@@ -3,7 +3,7 @@
     <v-content>
       <div class="screen-header">
         <div class="screen-title-row">
-          <h1 class="screen-title">Positiv-Tagebuch</h1>
+          <h1 class="screen-title">Tagebuch</h1>
           <div class="screen-actions">
             <button class="screen-add" @click="$router.push('/add-journal')" aria-label="Neuer Eintrag">+</button>
             <button class="screen-add" @click="$router.push('/settings')" aria-label="Einstellungen">
@@ -51,55 +51,58 @@
             <span class="timeline-dot"></span>
             <div class="timeline-body">
               <p class="timeline-meta">{{ dayLabel(entry.time) }}</p>
-              <!-- The whole card answers the swipe, so it slides off the
-                   buttons the way the belief and action cards do. -->
-              <div class="head-swipe">
-                <div v-if="isSwiping(entry.time)" class="swipe-panel left">
-                  <div class="swipe-group single swipe-btn-edit">
-                    <button class="swipe-btn swipe-btn-edit" @click.stop="editEntry(entry)">Bearbeiten</button>
+              <div class="card journal-card">
+                <!-- Only the head answers the swipe; the rest of the card
+                     stays put, the way the belief and action cards work. -->
+                <div class="head-swipe">
+                  <div v-if="isSwiping(entry.time)" class="swipe-panel left">
+                    <div class="swipe-group single swipe-btn-edit">
+                      <button class="swipe-btn swipe-btn-edit" @click.stop="editEntry(entry)">Bearbeiten</button>
+                    </div>
+                  </div>
+                  <div v-if="isSwiping(entry.time)" class="swipe-panel right">
+                    <div class="swipe-group single swipe-btn-delete">
+                      <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">Löschen</button>
+                    </div>
+                  </div>
+                  <div
+                    class="card-head swipe-handle"
+                    :style="rowSt(entry.time)"
+                    @touchstart="tsStart($event, entry.time)"
+                    @touchmove="tsMove($event, entry.time)"
+                    @touchend="tsEnd($event, entry.time)"
+                  >
+                    <p class="card-title">{{ entry.fact }}</p>
                   </div>
                 </div>
-                <div v-if="isSwiping(entry.time)" class="swipe-panel right">
-                  <div class="swipe-group single swipe-btn-delete">
-                    <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">Löschen</button>
-                  </div>
+
+                <p v-if="entry.meaning" class="journal-meaning">{{ entry.meaning }}</p>
+
+                <!-- The objection first, then the sentence it is aimed at:
+                     the affirmation gets the last word. -->
+                <p v-if="entry.note" class="journal-note">„{{ entry.note }}“</p>
+
+                <!-- The sentence this entry is evidence for. -->
+                <div v-if="affirmationOf(entry)" class="aff-box">
+                  <p class="aff-label">Affirmation</p>
+                  <p class="aff-text">„{{ affirmationOf(entry) }}“</p>
                 </div>
-                <div
-                  class="card journal-card swipe-handle"
-                  :style="rowSt(entry.time)"
-                  @touchstart="tsStart($event, entry.time)"
-                  @touchmove="tsMove($event, entry.time)"
-                  @touchend="tsEnd($event, entry.time)"
-                >
-                  <p class="card-title">{{ entry.fact }}</p>
-                  <p v-if="entry.meaning" class="journal-meaning">{{ entry.meaning }}</p>
 
-                  <!-- The objection first, then the sentence it is aimed at:
-                       the affirmation gets the last word. -->
-                  <p v-if="entry.note" class="journal-note">„{{ entry.note }}“</p>
-
-                  <!-- The sentence this entry is evidence for. -->
-                  <div v-if="affirmationOf(entry)" class="aff-box">
-                    <p class="aff-label">Affirmation</p>
-                    <p class="aff-text">„{{ affirmationOf(entry) }}“</p>
-                  </div>
-
-                  <div class="timeline-chips">
-                    <span class="timeline-chip" @click.stop="openBelief(entry)">
-                      „{{ beliefTextOf(entry) }}“
-                      <span v-if="typeof entry.credibility === 'number'" class="timeline-chip-score">
-                        {{ entry.credibility }}/10
-                      </span>
-                      <span
-                        v-if="deltaMark(entry)"
-                        class="timeline-chip-trend"
-                        :style="{ color: deltaMark(entry).color }"
-                      >{{ deltaMark(entry).text }}</span>
+                <div class="timeline-chips">
+                  <span class="timeline-chip" @click.stop="openBelief(entry)">
+                    „{{ beliefTextOf(entry) }}“
+                    <span v-if="typeof entry.credibility === 'number'" class="timeline-chip-score">
+                      {{ entry.credibility }}/10
                     </span>
-                    <span class="fit-mark" :class="entry.fit">
-                      <i class="fit-dot"></i>{{ entry.fit === 'new' ? 'Affirmation' : 'Überzeugung' }}
-                    </span>
-                  </div>
+                    <span
+                      v-if="deltaMark(entry)"
+                      class="timeline-chip-trend"
+                      :style="{ color: deltaMark(entry).color }"
+                    >{{ deltaMark(entry).text }}</span>
+                  </span>
+                  <span class="fit-mark" :class="entry.fit">
+                    <i class="fit-dot"></i>{{ entry.fit === 'new' ? 'Affirmation' : 'Überzeugung' }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -362,6 +365,10 @@ export default {
 /* The card is the handle, so it keeps its own fill and radius and only
    drops the side margin .card carries for a full-width list. */
 .journal-card { margin: 0; }
+/* .aff-box carries no top margin of its own — everywhere else it follows a
+   detail row whose padding already holds it off. Here a paragraph sits above
+   it, and a paragraph's bottom margin is zero. */
+.aff-box { margin-top: 14px; }
 .journal-meaning {
   font-size: 0.92rem;
   color: #8e8e93;

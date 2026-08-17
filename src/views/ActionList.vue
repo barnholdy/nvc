@@ -171,13 +171,6 @@
           <div v-if="affirmationOf(row)" class="aff-box" :class="{ 'aff-box-loose': compact }">
             <p class="aff-label">Affirmation</p>
             <p class="aff-text">„{{ affirmationOf(row) }}“</p>
-            <div class="aff-foot" v-if="affirmationTruth(row) !== null">
-              <span class="aff-score">
-                <span class="aff-value">{{ round(affirmationTruth(row)) }}</span>
-                <span class="aff-max">/10</span>
-                <span class="aff-word">Glaubwürdigkeit</span>
-              </span>
-            </div>
           </div>
 
           <!-- The belief under test, kept at the foot of the card: the run is
@@ -329,7 +322,7 @@ import {
   isDue,
   isPlanned,
 } from '@/utils/experiment';
-import { beliefCredibility, affirmationCredibility } from '@/utils/credibility';
+import { beliefCredibility } from '@/utils/credibility';
 import { deltaColor } from '@/utils/beliefTrend';
 import { beliefStatusLabel, beliefStatusColor } from '@/utils/beliefStatus';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
@@ -604,13 +597,6 @@ export default {
       const list = ((this.beliefOf(row) || {}).affirmations) || [];
       const first = list.find(a => a && a.text);
       return first ? first.text : '';
-    },
-    // The sentence's own standing across everything it was rated in, the same
-    // number the Affirmationen list shows.
-    affirmationTruth(row) {
-      const text = this.affirmationOf(row);
-      if (!text) return null;
-      return affirmationCredibility(this.$store.getters.beliefs, text);
     },
     // Coming from a belief card: select its chip and scroll the row so the
     // selection is visible rather than off to the right.

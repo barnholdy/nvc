@@ -31,12 +31,7 @@
 <script>
 import WizardContext from '@/components/WizardContext.vue';
 import InputCard from '@/components/InputCard.vue';
-
-const COPING_OPTIONS = [
-  { value: 'erdulden', label: 'Erdulden', desc: 'Für wahr halten.' },
-  { value: 'vermeiden', label: 'Vermeiden', desc: 'Aus dem Weg gehen.' },
-  { value: 'ueberkompensieren', label: 'Überkompensieren', desc: 'Gegenteil tun.' },
-];
+import { COPING_OPTIONS } from '@/utils/coping';
 
 export default {
   name: 'belief-add-reaction',

@@ -2,7 +2,12 @@
   <div>
     <!-- No needs here: they are picked on the next step. The feelings are
          named in the sentence under the question rather than listed above it. -->
-    <wizard-context :quote="belief" :reaction="reaction" :reaction-feelings="feelings"></wizard-context>
+    <wizard-context
+      :quote="belief"
+      :reaction="reaction"
+      :reaction-feelings="feelings"
+      :coping="coping"
+    ></wizard-context>
 
     <p class="wizard-question">Wo kommt das her?</p>
     <feeling-words
@@ -40,6 +45,7 @@ export default {
   props: {
     belief: { type: String, default: '' },
     reaction: { type: String, default: '' },
+    coping: { type: String, default: '' },
     feelings: { type: Array, default: () => [] },
     initialValue: { type: String, default: '' },
   },

@@ -12,13 +12,6 @@
     <div v-if="affirmationText" class="aff-box">
       <p class="aff-label">Affirmation</p>
       <p class="aff-text">„{{ affirmationText }}“</p>
-      <div v-if="affirmationTruth !== null" class="aff-foot">
-        <span class="aff-score">
-          <span class="aff-value">{{ round(affirmationTruth) }}</span>
-          <span class="aff-max">/10</span>
-          <span class="aff-word">Glaubwürdigkeit</span>
-        </span>
-      </div>
     </div>
 
     <p class="wizard-question">Was tust du konkret?</p>
@@ -94,7 +87,7 @@ import WizardContext from '@/components/WizardContext.vue';
 import InputCard from '@/components/InputCard.vue';
 import { askClaude, loadApiKey, saveApiKey, parseLines } from '@/utils/ai';
 import { buildActionPrompt, SUGGESTION_COUNT } from '@/utils/actionSuggestions';
-import { beliefCredibility, affirmationCredibility } from '@/utils/credibility';
+import { beliefCredibility } from '@/utils/credibility';
 
 export default {
   name: 'belief-act-situation',
@@ -132,12 +125,6 @@ export default {
     // at so far, not a reading taken here.
     beliefTruth() {
       return beliefCredibility(this.patterns, this.entry, this.journal);
-    },
-    affirmationTruth() {
-      const list = (this.entry && this.entry.affirmations) || [];
-      const first = list.find(a => a && a.text);
-      if (!first) return null;
-      return affirmationCredibility(this.allBeliefs, first.text);
     },
   },
   watch: {

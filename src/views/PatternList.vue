@@ -52,37 +52,51 @@
               <span class="timeline-dot"></span>
               <div class="timeline-body">
                 <p class="timeline-meta">{{ dayLabel(entry.time) }}</p>
-                <div class="head-swipe">
-                  <div v-if="isSwiping(entry.time)" class="swipe-panel left">
-                    <div class="swipe-group single swipe-btn-edit">
-                      <button class="swipe-btn swipe-btn-edit" @click.stop="editEntry(entry)">Bearbeiten</button>
+                <div class="card situation-card">
+                  <!-- Only the head answers the swipe; the rest of the card
+                       stays put, the way the belief and action cards work. -->
+                  <div class="head-swipe">
+                    <div v-if="isSwiping(entry.time)" class="swipe-panel left">
+                      <div class="swipe-group single swipe-btn-edit">
+                        <button class="swipe-btn swipe-btn-edit" @click.stop="editEntry(entry)">Bearbeiten</button>
+                      </div>
+                    </div>
+                    <div v-if="isSwiping(entry.time)" class="swipe-panel right">
+                      <div class="swipe-group single swipe-btn-delete">
+                        <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">Löschen</button>
+                      </div>
+                    </div>
+                    <div
+                      class="card-head swipe-handle"
+                      :style="rowSt(entry.time)"
+                      @touchstart="tsStart($event, entry.time)"
+                      @touchmove="tsMove($event, entry.time)"
+                      @touchend="tsEnd($event, entry.time)"
+                    >
+                      <p class="card-title">{{ entry.trigger }}</p>
                     </div>
                   </div>
-                  <div v-if="isSwiping(entry.time)" class="swipe-panel right">
-                    <div class="swipe-group single swipe-btn-delete">
-                      <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">Löschen</button>
-                    </div>
-                  </div>
-                  <p
-                    class="timeline-text swipe-handle"
-                    :style="rowSt(entry.time)"
-                    @touchstart="tsStart($event, entry.time)"
-                    @touchmove="tsMove($event, entry.time)"
-                    @touchend="tsEnd($event, entry.time)"
-                  >{{ entry.trigger }}</p>
-                </div>
-                <div v-if="beliefFilter === null" class="timeline-chips">
-                  <span
-                    v-for="b in beliefsOf(entry)"
-                    :key="b.time"
-                    class="timeline-chip"
-                    @click.stop="openBelief(b)"
-                  >
-                    „{{ b.belief }}“
-                    <span v-if="truthOf(entry, b) !== null" class="timeline-chip-score">
-                      {{ truthOf(entry, b) }}/10
+
+                  <!-- What this situation rated each belief at, and how far
+                       that sits from where the belief stands overall. -->
+                  <div v-if="beliefFilter === null" class="timeline-chips">
+                    <span
+                      v-for="b in beliefsOf(entry)"
+                      :key="b.time"
+                      class="timeline-chip"
+                      @click.stop="openBelief(b)"
+                    >
+                      „{{ b.belief }}“
+                      <span v-if="truthOf(entry, b) !== null" class="timeline-chip-score">
+                        {{ truthOf(entry, b) }}/10
+                      </span>
+                      <span
+                        v-if="deltaMark(entry, b)"
+                        class="timeline-chip-trend"
+                        :style="{ color: deltaMark(entry, b).color }"
+                      >{{ deltaMark(entry, b).text }}</span>
                     </span>
-                  </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -128,6 +142,7 @@
 import moment from 'moment';
 import { isComplete } from '@/utils/beliefStatus';
 import { beliefTruthIn, beliefCredibility } from '@/utils/credibility';
+import { deltaColor } from '@/utils/beliefTrend';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 import NavIcon from '@/components/NavIcon.vue';
 
@@ -235,6 +250,23 @@ export default {
       return list.length > 0 && list.every(isComplete);
     },
     truthOf(entry, belief) { return beliefTruthIn(entry, belief); },
+    // How far this situation's reading sits from where the belief stands
+    // across all of them. Null when there is nothing to compare, and when it
+    // sits right on it.
+    deltaMark(entry, belief) {
+      const own = beliefTruthIn(entry, belief);
+      if (own === null) return null;
+      const avg = beliefCredibility(
+        this.$store.getters.patterns, belief, this.$store.getters.journal,
+      );
+      if (avg === null) return null;
+      const delta = Math.round((own - avg) * 10) / 10;
+      if (delta === 0) return null;
+      return {
+        text: (delta > 0 ? '+' : '−') + String(Math.abs(delta)).replace('.', ','),
+        color: deltaColor(delta),
+      };
+    },
     dayLabel(time) {
       moment.locale('de');
       return moment(time).format('D. MMM').toUpperCase();
@@ -314,7 +346,7 @@ export default {
   position: relative;
   display: flex;
   gap: 14px;
-  padding: 4px 20px 18px;
+  padding: 4px 20px 12px;
   background: #000;
   /* Each entry draws the thread across its own box only, in two halves that
      meet at its dot: never past its own edges, because every row paints an
@@ -356,14 +388,10 @@ export default {
   margin: 0 0 6px;
   text-transform: uppercase;
 }
-.head-swipe .swipe-handle { background: #000; }
-.timeline-text {
-  font-size: 1rem;
-  color: #ebebf5;
-  line-height: 1.45;
-  margin: 0 0 10px;
-}
-.timeline-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+/* The card is the handle, so it keeps its own fill and radius and only drops
+   the side margin .card carries for a full-width list. */
+.situation-card { margin: 0; }
+.timeline-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .timeline-chip {
   display: inline-flex;
   align-items: center;
@@ -378,7 +406,8 @@ export default {
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
 }
-.timeline-chip-score { color: #636366; }
+.timeline-chip-score { color: #636366; flex-shrink: 0; white-space: nowrap; }
+.timeline-chip-trend { font-weight: 600; flex-shrink: 0; white-space: nowrap; }
 
 .confirm-dialog { background: #1c1c1e !important; }
 .confirm-title { color: #fff; font-size: 1rem; justify-content: center; padding: 16px; }

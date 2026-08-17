@@ -1,6 +1,6 @@
 <template>
   <div>
-    <journal-context :belief="belief" :patterns="patterns" :allBeliefs="allBeliefs"></journal-context>
+    <journal-context :belief="belief" :patterns="patterns" :journal="journal"></journal-context>
 
     <p class="wizard-question">Was ist passiert?</p>
     <p class="wizard-body">Nur die Fakten — was du gesehen, gehört oder erlebt hast, ohne Deutung.</p>
@@ -25,7 +25,7 @@ export default {
   props: {
     belief: { type: Object, required: true },
     patterns: { type: Array, default: () => [] },
-    allBeliefs: { type: Array, default: () => [] },
+    journal: { type: Array, default: () => [] },
     initialValue: { type: String, default: '' },
   },
   data() {

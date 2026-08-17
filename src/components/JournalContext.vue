@@ -8,23 +8,13 @@
     <div v-if="affirmationText" class="aff-box">
       <p class="aff-label">Affirmation</p>
       <p class="aff-text">„{{ affirmationText }}“</p>
-      <div class="aff-foot">
-        <span class="aff-score">
-          <template v-if="affirmationTruth !== null">
-            <span class="aff-value">{{ round(affirmationTruth) }}</span>
-            <span class="aff-max">/10</span>
-            <span class="aff-word">Glaubwürdigkeit</span>
-          </template>
-          <span v-else class="aff-word">Noch nicht bewertet</span>
-        </span>
-      </div>
     </div>
   </div>
 </template>
 
 <script>
 import WizardContext from '@/components/WizardContext.vue';
-import { beliefCredibility, affirmationCredibility } from '@/utils/credibility';
+import { beliefCredibility } from '@/utils/credibility';
 
 // The same two numbers their own lists show: everything each has been rated
 // at so far, not a reading taken here.
@@ -34,9 +24,6 @@ export default {
   props: {
     belief: { type: Object, required: true },
     patterns: { type: Array, default: () => [] },
-    // Every belief, because an affirmation's standing is averaged across all
-    // of them — the same sentence can sit on more than one.
-    allBeliefs: { type: Array, default: () => [] },
     journal: { type: Array, default: () => [] },
   },
   computed: {
@@ -45,11 +32,6 @@ export default {
     },
     affirmationText() {
       return (this.belief.affirmations || []).map(a => a && a.text).filter(Boolean).join(' · ');
-    },
-    affirmationTruth() {
-      const first = (this.belief.affirmations || []).find(a => a && a.text);
-      if (!first) return null;
-      return affirmationCredibility(this.allBeliefs, first.text);
     },
   },
   methods: {
