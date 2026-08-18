@@ -77,9 +77,8 @@
                     </div>
                   </div>
 
-                  <!-- What this situation rated each belief at. No trend
-                       here: this screen is the record the trend is read off,
-                       so a chip per row would repeat it once per situation. -->
+                  <!-- What this situation rated each belief at, and how that
+                       compares to the belief's overall average. -->
                   <div v-if="beliefFilter === null" class="timeline-chips">
                     <span
                       v-for="b in beliefsOf(entry)"
@@ -91,6 +90,11 @@
                       <span v-if="truthOf(entry, b) !== null" class="timeline-chip-score">
                         {{ truthOf(entry, b) }}/10
                       </span>
+                      <span
+                        v-if="deltaMark(entry, b)"
+                        class="timeline-chip-trend"
+                        :style="{ color: deltaMark(entry, b).color }"
+                      >{{ deltaMark(entry, b).text }}</span>
                     </span>
                   </div>
                 </div>
@@ -137,7 +141,8 @@
 <script>
 import moment from 'moment';
 import { isComplete } from '@/utils/beliefStatus';
-import { beliefTruthIn } from '@/utils/credibility';
+import { beliefTruthIn, beliefCredibility } from '@/utils/credibility';
+import { deltaColor } from '@/utils/beliefTrend';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 import NavIcon from '@/components/NavIcon.vue';
 
@@ -242,6 +247,19 @@ export default {
       return list.length > 0 && list.every(isComplete);
     },
     truthOf(entry, belief) { return beliefTruthIn(entry, belief); },
+    // How far this situation's own reading sits from the belief's average —
+    // the same comparison the Handlungen and Tagebuch chips already show.
+    deltaMark(entry, belief) {
+      const own = this.truthOf(entry, belief);
+      const avg = beliefCredibility(this.$store.getters.patterns, belief, this.$store.getters.journal);
+      if (own === null || avg === null) return null;
+      const delta = Math.round((own - avg) * 10) / 10;
+      if (delta === 0) return null;
+      return {
+        text: (delta > 0 ? '+' : '−') + String(Math.abs(delta)).replace('.', ','),
+        color: deltaColor(delta),
+      };
+    },
     dayLabel(time) {
       moment.locale('de');
       return moment(time).format('D. MMM').toUpperCase();
@@ -382,6 +400,7 @@ export default {
   &:active { opacity: 0.6; }
 }
 .timeline-chip-score { color: #636366; flex-shrink: 0; white-space: nowrap; }
+.timeline-chip-trend { font-weight: 600; flex-shrink: 0; white-space: nowrap; }
 
 .confirm-dialog { background: #1c1c1e !important; }
 .confirm-title { color: #fff; font-size: 1rem; justify-content: center; padding: 16px; }

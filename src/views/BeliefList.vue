@@ -24,23 +24,29 @@
           >
             <v-icon small>{{ compact ? 'unfold_more' : 'unfold_less' }}</v-icon>
           </button>
-          <v-menu offset-y :close-on-content-click="true">
-            <button slot="activator" class="pill pill-icon" aria-label="Sortieren">
+          <div class="sort-wrap">
+            <button
+              ref="sortBtn"
+              class="pill pill-icon"
+              :class="{ active: sortMenuOpen }"
+              aria-label="Sortieren"
+              @click.stop="toggleSortMenu"
+            >
               <v-icon small>sort</v-icon>
             </button>
-            <v-list dense>
-              <v-list-tile
+            <div v-if="sortMenuOpen" class="sort-backdrop" @click="sortMenuOpen = false"></div>
+            <div v-if="sortMenuOpen" class="sort-menu" :style="sortMenuPos">
+              <button
                 v-for="opt in sortOptions"
                 :key="opt.key"
-                @click="sortMode = opt.key"
+                class="sort-menu-item"
+                @click="selectSort(opt.key)"
               >
-                <v-list-tile-title>{{ opt.label }}</v-list-tile-title>
-                <v-list-tile-action v-if="sortMode === opt.key">
-                  <v-icon small color="#4ade80">check</v-icon>
-                </v-list-tile-action>
-              </v-list-tile>
-            </v-list>
-          </v-menu>
+                <span>{{ opt.label }}</span>
+                <v-icon v-if="sortMode === opt.key" small color="#4ade80">check</v-icon>
+              </button>
+            </div>
+          </div>
           <button
             v-for="f in filters"
             :key="f.key"
@@ -345,9 +351,9 @@ const PRACTICE_KEY = 'nvc.amen';
 const COMPACT_KEY = 'nvc.beliefsCompact';
 const SORT_KEY = 'nvc.beliefsSort';
 const SORT_OPTIONS = [
-  { key: 'situations', label: 'Situationen (häufigste zuerst)' },
+  { key: 'situations', label: 'Situationen' },
   { key: 'recent', label: 'Zuletzt genannt' },
-  { key: 'credibility', label: 'Glaubwürdigkeit (höchste zuerst)' },
+  { key: 'credibility', label: 'Glaubwürdigkeit' },
 ];
 const SORT_KEYS = SORT_OPTIONS.map(o => o.key);
 
@@ -365,6 +371,8 @@ export default {
       sortMode: SORT_KEYS.indexOf(localStorage.getItem(SORT_KEY)) !== -1
         ? localStorage.getItem(SORT_KEY)
         : 'situations',
+      sortMenuOpen: false,
+      sortMenuPos: { top: '0px', left: '0px' },
       entryToDelete: null,
       isDeleteDialogShowing: false,
       // Saving a belief returns here with the tab it now belongs to.
@@ -461,6 +469,21 @@ export default {
     },
   },
   methods: {
+    // Fixed rather than absolute: the pill row scrolls horizontally, and an
+    // absolutely positioned menu would be clipped by that same overflow.
+    toggleSortMenu() {
+      if (this.sortMenuOpen) { this.sortMenuOpen = false; return; }
+      const el = this.$refs.sortBtn;
+      const r = el.getBoundingClientRect();
+      const MENU_WIDTH = 220;
+      const left = Math.min(r.left, window.innerWidth - MENU_WIDTH - 14);
+      this.sortMenuPos = { top: `${r.bottom + 6}px`, left: `${Math.max(14, left)}px` };
+      this.sortMenuOpen = true;
+    },
+    selectSort(key) {
+      this.sortMode = key;
+      this.sortMenuOpen = false;
+    },
     // Open the belief this route asks for. It may well sit under a different
     // tab than the one showing, so the tab follows the belief rather than the
     // other way round.
@@ -681,6 +704,47 @@ export default {
 <style scoped lang="scss">
 .dark-page { background: #000; min-height: 100vh; }
 
+/* Anchors the dropdown to the button that opens it, the same shrink-to-fit
+   width a pill has — a full-width wrapper would stretch the flex row. */
+.sort-wrap { position: relative; flex-shrink: 0; }
+/* Catches the tap that dismisses the menu, without dimming the screen the
+   way a real dialog's backdrop would for what is just a small picker. */
+.sort-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: transparent;
+}
+.sort-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 41;
+  min-width: 220px;
+  background: #2c2c2e;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  padding: 4px 0;
+  overflow: hidden;
+}
+.sort-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.92rem;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  &:active { background: rgba(255, 255, 255, 0.06); }
+}
 
 .mt-2 { margin-top: 8px !important; }
 
