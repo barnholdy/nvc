@@ -4,7 +4,7 @@
       <p class="wc-label">{{ label }}</p>
       <p class="card-title wc-quote">„{{ quote }}“</p>
       <div v-if="score !== null" class="score-row">
-        <span class="score-value">x̃ {{ score }}</span>
+        <span class="score-value">{{ standing ? '' : 'x̃ ' }}{{ score }}</span>
         <span class="score-max">/10</span>
         <span class="score-label">Glaubwürdigkeit</span>
       </div>
@@ -71,8 +71,12 @@ export default {
   props: {
     label: { type: String, default: 'Überzeugung' },
     quote: { type: String, default: '' },
-    // Raw 0–10 standing, or null when nothing was ever rated.
+    // Raw 0–10 reading, or null when nothing was ever rated.
     credibility: { type: Number, default: null },
+    // True when `credibility` is the belief's current standing (median of
+    // its most recent readings) rather than the frozen first-three anchor —
+    // the anchor keeps the x̃ mark, the standing reads as a plain number.
+    standing: { type: Boolean, default: false },
     situation: { type: String, default: '' },
     exceptions: { type: String, default: '' },
     perspective: { type: String, default: '' },

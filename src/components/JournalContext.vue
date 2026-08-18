@@ -3,7 +3,7 @@
     <!-- Both ends of what a journal entry is for, on every step: the belief
          being weakened and the affirmation being built up, each with the
          standing it has right now. -->
-    <wizard-context :quote="belief.belief" :credibility="beliefTruth"></wizard-context>
+    <wizard-context :quote="belief.belief" :credibility="beliefTruth" standing></wizard-context>
 
     <div v-if="affirmationText" class="aff-box">
       <p class="aff-label">Affirmation</p>
@@ -14,10 +14,10 @@
 
 <script>
 import WizardContext from '@/components/WizardContext.vue';
-import { beliefCredibility } from '@/utils/credibility';
+import { beliefStanding } from '@/utils/credibility';
 
-// The same two numbers their own lists show: everything each has been rated
-// at so far, not a reading taken here.
+// Where the belief stands right now, the same number the Überzeugungen list
+// shows — not a reading taken here.
 export default {
   name: 'journal-context',
   components: { WizardContext },
@@ -28,7 +28,7 @@ export default {
   },
   computed: {
     beliefTruth() {
-      return beliefCredibility(this.patterns, this.belief, this.journal);
+      return beliefStanding(this.patterns, this.belief, this.journal);
     },
     affirmationText() {
       return (this.belief.affirmations || []).map(a => a && a.text).filter(Boolean).join(' · ');
