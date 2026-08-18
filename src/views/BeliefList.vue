@@ -90,21 +90,8 @@
         </div>
           <span class="card-pill">{{ statusLabel(entry) }}</span>
 
-          <!-- The meter first, full width — then the movement of that
-               reading since the anchor was set, tucked under it. -->
           <div v-if="credibility(entry) !== null" class="score-row">
             <credibility-meter :value="credibility(entry)" :baseline="anchorOf(entry)"></credibility-meter>
-            <div v-if="trendOf(entry)" class="score-side">
-              <sparkline
-                class="score-spark"
-                :values="trendOf(entry).values"
-                :color="trendOf(entry).color"
-              ></sparkline>
-              <span
-                class="score-trend"
-                :style="{ color: trendOf(entry).color }"
-              >{{ trendOf(entry).text }}</span>
-            </div>
           </div>
 
           <div v-if="!compact" class="card-sep"></div>
@@ -326,9 +313,7 @@
 </template>
 
 <script>
-import moment from 'moment';
 import FeelingChips from '@/components/FeelingChips.vue';
-import Sparkline from '@/components/Sparkline.vue';
 import CredibilityMeter from '@/components/CredibilityMeter.vue';
 import AffirmationPractice from '@/components/AffirmationPractice.vue';
 import {
@@ -339,8 +324,7 @@ import {
   BELIEF_STATUS_LABELS,
 } from '@/utils/beliefStatus';
 import { experimentsOf, experimentDisplayState } from '@/utils/experiment';
-import { beliefCredibility, beliefStanding, beliefPoints } from '@/utils/credibility';
-import { deltaColor } from '@/utils/beliefTrend';
+import { beliefCredibility, beliefStanding } from '@/utils/credibility';
 import { copingLabel } from '@/utils/coping';
 import { requestedId, scrollRowIntoView, scrollRowToTop } from '@/utils/reveal';
 import NavIcon from '@/components/NavIcon.vue';
@@ -357,7 +341,7 @@ const SORT_KEYS = SORT_OPTIONS.map(o => o.key);
 
 export default {
   name: 'belief-list',
-  components: { FeelingChips, Sparkline, AffirmationPractice, NavIcon, CredibilityMeter },
+  components: { FeelingChips, AffirmationPractice, NavIcon, CredibilityMeter },
   data() {
     return {
       // Which written answer is unfolded, keyed by belief and row: every card
@@ -517,28 +501,6 @@ export default {
       return beliefCredibility(this.$store.getters.patterns, entry, this.$store.getters.journal);
     },
     copingOf(entry) { return copingLabel(entry && entry.coping); },
-    // The current standing held against the frozen anchor: only from the
-    // second reading on, since one number alone has no direction. The month
-    // named is the one the anchor was set in, so "seit Juni" means "since
-    // the readings this belief is still measured against".
-    trendOf(entry) {
-      const points = beliefPoints(this.$store.getters.patterns, entry, this.$store.getters.journal);
-      if (points.length < 2) return null;
-      const baseline = beliefCredibility(this.$store.getters.patterns, entry, this.$store.getters.journal);
-      const standing = this.credibility(entry);
-      if (baseline === null || standing === null) return null;
-      const delta = Math.round((standing - baseline) * 10) / 10;
-      if (delta === 0) return null;
-      moment.locale('de');
-      const sign = delta > 0 ? '+' : '−';
-      const shown = String(Math.abs(delta)).replace('.', ',');
-      return {
-        text: `${sign}${shown} seit ${moment(points[0].time).format('MMMM')}`,
-        // A belief losing credibility is the direction the work aims at.
-        color: deltaColor(delta),
-        values: points.map(pt => pt.value),
-      };
-    },
     // The same screen the Affirmationen list opens, fed from this belief: the
     // new feelings it was written towards, and the needs it serves.
     startPractice(entry) {
@@ -775,28 +737,11 @@ export default {
 }
 
 /* Without the row list above it the box would butt straight against the
-   trend line, which is a number, not a heading. */
+   meter above, which is a reading, not a heading. */
 .aff-box-loose { margin-top: 14px !important; }
-/* The meter needs the full width to read; the shared baseline rule that
-   suits a single line does not apply here, so the reading stacks below it
-   instead of squeezing in beside it. */
-.score-row { flex-direction: column; align-items: stretch; }
 /* .score-row already carries the top margin the meter would otherwise add
    again on top of it. */
 .score-row > .cred-meter { margin-top: 0; }
-/* Sparkline and its reading, side by side, tucked under the meter. */
-.score-side {
-  align-self: flex-end;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-}
-.score-trend {
-  font-size: 0.85rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
 /* Quieter than a feeling chip: it names a strategy, not something picked
    here, and must not outweigh the reaction it belongs to. */
 .coping-chip {

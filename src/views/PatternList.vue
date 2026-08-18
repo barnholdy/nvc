@@ -80,7 +80,7 @@
                   <!-- What this situation rated each belief at, held against
                        where the belief itself stands. -->
                   <belief-chip
-                    v-for="b in beliefsOf(entry)"
+                    v-for="b in shownBeliefsOf(entry)"
                     :key="b.time"
                     :text="b.belief"
                     :value="truthOf(entry, b)"
@@ -230,6 +230,14 @@ export default {
     beliefsOf(entry) {
       const beliefs = this.$store.getters.beliefs;
       return (entry.beliefs || []).map(id => beliefs.find(b => b.time === id)).filter(Boolean);
+    },
+    // Once one belief is picked in the filter row, its chip is the only one
+    // that still answers the question being asked — the others would just
+    // repeat what every other card already says.
+    shownBeliefsOf(entry) {
+      const list = this.beliefsOf(entry);
+      if (this.beliefFilter === null) return list;
+      return list.filter(b => b.time === this.beliefFilter);
     },
     // A situation whose beliefs have not been worked through yet is worth
     // marking: it is the open end of the record.

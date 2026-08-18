@@ -9,22 +9,24 @@
       <!-- Only clickable when the text still matches a belief that exists:
            the analysis echoes text back, and a renamed or deleted one has
            nowhere left to jump to. -->
-      <div v-for="(b, j) in k.beliefs" :key="j" class="group-item">
-        <belief-chip
-          :text="b.text"
-          :value="b.standing"
-          :baseline="b.credibility"
-          :tappable="b.time !== null"
-          @open="openBelief(b)"
-        ></belief-chip>
-        <feeling-chips
-          v-if="b.feelings.length"
-          :items="b.feelings"
-          type="feelings"
-          flat
-          class="group-feelings"
-        ></feeling-chips>
-      </div>
+      <belief-chip
+        v-for="(b, j) in k.beliefs"
+        :key="j"
+        :text="b.text"
+        :value="b.standing"
+        :baseline="b.credibility"
+        :tappable="b.time !== null"
+        @open="openBelief(b)"
+      ></belief-chip>
+      <!-- Every feeling any belief in the cluster carries, once each — the
+           cluster is the pattern, not any one sentence in it. -->
+      <feeling-chips
+        v-if="k.feelings.length"
+        :items="k.feelings"
+        type="feelings"
+        flat
+        class="group-feelings"
+      ></feeling-chips>
     </div>
 
     <div class="card now-card" @click="generateKernmuster">
@@ -97,9 +99,8 @@ export default {
       });
       const patterns = this.$store.getters.patterns;
       const journal = this.$store.getters.journal;
-      return this.kernmuster.map(k => ({
-        title: k.title,
-        beliefs: ((k && k.beliefs) || []).map((t) => {
+      return this.kernmuster.map((k) => {
+        const beliefs = ((k && k.beliefs) || []).map((t) => {
           const belief = byText[normalizeBelief(t)];
           const c = belief ? beliefCredibility(patterns, belief, journal) : null;
           return {
@@ -108,16 +109,23 @@ export default {
             // rounding and the German comma itself.
             credibility: c,
             standing: belief ? beliefStanding(patterns, belief, journal) : null,
-            // What it feels like when the belief is true — the same feelings
-            // the belief's own card shows, so a cluster reads as more than a
-            // list of sentences.
-            feelings: belief && Array.isArray(belief.feelings) ? belief.feelings : [],
+            resolved: belief,
             // Only set when the text still matches something stored — that is
             // what makes the chip a link rather than just a label.
             time: belief ? belief.time : null,
           };
-        }),
-      }));
+        });
+        return {
+          title: k.title,
+          beliefs,
+          // What it feels like when any belief in the cluster is true, all
+          // together — the cluster is the pattern, so its feelings belong to
+          // it as a whole rather than repeated under each sentence in it.
+          feelings: beliefs
+            .map(b => (b.resolved && Array.isArray(b.resolved.feelings) ? b.resolved.feelings : []))
+            .flat(),
+        };
+      });
     },
     subline() {
       if (this.error) return this.error;
