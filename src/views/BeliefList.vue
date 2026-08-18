@@ -226,6 +226,22 @@
             </div>
           </div>
 
+          <div
+            v-if="compact && (patternCount(entry.time) || experimentCount(entry))"
+            class="link-chips"
+          >
+            <span
+              v-if="patternCount(entry.time)"
+              class="link-chip"
+              @click.stop="openSituations(entry)"
+            >{{ situationsShort(entry) }}</span>
+            <span
+              v-if="experimentCount(entry)"
+              class="link-chip"
+              @click.stop="openExperiments(entry)"
+            >{{ experimentsShort(entry) }}</span>
+          </div>
+
           <div v-if="!compact && patternCount(entry.time)" class="card-link" @click.stop="openSituations(entry)">
             <span class="card-link-text">{{ situationsLabel(entry) }}</span>
             <v-icon class="detail-chevron">chevron_right</v-icon>
@@ -467,6 +483,15 @@ export default {
     needNames(entry) { return this.names(this.needsOf(entry)); },
     patternCount(beliefTime) { return this.patternCountMap[beliefTime] || 0; },
     experimentCount(entry) { return experimentsOf(entry).length; },
+    // The compact chip has room for the count and nothing else.
+    situationsShort(entry) {
+      const n = this.patternCount(entry.time);
+      return n === 1 ? '1 Situation' : `${n} Situationen`;
+    },
+    experimentsShort(entry) {
+      const n = experimentsOf(entry).length;
+      return n === 1 ? '1 Handlung' : `${n} Handlungen`;
+    },
     situationsLabel(entry) {
       const n = this.patternCount(entry.time);
       if (!n) return 'Keine Situationen';
@@ -631,6 +656,24 @@ export default {
   font-size: 0.78rem;
   color: #8e8e93;
 }
+/* Compact mode drops the full-width links but keeps the counts reachable,
+   shrunk down to a tap target that names just the number and the noun. */
+.link-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+.link-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #3a3a3c;
+  border-radius: 999px;
+  padding: 4px 11px;
+  font-size: 0.78rem;
+  color: #d1d1d6;
+}
+.link-chip:active { opacity: 0.6; }
 /* Only the head answers a swipe; the rest of the card scrolls freely. */
 
 .confirm-dialog { background: #1c1c1e !important; }
