@@ -4,7 +4,7 @@
          step asks you to doubt it. Nothing renders when there is nothing to
          say: a number without a rating behind it would claim an answer
          nobody gave. -->
-    <wizard-context :quote="belief" :credibility="truth" standing></wizard-context>
+    <wizard-context :quote="belief" :credibility="truth" :credibility-baseline="truthBaseline"></wizard-context>
 
     <p class="wizard-question">Stimmt das wirklich in jeder Situation?</p>
     <p class="wizard-body">
@@ -33,6 +33,8 @@ export default {
     // Where the belief stands, the same number its own card shows.
     // Null when it was never rated.
     truth: { type: Number, default: null },
+    // The frozen anchor to mark against it, orange on the same meter.
+    truthBaseline: { type: Number, default: null },
     initialValue: { type: String, default: '' },
   },
   data() {

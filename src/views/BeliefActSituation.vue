@@ -7,7 +7,7 @@
       v-if="entry"
       :quote="entry.belief"
       :credibility="beliefTruth"
-      standing
+      :credibility-baseline="beliefBaseline"
     ></wizard-context>
 
     <div v-if="affirmationText" class="aff-box">
@@ -88,7 +88,7 @@ import WizardContext from '@/components/WizardContext.vue';
 import InputCard from '@/components/InputCard.vue';
 import { askClaude, loadApiKey, saveApiKey, parseLines } from '@/utils/ai';
 import { buildActionPrompt, SUGGESTION_COUNT } from '@/utils/actionSuggestions';
-import { beliefStanding } from '@/utils/credibility';
+import { beliefStanding, beliefCredibility } from '@/utils/credibility';
 
 export default {
   name: 'belief-act-situation',
@@ -126,6 +126,9 @@ export default {
     // list shows — not a reading taken here.
     beliefTruth() {
       return beliefStanding(this.patterns, this.entry, this.journal);
+    },
+    beliefBaseline() {
+      return beliefCredibility(this.patterns, this.entry, this.journal);
     },
   },
   watch: {

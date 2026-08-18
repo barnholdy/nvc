@@ -90,15 +90,10 @@
         </div>
           <span class="card-pill">{{ statusLabel(entry) }}</span>
 
-          <!-- Number on the left, the movement of that number on the right:
-               the line and the words under it say the same thing, so they
-               belong in one column. -->
+          <!-- The meter first, full width — then the movement of that
+               reading since the anchor was set, tucked under it. -->
           <div v-if="credibility(entry) !== null" class="score-row">
-            <div class="score-main">
-              <span class="score-value">{{ round(credibility(entry)) }}</span>
-              <span class="score-max">/10</span>
-              <span class="score-label">Glaubwürdigkeit</span>
-            </div>
+            <credibility-meter :value="credibility(entry)" :baseline="anchorOf(entry)"></credibility-meter>
             <div v-if="trendOf(entry)" class="score-side">
               <sparkline
                 class="score-spark"
@@ -334,6 +329,7 @@
 import moment from 'moment';
 import FeelingChips from '@/components/FeelingChips.vue';
 import Sparkline from '@/components/Sparkline.vue';
+import CredibilityMeter from '@/components/CredibilityMeter.vue';
 import AffirmationPractice from '@/components/AffirmationPractice.vue';
 import {
   beliefStatus,
@@ -361,7 +357,7 @@ const SORT_KEYS = SORT_OPTIONS.map(o => o.key);
 
 export default {
   name: 'belief-list',
-  components: { FeelingChips, Sparkline, AffirmationPractice, NavIcon },
+  components: { FeelingChips, Sparkline, AffirmationPractice, NavIcon, CredibilityMeter },
   data() {
     return {
       // Which written answer is unfolded, keyed by belief and row: every card
@@ -510,18 +506,15 @@ export default {
         ? scrollRowToTop(this.$el, entry.time)
         : scrollRowIntoView(this.$el, entry.time)));
     },
-    // One decimal, and a German comma: the headline number is the only
-    // place this value is shown, so rounding it whole would hide half a
-    // point that was actually recorded.
-    round(v) {
-      if (v === null || v === undefined) return '';
-      return String(Math.round(v * 10) / 10).replace('.', ',');
-    },
     statusLabel(entry) { return beliefStatusLabel(entry); },
     // Where the belief stands right now: the median of its most recent
     // readings, moving as new ones come in.
     credibility(entry) {
       return beliefStanding(this.$store.getters.patterns, entry, this.$store.getters.journal);
+    },
+    // The frozen anchor the meter marks in orange, held against the standing.
+    anchorOf(entry) {
+      return beliefCredibility(this.$store.getters.patterns, entry, this.$store.getters.journal);
     },
     copingOf(entry) { return copingLabel(entry && entry.coping); },
     // The current standing held against the frozen anchor: only from the
@@ -784,25 +777,20 @@ export default {
 /* Without the row list above it the box would butt straight against the
    trend line, which is a number, not a heading. */
 .aff-box-loose { margin-top: 14px !important; }
-/* Two columns of different heights now, so the shared baseline rule that
-   suits a single line does not apply here. */
-.score-row { align-items: center; }
-.score-main {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 6px;
-  flex: 1;
-  min-width: 0;
-}
-/* The line and its reading, stacked and pinned right. */
+/* The meter needs the full width to read; the shared baseline rule that
+   suits a single line does not apply here, so the reading stacks below it
+   instead of squeezing in beside it. */
+.score-row { flex-direction: column; align-items: stretch; }
+/* .score-row already carries the top margin the meter would otherwise add
+   again on top of it. */
+.score-row > .cred-meter { margin-top: 0; }
+/* Sparkline and its reading, side by side, tucked under the meter. */
 .score-side {
-  flex-shrink: 0;
+  align-self: flex-end;
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-  margin-left: 12px;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
 }
 .score-trend {
   font-size: 0.85rem;

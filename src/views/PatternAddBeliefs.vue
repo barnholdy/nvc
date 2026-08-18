@@ -80,11 +80,7 @@
         @click="addBelief(b.time)"
       >
         <p class="card-title available-title">„{{ b.belief }}“</p>
-        <div v-if="credibilityOf(b) !== null" class="score-row">
-          <span class="score-value">{{ round(credibilityOf(b)) }}</span>
-          <span class="score-max">/10</span>
-          <span class="score-label">Glaubwürdigkeit</span>
-        </div>
+        <credibility-meter :value="credibilityOf(b)" :baseline="baselineOf(b)"></credibility-meter>
       </div>
     </template>
   </div>
@@ -94,7 +90,8 @@
 import WizardContext from '@/components/WizardContext.vue';
 import InputCard from '@/components/InputCard.vue';
 import MeterCard from '@/components/MeterCard.vue';
-import { beliefStanding } from '@/utils/credibility';
+import CredibilityMeter from '@/components/CredibilityMeter.vue';
+import { beliefStanding, beliefCredibility } from '@/utils/credibility';
 
 const TRUTH_DEFAULT = 5;
 
@@ -121,7 +118,7 @@ const CORE_BELIEF_SUGGESTIONS = [
 
 export default {
   name: 'pattern-add-beliefs',
-  components: { WizardContext, InputCard, MeterCard },
+  components: { WizardContext, InputCard, MeterCard, CredibilityMeter },
   props: {
     allBeliefs: { type: Array, default: function() { return []; } },
     // For the credibility shown on "schon erfasste" beliefs — the same
@@ -177,7 +174,7 @@ export default {
   },
   methods: {
     credibilityOf(belief) { return beliefStanding(this.patterns, belief, this.journal); },
-    round(v) { return String(Math.round(v * 10) / 10).replace('.', ','); },
+    baselineOf(belief) { return beliefCredibility(this.patterns, belief, this.journal); },
     // The rating belongs to this situation, not to the belief: the same belief
     // rated again later is what makes a trend.
     truthOf(time) {

@@ -15,11 +15,7 @@
       @click="pick(b.time)"
     >
       <p class="card-title">„{{ b.belief }}“</p>
-      <div v-if="credibility(b) !== null" class="score-row">
-        <span class="score-value">{{ round(credibility(b)) }}</span>
-        <span class="score-max">/10</span>
-        <span class="score-label">Glaubwürdigkeit</span>
-      </div>
+      <credibility-meter :value="credibility(b)" :baseline="baselineOf(b)"></credibility-meter>
       <p class="pick-belief-aff">„{{ affirmationOf(b) }}“</p>
     </div>
   </div>
@@ -29,10 +25,12 @@
 // Only beliefs the wandeln wizard actually finished — an entry needs both
 // ends: the belief to weaken and the affirmation to build up.
 import { beliefStatus } from '@/utils/beliefStatus';
-import { beliefStanding } from '@/utils/credibility';
+import { beliefStanding, beliefCredibility } from '@/utils/credibility';
+import CredibilityMeter from '@/components/CredibilityMeter.vue';
 
 export default {
   name: 'journal-add-belief',
+  components: { CredibilityMeter },
   props: {
     allBeliefs: { type: Array, default: () => [] },
     patterns: { type: Array, default: () => [] },
@@ -52,7 +50,9 @@ export default {
     credibility(belief) {
       return beliefStanding(this.patterns, belief, this.journal);
     },
-    round(v) { return String(Math.round(v * 10) / 10).replace('.', ','); },
+    baselineOf(belief) {
+      return beliefCredibility(this.patterns, belief, this.journal);
+    },
     affirmationOf(belief) {
       return (belief.affirmations || []).map(a => a && a.text).filter(Boolean).join(' · ');
     },

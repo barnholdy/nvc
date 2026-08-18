@@ -13,17 +13,21 @@
       </div>
 
       <!-- Above everything, and always there: writing down what just happened
-           is the one thing that does not depend on anything already being in
-           the app. -->
-      <div class="card capture-card" @click="$router.push('/add-pattern')">
-        <svg class="capture-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path :d="captureIcon" fill="currentColor"></path>
-        </svg>
-        <div class="capture-body">
+           or what already has is the one thing that does not depend on
+           anything already being in the app. -->
+      <div class="capture-grid">
+        <div class="capture-card" @click="$router.push('/add-pattern')">
+          <svg class="capture-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path :d="captureIcon" fill="currentColor"></path>
+          </svg>
           <p class="capture-title">Situation erfassen</p>
-          <p class="capture-sub">Was ist dir gerade begegnet?</p>
         </div>
-        <v-icon class="detail-chevron">chevron_right</v-icon>
+        <div class="capture-card" @click="$router.push('/add-journal')">
+          <svg class="capture-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path :d="journalIcon" fill="currentColor"></path>
+          </svg>
+          <p class="capture-title">Tagebucheintrag schreiben</p>
+        </div>
       </div>
 
       <!-- A pause before the lists below ask anything of you. -->
@@ -111,11 +115,7 @@
         <div v-if="shownTrend" class="card">
           <p class="card-title">„{{ shownTrend.text }}“</p>
           <div v-if="shownTrend.standing !== null" class="score-row">
-            <div class="score-main">
-              <span class="score-value">{{ round(shownTrend.standing) }}</span>
-              <span class="score-max">/10</span>
-              <span class="score-label">Glaubwürdigkeit</span>
-            </div>
+            <credibility-meter :value="shownTrend.standing" :baseline="shownTrend.baseline"></credibility-meter>
             <div v-if="trendOf(shownTrend)" class="score-side">
               <span
                 class="score-trend"
@@ -180,8 +180,9 @@ import {
   beliefCredibility, beliefRows, baselineOf, standingOf,
 } from '@/utils/credibility';
 import { deltaColor } from '@/utils/beliefTrend';
-import { mdiLightningBolt } from '@mdi/js';
+import { mdiLightningBolt, mdiBookOpenPageVariant } from '@mdi/js';
 import NavIcon from '@/components/NavIcon.vue';
+import CredibilityMeter from '@/components/CredibilityMeter.vue';
 import TrendChart from '@/components/TrendChart.vue';
 import ProfileStats from '@/components/ProfileStats.vue';
 import PatternGroups from '@/components/PatternGroups.vue';
@@ -206,7 +207,8 @@ function readPractised() {
 export default {
   name: 'now-view',
   components: {
-    AffirmationPractice, NavIcon, TrendChart, ProfileStats, PatternGroups, EmpathyBlock, BreathCircle,
+    AffirmationPractice, NavIcon, CredibilityMeter, TrendChart, ProfileStats, PatternGroups, EmpathyBlock,
+    BreathCircle,
   },
   data() {
     return {
@@ -217,6 +219,7 @@ export default {
     // A situation is the moment something struck — the bolt this app used for
     // Situationen before the nav went to a history icon.
     captureIcon() { return mdiLightningBolt; },
+    journalIcon() { return mdiBookOpenPageVariant; },
     beliefs() { return this.$store.getters.beliefs; },
     patterns() { return this.$store.getters.patterns; },
     journal() { return this.$store.getters.journal; },
@@ -461,6 +464,13 @@ export default {
 <style scoped lang="scss">
 .dark-page { background: #000; min-height: 100vh; }
 
+/* Meter on the left, its movement on the right — the same layout the
+   Überzeugungen list uses for its own headline row. */
+.score-row { display: flex; flex-direction: column; align-items: stretch; }
+.score-row > .cred-meter { margin-top: 0; }
+.score-side { align-self: flex-end; margin-top: 10px; }
+.score-trend { font-size: 0.85rem; font-weight: 600; white-space: nowrap; }
+
 /* Small grey capitals: the heading names the pile, the cards below are the
    things in it. */
 .section-head {
@@ -472,35 +482,40 @@ export default {
   margin: 18px 20px 8px;
 }
 
-/* The one action that always applies, so it gets the full width and sits
-   above every count. */
+/* The two actions that always apply, so they get the top of the screen —
+   side by side, since picking which one happens in the wizard each opens,
+   not here. */
+.capture-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 4px 14px 0;
+}
 .capture-card {
+  background: #141416;
+  border-radius: 18px;
+  padding: 16px;
   display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-top: 4px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.7; }
 }
 .capture-icon {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   flex-shrink: 0;
   color: #4ade80;
 }
-.capture-body { flex: 1; min-width: 0; }
 .capture-title {
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-weight: 500;
   color: #fff;
   line-height: 1.3;
   margin: 0;
-}
-.capture-sub {
-  font-size: 0.88rem;
-  color: #8e8e93;
-  margin: 3px 0 0;
 }
 
 /* Two-column count tiles: a label, a number, the verb that acts on it — no

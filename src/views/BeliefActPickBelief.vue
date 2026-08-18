@@ -15,11 +15,7 @@
       @click="pick(b.time)"
     >
       <p class="card-title">„{{ b.belief }}“</p>
-      <div v-if="credibility(b) !== null" class="score-row">
-        <span class="score-value">{{ round(credibility(b)) }}</span>
-        <span class="score-max">/10</span>
-        <span class="score-label">Glaubwürdigkeit</span>
-      </div>
+      <credibility-meter :value="credibility(b)" :baseline="baselineOf(b)"></credibility-meter>
       <!-- The sentence the action is meant to act from, the way the journal's
            own picker shows it. Guarded: a belief can reach "gewandelt" by
            having been acted on, without an affirmation ever being written. -->
@@ -34,10 +30,12 @@
 <script>
 // Only shown when the wizard is opened from the Handlungen list, where no
 // belief has been chosen yet.
-import { beliefStanding } from '@/utils/credibility';
+import { beliefStanding, beliefCredibility } from '@/utils/credibility';
+import CredibilityMeter from '@/components/CredibilityMeter.vue';
 
 export default {
   name: 'belief-act-pick-belief',
+  components: { CredibilityMeter },
   props: {
     beliefs: { type: Array, default: () => [] },
     patterns: { type: Array, default: () => [] },
@@ -51,8 +49,9 @@ export default {
     credibility(belief) {
       return beliefStanding(this.patterns, belief, this.journal);
     },
-    // One decimal, German comma — the same rounding the list cards use.
-    round(v) { return String(Math.round(v * 10) / 10).replace('.', ','); },
+    baselineOf(belief) {
+      return beliefCredibility(this.patterns, belief, this.journal);
+    },
     affirmationOf(belief) {
       return (belief.affirmations || []).map(a => a && a.text).filter(Boolean).join(' · ');
     },

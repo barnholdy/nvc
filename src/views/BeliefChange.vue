@@ -7,6 +7,7 @@
           v-show="step === 1"
           :belief="entry ? entry.belief : ''"
           :truth="standingTruth"
+          :truth-baseline="situationTruth"
           :initialValue="exceptions"
           @changed="exceptions = $event">
         </belief-change-absoluteness>

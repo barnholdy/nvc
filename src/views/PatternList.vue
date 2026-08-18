@@ -79,16 +79,14 @@
 
                   <!-- What this situation rated each belief at, held against
                        where the belief itself stands. -->
-                  <template v-if="beliefFilter === null">
-                    <belief-chip
-                      v-for="b in beliefsOf(entry)"
-                      :key="b.time"
-                      :text="b.belief"
-                      :value="truthOf(entry, b)"
-                      :baseline="credibilityOf(b)"
-                      @open="openBelief(b)"
-                    ></belief-chip>
-                  </template>
+                  <belief-chip
+                    v-for="b in beliefsOf(entry)"
+                    :key="b.time"
+                    :text="b.belief"
+                    :value="truthOf(entry, b)"
+                    :baseline="credibilityOf(b)"
+                    @open="openBelief(b)"
+                  ></belief-chip>
                 </div>
               </div>
             </div>

@@ -3,11 +3,7 @@
     <template v-if="quote">
       <p class="wc-label">{{ label }}</p>
       <p class="card-title wc-quote">„{{ quote }}“</p>
-      <div v-if="score !== null" class="score-row">
-        <span class="score-value">{{ standing ? '' : 'x̃ ' }}{{ score }}</span>
-        <span class="score-max">/10</span>
-        <span class="score-label">Glaubwürdigkeit</span>
-      </div>
+      <credibility-meter :value="credibility" :baseline="credibilityBaseline"></credibility-meter>
     </template>
 
     <!-- What was feared against what happened, as one bar — the same one the
@@ -59,24 +55,25 @@
 
 <script>
 import FeelingChips from '@/components/FeelingChips.vue';
+import CredibilityMeter from '@/components/CredibilityMeter.vue';
 import { fearGap, fearGapColor } from '@/utils/experiment';
 import { copingLabel } from '@/utils/coping';
 
 // One card for what the wizard already knows: the thing being worked on, and
-// the answers given so far. Same quote, same score row, same detail rows the
+// the answers given so far. Same quote, same meter, same detail rows the
 // belief cards use — a step should not invent its own way of showing them.
 export default {
   name: 'wizard-context',
-  components: { FeelingChips },
+  components: { FeelingChips, CredibilityMeter },
   props: {
     label: { type: String, default: 'Überzeugung' },
     quote: { type: String, default: '' },
-    // Raw 0–10 reading, or null when nothing was ever rated.
+    // The belief's current standing — the blue blocks on the meter. Null
+    // when nothing was ever rated.
     credibility: { type: Number, default: null },
-    // True when `credibility` is the belief's current standing (median of
-    // its most recent readings) rather than the frozen first-three anchor —
-    // the anchor keeps the x̃ mark, the standing reads as a plain number.
-    standing: { type: Boolean, default: false },
+    // The frozen first-three anchor the meter marks in orange, held against
+    // the standing above. Null when there is nothing to mark.
+    credibilityBaseline: { type: Number, default: null },
     situation: { type: String, default: '' },
     exceptions: { type: String, default: '' },
     perspective: { type: String, default: '' },
@@ -108,10 +105,6 @@ export default {
     return { openKeys: {} };
   },
   computed: {
-    score() {
-      if (this.credibility === null || this.credibility === undefined) return null;
-      return String(Math.round(this.credibility * 10) / 10).replace('.', ',');
-    },
     hasGap() {
       return typeof this.fearExpected === 'number' && typeof this.fearActual === 'number';
     },
@@ -199,12 +192,12 @@ export default {
 /* The first row only needs a rule above it when a quote sits there. */
 .detail-row:first-child { border-top: none; }
 .card-title + .detail-row,
-.score-row + .detail-row,
+.cred-meter + .detail-row,
 .gap-legend + .detail-row { border-top: 1px solid #2c2c2e; margin-top: 12px; }
 /* .gap-bar's own margin-top assumes it opens the card; following a quote it
    needs the same divider treatment the rows get instead. */
 .card-title + .gap-bar,
-.score-row + .gap-bar {
+.cred-meter + .gap-bar {
   border-top: 1px solid #2c2c2e;
   margin-top: 12px;
   padding-top: 12px;
