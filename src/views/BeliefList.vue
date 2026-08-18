@@ -24,6 +24,23 @@
           >
             <v-icon small>{{ compact ? 'unfold_more' : 'unfold_less' }}</v-icon>
           </button>
+          <v-menu offset-y :close-on-content-click="true">
+            <button slot="activator" class="pill pill-icon" aria-label="Sortieren">
+              <v-icon small>sort</v-icon>
+            </button>
+            <v-list dense>
+              <v-list-tile
+                v-for="opt in sortOptions"
+                :key="opt.key"
+                @click="sortMode = opt.key"
+              >
+                <v-list-tile-title>{{ opt.label }}</v-list-tile-title>
+                <v-list-tile-action v-if="sortMode === opt.key">
+                  <v-icon small color="#4ade80">check</v-icon>
+                </v-list-tile-action>
+              </v-list-tile>
+            </v-list>
+          </v-menu>
           <button
             v-for="f in filters"
             :key="f.key"
@@ -227,7 +244,7 @@
           </div>
 
           <div
-            v-if="compact && (patternCount(entry.time) || experimentCount(entry))"
+            v-if="compact && (patternCount(entry.time) || experimentCount(entry) || journalCount(entry.time))"
             class="link-chips"
           >
             <span
@@ -240,6 +257,11 @@
               class="link-chip"
               @click.stop="openExperiments(entry)"
             >{{ experimentsShort(entry) }}</span>
+            <span
+              v-if="journalCount(entry.time)"
+              class="link-chip"
+              @click.stop="openJournal(entry)"
+            >{{ journalShort(entry) }}</span>
           </div>
 
           <div v-if="!compact && patternCount(entry.time)" class="card-link" @click.stop="openSituations(entry)">
@@ -249,6 +271,11 @@
 
           <div v-if="!compact && experimentCount(entry)" class="card-link" @click.stop="openExperiments(entry)">
             <span class="card-link-text">{{ experimentsLabel(entry) }}</span>
+            <v-icon class="detail-chevron">chevron_right</v-icon>
+          </div>
+
+          <div v-if="!compact && journalCount(entry.time)" class="card-link" @click.stop="openJournal(entry)">
+            <span class="card-link-text">{{ journalLabel(entry) }}</span>
             <v-icon class="detail-chevron">chevron_right</v-icon>
           </div>
       </div>
@@ -316,6 +343,13 @@ import NavIcon from '@/components/NavIcon.vue';
 
 const PRACTICE_KEY = 'nvc.amen';
 const COMPACT_KEY = 'nvc.beliefsCompact';
+const SORT_KEY = 'nvc.beliefsSort';
+const SORT_OPTIONS = [
+  { key: 'situations', label: 'Situationen (häufigste zuerst)' },
+  { key: 'recent', label: 'Zuletzt genannt' },
+  { key: 'credibility', label: 'Glaubwürdigkeit (höchste zuerst)' },
+];
+const SORT_KEYS = SORT_OPTIONS.map(o => o.key);
 
 export default {
   name: 'belief-list',
@@ -328,6 +362,9 @@ export default {
       practising: null,
       // Remembered, so the choice survives leaving the list and coming back.
       compact: localStorage.getItem(COMPACT_KEY) === '1',
+      sortMode: SORT_KEYS.indexOf(localStorage.getItem(SORT_KEY)) !== -1
+        ? localStorage.getItem(SORT_KEY)
+        : 'situations',
       entryToDelete: null,
       isDeleteDialogShowing: false,
       // Saving a belief returns here with the tab it now belongs to.
@@ -340,6 +377,7 @@ export default {
   },
   watch: {
     compact(v) { localStorage.setItem(COMPACT_KEY, v ? '1' : '0'); },
+    sortMode(v) { localStorage.setItem(SORT_KEY, v); },
     '$route.query.open': function() { this.revealRequested(); },
     tab() { this.sw.openIdx = null; this.sw.openDir = null; },
   },
@@ -349,11 +387,44 @@ export default {
     panelStyle() {
       return this.sw.handleHeight ? { height: `${this.sw.handleHeight}px` } : null;
     },
+    sortOptions() { return SORT_OPTIONS; },
     beliefs() {
+      const list = this.$store.getters.beliefs.concat();
+      if (this.sortMode === 'recent') {
+        const recent = this.lastMentionMap;
+        // Never mentioned in a situation sinks to the bottom — there is no
+        // "most recent" to rank it by.
+        return list.sort((a, b) => {
+          const ra = recent[a.time]; const rb = recent[b.time];
+          if (ra === undefined && rb === undefined) return b.time - a.time;
+          if (ra === undefined) return 1;
+          if (rb === undefined) return -1;
+          return rb - ra;
+        });
+      }
+      if (this.sortMode === 'credibility') {
+        // Never rated sinks to the bottom, same reasoning as above.
+        return list.sort((a, b) => {
+          const ca = this.credibility(a); const cb = this.credibility(b);
+          if (ca === null && cb === null) return b.time - a.time;
+          if (ca === null) return 1;
+          if (cb === null) return -1;
+          return cb - ca;
+        });
+      }
       const map = this.patternCountMap;
-      return this.$store.getters.beliefs
-        .concat()
-        .sort((a, b) => ((map[b.time] || 0) - (map[a.time] || 0)) || (b.time - a.time));
+      return list.sort((a, b) => ((map[b.time] || 0) - (map[a.time] || 0)) || (b.time - a.time));
+    },
+    // The most recent situation each belief was named in — undefined for one
+    // that has never been.
+    lastMentionMap() {
+      const map = {};
+      this.$store.getters.patterns.forEach((p) => {
+        (p.beliefs || []).forEach((id) => {
+          if (map[id] === undefined || p.time > map[id]) map[id] = p.time;
+        });
+      });
+      return map;
     },
     filteredBeliefs() {
       if (this.tab === 'all') return this.beliefs;
@@ -377,6 +448,14 @@ export default {
       const map = {};
       this.$store.getters.patterns.forEach((p) => {
         (p.beliefs || []).forEach((id) => { map[id] = (map[id] || 0) + 1; });
+      });
+      return map;
+    },
+    journalCountMap() {
+      const map = {};
+      this.$store.getters.journal.forEach((e) => {
+        if (!e) return;
+        map[e.beliefTime] = (map[e.beliefTime] || 0) + 1;
       });
       return map;
     },
@@ -483,6 +562,7 @@ export default {
     needNames(entry) { return this.names(this.needsOf(entry)); },
     patternCount(beliefTime) { return this.patternCountMap[beliefTime] || 0; },
     experimentCount(entry) { return experimentsOf(entry).length; },
+    journalCount(beliefTime) { return this.journalCountMap[beliefTime] || 0; },
     // The compact chip has room for the count and nothing else.
     situationsShort(entry) {
       const n = this.patternCount(entry.time);
@@ -491,6 +571,10 @@ export default {
     experimentsShort(entry) {
       const n = experimentsOf(entry).length;
       return n === 1 ? '1 Handlung' : `${n} Handlungen`;
+    },
+    journalShort(entry) {
+      const n = this.journalCount(entry.time);
+      return n === 1 ? '1 Eintrag' : `${n} Einträge`;
     },
     situationsLabel(entry) {
       const n = this.patternCount(entry.time);
@@ -506,6 +590,11 @@ export default {
       const head = list.length === 1 ? '1 Handlung' : `${list.length} Handlungen`;
       return openCount ? `${head} · ${openCount} offen` : head;
     },
+    journalLabel(entry) {
+      const n = this.journalCount(entry.time);
+      if (!n) return 'Keine Tagebucheinträge';
+      return n === 1 ? '1 Tagebucheintrag ansehen' : `${n} Tagebucheinträge ansehen`;
+    },
     // The target list opens filtered to this belief rather than at one of its
     // rows: the question being asked is "all of them", not "that one".
     openSituations(entry) {
@@ -513,6 +602,9 @@ export default {
     },
     openExperiments(entry) {
       this.$router.push({ path: '/actions', query: { belief: String(entry.time) } });
+    },
+    openJournal(entry) {
+      this.$router.push({ path: '/journal', query: { belief: String(entry.time) } });
     },
     // The one step that moves this belief forward from where it stands.
     rowActionLabel(entry) {

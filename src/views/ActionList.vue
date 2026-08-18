@@ -543,16 +543,10 @@ export default {
     },
     // The bar is drawn on the 0-10 fear scale.
     pct(v) { return `${Math.max(0, Math.min(10, v || 0)) * 10}%`; },
-    // State and, once it is finished, when — a run is identified as much by
-    // its date as by how far it got.
+    // Just the state — the timeline meta above the card already names the
+    // date, so the badge repeating it would say the same thing twice.
     stateLine(x) {
-      const label = EXPERIMENT_DISPLAY_LABELS[experimentDisplayState(x)];
-      const at = x.completedAt || x.doneAt || x.plannedAt;
-      return at ? `${label} · ${this.shortDate(at)}` : label;
-    },
-    shortDate(ts) {
-      moment.locale('de');
-      return moment(ts).format('D. MMM');
+      return EXPERIMENT_DISPLAY_LABELS[experimentDisplayState(x)];
     },
     dayLabel(ts) {
       moment.locale('de');

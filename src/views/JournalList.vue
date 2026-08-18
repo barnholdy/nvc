@@ -194,12 +194,29 @@ export default {
     },
   },
   mounted() {
+    this.applyBeliefQuery();
     this.revealRequested();
   },
   watch: {
     '$route.query.open': function() { this.revealRequested(); },
+    '$route.query.belief': function() { this.applyBeliefQuery(); },
   },
   methods: {
+    // Coming from a belief card: select its chip, and scroll the pill row so
+    // the selection is visible rather than somewhere off to the right.
+    applyBeliefQuery() {
+      const raw = this.$route.query.belief;
+      if (!raw) return;
+      const time = parseInt(raw, 10);
+      if (!this.filterBeliefs.some(b => b.time === time)) return;
+      this.beliefFilter = time;
+      this.$nextTick(() => {
+        const el = this.$el.querySelector('.pill.active');
+        if (el && el.scrollIntoView) {
+          el.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+        }
+      });
+    },
     // Coming from a trend bar: clear the filter so the row it points at is
     // actually in the list, then bring it into view.
     revealRequested() {
