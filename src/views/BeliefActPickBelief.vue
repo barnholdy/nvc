@@ -16,7 +16,7 @@
     >
       <p class="card-title">„{{ b.belief }}“</p>
       <div v-if="credibility(b) !== null" class="score-row">
-        <span class="score-value">x̃ {{ round(credibility(b)) }}</span>
+        <span class="score-value">{{ round(credibility(b)) }}</span>
         <span class="score-max">/10</span>
         <span class="score-label">Glaubwürdigkeit</span>
       </div>
@@ -34,7 +34,7 @@
 <script>
 // Only shown when the wizard is opened from the Handlungen list, where no
 // belief has been chosen yet.
-import { beliefCredibility } from '@/utils/credibility';
+import { beliefStanding } from '@/utils/credibility';
 
 export default {
   name: 'belief-act-pick-belief',
@@ -49,7 +49,7 @@ export default {
   },
   methods: {
     credibility(belief) {
-      return beliefCredibility(this.patterns, belief, this.journal);
+      return beliefStanding(this.patterns, belief, this.journal);
     },
     // One decimal, German comma — the same rounding the list cards use.
     round(v) { return String(Math.round(v * 10) / 10).replace('.', ','); },

@@ -6,7 +6,7 @@
         <belief-change-absoluteness
           v-show="step === 1"
           :belief="entry ? entry.belief : ''"
-          :truth="situationTruth"
+          :truth="standingTruth"
           :initialValue="exceptions"
           @changed="exceptions = $event">
         </belief-change-absoluteness>
@@ -85,7 +85,7 @@ import BeliefChangeAbsoluteness from '@/views/BeliefChangeAbsoluteness.vue';
 import PatternAddWithoutBelief from '@/views/PatternAddWithoutBelief.vue';
 import BeliefAddFeelingNeed from '@/views/BeliefAddFeelingNeed.vue';
 import { MAX_FEELINGS } from '@/utils/emotions';
-import { beliefCredibility } from '@/utils/credibility';
+import { beliefCredibility, beliefStanding } from '@/utils/credibility';
 import PatternChangeAffirmation from '@/views/PatternChangeAffirmation.vue';
 import WizardHeader from '@/components/WizardHeader.vue';
 import WizardFooter from '@/components/WizardFooter.vue';
@@ -132,10 +132,15 @@ export default {
   computed: {
     INTENSITY_THRESHOLD() { return INTENSITY_THRESHOLD; },
     MAX_FEELINGS() { return MAX_FEELINGS; },
-    // Where this belief stands: the median of its first few readings, across
-    // the situations, experiments and journal entries that rated it.
+    // The frozen anchor this belief was first rated at — feeds the
+    // suggestion prompt's weighting, not shown anywhere on screen.
     situationTruth() {
       return beliefCredibility(this.$store.getters.patterns, this.entry, this.$store.getters.journal);
+    },
+    // Where the belief stands right now — the number the first step shows,
+    // the same one the Überzeugungen list shows as its headline.
+    standingTruth() {
+      return beliefStanding(this.$store.getters.patterns, this.entry, this.$store.getters.journal);
     },
     // Beliefs worked on before the limit existed can hold more than five new
     // feelings; the way forward opens once they are back within it.

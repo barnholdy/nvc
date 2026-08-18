@@ -16,7 +16,7 @@
     >
       <p class="card-title">„{{ b.belief }}“</p>
       <div v-if="credibility(b) !== null" class="score-row">
-        <span class="score-value">x̃ {{ round(credibility(b)) }}</span>
+        <span class="score-value">{{ round(credibility(b)) }}</span>
         <span class="score-max">/10</span>
         <span class="score-label">Glaubwürdigkeit</span>
       </div>
@@ -29,7 +29,7 @@
 // Only beliefs the wandeln wizard actually finished — an entry needs both
 // ends: the belief to weaken and the affirmation to build up.
 import { beliefStatus } from '@/utils/beliefStatus';
-import { beliefCredibility } from '@/utils/credibility';
+import { beliefStanding } from '@/utils/credibility';
 
 export default {
   name: 'journal-add-belief',
@@ -50,7 +50,7 @@ export default {
   },
   methods: {
     credibility(belief) {
-      return beliefCredibility(this.patterns, belief, this.journal);
+      return beliefStanding(this.patterns, belief, this.journal);
     },
     round(v) { return String(Math.round(v * 10) / 10).replace('.', ','); },
     affirmationOf(belief) {

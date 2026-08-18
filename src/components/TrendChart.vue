@@ -163,7 +163,7 @@ export default {
   flex-direction: column-reverse;
   gap: 2px;
   width: 26px;
-  height: 110px;
+  height: 165px;
   border-radius: 6px;
   overflow: hidden;
 }

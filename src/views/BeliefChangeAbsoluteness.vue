@@ -4,7 +4,7 @@
          step asks you to doubt it. Nothing renders when there is nothing to
          say: a number without a rating behind it would claim an answer
          nobody gave. -->
-    <wizard-context :quote="belief" :credibility="truth"></wizard-context>
+    <wizard-context :quote="belief" :credibility="truth" standing></wizard-context>
 
     <p class="wizard-question">Stimmt das wirklich in jeder Situation?</p>
     <p class="wizard-body">

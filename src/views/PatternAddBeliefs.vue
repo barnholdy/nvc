@@ -81,7 +81,7 @@
       >
         <p class="card-title available-title">„{{ b.belief }}“</p>
         <div v-if="credibilityOf(b) !== null" class="score-row">
-          <span class="score-value">x̃ {{ round(credibilityOf(b)) }}</span>
+          <span class="score-value">{{ round(credibilityOf(b)) }}</span>
           <span class="score-max">/10</span>
           <span class="score-label">Glaubwürdigkeit</span>
         </div>
@@ -94,7 +94,7 @@
 import WizardContext from '@/components/WizardContext.vue';
 import InputCard from '@/components/InputCard.vue';
 import MeterCard from '@/components/MeterCard.vue';
-import { beliefCredibility } from '@/utils/credibility';
+import { beliefStanding } from '@/utils/credibility';
 
 const TRUTH_DEFAULT = 5;
 
@@ -176,7 +176,7 @@ export default {
     },
   },
   methods: {
-    credibilityOf(belief) { return beliefCredibility(this.patterns, belief, this.journal); },
+    credibilityOf(belief) { return beliefStanding(this.patterns, belief, this.journal); },
     round(v) { return String(Math.round(v * 10) / 10).replace('.', ','); },
     // The rating belongs to this situation, not to the belief: the same belief
     // rated again later is what makes a trend.
