@@ -20,7 +20,7 @@
         >„{{ b.text }}“<span
           v-if="b.credibility !== null"
           class="chip-score"
-        > · {{ b.credibility }}/10</span></component>
+        > · ⌀ {{ b.credibility }}/10</span></component>
       </div>
     </div>
 
@@ -28,7 +28,7 @@
       <div class="now-line">
         <div class="now-body">
           <p class="now-title">{{ kernmuster.length ? 'Neu analysieren' : 'Muster analysieren' }}</p>
-          <p class="now-sub" :class="{ 'sub-changed': dataChanged }">{{ subline }}</p>
+          <p class="now-sub">{{ subline }}</p>
         </div>
         <v-progress-circular
           v-if="isLoading"
@@ -40,7 +40,6 @@
         <button
           v-else
           class="now-btn"
-          :class="{ 'btn-changed': dataChanged }"
           @click.stop="generateKernmuster"
         >{{ kernmuster.length ? 'Neu' : 'Analysieren' }}</button>
       </div>
@@ -255,9 +254,6 @@ export default {
   color: #8e8e93;
   margin: 4px 0 0;
 }
-/* Orange when the beliefs have moved on since the last analysis — the same
-   colour the rest of the app uses for "this needs attention". */
-.sub-changed { color: #fd9927; }
 .now-btn {
   flex-shrink: 0;
   background: none;
@@ -269,5 +265,4 @@ export default {
   padding: 9px 20px;
   cursor: pointer;
 }
-.btn-changed { border-color: #fd9927; color: #fd9927; }
 </style>

@@ -46,7 +46,10 @@
             class="card practise-card practise-card-wide"
             @click="practiseSection.run(item)"
           >
-            <p class="practise-title">{{ item.text }}</p>
+            <div class="aff-box practise-aff">
+              <p class="aff-label">Affirmation</p>
+              <p class="aff-text">{{ item.text }}</p>
+            </div>
             <p class="now-sub">{{ item.sub }}</p>
             <button
               class="now-btn"
@@ -102,11 +105,16 @@
             class="pill trend-pill"
             :class="{ active: r.key === shownTrendKey }"
             @click="trendKey = r.key"
-          >{{ r.short }}<span class="pill-count"> · {{ r.points.length }}</span></button>
+          >„{{ r.short }}“<span class="pill-count"> · {{ r.points.length }}</span></button>
         </div>
 
         <div v-if="shownTrend" class="card">
           <p class="card-title">„{{ shownTrend.text }}“</p>
+          <div v-if="shownTrend.avg !== null" class="score-row">
+            <span class="score-value">⌀ {{ round(shownTrend.avg) }}</span>
+            <span class="score-max">/10</span>
+            <span class="score-label">Glaubwürdigkeit</span>
+          </div>
           <trend-chart :row="shownTrend"></trend-chart>
         </div>
       </template>
@@ -160,7 +168,7 @@ import {
   experimentState,
 } from '@/utils/experiment';
 import {
-  beliefCredibility, beliefRows,
+  beliefCredibility, beliefRows, averageOf,
 } from '@/utils/credibility';
 import { mdiLightningBolt } from '@mdi/js';
 import NavIcon from '@/components/NavIcon.vue';
@@ -253,7 +261,7 @@ export default {
       const shorten = t => (t.length > 28 ? `${t.slice(0, 27)}…` : t);
       return beliefRows(this.patterns, this.beliefs, this.journal)
         .filter(r => r.hasTrend)
-        .map(r => Object.assign({}, r, { short: shorten(r.text) }));
+        .map(r => Object.assign({}, r, { short: shorten(r.text), avg: averageOf(r.points) }));
     },
     // The chosen chip, or the first one — a chip that vanished (a rating
     // undone elsewhere) must not leave the block blank.
@@ -545,17 +553,7 @@ export default {
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.7; }
 }
-.practise-title {
-  font-size: 0.95rem;
-  font-weight: 400;
-  color: #fff;
-  line-height: 1.35;
-  margin: 0 0 8px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
+.practise-aff { margin-bottom: 8px; }
 .practise-card .now-sub {
   white-space: normal;
   margin-bottom: 12px;

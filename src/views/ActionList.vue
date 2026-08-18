@@ -53,140 +53,156 @@
         <p class="list-empty-sub">{{ emptyText }}</p>
       </div>
 
-      <div
-        v-for="(row, i) in filteredRows"
-        :key="row.experiment.id"
-        class="card"
-        :data-row-id="row.experiment.id"
-      >
-        <div class="head-swipe">
-          <!-- Whatever the card's own button already offers is left out. -->
-          <div v-if="isSwiping(i) && otherSteps(row).length" class="swipe-panel left">
-            <div class="swipe-group" :class="{ single: otherSteps(row).length === 1 }">
-              <button
-                v-for="step in otherSteps(row)"
-                :key="step.key"
-                class="swipe-btn"
-                :style="{ color: step.color }"
-                @click.stop="step.run(row)"
-              >{{ step.label }}</button>
-            </div>
-          </div>
-          <div v-if="isSwiping(i)" class="swipe-panel right">
-            <div class="swipe-group single swipe-btn-delete">
-              <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(row)">Löschen</button>
-            </div>
-          </div>
-          <div
-            class="card-head swipe-handle"
-            :style="rowSt(i)"
-            @touchstart="tsStart($event, i)"
-            @touchmove="tsMove($event, i)"
-            @touchend="tsEnd($event, i)"
-          >
-            <p class="card-title">{{ row.experiment.situation || 'Ohne Situation' }}</p>
-            <button
-              v-if="needsPlan(row.experiment)"
-              class="card-btn"
-              @click.stop="editExperiment(row)"
-            >Planen</button>
-            <button
-              v-else-if="displayState(row.experiment) === 'planned'"
-              class="card-btn"
-              @click.stop="startResult(row)"
-            >Auswerten</button>
-          </div>
-        </div>
-          <span class="card-pill">{{ stateLine(row.experiment) }}</span>
-          <p v-if="isDue(row.experiment)" class="due-hint">Schon durchgeführt?</p>
-
-          <!-- What was feared against what happened, as one bar: the orange
-               reaches as far as the fear did, the blue as far as reality. -->
-          <template v-if="gapOf(row.experiment) !== null">
-            <div class="gap-bar">
-              <span
-                class="gap-fill gap-expected"
-                :style="{ width: pct(row.experiment.fearExpected) }"
-              ></span>
-              <span
-                class="gap-fill gap-real"
-                :style="{ width: pct(row.experiment.fearActual) }"
-              ></span>
-            </div>
-            <div class="gap-legend">
-              <span class="gap-key"><i class="gap-dot gap-dot-expected"></i>erwartet {{ row.experiment.fearExpected }}</span>
-              <span class="gap-key"><i class="gap-dot gap-dot-real"></i>real {{ row.experiment.fearActual }}</span>
-              <span class="gap-delta" :style="{ color: gapColor(gapOf(row.experiment)) }">
-                {{ gapOf(row.experiment) > 0 ? '−' : '+' }}{{ Math.abs(gapOf(row.experiment)) }}
-              </span>
-            </div>
-          </template>
-          <template v-else-if="row.experiment.fearExpected !== null">
-            <div class="gap-bar">
-              <span
-                class="gap-fill gap-expected"
-                :style="{ width: pct(row.experiment.fearExpected) }"
-              ></span>
-            </div>
-            <div class="gap-legend">
-              <span class="gap-key"><i class="gap-dot gap-dot-expected"></i>erwartet {{ row.experiment.fearExpected }}</span>
-            </div>
-          </template>
-
-          <div v-if="!compact" class="card-sep"></div>
+      <template v-else>
+        <template v-for="group in groups">
+          <p :key="group.key" class="month-head">{{ group.label }}</p>
 
           <div
-            v-if="!compact && row.experiment.fear"
-            class="detail-row"
-            :class="{ open: isOpen(row, 'fear') }"
-            @click.stop="toggleRow(row, 'fear')"
+            v-for="row in group.entries"
+            :key="row.experiment.id"
+            :data-row-id="row.experiment.id"
           >
-            <span class="detail-label">Befürchtung</span>
-            <p class="detail-value" :class="{ open: isOpen(row, 'fear') }">{{ row.experiment.fear }}</p>
-            <v-icon v-if="!isOpen(row, 'fear')" class="detail-chevron">chevron_right</v-icon>
-          </div>
+            <div
+              class="timeline-row"
+              :class="{ 'timeline-first': row.experiment.id === group.entries[0].experiment.id }"
+            >
+              <span class="timeline-dot"></span>
+              <div class="timeline-body">
+                <p class="timeline-meta">{{ dayLabel(row.experiment.id) }}</p>
+                <div class="card action-card">
+                  <div class="head-swipe">
+                    <!-- Whatever the card's own button already offers is left out. -->
+                    <div v-if="isSwiping(row.experiment.id) && otherSteps(row).length" class="swipe-panel left">
+                      <div class="swipe-group" :class="{ single: otherSteps(row).length === 1 }">
+                        <button
+                          v-for="step in otherSteps(row)"
+                          :key="step.key"
+                          class="swipe-btn"
+                          :style="{ color: step.color }"
+                          @click.stop="step.run(row)"
+                        >{{ step.label }}</button>
+                      </div>
+                    </div>
+                    <div v-if="isSwiping(row.experiment.id)" class="swipe-panel right">
+                      <div class="swipe-group single swipe-btn-delete">
+                        <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(row)">Löschen</button>
+                      </div>
+                    </div>
+                    <div
+                      class="card-head swipe-handle"
+                      :style="rowSt(row.experiment.id)"
+                      @touchstart="tsStart($event, row.experiment.id)"
+                      @touchmove="tsMove($event, row.experiment.id)"
+                      @touchend="tsEnd($event, row.experiment.id)"
+                    >
+                      <p class="card-title">{{ row.experiment.situation || 'Ohne Situation' }}</p>
+                      <button
+                        v-if="needsPlan(row.experiment)"
+                        class="card-btn"
+                        @click.stop="editExperiment(row)"
+                      >Planen</button>
+                      <button
+                        v-else-if="displayState(row.experiment) === 'planned'"
+                        class="card-btn"
+                        @click.stop="startResult(row)"
+                      >Auswerten</button>
+                    </div>
+                  </div>
+                  <span class="card-pill">{{ stateLine(row.experiment) }}</span>
+                  <p v-if="isDue(row.experiment)" class="due-hint">Schon durchgeführt?</p>
 
-          <div
-            v-if="!compact && row.experiment.outcome"
-            class="detail-row"
-            :class="{ open: isOpen(row, 'outcome') }"
-            @click.stop="toggleRow(row, 'outcome')"
-          >
-            <span class="detail-label">Was passiert ist</span>
-            <p class="detail-value" :class="{ open: isOpen(row, 'outcome') }">{{ row.experiment.outcome }}</p>
-            <v-icon v-if="!isOpen(row, 'outcome')" class="detail-chevron">chevron_right</v-icon>
-          </div>
+                  <!-- What was feared against what happened, as one bar: the orange
+                       reaches as far as the fear did, the blue as far as reality. -->
+                  <template v-if="gapOf(row.experiment) !== null">
+                    <div class="gap-bar">
+                      <span
+                        class="gap-fill gap-expected"
+                        :style="{ width: pct(row.experiment.fearExpected) }"
+                      ></span>
+                      <span
+                        class="gap-fill gap-real"
+                        :style="{ width: pct(row.experiment.fearActual) }"
+                      ></span>
+                    </div>
+                    <div class="gap-legend">
+                      <span class="gap-key"><i class="gap-dot gap-dot-expected"></i>erwartet {{ row.experiment.fearExpected }}</span>
+                      <span class="gap-key"><i class="gap-dot gap-dot-real"></i>real {{ row.experiment.fearActual }}</span>
+                      <span class="gap-delta" :style="{ color: gapColor(gapOf(row.experiment)) }">
+                        {{ gapOf(row.experiment) > 0 ? '−' : '+' }}{{ Math.abs(gapOf(row.experiment)) }}
+                      </span>
+                    </div>
+                  </template>
+                  <template v-else-if="row.experiment.fearExpected !== null">
+                    <div class="gap-bar">
+                      <span
+                        class="gap-fill gap-expected"
+                        :style="{ width: pct(row.experiment.fearExpected) }"
+                      ></span>
+                    </div>
+                    <div class="gap-legend">
+                      <span class="gap-key"><i class="gap-dot gap-dot-expected"></i>erwartet {{ row.experiment.fearExpected }}</span>
+                    </div>
+                  </template>
 
-          <div
-            v-if="!compact && row.experiment.learning"
-            class="detail-row"
-            :class="{ open: isOpen(row, 'learning') }"
-            @click.stop="toggleRow(row, 'learning')"
-          >
-            <span class="detail-label">Was sagt dir das?</span>
-            <p class="detail-value" :class="{ open: isOpen(row, 'learning') }">{{ row.experiment.learning }}</p>
-            <v-icon v-if="!isOpen(row, 'learning')" class="detail-chevron">chevron_right</v-icon>
-          </div>
+                  <div v-if="!compact" class="card-sep"></div>
 
-          <div v-if="affirmationOf(row)" class="aff-box" :class="{ 'aff-box-loose': compact }">
-            <p class="aff-label">Affirmation</p>
-            <p class="aff-text">„{{ affirmationOf(row) }}“</p>
-          </div>
+                  <div
+                    v-if="!compact && row.experiment.fear"
+                    class="detail-row"
+                    :class="{ open: isOpen(row, 'fear') }"
+                    @click.stop="toggleRow(row, 'fear')"
+                  >
+                    <span class="detail-label">Befürchtung</span>
+                    <p class="detail-value" :class="{ open: isOpen(row, 'fear') }">{{ row.experiment.fear }}</p>
+                    <v-icon v-if="!isOpen(row, 'fear')" class="detail-chevron">chevron_right</v-icon>
+                  </div>
 
-          <!-- The belief under test, kept at the foot of the card: the run is
-               the subject here, the belief is what it is aimed at. -->
-          <div class="belief-chip" @click.stop="openBelief(row)">
-            <span class="belief-chip-text">„{{ row.beliefText }}“</span>
-            <span v-if="rowTruth(row) !== null" class="belief-chip-score">
-              {{ rowTruth(row) }}/10
-            </span>
-            <span
-              v-if="deltaMark(row)"
-              class="belief-chip-trend"
-              :style="{ color: deltaMark(row).color }"
-            >{{ deltaMark(row).text }}</span>
+                  <div
+                    v-if="!compact && row.experiment.outcome"
+                    class="detail-row"
+                    :class="{ open: isOpen(row, 'outcome') }"
+                    @click.stop="toggleRow(row, 'outcome')"
+                  >
+                    <span class="detail-label">Was passiert ist</span>
+                    <p class="detail-value" :class="{ open: isOpen(row, 'outcome') }">{{ row.experiment.outcome }}</p>
+                    <v-icon v-if="!isOpen(row, 'outcome')" class="detail-chevron">chevron_right</v-icon>
+                  </div>
+
+                  <div
+                    v-if="!compact && row.experiment.learning"
+                    class="detail-row"
+                    :class="{ open: isOpen(row, 'learning') }"
+                    @click.stop="toggleRow(row, 'learning')"
+                  >
+                    <span class="detail-label">Was sagt dir das?</span>
+                    <p class="detail-value" :class="{ open: isOpen(row, 'learning') }">{{ row.experiment.learning }}</p>
+                    <v-icon v-if="!isOpen(row, 'learning')" class="detail-chevron">chevron_right</v-icon>
+                  </div>
+
+                  <div v-if="affirmationOf(row)" class="aff-box" :class="{ 'aff-box-loose': compact }">
+                    <p class="aff-label">Affirmation</p>
+                    <p class="aff-text">„{{ affirmationOf(row) }}“</p>
+                  </div>
+
+                  <!-- The belief under test, kept at the foot of the card: the run is
+                       the subject here, the belief is what it is aimed at. -->
+                  <div class="belief-chip" @click.stop="openBelief(row)">
+                    <span class="belief-chip-text">„{{ row.beliefText }}“</span>
+                    <span v-if="rowTruth(row) !== null" class="belief-chip-score">
+                      {{ rowTruth(row) }}/10
+                    </span>
+                    <span
+                      v-if="deltaMark(row)"
+                      class="belief-chip-trend"
+                      :style="{ color: deltaMark(row).color }"
+                    >{{ deltaMark(row).text }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-      </div>
+        </template>
+      </template>
 
       <div class="list-bottom-space"></div>
 
@@ -385,7 +401,7 @@ export default {
       // the same key pattern the Überzeugungen list uses for its own toggle.
       compact: localStorage.getItem(COMPACT_KEY) === '1',
       beliefFilter: null,
-      sw: { openIdx: null, handleHeight: 0, openDir: null, touchIdx: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
+      sw: { openKey: null, handleHeight: 0, openDir: null, touchKey: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
       now: Date.now(),
       isResultDialogShowing: false,
       resultRow: null,
@@ -402,8 +418,8 @@ export default {
   watch: {
     '$route.query.open': function() { this.revealRequested(); },
     '$route.query.belief': function() { this.applyBeliefQuery(); },
-    tab() { this.sw.openIdx = null; this.sw.openDir = null; },
-    beliefFilter() { this.sw.openIdx = null; this.sw.openDir = null; },
+    tab() { this.sw.openKey = null; this.sw.openDir = null; },
+    beliefFilter() { this.sw.openKey = null; this.sw.openDir = null; },
     compact(v) { localStorage.setItem(COMPACT_KEY, v ? '1' : '0'); },
   },
   computed: {
@@ -449,6 +465,22 @@ export default {
         label: EXPERIMENT_DISPLAY_LABELS[key],
         count: rows.filter(r => experimentDisplayState(r.experiment) === key).length,
       })));
+    },
+    // Same monthly timeline the Verlauf and Tagebuch lists use, grouped on
+    // when the run was planned — filteredRows already comes out newest first.
+    groups() {
+      const out = [];
+      const index = {};
+      moment.locale('de');
+      this.filteredRows.forEach((row) => {
+        const key = moment(row.experiment.id).format('YYYY-MM');
+        if (index[key] === undefined) {
+          index[key] = out.length;
+          out.push({ key, label: moment(row.experiment.id).format('MMMM YYYY').toUpperCase(), entries: [] });
+        }
+        out[index[key]].entries.push(row);
+      });
+      return out;
     },
     emptyText() {
       if (this.tab === 'open') return 'Neu ist hier nur, was noch keine Befürchtung hat.';
@@ -496,7 +528,7 @@ export default {
         : (this.displayState(row.experiment) === 'planned' ? 'Auswerten' : '');
       return steps.filter(s => s.label !== here);
     },
-    isSwiping(i) { return this.sw.openIdx === i || this.sw.touchIdx === i; },
+    isSwiping(key) { return this.sw.openKey === key || this.sw.touchKey === key; },
     isOpen(row, key) { return !!this.openRows[`${row.experiment.id}:${key}`]; },
     toggleRow(row, key) {
       const k = `${row.experiment.id}:${key}`;
@@ -521,6 +553,10 @@ export default {
     shortDate(ts) {
       moment.locale('de');
       return moment(ts).format('D. MMM');
+    },
+    dayLabel(ts) {
+      moment.locale('de');
+      return moment(ts).format('D. MMM').toUpperCase();
     },
 
     // Writes the changed experiment back into its belief, matched by id.
@@ -615,48 +651,50 @@ export default {
       });
     },
     // Only the card head answers a swipe; the rest of the card scrolls.
-    tsStart(e, i) {
+    // Keyed by the run's own id rather than its index: the timeline is
+    // grouped by month, so an index within a group would collide across them.
+    tsStart(e, key) {
       if (e.target && e.target.closest && e.target.closest('.card-btn')) return;
       this.sw.handleHeight = e.currentTarget ? e.currentTarget.offsetHeight : 0;
       const t = e.touches[0];
-      this.sw.touchIdx = i; this.sw.startX = t.clientX; this.sw.startY = t.clientY;
+      this.sw.touchKey = key; this.sw.startX = t.clientX; this.sw.startY = t.clientY;
       this.sw.dx = 0; this.sw.isH = null; this.sw.drag = false;
     },
-    tsMove(e, i) {
-      if (this.sw.touchIdx !== i) return;
+    tsMove(e, key) {
+      if (this.sw.touchKey !== key) return;
       const t = e.touches[0];
       const dx = t.clientX - this.sw.startX, dy = t.clientY - this.sw.startY;
       if (this.sw.isH === null && (Math.abs(dx) > 8 || Math.abs(dy) > 8))
         this.sw.isH = Math.abs(dx) > Math.abs(dy) * 1.5;
       if (!this.sw.isH) return;
       e.preventDefault();
-      this.sw.dx = Math.max(-110, Math.min(dx, this.rightWidth(i)));
+      this.sw.dx = Math.max(-110, Math.min(dx, this.rightWidth(key)));
       this.sw.drag = true;
     },
-    tsEnd(e, i) {
-      if (this.sw.touchIdx !== i) return;
+    tsEnd(e, key) {
+      if (this.sw.touchKey !== key) return;
       if (this.sw.drag) {
-        if (this.sw.dx < -40) { this.sw.openIdx = i; this.sw.openDir = 'left'; }
-        else if (this.sw.dx > 40) { this.sw.openIdx = i; this.sw.openDir = 'right'; }
-        else { this.sw.openIdx = null; this.sw.openDir = null; }
-      } else if (this.sw.openIdx !== null) {
-        this.sw.openIdx = null; this.sw.openDir = null;
+        if (this.sw.dx < -40) { this.sw.openKey = key; this.sw.openDir = 'left'; }
+        else if (this.sw.dx > 40) { this.sw.openKey = key; this.sw.openDir = 'right'; }
+        else { this.sw.openKey = null; this.sw.openDir = null; }
+      } else if (this.sw.openKey !== null) {
+        this.sw.openKey = null; this.sw.openDir = null;
       }
-      this.sw.touchIdx = null; this.sw.dx = 0; this.sw.drag = false; this.sw.isH = null;
+      this.sw.touchKey = null; this.sw.dx = 0; this.sw.drag = false; this.sw.isH = null;
     },
     // Keep in step with the buttons rendered above: a mismatch makes the card
     // spring back before the second one can be tapped.
-    rightWidth(i) {
-      const row = this.filteredRows[i];
-      const n = this.otherSteps(row).length;
+    rightWidth(key) {
+      const row = this.filteredRows.find(r => r.experiment.id === key);
+      const n = row ? this.otherSteps(row).length : 0;
       return n >= 2 ? 190 : 110;
     },
-    rowSt(i) {
+    rowSt(key) {
       const s = this.sw;
-      const live = s.touchIdx === i && s.drag && s.isH;
+      const live = s.touchKey === key && s.drag && s.isH;
       let x = 0;
       if (live) x = s.dx;
-      else if (s.openIdx === i) x = s.openDir === 'left' ? -110 : this.rightWidth(i);
+      else if (s.openKey === key) x = s.openDir === 'left' ? -110 : this.rightWidth(key);
       return { transform: `translateX(${x}px)`, transition: live ? 'none' : 'transform 0.2s ease' };
     },
     revealRequested() {
@@ -731,6 +769,55 @@ export default {
 
 <style scoped lang="scss">
 .dark-page { background: #000; min-height: 100vh; }
+
+.month-head {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: #636366;
+  font-weight: 600;
+  margin: 18px 0 10px;
+  padding: 0 20px;
+}
+
+/* Same dotted thread the Verlauf and Tagebuch lists draw the timeline with. */
+.timeline-row {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  padding: 4px 20px 12px;
+  background: #000;
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    left: 24px;
+    width: 1px;
+    background: #2c2c2e;
+  }
+  &::before { top: 14px; bottom: 0; }
+  &::after { top: 0; height: 14px; }
+  &.timeline-first::after { display: none; }
+}
+.timeline-dot {
+  position: relative;
+  flex-shrink: 0;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #48484a;
+  margin-top: 6px;
+}
+.timeline-body { flex: 1; min-width: 0; position: relative; z-index: 1; }
+.timeline-meta {
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: #636366;
+  margin: 0 0 6px;
+  text-transform: uppercase;
+}
+/* The card is the handle, so it keeps its own fill and radius and only drops
+   the side margin .card carries for a full-width list. */
+.action-card { margin: 0; }
 
 /* ─── Swipe rows ─── */
 

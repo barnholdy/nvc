@@ -81,7 +81,7 @@
       >
         <p class="card-title available-title">„{{ b.belief }}“</p>
         <div v-if="credibilityOf(b) !== null" class="score-row">
-          <span class="score-value">{{ round(credibilityOf(b)) }}</span>
+          <span class="score-value">⌀ {{ round(credibilityOf(b)) }}</span>
           <span class="score-max">/10</span>
           <span class="score-label">Glaubwürdigkeit</span>
         </div>
