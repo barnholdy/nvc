@@ -95,7 +95,7 @@
                belong in one column. -->
           <div v-if="credibility(entry) !== null" class="score-row">
             <div class="score-main">
-              <span class="score-value">⌀ {{ round(credibility(entry)) }}</span>
+              <span class="score-value">x̃ {{ round(credibility(entry)) }}</span>
               <span class="score-max">/10</span>
               <span class="score-label">Glaubwürdigkeit</span>
             </div>

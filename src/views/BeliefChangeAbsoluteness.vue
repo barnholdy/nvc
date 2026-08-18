@@ -30,7 +30,7 @@ export default {
   components: { WizardContext, InputCard },
   props: {
     belief: { type: String, default: '' },
-    // Average of every rating this belief collected in the Situationen wizard.
+    // Where the belief stands, the same number its own card shows.
     // Null when it was never rated.
     truth: { type: Number, default: null },
     initialValue: { type: String, default: '' },

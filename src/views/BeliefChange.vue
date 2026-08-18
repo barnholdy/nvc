@@ -132,8 +132,8 @@ export default {
   computed: {
     INTENSITY_THRESHOLD() { return INTENSITY_THRESHOLD; },
     MAX_FEELINGS() { return MAX_FEELINGS; },
-    // Every reading this belief has collected, averaged — the situations it
-    // was rated in and the experiments that were evaluated.
+    // Where this belief stands: the median of its first few readings, across
+    // the situations, experiments and journal entries that rated it.
     situationTruth() {
       return beliefCredibility(this.$store.getters.patterns, this.entry, this.$store.getters.journal);
     },

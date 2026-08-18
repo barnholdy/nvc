@@ -88,18 +88,13 @@
                   <p class="aff-text">„{{ affirmationOf(entry) }}“</p>
                 </div>
 
-                <div class="timeline-chips">
-                  <span class="timeline-chip" @click.stop="openBelief(entry)">
-                    „{{ beliefTextOf(entry) }}“
-                    <span v-if="typeof entry.credibility === 'number'" class="timeline-chip-score">
-                      {{ entry.credibility }}/10
-                    </span>
-                    <span
-                      v-if="deltaMark(entry)"
-                      class="timeline-chip-trend"
-                      :style="{ color: deltaMark(entry).color }"
-                    >{{ deltaMark(entry).text }}</span>
-                  </span>
+                <belief-chip
+                  :text="beliefTextOf(entry)"
+                  :value="ownValue(entry)"
+                  :baseline="credibilityOf(entry)"
+                  @open="openBelief(entry)"
+                ></belief-chip>
+                <div class="fit-row">
                   <span class="fit-mark" :class="entry.fit">
                     <i class="fit-dot"></i>{{ entry.fit === 'new' ? 'Affirmation' : 'Überzeugung' }}
                   </span>
@@ -148,12 +143,12 @@
 import moment from 'moment';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 import { beliefCredibility } from '@/utils/credibility';
-import { deltaColor } from '@/utils/beliefTrend';
 import NavIcon from '@/components/NavIcon.vue';
+import BeliefChip from '@/components/BeliefChip.vue';
 
 export default {
   name: 'journal-list',
-  components: { NavIcon },
+  components: { NavIcon, BeliefChip },
   data() {
     return {
       beliefFilter: null,
@@ -240,25 +235,15 @@ export default {
       if (!b) return '';
       return (b.affirmations || []).map(a => a && a.text).filter(Boolean).join(' · ');
     },
-    // Where the belief stands across every reading, this entry's included —
-    // the number the belief list shows as its headline.
-    averageOf(entry) {
+    // Where the belief stands — the number its own card shows as its headline.
+    credibilityOf(entry) {
       const b = this.beliefOf(entry);
       if (!b) return null;
       return beliefCredibility(this.$store.getters.patterns, b, this.$store.getters.journal);
     },
-    // How far this one reading sits from the belief's average. Null when
-    // there is nothing to compare against, and when it sits right on it —
-    // a chip saying "±0" on every first entry would be noise.
-    deltaMark(entry) {
-      const avg = this.averageOf(entry);
-      if (avg === null || typeof entry.credibility !== 'number') return null;
-      const delta = Math.round((entry.credibility - avg) * 10) / 10;
-      if (delta === 0) return null;
-      return {
-        text: (delta > 0 ? '+' : '−') + String(Math.abs(delta)).replace('.', ','),
-        color: deltaColor(delta),
-      };
+    // What this one entry rated it at, which an older entry may not carry.
+    ownValue(entry) {
+      return typeof entry.credibility === 'number' ? entry.credibility : null;
     },
     dayLabel(time) {
       moment.locale('de');
@@ -290,7 +275,7 @@ export default {
     // across months.
     tsStart(e, key) {
       if (e.target && e.target.closest
-        && (e.target.closest('.swipe-btn') || e.target.closest('.timeline-chip'))) return;
+        && (e.target.closest('.swipe-btn') || e.target.closest('.belief-chip'))) return;
       this.sw.handleHeight = e.currentTarget ? e.currentTarget.offsetHeight : 0;
       const t = e.touches[0];
       this.sw.touchKey = key; this.sw.startX = t.clientX; this.sw.startY = t.clientY;
@@ -394,23 +379,9 @@ export default {
   margin: 8px 0 0;
   font-style: italic;
 }
-.timeline-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-.timeline-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: #1c1c1e;
-  border: 1px solid #2c2c2e;
-  border-radius: 999px;
-  padding: 7px 13px;
-  font-size: 0.85rem;
-  color: #8e8e93;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  &:active { opacity: 0.6; }
-}
-.timeline-chip-score { color: #636366; flex-shrink: 0; white-space: nowrap; }
-.timeline-chip-trend { font-weight: 600; flex-shrink: 0; white-space: nowrap; }
+/* Its own line under the belief tag: a quiet note about the entry, not a
+   second tag competing with the one above it. */
+.fit-row { margin-top: 12px; }
 
 /* Which of the two sentences this entry speaks for — a mark rather than a
    chip: it qualifies the entry, it is not a thing to tap. */

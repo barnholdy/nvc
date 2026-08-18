@@ -6,22 +6,17 @@
          that fell into it as chips. -->
     <div v-for="(k, i) in patternGroups" :key="i" class="card">
       <p class="card-title">{{ k.title }}</p>
-      <div class="group-chips">
-        <!-- Only clickable when the text still matches a belief that exists:
-             the analysis echoes text back, and a renamed or deleted one has
-             nowhere left to jump to. -->
-        <component
-          :is="b.time !== null ? 'button' : 'span'"
-          v-for="(b, j) in k.beliefs"
-          :key="j"
-          class="group-chip"
-          :class="{ tappable: b.time !== null }"
-          @click="openBelief(b)"
-        >„{{ b.text }}“<span
-          v-if="b.credibility !== null"
-          class="chip-score"
-        > · ⌀ {{ b.credibility }}/10</span></component>
-      </div>
+      <!-- Only clickable when the text still matches a belief that exists:
+           the analysis echoes text back, and a renamed or deleted one has
+           nowhere left to jump to. -->
+      <belief-chip
+        v-for="(b, j) in k.beliefs"
+        :key="j"
+        :text="b.text"
+        :baseline="b.credibility"
+        :tappable="b.time !== null"
+        @open="openBelief(b)"
+      ></belief-chip>
     </div>
 
     <div class="card now-card" @click="generateKernmuster">
@@ -50,6 +45,7 @@
 <script>
 import { beliefCredibility } from '@/utils/credibility';
 import { openQuery } from '@/utils/reveal';
+import BeliefChip from '@/components/BeliefChip.vue';
 
 // Quotes, case, spacing and a trailing period are all the analysis is likely to
 // change when it repeats a belief back — none of them make it a different one.
@@ -64,6 +60,7 @@ function normalizeBelief(text) {
 
 export default {
   name: 'pattern-groups',
+  components: { BeliefChip },
   data() {
     const saved = localStorage.getItem('nvc.kernmuster');
     return {
@@ -98,8 +95,9 @@ export default {
           const c = belief ? beliefCredibility(patterns, belief, journal) : null;
           return {
             text: belief ? belief.belief : t,
-            // One decimal, German comma — the same number the cards show.
-            credibility: c === null ? null : String(Math.round(c * 10) / 10).replace('.', ','),
+            // Raw, so the chip can place it on its own scale — it does the
+            // rounding and the German comma itself.
+            credibility: c,
             // Only set when the text still matches something stored — that is
             // what makes the chip a link rather than just a label.
             time: belief ? belief.time : null,
@@ -195,41 +193,6 @@ export default {
   color: #8e8e93;
   margin: 18px 20px 8px;
 }
-
-.group-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 12px;
-}
-/* Outline, like the feeling chips. A belief is a whole sentence, so the chip
-   wraps rather than running off the card — rounded ends still read as one
-   chip across two lines. Rendered as a <button> when it links to a belief, so
-   it needs its browser chrome reset back to nothing. */
-.group-chip {
-  display: inline-block;
-  background: none;
-  font-family: inherit;
-  font-size: 0.85rem;
-  color: #8e8e93;
-  border: 1px solid #3a3a3c;
-  border-radius: 14px;
-  padding: 5px 12px;
-  line-height: 1.35;
-  max-width: 100%;
-  min-width: 0;
-  overflow-wrap: anywhere;
-  text-align: left;
-}
-.group-chip.tappable {
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  &:active { opacity: 0.6; }
-}
-
-/* The number is the quieter half of the chip, and never wraps away from the
-   sentence it belongs to. */
-.chip-score { color: #636366; white-space: nowrap; }
 
 .now-card {
   cursor: pointer;

@@ -186,17 +186,12 @@
 
                   <!-- The belief under test, kept at the foot of the card: the run is
                        the subject here, the belief is what it is aimed at. -->
-                  <div class="belief-chip" @click.stop="openBelief(row)">
-                    <span class="belief-chip-text">„{{ row.beliefText }}“</span>
-                    <span v-if="rowTruth(row) !== null" class="belief-chip-score">
-                      {{ rowTruth(row) }}/10
-                    </span>
-                    <span
-                      v-if="deltaMark(row)"
-                      class="belief-chip-trend"
-                      :style="{ color: deltaMark(row).color }"
-                    >{{ deltaMark(row).text }}</span>
-                  </div>
+                  <belief-chip
+                    :text="row.beliefText"
+                    :value="rowTruth(row)"
+                    :baseline="beliefTruth(row)"
+                    @open="openBelief(row)"
+                  ></belief-chip>
                 </div>
               </div>
             </div>
@@ -339,10 +334,10 @@ import {
   isPlanned,
 } from '@/utils/experiment';
 import { beliefCredibility } from '@/utils/credibility';
-import { deltaColor } from '@/utils/beliefTrend';
 import { beliefStatusLabel, beliefStatusColor } from '@/utils/beliefStatus';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 import NavIcon from '@/components/NavIcon.vue';
+import BeliefChip from '@/components/BeliefChip.vue';
 
 const COMPACT_KEY = 'nvc.actionsCompact';
 
@@ -385,7 +380,7 @@ function triggerConfetti() {
 export default {
   name: 'action-list',
   components: {
-    NavIcon, WizardHeader, WizardFooter, WizardContext, InputCard, MeterCard,
+    NavIcon, WizardHeader, WizardFooter, WizardContext, InputCard, MeterCard, BeliefChip,
   },
   data() {
     return {
@@ -600,19 +595,6 @@ export default {
     rowTruth(row) {
       const v = row && row.experiment && row.experiment.beliefTruth;
       return typeof v === 'number' ? v : null;
-    },
-    // How far that reading sits from the belief's average. Null when there is
-    // nothing to compare, and when it sits right on it.
-    deltaMark(row) {
-      const own = this.rowTruth(row);
-      const avg = this.beliefTruth(row);
-      if (own === null || avg === null) return null;
-      const delta = Math.round((own - avg) * 10) / 10;
-      if (delta === 0) return null;
-      return {
-        text: (delta > 0 ? '+' : '−') + String(Math.abs(delta)).replace('.', ','),
-        color: deltaColor(delta),
-      };
     },
     beliefStatusLabel(belief) { return beliefStatusLabel(belief); },
     beliefStatusColor(belief) { return beliefStatusColor(belief); },
@@ -946,26 +928,6 @@ export default {
 /* .gap-bar and friends are global now — the result wizard's own context
    card draws the same bar. */
 
-/* Same outline chip Verlauf uses for its belief tags: content-width, not a
-   stretched block — a label, not a section of the card. */
-.belief-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  max-width: 100%;
-  min-width: 0;
-  background: #1c1c1e;
-  border: 1px solid #2c2c2e;
-  border-radius: 999px;
-  padding: 7px 13px;
-  margin-top: 14px;
-  font-size: 0.85rem;
-  color: #8e8e93;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  &:active { opacity: 0.6; }
-}
-.belief-chip-text { min-width: 0; overflow-wrap: anywhere; }
-.belief-chip-score { color: #636366; flex-shrink: 0; white-space: nowrap; }
-.belief-chip-trend { font-weight: 600; flex-shrink: 0; white-space: nowrap; }
+/* The belief tag is a component of its own now — it carries the same two
+   readings on every screen that shows one. */
 </style>

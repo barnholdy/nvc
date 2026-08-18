@@ -81,7 +81,7 @@
       >
         <p class="card-title available-title">„{{ b.belief }}“</p>
         <div v-if="credibilityOf(b) !== null" class="score-row">
-          <span class="score-value">⌀ {{ round(credibilityOf(b)) }}</span>
+          <span class="score-value">x̃ {{ round(credibilityOf(b)) }}</span>
           <span class="score-max">/10</span>
           <span class="score-label">Glaubwürdigkeit</span>
         </div>
@@ -125,7 +125,7 @@ export default {
   props: {
     allBeliefs: { type: Array, default: function() { return []; } },
     // For the credibility shown on "schon erfasste" beliefs — the same
-    // average the belief cards show, not a rating taken here.
+    // standing the belief cards show, not a rating taken here.
     patterns: { type: Array, default: function() { return []; } },
     journal: { type: Array, default: function() { return []; } },
     selectedBeliefIds: { type: Array, default: function() { return []; } },

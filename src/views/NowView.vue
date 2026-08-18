@@ -110,8 +110,8 @@
 
         <div v-if="shownTrend" class="card">
           <p class="card-title">„{{ shownTrend.text }}“</p>
-          <div v-if="shownTrend.avg !== null" class="score-row">
-            <span class="score-value">⌀ {{ round(shownTrend.avg) }}</span>
+          <div v-if="shownTrend.standing !== null" class="score-row">
+            <span class="score-value">x̃ {{ round(shownTrend.standing) }}</span>
             <span class="score-max">/10</span>
             <span class="score-label">Glaubwürdigkeit</span>
           </div>
@@ -168,7 +168,7 @@ import {
   experimentState,
 } from '@/utils/experiment';
 import {
-  beliefCredibility, beliefRows, averageOf,
+  beliefCredibility, beliefRows, baselineOf,
 } from '@/utils/credibility';
 import { mdiLightningBolt } from '@mdi/js';
 import NavIcon from '@/components/NavIcon.vue';
@@ -261,7 +261,7 @@ export default {
       const shorten = t => (t.length > 28 ? `${t.slice(0, 27)}…` : t);
       return beliefRows(this.patterns, this.beliefs, this.journal)
         .filter(r => r.hasTrend)
-        .map(r => Object.assign({}, r, { short: shorten(r.text), avg: averageOf(r.points) }));
+        .map(r => Object.assign({}, r, { short: shorten(r.text), standing: baselineOf(r.points) }));
     },
     // The chosen chip, or the first one — a chip that vanished (a rating
     // undone elsewhere) must not leave the block blank.
