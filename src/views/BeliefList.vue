@@ -95,7 +95,7 @@
                belong in one column. -->
           <div v-if="credibility(entry) !== null" class="score-row">
             <div class="score-main">
-              <span class="score-value">x̃ {{ round(credibility(entry)) }}</span>
+              <span class="score-value">{{ round(credibility(entry)) }}</span>
               <span class="score-max">/10</span>
               <span class="score-label">Glaubwürdigkeit</span>
             </div>
@@ -343,7 +343,7 @@ import {
   BELIEF_STATUS_LABELS,
 } from '@/utils/beliefStatus';
 import { experimentsOf, experimentDisplayState } from '@/utils/experiment';
-import { beliefCredibility, beliefPoints } from '@/utils/credibility';
+import { beliefCredibility, beliefStanding, beliefPoints } from '@/utils/credibility';
 import { deltaColor } from '@/utils/beliefTrend';
 import { copingLabel } from '@/utils/coping';
 import { requestedId, scrollRowIntoView, scrollRowToTop } from '@/utils/reveal';
@@ -518,25 +518,29 @@ export default {
       return String(Math.round(v * 10) / 10).replace('.', ',');
     },
     statusLabel(entry) { return beliefStatusLabel(entry); },
+    // Where the belief stands right now: the median of its most recent
+    // readings, moving as new ones come in.
     credibility(entry) {
-      return beliefCredibility(this.$store.getters.patterns, entry, this.$store.getters.journal);
+      return beliefStanding(this.$store.getters.patterns, entry, this.$store.getters.journal);
     },
-    // Only from the second reading on: one number has no direction. The month
-    // named is the one the run started in, so "seit Juni" means "since the
-    // first time you rated this".
     copingOf(entry) { return copingLabel(entry && entry.coping); },
+    // The current standing held against the frozen anchor: only from the
+    // second reading on, since one number alone has no direction. The month
+    // named is the one the anchor was set in, so "seit Juni" means "since
+    // the readings this belief is still measured against".
     trendOf(entry) {
       const points = beliefPoints(this.$store.getters.patterns, entry, this.$store.getters.journal);
       if (points.length < 2) return null;
-      const first = points[0];
-      const last = points[points.length - 1];
-      const delta = Math.round((last.value - first.value) * 10) / 10;
+      const baseline = beliefCredibility(this.$store.getters.patterns, entry, this.$store.getters.journal);
+      const standing = this.credibility(entry);
+      if (baseline === null || standing === null) return null;
+      const delta = Math.round((standing - baseline) * 10) / 10;
       if (delta === 0) return null;
       moment.locale('de');
       const sign = delta > 0 ? '+' : '−';
       const shown = String(Math.abs(delta)).replace('.', ',');
       return {
-        text: `${sign}${shown} seit ${moment(first.time).format('MMMM')}`,
+        text: `${sign}${shown} seit ${moment(points[0].time).format('MMMM')}`,
         // A belief losing credibility is the direction the work aims at.
         color: deltaColor(delta),
         values: points.map(pt => pt.value),
@@ -723,9 +727,7 @@ export default {
   background: transparent;
 }
 .sort-menu {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
+  position: fixed;
   z-index: 41;
   min-width: 220px;
   background: #2c2c2e;

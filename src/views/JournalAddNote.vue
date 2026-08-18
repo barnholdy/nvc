@@ -1,6 +1,6 @@
 <template>
   <div>
-    <journal-recall :fact="fact" :meaning="meaning" :fit="fit" :credibility="credibility"></journal-recall>
+    <journal-recall :fact="fact" :meaning="meaning" :credibility="credibility"></journal-recall>
 
     <p class="wizard-question">Gibt es ein „Ja, aber“?</p>
     <p class="wizard-body">Platz für den Einwand, der sofort dagegenhält — er gehört dazu, muss dich aber nicht aufhalten.</p>
@@ -26,7 +26,6 @@ export default {
   props: {
     fact: { type: String, default: '' },
     meaning: { type: String, default: '' },
-    fit: { type: String, default: '' },
     credibility: { type: Number, default: null },
     initialValue: { type: String, default: '' },
   },

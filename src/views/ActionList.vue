@@ -127,9 +127,6 @@
                     <div class="gap-legend">
                       <span class="gap-key"><i class="gap-dot gap-dot-expected"></i>erwartet {{ row.experiment.fearExpected }}</span>
                       <span class="gap-key"><i class="gap-dot gap-dot-real"></i>real {{ row.experiment.fearActual }}</span>
-                      <span class="gap-delta" :style="{ color: gapColor(gapOf(row.experiment)) }">
-                        {{ gapOf(row.experiment) > 0 ? '−' : '+' }}{{ Math.abs(gapOf(row.experiment)) }}
-                      </span>
                     </div>
                   </template>
                   <template v-else-if="row.experiment.fearExpected !== null">
@@ -329,7 +326,6 @@ import {
   isExperimentDisplayState,
   experimentState,
   fearGap,
-  fearGapColor,
   isDue,
   isPlanned,
 } from '@/utils/experiment';
@@ -504,7 +500,6 @@ export default {
     state(x) { return experimentState(x); },
     displayState(x) { return experimentDisplayState(x); },
     gapOf(x) { return fearGap(x); },
-    gapColor(gap) { return fearGapColor(gap); },
     isDue(x) { return isDue(x, this.now); },
     // A migrated action has a situation but no anchor — it cannot be evaluated.
     needsPlan(x) { return experimentState(x) !== 'evaluated' && !isPlanned(x); },
@@ -601,11 +596,10 @@ export default {
     openBelief(row) {
       this.$router.push({ path: '/beliefs', query: openQuery(row.beliefTime, { top: true }) });
     },
-    // One affirmation per belief, so the first is the one — but experiments
-    // written before that rule can name their own, and that one wins.
+    // Always the belief's current affirmation, never a copy an older
+    // experiment recorded of its own — an edited affirmation must read the
+    // same on every run that tests it, not just the ones written after.
     affirmationOf(row) {
-      const named = row && row.experiment && row.experiment.affirmationText;
-      if (named) return named;
       const list = ((this.beliefOf(row) || {}).affirmations) || [];
       const first = list.find(a => a && a.text);
       return first ? first.text : '';

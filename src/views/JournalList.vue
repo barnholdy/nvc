@@ -88,17 +88,20 @@
                   <p class="aff-text">„{{ affirmationOf(entry) }}“</p>
                 </div>
 
+                <feeling-chips
+                  v-if="feelingsOf(entry).length"
+                  :items="feelingsOf(entry)"
+                  type="feelings"
+                  flat
+                  class="journal-feelings"
+                ></feeling-chips>
+
                 <belief-chip
                   :text="beliefTextOf(entry)"
                   :value="ownValue(entry)"
                   :baseline="credibilityOf(entry)"
                   @open="openBelief(entry)"
                 ></belief-chip>
-                <div class="fit-row">
-                  <span class="fit-mark" :class="entry.fit">
-                    <i class="fit-dot"></i>{{ entry.fit === 'new' ? 'Affirmation' : 'Überzeugung' }}
-                  </span>
-                </div>
               </div>
             </div>
           </div>
@@ -145,10 +148,11 @@ import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 import { beliefCredibility } from '@/utils/credibility';
 import NavIcon from '@/components/NavIcon.vue';
 import BeliefChip from '@/components/BeliefChip.vue';
+import FeelingChips from '@/components/FeelingChips.vue';
 
 export default {
   name: 'journal-list',
-  components: { NavIcon, BeliefChip },
+  components: { NavIcon, BeliefChip, FeelingChips },
   data() {
     return {
       beliefFilter: null,
@@ -234,6 +238,9 @@ export default {
       const b = this.beliefOf(entry);
       if (!b) return '';
       return (b.affirmations || []).map(a => a && a.text).filter(Boolean).join(' · ');
+    },
+    feelingsOf(entry) {
+      return Array.isArray(entry.feelings) ? entry.feelings : [];
     },
     // Where the belief stands — the number its own card shows as its headline.
     credibilityOf(entry) {
@@ -379,27 +386,9 @@ export default {
   margin: 8px 0 0;
   font-style: italic;
 }
-/* Its own line under the belief tag: a quiet note about the entry, not a
-   second tag competing with the one above it. */
-.fit-row { margin-top: 12px; }
-
-/* Which of the two sentences this entry speaks for — a mark rather than a
-   chip: it qualifies the entry, it is not a thing to tap. */
-.fit-mark {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.78rem;
-  color: #636366;
-  &.old .fit-dot { background: #8e8e93; }
-  &.new .fit-dot { background: #4ade80; }
-}
-.fit-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
+/* Sits above the belief tag, under whatever came before it — the aff-box
+   when there is one, the note or meaning otherwise. */
+.journal-feelings { margin-top: 12px; }
 .journal-note {
   font-size: 0.85rem;
   color: #636366;

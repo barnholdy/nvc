@@ -26,9 +26,17 @@
           @changed="fact = $event">
         </journal-add-fact>
 
-        <journal-add-meaning
+        <journal-add-feelings
           v-if="belief"
           v-show="step === 3"
+          :fact="fact"
+          :initialValue="feelings"
+          @changed="feelings = $event">
+        </journal-add-feelings>
+
+        <journal-add-meaning
+          v-if="belief"
+          v-show="step === 4"
           :fact="fact"
           :initialValue="meaning"
           @changed="meaning = $event">
@@ -36,21 +44,18 @@
 
         <journal-add-fit
           v-if="belief"
-          v-show="step === 4"
-          :belief="belief"
+          v-show="step === 5"
           :fact="fact"
           :meaning="meaning"
-          :initialFit="fit"
           :initialCredibility="credibility"
-          @changed="onFitChanged">
+          @changed="credibility = $event">
         </journal-add-fit>
 
         <journal-add-note
           v-if="belief"
-          v-show="step === 5"
+          v-show="step === 6"
           :fact="fact"
           :meaning="meaning"
-          :fit="fit"
           :credibility="credibility"
           :initialValue="note"
           @changed="note = $event">
@@ -71,18 +76,20 @@
 <script>
 import JournalAddBelief from '@/views/JournalAddBelief.vue';
 import JournalAddFact from '@/views/JournalAddFact.vue';
+import JournalAddFeelings from '@/views/JournalAddFeelings.vue';
 import JournalAddMeaning from '@/views/JournalAddMeaning.vue';
 import JournalAddFit from '@/views/JournalAddFit.vue';
 import JournalAddNote from '@/views/JournalAddNote.vue';
 import WizardHeader from '@/components/WizardHeader.vue';
 import WizardFooter from '@/components/WizardFooter.vue';
+import { MAX_FEELINGS } from '@/utils/emotions';
 
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 6;
 
 export default {
   name: 'journal-add',
   components: {
-    JournalAddBelief, JournalAddFact, JournalAddMeaning, JournalAddFit, JournalAddNote,
+    JournalAddBelief, JournalAddFact, JournalAddFeelings, JournalAddMeaning, JournalAddFit, JournalAddNote,
     WizardHeader, WizardFooter,
   },
   data() {
@@ -94,8 +101,8 @@ export default {
       editEntry: editEntry || null,
       beliefTime: editEntry ? editEntry.beliefTime : null,
       fact: editEntry ? editEntry.fact || '' : '',
+      feelings: editEntry ? editEntry.feelings || [] : [],
       meaning: editEntry ? editEntry.meaning || '' : '',
-      fit: editEntry ? editEntry.fit || '' : '',
       credibility: editEntry && typeof editEntry.credibility === 'number' ? editEntry.credibility : null,
       note: editEntry ? editEntry.note || '' : '',
     };
@@ -123,16 +130,12 @@ export default {
     isStepComplete() {
       if (this.step === 1) return this.beliefTime !== null;
       if (this.step === 2) return this.fact.trim() !== '';
-      if (this.step === 3) return this.meaning.trim() !== '';
-      if (this.step === 4) return !!this.fit;
+      if (this.step === 3) return this.feelings.length <= MAX_FEELINGS;
+      if (this.step === 4) return this.meaning.trim() !== '';
       return true;
     },
   },
   methods: {
-    onFitChanged(payload) {
-      this.fit = payload.fit;
-      this.credibility = payload.credibility;
-    },
     nextStep() {
       this.step += 1;
       this.$vuetify.goTo(0, { duration: 0 });
@@ -150,8 +153,8 @@ export default {
       const payload = {
         beliefTime: this.beliefTime,
         fact: this.fact.trim(),
+        feelings: this.feelings,
         meaning: this.meaning.trim(),
-        fit: this.fit,
         credibility: this.credibility,
         note: this.note.trim(),
       };

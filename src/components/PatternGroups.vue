@@ -9,14 +9,22 @@
       <!-- Only clickable when the text still matches a belief that exists:
            the analysis echoes text back, and a renamed or deleted one has
            nowhere left to jump to. -->
-      <belief-chip
-        v-for="(b, j) in k.beliefs"
-        :key="j"
-        :text="b.text"
-        :baseline="b.credibility"
-        :tappable="b.time !== null"
-        @open="openBelief(b)"
-      ></belief-chip>
+      <div v-for="(b, j) in k.beliefs" :key="j" class="group-item">
+        <belief-chip
+          :text="b.text"
+          :value="b.standing"
+          :baseline="b.credibility"
+          :tappable="b.time !== null"
+          @open="openBelief(b)"
+        ></belief-chip>
+        <feeling-chips
+          v-if="b.feelings.length"
+          :items="b.feelings"
+          type="feelings"
+          flat
+          class="group-feelings"
+        ></feeling-chips>
+      </div>
     </div>
 
     <div class="card now-card" @click="generateKernmuster">
@@ -43,9 +51,10 @@
 </template>
 
 <script>
-import { beliefCredibility } from '@/utils/credibility';
+import { beliefCredibility, beliefStanding } from '@/utils/credibility';
 import { openQuery } from '@/utils/reveal';
 import BeliefChip from '@/components/BeliefChip.vue';
+import FeelingChips from '@/components/FeelingChips.vue';
 
 // Quotes, case, spacing and a trailing period are all the analysis is likely to
 // change when it repeats a belief back — none of them make it a different one.
@@ -60,7 +69,7 @@ function normalizeBelief(text) {
 
 export default {
   name: 'pattern-groups',
-  components: { BeliefChip },
+  components: { BeliefChip, FeelingChips },
   data() {
     const saved = localStorage.getItem('nvc.kernmuster');
     return {
@@ -98,6 +107,11 @@ export default {
             // Raw, so the chip can place it on its own scale — it does the
             // rounding and the German comma itself.
             credibility: c,
+            standing: belief ? beliefStanding(patterns, belief, journal) : null,
+            // What it feels like when the belief is true — the same feelings
+            // the belief's own card shows, so a cluster reads as more than a
+            // list of sentences.
+            feelings: belief && Array.isArray(belief.feelings) ? belief.feelings : [],
             // Only set when the text still matches something stored — that is
             // what makes the chip a link rather than just a label.
             time: belief ? belief.time : null,
@@ -193,6 +207,8 @@ export default {
   color: #8e8e93;
   margin: 18px 20px 8px;
 }
+/* The feelings ride under their own belief's chip, not the next one's. */
+.group-feelings { margin-top: 8px; }
 
 .now-card {
   cursor: pointer;

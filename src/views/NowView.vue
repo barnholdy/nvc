@@ -111,9 +111,17 @@
         <div v-if="shownTrend" class="card">
           <p class="card-title">„{{ shownTrend.text }}“</p>
           <div v-if="shownTrend.standing !== null" class="score-row">
-            <span class="score-value">x̃ {{ round(shownTrend.standing) }}</span>
-            <span class="score-max">/10</span>
-            <span class="score-label">Glaubwürdigkeit</span>
+            <div class="score-main">
+              <span class="score-value">{{ round(shownTrend.standing) }}</span>
+              <span class="score-max">/10</span>
+              <span class="score-label">Glaubwürdigkeit</span>
+            </div>
+            <div v-if="trendOf(shownTrend)" class="score-side">
+              <span
+                class="score-trend"
+                :style="{ color: trendOf(shownTrend).color }"
+              >{{ trendOf(shownTrend).text }}</span>
+            </div>
           </div>
           <trend-chart :row="shownTrend"></trend-chart>
         </div>
@@ -158,6 +166,7 @@
 </template>
 
 <script>
+import moment from 'moment';
 import AffirmationPractice from '@/components/AffirmationPractice.vue';
 import { beliefStatus } from '@/utils/beliefStatus';
 import {
@@ -168,8 +177,9 @@ import {
   experimentState,
 } from '@/utils/experiment';
 import {
-  beliefCredibility, beliefRows, baselineOf,
+  beliefCredibility, beliefRows, baselineOf, standingOf,
 } from '@/utils/credibility';
+import { deltaColor } from '@/utils/beliefTrend';
 import { mdiLightningBolt } from '@mdi/js';
 import NavIcon from '@/components/NavIcon.vue';
 import TrendChart from '@/components/TrendChart.vue';
@@ -261,7 +271,11 @@ export default {
       const shorten = t => (t.length > 28 ? `${t.slice(0, 27)}…` : t);
       return beliefRows(this.patterns, this.beliefs, this.journal)
         .filter(r => r.hasTrend)
-        .map(r => Object.assign({}, r, { short: shorten(r.text), standing: baselineOf(r.points) }));
+        .map(r => Object.assign({}, r, {
+          short: shorten(r.text),
+          standing: standingOf(r.points),
+          baseline: baselineOf(r.points),
+        }));
     },
     // The chosen chip, or the first one — a chip that vanished (a rating
     // undone elsewhere) must not leave the block blank.
@@ -407,6 +421,20 @@ export default {
   },
   methods: {
     round(v) { return String(Math.round(v * 10) / 10).replace('.', ','); },
+    // The current standing held against the frozen anchor, the same
+    // comparison the Überzeugungen list shows under its own headline number.
+    trendOf(row) {
+      if (!row || row.baseline === null || row.standing === null) return null;
+      const delta = Math.round((row.standing - row.baseline) * 10) / 10;
+      if (delta === 0) return null;
+      moment.locale('de');
+      const sign = delta > 0 ? '+' : '−';
+      const shown = String(Math.abs(delta)).replace('.', ',');
+      return {
+        text: `${sign}${shown} seit ${moment(row.points[0].time).format('MMMM')}`,
+        color: deltaColor(delta),
+      };
+    },
     sinceLabel(days) {
       if (days === null) return 'noch nie geübt';
       if (days <= 0) return 'heute geübt';

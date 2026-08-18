@@ -1,16 +1,5 @@
 <template>
   <div>
-    <div class="trend-badges">
-      <span class="card-pill">
-        {{ row.points.length }} {{ row.points.length === 1 ? 'Bewertung' : 'Bewertungen' }}
-      </span>
-      <span
-        v-if="row.hasTrend"
-        class="card-pill"
-        :style="{ color: deltaTint, borderColor: deltaTint }"
-      >{{ deltaText }}</span>
-    </div>
-
     <div class="chart-row">
       <div class="axis">
         <span class="axis-label">10</span>
@@ -28,12 +17,21 @@
             :class="{ tappable: canOpen(p) }"
             @click="openPoint(p)"
           >
-            <span class="bar-value" :style="{ color: barColor(p.value) }">{{ p.value }}</span>
+            <span class="bar-value">{{ p.value }}</span>
             <div class="bar-track">
               <div class="bar-mid"></div>
+              <span
+                v-for="n in scale"
+                :key="n"
+                class="bar-seg"
+                :class="{ filled: n <= p.value }"
+              ></span>
+              <!-- Where the belief itself stands, held against every single
+                   reading — the same anchor its own card and chip show. -->
               <div
-                class="bar-fill"
-                :style="{ height: barHeight(p.value), background: barColor(p.value) }"
+                v-if="row.baseline !== null"
+                class="bar-baseline"
+                :style="{ bottom: baselinePct }"
               ></div>
             </div>
             <span class="bar-date">{{ shortDate(p.time) }}</span>
@@ -45,13 +43,15 @@
       </div>
     </div>
 
-    <p v-if="!row.hasTrend" class="trend-hint">{{ hint }}</p>
+    <p v-if="!row.hasTrend" class="trend-hint">
+      Eine zweite Bewertung in einer späteren Situation zeigt, ob sich etwas bewegt.
+    </p>
   </div>
 </template>
 
 <script>
 import moment from 'moment';
-import { truthColor, deltaColor, deltaLabel, TRUTH_SCALE_MAX } from '@/utils/beliefTrend';
+import { TRUTH_SCALE_MAX } from '@/utils/beliefTrend';
 import { openQuery } from '@/utils/reveal';
 
 // Which side a reading came from — the same 0-10 question is asked in several
@@ -75,20 +75,13 @@ export default {
   name: 'trend-chart',
   props: {
     row: { type: Object, required: true },
-    // A belief is worth less the higher it stands, an affirmation is worth
-    // more — so the same colour scale would say the opposite thing.
-    inverted: { type: Boolean, default: false },
   },
   computed: {
-    deltaTint() {
-      return this.inverted ? deltaColor(-this.row.delta) : deltaColor(this.row.delta);
+    scale() {
+      return TRUTH_SCALE_MAX;
     },
-    deltaText() { return deltaLabel(this.row.delta); },
-    hint() {
-      return this.inverted
-        ? 'Eine zweite Bewertung — beim Wandeln oder nach einer Handlung — zeigt, ob sich '
-          + 'etwas bewegt.'
-        : 'Eine zweite Bewertung in einer späteren Situation zeigt, ob sich etwas bewegt.';
+    baselinePct() {
+      return `${(Math.max(0, Math.min(TRUTH_SCALE_MAX, this.row.baseline)) / TRUTH_SCALE_MAX) * 100}%`;
     },
   },
   methods: {
@@ -104,15 +97,6 @@ export default {
       if (!this.canOpen(point)) return;
       this.$router.push({ path: this.routeFor(point), query: openQuery(point.targetId) });
     },
-    barColor(value) {
-      return this.inverted ? truthColor(TRUTH_SCALE_MAX - value) : truthColor(value);
-    },
-    // A zero would otherwise be invisible, and "kaum noch wahr" is exactly the
-    // result worth seeing.
-    barHeight(value) {
-      const pct = (value / TRUTH_SCALE_MAX) * 100;
-      return `${Math.max(2, pct)}%`;
-    },
     shortDate(time) {
       moment.locale('de');
       return moment(time).format('D. MMM');
@@ -122,17 +106,11 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.trend-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 10px 0 14px;
-}
-
 .chart-row {
   display: flex;
   align-items: stretch;
   gap: 8px;
+  margin-top: 4px;
 }
 // The axis is aligned to the track only, not to the value and date rows above
 // and below it, so the numbers sit where the bars actually start and end.
@@ -174,31 +152,47 @@ export default {
 .bar-value {
   font-size: 0.78rem;
   font-weight: 600;
+  color: #6aaef7;
   line-height: 1;
   margin-bottom: 4px;
   height: 16px;
 }
 .bar-track {
   position: relative;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 2px;
   width: 26px;
   height: 110px;
-  background: #2c2c2e;
   border-radius: 6px;
   overflow: hidden;
 }
+.bar-seg {
+  flex: 1;
+  border-radius: 2px;
+  background: #3a3a3c;
+}
+.bar-seg.filled { background: #6aaef7; }
 .bar-mid {
   position: absolute;
   left: 0;
   right: 0;
   top: 50%;
   border-top: 1px dashed #48484a;
+  z-index: 1;
 }
-.bar-fill {
+/* Drawn over the segments and reaching past them, so it reads as a line held
+   against the scale rather than as one more block in it — the same marker
+   the belief chip draws across its own row. */
+.bar-baseline {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 6px;
+  left: -2px;
+  right: -2px;
+  height: 2px;
+  margin-bottom: -1px;
+  border-radius: 1px;
+  background: #fd9927;
+  z-index: 2;
 }
 .bar-date {
   font-size: 0.62rem;

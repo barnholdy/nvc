@@ -1,8 +1,8 @@
 <template>
   <div v-if="rows.length" class="card">
     <div v-for="row in rows" :key="row.key" class="recall-row">
-      <p class="recall-label">{{ row.label }}</p>
-      <p class="recall-text">{{ row.text }}</p>
+      <p v-if="row.label" class="recall-label">{{ row.label }}</p>
+      <p v-if="row.text" class="recall-text">{{ row.text }}</p>
       <div v-if="row.score !== undefined" class="score-row">
         <span class="score-value">{{ row.score }}</span>
         <span class="score-max">/10</span>
@@ -21,8 +21,6 @@ export default {
   props: {
     fact: { type: String, default: '' },
     meaning: { type: String, default: '' },
-    // 'old' | 'new' — which of the two sentences the entry belongs to.
-    fit: { type: String, default: '' },
     credibility: { type: Number, default: null },
   },
   computed: {
@@ -30,15 +28,9 @@ export default {
       const out = [];
       if (this.fact) out.push({ key: 'fact', label: 'Was passiert ist', text: this.fact });
       if (this.meaning) out.push({ key: 'meaning', label: 'Was das über mich sagt', text: this.meaning });
-      if (this.fit) {
-        const row = {
-          key: 'fit',
-          label: 'Passt zu',
-          text: this.fit === 'new' ? 'Neue Affirmation' : 'Alte Überzeugung',
-        };
-        // The reading belongs to this answer, so it rides along with it.
-        if (typeof this.credibility === 'number') row.score = this.credibility;
-        out.push(row);
+      // No label of its own — the score row already says "Glaubwürdigkeit".
+      if (typeof this.credibility === 'number') {
+        out.push({ key: 'credibility', score: this.credibility });
       }
       return out;
     },

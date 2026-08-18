@@ -129,28 +129,42 @@ export function averageOf(points) {
   return sum / points.length;
 }
 
-// How many readings set a belief's standing, after which it stops moving.
+// How many readings set a belief's anchor, and how many recent ones its
+// current standing is read off.
 export const BASELINE_COUNT = 3;
 
-// A belief's credibility is the median of its first few readings, and nothing
-// after those changes it. A median rather than a mean so one extreme first
-// impression cannot set the anchor by itself; frozen after the first few so
-// later work reads as movement against a fixed reference instead of quietly
-// dragging the reference along with it — which is what a running average did,
-// and why a belief could never visibly lose ground.
-export function baselineOf(points) {
-  const values = list(points)
-    .slice(0, BASELINE_COUNT)
-    .map(p => p.value)
-    .sort((a, b) => a - b);
-  if (!values.length) return null;
-  const mid = Math.floor(values.length / 2);
+function medianOf(values) {
+  const sorted = values.slice().sort((a, b) => a - b);
+  if (!sorted.length) return null;
+  const mid = Math.floor(sorted.length / 2);
   // An even count has no middle reading, so the two either side share the job.
-  return values.length % 2 ? values[mid] : (values[mid - 1] + values[mid]) / 2;
+  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+}
+
+// A belief's anchor is the median of its first few readings, and nothing
+// after those changes it. A median rather than a mean so one extreme first
+// impression cannot set it alone; frozen after the first few so later work
+// reads as movement against a fixed reference instead of quietly dragging the
+// reference along with it — which is what a running average did, and why a
+// belief could never visibly lose ground. Used as the wizards' own context
+// and as the baseline every belief chip measures a single reading against.
+export function baselineOf(points) {
+  return medianOf(list(points).slice(0, BASELINE_COUNT).map(p => p.value));
+}
+
+// Where a belief stands right now: the median of its most recent readings,
+// moving as new ones come in — the number the Überzeugungen list and the
+// Jetzt trends read off, held against the frozen anchor above.
+export function standingOf(points) {
+  return medianOf(list(points).slice(-BASELINE_COUNT).map(p => p.value));
 }
 
 export function beliefCredibility(patterns, belief, journal) {
   return baselineOf(beliefPoints(patterns, belief, journal));
+}
+
+export function beliefStanding(patterns, belief, journal) {
+  return standingOf(beliefPoints(patterns, belief, journal));
 }
 
 export function affirmationCredibility(beliefs, text) {
