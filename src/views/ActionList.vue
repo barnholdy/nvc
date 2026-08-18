@@ -455,7 +455,7 @@ export default {
         }
         out[seen[r.beliefTime]].count += 1;
       });
-      return out;
+      return out.sort((a, b) => b.count - a.count);
     },
     filters() {
       const rows = this.byBelief;

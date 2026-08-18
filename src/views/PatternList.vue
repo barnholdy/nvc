@@ -180,7 +180,8 @@ export default {
           // How many situations it turns up in — the same reading the state
           // chips give, so both rows of chips answer the same question.
           count: this.patterns.filter(pt => (pt.beliefs || []).indexOf(b.time) !== -1).length,
-        }));
+        }))
+        .sort((a, b) => b.count - a.count);
     },
     groups() {
       const out = [];

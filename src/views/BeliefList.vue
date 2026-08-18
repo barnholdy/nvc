@@ -24,29 +24,15 @@
           >
             <v-icon small>{{ compact ? 'unfold_more' : 'unfold_less' }}</v-icon>
           </button>
-          <div class="sort-wrap">
-            <button
-              ref="sortBtn"
-              class="pill pill-icon"
-              :class="{ active: sortMenuOpen }"
-              aria-label="Sortieren"
-              @click.stop="toggleSortMenu"
-            >
-              <v-icon small>sort</v-icon>
-            </button>
-            <div v-if="sortMenuOpen" class="sort-backdrop" @click="sortMenuOpen = false"></div>
-            <div v-if="sortMenuOpen" class="sort-menu" :style="sortMenuPos">
-              <button
-                v-for="opt in sortOptions"
-                :key="opt.key"
-                class="sort-menu-item"
-                @click="selectSort(opt.key)"
-              >
-                <span>{{ opt.label }}</span>
-                <v-icon v-if="sortMode === opt.key" small color="#4ade80">check</v-icon>
-              </button>
-            </div>
-          </div>
+          <button
+            ref="sortBtn"
+            class="pill pill-icon"
+            :class="{ active: sortMenuOpen }"
+            aria-label="Sortieren"
+            @click.stop="toggleSortMenu"
+          >
+            <v-icon small>sort</v-icon>
+          </button>
           <button
             v-for="f in filters"
             :key="f.key"
@@ -300,6 +286,22 @@
       </v-dialog>
     </v-content>
 
+    <!-- Sits outside the scrolling header entirely, positioned in JS off the
+         button's own rect: no ancestor overflow or stacking context can clip
+         or bury it, whatever the header's scroll state. -->
+    <div v-if="sortMenuOpen" class="sort-backdrop" @click="sortMenuOpen = false"></div>
+    <div v-if="sortMenuOpen" class="sort-menu" :style="sortMenuPos">
+      <button
+        v-for="opt in sortOptions"
+        :key="opt.key"
+        class="sort-menu-item"
+        @click="selectSort(opt.key)"
+      >
+        <span>{{ opt.label }}</span>
+        <v-icon v-if="sortMode === opt.key" small color="#4ade80">check</v-icon>
+      </button>
+    </div>
+
     <affirmation-practice
       v-if="practising"
       :text="practising.text"
@@ -469,15 +471,23 @@ export default {
     },
   },
   methods: {
-    // Fixed rather than absolute: the pill row scrolls horizontally, and an
-    // absolutely positioned menu would be clipped by that same overflow.
+    // Fixed rather than absolute, and rendered outside the header entirely:
+    // the pill row scrolls horizontally, and anything anchored inside it —
+    // absolutely positioned or not — risks being clipped or buried by that
+    // same overflow/stacking context. A failure to read the button's own
+    // position must still open the menu somewhere rather than do nothing.
     toggleSortMenu() {
       if (this.sortMenuOpen) { this.sortMenuOpen = false; return; }
-      const el = this.$refs.sortBtn;
-      const r = el.getBoundingClientRect();
       const MENU_WIDTH = 220;
-      const left = Math.min(r.left, window.innerWidth - MENU_WIDTH - 14);
-      this.sortMenuPos = { top: `${r.bottom + 6}px`, left: `${Math.max(14, left)}px` };
+      let top = 96;
+      let left = 14;
+      const el = this.$refs.sortBtn;
+      if (el && typeof el.getBoundingClientRect === 'function') {
+        const r = el.getBoundingClientRect();
+        top = r.bottom + 6;
+        left = Math.max(14, Math.min(r.left, window.innerWidth - MENU_WIDTH - 14));
+      }
+      this.sortMenuPos = { top: `${top}px`, left: `${left}px` };
       this.sortMenuOpen = true;
     },
     selectSort(key) {
@@ -704,9 +714,6 @@ export default {
 <style scoped lang="scss">
 .dark-page { background: #000; min-height: 100vh; }
 
-/* Anchors the dropdown to the button that opens it, the same shrink-to-fit
-   width a pill has — a full-width wrapper would stretch the flex row. */
-.sort-wrap { position: relative; flex-shrink: 0; }
 /* Catches the tap that dismisses the menu, without dimming the screen the
    way a real dialog's backdrop would for what is just a small picker. */
 .sort-backdrop {

@@ -176,7 +176,8 @@ export default {
       this.entries.forEach((e) => { counts[e.beliefTime] = (counts[e.beliefTime] || 0) + 1; });
       return this.$store.getters.beliefs
         .filter(b => counts[b.time])
-        .map(b => ({ time: b.time, belief: b.belief, count: counts[b.time] }));
+        .map(b => ({ time: b.time, belief: b.belief, count: counts[b.time] }))
+        .sort((a, b) => b.count - a.count);
     },
     groups() {
       const out = [];
