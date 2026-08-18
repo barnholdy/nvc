@@ -110,7 +110,7 @@ export default {
   display: flex;
   align-items: stretch;
   gap: 8px;
-  margin-top: 4px;
+  margin-top: 16px;
 }
 // The axis is aligned to the track only, not to the value and date rows above
 // and below it, so the numbers sit where the bars actually start and end.

@@ -76,6 +76,14 @@
                   </div>
                 </div>
 
+                <feeling-chips
+                  v-if="feelingsOf(entry).length"
+                  :items="feelingsOf(entry)"
+                  type="feelings"
+                  flat
+                  class="journal-feelings"
+                ></feeling-chips>
+
                 <p v-if="entry.meaning" class="journal-meaning">{{ entry.meaning }}</p>
 
                 <!-- The objection first, then the sentence it is aimed at:
@@ -87,14 +95,6 @@
                   <p class="aff-label">Affirmation</p>
                   <p class="aff-text">„{{ affirmationOf(entry) }}“</p>
                 </div>
-
-                <feeling-chips
-                  v-if="feelingsOf(entry).length"
-                  :items="feelingsOf(entry)"
-                  type="feelings"
-                  flat
-                  class="journal-feelings"
-                ></feeling-chips>
 
                 <belief-chip
                   :text="beliefTextOf(entry)"
@@ -386,8 +386,8 @@ export default {
   margin: 8px 0 0;
   font-style: italic;
 }
-/* Sits above the belief tag, under whatever came before it — the aff-box
-   when there is one, the note or meaning otherwise. */
+/* Right under the fact it was felt about, before the interpretation and
+   everything that follows it. */
 .journal-feelings { margin-top: 12px; }
 .journal-note {
   font-size: 0.85rem;

@@ -739,6 +739,10 @@ export default {
 /* Without the row list above it the box would butt straight against the
    meter above, which is a reading, not a heading. */
 .aff-box-loose { margin-top: 14px !important; }
+/* Block rather than the global flex row: the meter is the only thing here
+   now, and as a flex item without stretch it would shrink to fit-content
+   instead of the full width it needs to read. */
+.score-row { display: block; }
 /* .score-row already carries the top margin the meter would otherwise add
    again on top of it. */
 .score-row > .cred-meter { margin-top: 0; }
