@@ -85,6 +85,7 @@
                     :text="b.belief"
                     :value="truthOf(entry, b)"
                     :baseline="credibilityOf(b)"
+                    :value-is-median="false"
                     @open="openBelief(b)"
                   ></belief-chip>
                 </div>

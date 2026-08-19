@@ -187,6 +187,7 @@
                     :text="row.beliefText"
                     :value="rowTruth(row)"
                     :baseline="beliefTruth(row)"
+                    :value-is-median="false"
                     @open="openBelief(row)"
                   ></belief-chip>
                 </div>

@@ -61,6 +61,7 @@
           :fact="fact"
           :feelings="feelings"
           :meaning="meaning"
+          :belief="belief"
           :credibility="credibility"
           :initialValue="note"
           @changed="note = $event">

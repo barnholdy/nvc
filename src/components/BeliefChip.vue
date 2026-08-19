@@ -9,7 +9,7 @@
          blocks reach as far as this one entry rated it, the orange line marks
          the belief's own standing. Two numbers on one scale say more than a
          difference would — the gap is the point, and it is visible. -->
-    <credibility-meter :value="value" :baseline="baseline"></credibility-meter>
+    <credibility-meter :value="value" :baseline="baseline" :value-is-median="valueIsMedian"></credibility-meter>
   </div>
 </template>
 
@@ -26,6 +26,9 @@ export default {
     value: { type: Number, default: null },
     // Where the belief itself stands, the same number its own card shows.
     baseline: { type: Number, default: null },
+    // False for a history row: what that one entry itself rated is a single
+    // reading, not a median, so its number stays plain.
+    valueIsMedian: { type: Boolean, default: true },
     // A chip whose belief no longer exists is a label, not a link.
     tappable: { type: Boolean, default: true },
   },

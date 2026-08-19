@@ -81,11 +81,14 @@
             @touchend="tsEnd($event, idx)"
           >
             <p class="card-title">„{{ entry.belief }}“</p>
-            <button
-              v-if="rowActionLabel(entry)"
-              class="card-btn"
-              @click.stop="runRowAction(entry)"
-            >{{ rowActionLabel(entry) }}</button>
+            <div v-if="cardActions(entry).length" class="card-action-group">
+              <button
+                v-for="act in cardActions(entry)"
+                :key="act.key"
+                class="card-action-btn"
+                @click.stop="act.run(entry)"
+              >{{ act.label }}</button>
+            </div>
           </div>
         </div>
           <span class="card-pill">{{ statusLabel(entry) }}</span>
@@ -518,9 +521,9 @@ export default {
         localStorage.setItem(PRACTICE_KEY, JSON.stringify(map));
       } catch (e) { /* a full or blocked store must not stop the practice */ }
     },
-    // Every step except the one the card's own button already offers.
+    // Every step except the ones the card's own head buttons already offer.
     otherSteps(entry) {
-      const here = this.rowActionLabel(entry);
+      const shown = this.cardActions(entry).map(a => a.label);
       const steps = [
         { key: 'edit', label: 'Ergründen', color: '#4ade80', run: e => this.editEntry(e) },
         { key: 'change', label: 'Wandeln', color: '#4ade80', run: e => this.changeEntry(e) },
@@ -531,7 +534,7 @@ export default {
       if (beliefStatus(entry) === 'done' && this.affirmationOf(entry)) {
         steps.push({ key: 'journal', label: 'Eintragen', color: '#4ade80', run: e => this.journalEntry(e) });
       }
-      return steps.filter(s => s.label !== here);
+      return steps.filter(s => !shown.includes(s.label));
     },
     isSwiping(idx) { return this.sw.openIdx === idx || this.sw.touchIdx === idx; },
     isOpen(entry, key) { return !!this.openRows[`${entry.time}:${key}`]; },
@@ -612,6 +615,18 @@ export default {
       if (s === 'done') return 'Handeln';
       return '';
     },
+    // The card's own head button — normally just the one step the belief is
+    // ready for, but a done belief with an affirmation also offers Eintragen
+    // right beside it, split the same way the swipe menu splits its own.
+    cardActions(entry) {
+      const label = this.rowActionLabel(entry);
+      if (!label) return [];
+      const actions = [{ key: 'primary', label, run: e => this.runRowAction(e) }];
+      if (beliefStatus(entry) === 'done' && this.affirmationOf(entry)) {
+        actions.push({ key: 'journal', label: 'Eintragen', run: e => this.journalEntry(e) });
+      }
+      return actions;
+    },
     runRowAction(entry) {
       const s = beliefStatus(entry);
       if (s === 'open') this.editEntry(entry);
@@ -633,7 +648,7 @@ export default {
     // counts — otherwise scrolling past a card would drag it sideways.
     tsStart(e, i) {
       if (e.target && e.target.closest
-        && (e.target.closest('.swipe-btn') || e.target.closest('.card-btn'))) return;
+        && (e.target.closest('.swipe-btn') || e.target.closest('.card-btn') || e.target.closest('.card-action-btn'))) return;
       this.sw.handleHeight = e.currentTarget ? e.currentTarget.offsetHeight : 0;
       const t = e.touches[0];
       this.sw.touchIdx = i; this.sw.startX = t.clientX; this.sw.startY = t.clientY;

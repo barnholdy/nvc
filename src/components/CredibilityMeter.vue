@@ -14,12 +14,12 @@
         v-if="value !== null"
         class="meter-label meter-value"
         :style="{ left: labels.value }"
-      >{{ round(value) }}</span>
+      >{{ valueIsMedian ? 'x̃ ' : '' }}{{ round(value) }}</span>
       <span
         v-if="baseline !== null"
         class="meter-label meter-base"
         :style="{ left: labels.baseline }"
-      >{{ round(baseline) }}</span>
+      >x̃ {{ round(baseline) }}</span>
     </div>
   </div>
 </template>
@@ -45,6 +45,12 @@ export default {
     value: { type: Number, default: null },
     // The frozen anchor a reading is held against. Null when there is none.
     baseline: { type: Number, default: null },
+    // The baseline is always a median of its own first readings, so its
+    // label always carries the symbol. The value is one too almost
+    // everywhere it appears — except a history row showing what that one
+    // entry itself rated, which is a single reading and stays a plain
+    // number.
+    valueIsMedian: { type: Boolean, default: true },
   },
   computed: {
     max() { return SCALE_MAX; },

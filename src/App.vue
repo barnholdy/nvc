@@ -905,13 +905,37 @@ html { overflow-x: hidden; }
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
 }
+/* A second step offered right beside the first — split the same pill the
+   swipe menu uses for its own grouped actions, instead of two separate
+   buttons. */
+.card-action-group {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid #4ade80;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.card-action-btn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: #4ade80;
+  font-size: 0.9rem;
+  font-family: inherit;
+  padding: 7px 16px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  &:active { opacity: 0.6; }
+  & + & { border-left: 1px solid #4ade80; }
+}
 /* Swipe actions look like the button they sit beside: outlined, the same size.
    Several of them share one outline and are divided by a hairline, so two or
    three actions cost barely more width than one. */
 .swipe-group {
   display: inline-flex;
   align-items: stretch;
-  border: 1px solid #3a3a3c;
+  border: 1px solid #4ade80;
   border-radius: 999px;
   overflow: hidden;
 }
@@ -926,7 +950,7 @@ html { overflow-x: hidden; }
   white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
-  & + & { border-left: 1px solid #3a3a3c; }
+  & + & { border-left: 1px solid #4ade80; }
 }
 /* On its own it carries its own outline in its own colour. */
 .swipe-group.single {
