@@ -6,7 +6,7 @@
         <span class="axis-label">5</span>
         <span class="axis-label">0</span>
       </div>
-      <div class="chart-scroll">
+      <div class="chart-scroll" ref="scroll">
         <div class="chart">
           <!-- A bar is a reading taken somewhere; tapping it opens that
                somewhere, unfolded, in the list that owns it. -->
@@ -84,7 +84,21 @@ export default {
       return `${(Math.max(0, Math.min(TRUTH_SCALE_MAX, this.row.baseline)) / TRUTH_SCALE_MAX) * 100}%`;
     },
   },
+  watch: {
+    // A different belief's trend, or a newly added reading — either way the
+    // newest bar is the one worth seeing without having to scroll for it.
+    row() {
+      this.$nextTick(this.scrollToEnd);
+    },
+  },
+  mounted() {
+    this.scrollToEnd();
+  },
   methods: {
+    scrollToEnd() {
+      const el = this.$refs.scroll;
+      if (el) el.scrollLeft = el.scrollWidth;
+    },
     sourceLabel(source) { return SOURCES[source] || ''; },
     routeFor(point) {
       return point && ROUTES[point.source] ? ROUTES[point.source] : null;

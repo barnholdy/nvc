@@ -521,11 +521,17 @@ export default {
     // Every step except the one the card's own button already offers.
     otherSteps(entry) {
       const here = this.rowActionLabel(entry);
-      return [
-        { key: 'edit', label: 'Ergründen', color: '#8e8e93', run: e => this.editEntry(e) },
-        { key: 'change', label: 'Wandeln', color: '#fd9927', run: e => this.changeEntry(e) },
+      const steps = [
+        { key: 'edit', label: 'Ergründen', color: '#4ade80', run: e => this.editEntry(e) },
+        { key: 'change', label: 'Wandeln', color: '#4ade80', run: e => this.changeEntry(e) },
         { key: 'act', label: 'Handeln', color: '#4ade80', run: e => this.actEntry(e) },
-      ].filter(s => s.label !== here);
+      ];
+      // Only once the belief has an affirmation to hold a fact against —
+      // the same reach a Tagebuch entry needs its picker step to offer it.
+      if (beliefStatus(entry) === 'done' && this.affirmationOf(entry)) {
+        steps.push({ key: 'journal', label: 'Eintragen', color: '#4ade80', run: e => this.journalEntry(e) });
+      }
+      return steps.filter(s => s.label !== here);
     },
     isSwiping(idx) { return this.sw.openIdx === idx || this.sw.touchIdx === idx; },
     isOpen(entry, key) { return !!this.openRows[`${entry.time}:${key}`]; },
@@ -615,6 +621,7 @@ export default {
     editEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/edit-belief/${entry.time}`); },
     changeEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/change-belief/${entry.time}`); },
     actEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/act-belief/${entry.time}`); },
+    journalEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/journal-belief/${entry.time}`); },
     preDelete(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.entryToDelete = entry; this.isDeleteDialogShowing = true; },
     confirmDelete() {
       this.isDeleteDialogShowing = false;
@@ -656,7 +663,10 @@ export default {
     // than the chip is wide leaves a gap and reads as slack.
     rightWidth(i) {
       const entry = this.filteredBeliefs[i];
-      return entry && this.otherSteps(entry).length >= 2 ? 190 : 110;
+      const n = entry ? this.otherSteps(entry).length : 1;
+      // ~80px per button plus the shared outline — matches how wide 1 and 2
+      // already read, just extended for the belief that also offers Eintragen.
+      return Math.max(110, 30 + n * 80);
     },
     rowSt(i) {
       const s = this.sw;

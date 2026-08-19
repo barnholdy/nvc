@@ -86,6 +86,13 @@ export default new Router({
       component: () => import('./views/JournalAdd.vue'),
     },
     {
+      // Straight into a new entry for this belief, the same way act-belief
+      // skips the picker when a belief is already known.
+      path: '/journal-belief/:time',
+      name: 'journal-belief',
+      component: () => import('./views/JournalAdd.vue'),
+    },
+    {
       path: '/edit-journal/:time',
       name: 'edit-journal',
       component: () => import('./views/JournalAdd.vue'),

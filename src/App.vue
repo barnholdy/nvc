@@ -932,8 +932,8 @@ html { overflow-x: hidden; }
 .swipe-group.single {
   border-color: currentColor;
 }
-.swipe-btn-edit { color: #8e8e93; }
-.swipe-btn-change { color: #fd9927; }
+.swipe-btn-edit { color: #4ade80; }
+.swipe-btn-change { color: #4ade80; }
 .swipe-btn-act { color: #4ade80; }
 .swipe-btn-evaluate { color: #4ade80; }
 .swipe-btn-delete { color: #ff453a; }

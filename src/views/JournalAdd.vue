@@ -8,6 +8,7 @@
       ></wizard-header>
       <div>
         <journal-add-belief
+          v-if="!skipPicker"
           v-show="step === 1"
           :allBeliefs="allBeliefs"
           :patterns="allPatterns"
@@ -18,7 +19,7 @@
 
         <journal-add-fact
           v-if="belief"
-          v-show="step === 2"
+          v-show="step === factStep"
           :belief="belief"
           :patterns="allPatterns"
           :journal="allJournal"
@@ -28,7 +29,7 @@
 
         <journal-add-feelings
           v-if="belief"
-          v-show="step === 3"
+          v-show="step === feelingsStep"
           :fact="fact"
           :initialValue="feelings"
           @changed="feelings = $event">
@@ -36,25 +37,29 @@
 
         <journal-add-meaning
           v-if="belief"
-          v-show="step === 4"
+          v-show="step === meaningStep"
           :fact="fact"
+          :feelings="feelings"
           :initialValue="meaning"
           @changed="meaning = $event">
         </journal-add-meaning>
 
         <journal-add-fit
           v-if="belief"
-          v-show="step === 5"
+          v-show="step === fitStep"
           :fact="fact"
+          :feelings="feelings"
           :meaning="meaning"
+          :belief="belief"
           :initialCredibility="credibility"
           @changed="credibility = $event">
         </journal-add-fit>
 
         <journal-add-note
           v-if="belief"
-          v-show="step === 6"
+          v-show="step === noteStep"
           :fact="fact"
+          :feelings="feelings"
           :meaning="meaning"
           :credibility="credibility"
           :initialValue="note"
@@ -93,13 +98,22 @@ export default {
     WizardHeader, WizardFooter,
   },
   data() {
-    const editEntry = this.$store.getters.journal
-      .find(function(e) { return e.time === parseInt(this.$route.params.time, 10); }, this);
+    const isEdit = this.$route.name === 'edit-journal';
+    const editEntry = isEdit
+      ? this.$store.getters.journal
+        .find(function(e) { return e.time === parseInt(this.$route.params.time, 10); }, this)
+      : null;
+    // Opened from a belief's own swipe menu: the picker step is skipped the
+    // same way act-belief skips its own when a belief is already known.
+    const isPreselect = this.$route.name === 'journal-belief';
+    const preselectedBelief = isPreselect ? parseInt(this.$route.params.time, 10) : null;
+    const skipPicker = preselectedBelief !== null;
     return {
       step: 1,
-      totalSteps: TOTAL_STEPS,
+      totalSteps: skipPicker ? TOTAL_STEPS - 1 : TOTAL_STEPS,
+      skipPicker: skipPicker,
       editEntry: editEntry || null,
-      beliefTime: editEntry ? editEntry.beliefTime : null,
+      beliefTime: editEntry ? editEntry.beliefTime : preselectedBelief,
       fact: editEntry ? editEntry.fact || '' : '',
       feelings: editEntry ? editEntry.feelings || [] : [],
       meaning: editEntry ? editEntry.meaning || '' : '',
@@ -127,11 +141,18 @@ export default {
       if (this.beliefTime === null) return null;
       return this.allBeliefs.find(b => b.time === this.beliefTime) || null;
     },
+    // Shifted down by one once the picker step is skipped — the same way
+    // act-belief renumbers its own steps around a skipped picker.
+    factStep() { return this.skipPicker ? 1 : 2; },
+    feelingsStep() { return this.skipPicker ? 2 : 3; },
+    meaningStep() { return this.skipPicker ? 3 : 4; },
+    fitStep() { return this.skipPicker ? 4 : 5; },
+    noteStep() { return this.skipPicker ? 5 : 6; },
     isStepComplete() {
-      if (this.step === 1) return this.beliefTime !== null;
-      if (this.step === 2) return this.fact.trim() !== '';
-      if (this.step === 3) return this.feelings.length <= MAX_FEELINGS;
-      if (this.step === 4) return this.meaning.trim() !== '';
+      if (!this.skipPicker && this.step === 1) return this.beliefTime !== null;
+      if (this.step === this.factStep) return this.fact.trim() !== '';
+      if (this.step === this.feelingsStep) return this.feelings.length <= MAX_FEELINGS;
+      if (this.step === this.meaningStep) return this.meaning.trim() !== '';
       return true;
     },
   },

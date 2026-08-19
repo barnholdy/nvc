@@ -507,7 +507,7 @@ export default {
     // is there; the swipe offers whichever of the two is not on screen.
     otherSteps(row) {
       const steps = [
-        { key: 'plan', label: 'Planen', color: '#8e8e93', run: r => this.editExperiment(r) },
+        { key: 'plan', label: 'Planen', color: '#4ade80', run: r => this.editExperiment(r) },
       ];
       // Nothing to compare against until an anchor exists.
       if (!this.needsPlan(row.experiment)) {

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <journal-recall :fact="fact"></journal-recall>
+    <journal-recall :fact="fact" :feelings="feelings"></journal-recall>
 
     <p class="wizard-question">Was sagt das über dich?</p>
     <p class="wizard-body">Die Deutung, die sich beim Lesen der Fakten aufdrängt.</p>
@@ -24,6 +24,7 @@ export default {
   components: { InputCard, JournalRecall },
   props: {
     fact: { type: String, default: '' },
+    feelings: { type: Array, default: () => [] },
     initialValue: { type: String, default: '' },
   },
   data() {

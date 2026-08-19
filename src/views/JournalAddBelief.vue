@@ -18,6 +18,9 @@
       <credibility-meter :value="credibility(b)" :baseline="baselineOf(b)"></credibility-meter>
       <p class="pick-belief-aff">„{{ affirmationOf(b) }}“</p>
     </div>
+
+    <!-- Says why the list is as short as it is. -->
+    <p class="wizard-note">Wandle Überzeugungen, um sie hier zum Eintragen auszuwählen.</p>
   </div>
 </template>
 
