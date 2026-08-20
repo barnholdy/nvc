@@ -246,8 +246,10 @@ export default {
   white-space: nowrap;
 }
 .bar-icon { flex-shrink: 0; }
-.bar-icon-situation { color: #fd9927; }
-.bar-icon-journal { color: #4ade80; }
+/* The same two colours the credibility bar is read in, so a bar's mark means
+   the same thing here as it does in the list. */
+.bar-icon-situation { color: #c0483d; }
+.bar-icon-journal { color: #46955f; }
 
 .trend-hint {
   font-size: 0.72rem;

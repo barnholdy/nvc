@@ -29,6 +29,20 @@
             @click="beliefFilter = b.time"
           >„{{ b.belief }}“<span class="pill-count"> · {{ b.count }}</span></button>
         </div>
+
+        <div class="pill-row">
+          <!-- Collapsed strips an entry back to what it is about: the moment,
+               the sentence it speaks for, and the belief it speaks to. The
+               feelings, the meaning and the „Ja, aber“ stay one tap away. -->
+          <button
+            class="pill pill-icon"
+            :class="{ active: collapsed }"
+            :aria-label="collapsed ? 'Ausführliche Ansicht' : 'Kompakte Ansicht'"
+            @click="collapsed = !collapsed"
+          >
+            <v-icon small>{{ collapsed ? 'unfold_more' : 'unfold_less' }}</v-icon>
+          </button>
+        </div>
       </div>
 
       <div v-if="!groups.length" class="list-empty">
@@ -87,18 +101,18 @@
                 </div>
 
                 <feeling-chips
-                  v-if="feelingsOf(entry).length"
+                  v-if="!collapsed && feelingsOf(entry).length"
                   :items="feelingsOf(entry)"
                   type="feelings"
                   flat
                   class="journal-feelings"
                 ></feeling-chips>
 
-                <p v-if="entry.meaning" class="journal-meaning">{{ entry.meaning }}</p>
+                <p v-if="!collapsed && entry.meaning" class="journal-meaning">{{ entry.meaning }}</p>
 
                 <!-- The objection first, then the sentence it is aimed at:
                      the affirmation gets the last word. -->
-                <p v-if="entry.note" class="journal-note">„{{ entry.note }}“</p>
+                <p v-if="!collapsed && entry.note" class="journal-note">„{{ entry.note }}“</p>
 
                 <!-- The sentences this entry is evidence for. A Trigger is
                      evidence the other way, so it gets no such box. -->
@@ -168,11 +182,14 @@ import NavIcon from '@/components/NavIcon.vue';
 import BeliefChip from '@/components/BeliefChip.vue';
 import FeelingChips from '@/components/FeelingChips.vue';
 
+const COLLAPSED_KEY = 'nvc.journalCollapsed';
+
 export default {
   name: 'journal-list',
   components: { NavIcon, BeliefChip, FeelingChips },
   data() {
     return {
+      collapsed: localStorage.getItem(COLLAPSED_KEY) === '1',
       beliefFilter: null,
       entryToDelete: null,
       isDeleteDialogShowing: false,
@@ -219,6 +236,7 @@ export default {
     this.revealRequested();
   },
   watch: {
+    collapsed(v) { localStorage.setItem(COLLAPSED_KEY, v ? '1' : '0'); },
     '$route.query.open': function() { this.revealRequested(); },
     '$route.query.belief': function() { this.applyBeliefQuery(); },
   },
@@ -421,8 +439,10 @@ export default {
   flex-shrink: 0;
   margin-top: 3px;
 }
-.entry-icon-trigger { color: #fd9927; }
-.entry-icon-reflection { color: #4ade80; }
+/* The same two colours the credibility bar is read in: a Trigger is evidence
+   for the belief, a Reflexion evidence against it. */
+.entry-icon-trigger { color: #c0483d; }
+.entry-icon-reflection { color: #46955f; }
 /* .aff-box carries no top margin of its own — everywhere else it follows a
    detail row whose padding already holds it off. Here a paragraph sits above
    it, and a paragraph's bottom margin is zero. */
