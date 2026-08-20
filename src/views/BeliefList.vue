@@ -328,6 +328,7 @@ import {
 } from '@/utils/beliefStatus';
 import { experimentsOf, experimentDisplayState } from '@/utils/experiment';
 import { beliefCredibility, beliefStanding } from '@/utils/credibility';
+import { journalBeliefTimes } from '@/utils/journalBeliefs';
 import { copingLabel } from '@/utils/coping';
 import { requestedId, scrollRowIntoView, scrollRowToTop } from '@/utils/reveal';
 import NavIcon from '@/components/NavIcon.vue';
@@ -448,7 +449,9 @@ export default {
       const map = {};
       this.$store.getters.journal.forEach((e) => {
         if (!e) return;
-        map[e.beliefTime] = (map[e.beliefTime] || 0) + 1;
+        // One entry can be written against several beliefs, and counts for
+        // each of them.
+        journalBeliefTimes(e).forEach((t) => { map[t] = (map[t] || 0) + 1; });
       });
       return map;
     },

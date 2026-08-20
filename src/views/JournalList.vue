@@ -90,18 +90,23 @@
                      the affirmation gets the last word. -->
                 <p v-if="entry.note" class="journal-note">„{{ entry.note }}“</p>
 
-                <!-- The sentence this entry is evidence for. -->
-                <div v-if="affirmationOf(entry)" class="aff-box">
-                  <p class="aff-label">Affirmation</p>
-                  <p class="aff-text">„{{ affirmationOf(entry) }}“</p>
+                <!-- The sentences this entry is evidence for. -->
+                <div v-if="affirmationsOf(entry)" class="aff-box">
+                  <p class="aff-label">{{ affirmationLabel(entry) }}</p>
+                  <p class="aff-text">„{{ affirmationsOf(entry) }}“</p>
                 </div>
 
+                <!-- Every belief this entry was written against, each with
+                     what this one entry rated it at. -->
                 <belief-chip
-                  :text="beliefTextOf(entry)"
-                  :value="ownValue(entry)"
-                  :baseline="credibilityOf(entry)"
+                  v-for="b in beliefsOf(entry)"
+                  :key="b.time"
+                  :text="b.text"
+                  :value="b.value"
+                  :baseline="b.baseline"
                   :value-is-median="false"
-                  @open="openBelief(entry)"
+                  :tappable="b.exists"
+                  @open="openBelief(b.time)"
                 ></belief-chip>
               </div>
             </div>
@@ -147,6 +152,7 @@
 import moment from 'moment';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 import { beliefCredibility } from '@/utils/credibility';
+import { journalBeliefTimes, journalNames, journalTruthFor } from '@/utils/journalBeliefs';
 import NavIcon from '@/components/NavIcon.vue';
 import BeliefChip from '@/components/BeliefChip.vue';
 import FeelingChips from '@/components/FeelingChips.vue';
@@ -168,12 +174,15 @@ export default {
     },
     filtered() {
       if (this.beliefFilter === null) return this.entries;
-      return this.entries.filter(e => e.beliefTime === this.beliefFilter);
+      return this.entries.filter(e => journalNames(e, this.beliefFilter));
     },
-    // Only beliefs an entry was actually written against can filter one.
+    // Only beliefs an entry was actually written against can filter one. An
+    // entry naming several counts once for each of them.
     filterBeliefs() {
       const counts = {};
-      this.entries.forEach((e) => { counts[e.beliefTime] = (counts[e.beliefTime] || 0) + 1; });
+      this.entries.forEach((e) => {
+        journalBeliefTimes(e).forEach((t) => { counts[t] = (counts[t] || 0) + 1; });
+      });
       return this.$store.getters.beliefs
         .filter(b => counts[b.time])
         .map(b => ({ time: b.time, belief: b.belief, count: counts[b.time] }))
@@ -228,38 +237,53 @@ export default {
       this.$nextTick(() => scrollRowIntoView(this.$el, id));
     },
     isSwiping(key) { return this.sw.openKey === key || this.sw.touchKey === key; },
-    beliefOf(entry) {
-      return this.$store.getters.beliefs.find(b => b.time === entry.beliefTime);
+    // Every belief this entry names: what it is called, what this one entry
+    // rated it at, and where the belief itself stands.
+    beliefsOf(entry) {
+      const beliefs = this.$store.getters.beliefs;
+      const patterns = this.$store.getters.patterns;
+      const journal = this.$store.getters.journal;
+      return journalBeliefTimes(entry).map((time) => {
+        const belief = beliefs.find(b => b.time === time);
+        return {
+          time: time,
+          text: belief ? belief.belief : 'Gelöschte Überzeugung',
+          exists: !!belief,
+          value: journalTruthFor(entry, time),
+          baseline: belief ? beliefCredibility(patterns, belief, journal) : null,
+        };
+      });
     },
-    beliefTextOf(entry) {
-      const b = this.beliefOf(entry);
-      return b ? b.belief : 'Gelöschte Überzeugung';
+    // The affirmations of everything this entry speaks for, each named once —
+    // two beliefs can have been given the same sentence to grow into.
+    affirmationTextsOf(entry) {
+      const beliefs = this.$store.getters.beliefs;
+      const seen = [];
+      journalBeliefTimes(entry).forEach((time) => {
+        const belief = beliefs.find(b => b.time === time);
+        if (!belief) return;
+        (belief.affirmations || []).forEach((a) => {
+          if (a && a.text && seen.indexOf(a.text) === -1) seen.push(a.text);
+        });
+      });
+      return seen;
     },
-    affirmationOf(entry) {
-      const b = this.beliefOf(entry);
-      if (!b) return '';
-      return (b.affirmations || []).map(a => a && a.text).filter(Boolean).join(' · ');
+    affirmationsOf(entry) {
+      return this.affirmationTextsOf(entry).join(' · ');
+    },
+    affirmationLabel(entry) {
+      return this.affirmationTextsOf(entry).length > 1 ? 'Affirmationen' : 'Affirmation';
     },
     feelingsOf(entry) {
       return Array.isArray(entry.feelings) ? entry.feelings : [];
-    },
-    // Where the belief stands — the number its own card shows as its headline.
-    credibilityOf(entry) {
-      const b = this.beliefOf(entry);
-      if (!b) return null;
-      return beliefCredibility(this.$store.getters.patterns, b, this.$store.getters.journal);
-    },
-    // What this one entry rated it at, which an older entry may not carry.
-    ownValue(entry) {
-      return typeof entry.credibility === 'number' ? entry.credibility : null;
     },
     dayLabel(time) {
       moment.locale('de');
       return moment(time).format('D. MMM').toUpperCase();
     },
-    openBelief(entry) {
-      if (!this.beliefOf(entry)) return;
-      this.$router.push({ path: '/beliefs', query: openQuery(entry.beliefTime, { top: true }) });
+    openBelief(beliefTime) {
+      if (!this.$store.getters.beliefs.some(b => b.time === beliefTime)) return;
+      this.$router.push({ path: '/beliefs', query: openQuery(beliefTime, { top: true }) });
     },
     editEntry(entry) {
       this.sw.openKey = null; this.sw.openDir = null;

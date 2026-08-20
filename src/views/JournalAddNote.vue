@@ -4,8 +4,7 @@
       :fact="fact"
       :feelings="feelings"
       :meaning="meaning"
-      :belief="beliefText"
-      :credibility="credibility"
+      :beliefs="beliefs"
     ></journal-recall>
 
     <p class="wizard-question">Gibt es ein „Ja, aber“?</p>
@@ -33,17 +32,13 @@ export default {
     fact: { type: String, default: '' },
     feelings: { type: Array, default: () => [] },
     meaning: { type: String, default: '' },
-    // Just the belief being weakened — read together with the credibility
-    // just rated for it, so both stand side by side at the very end.
-    belief: { type: Object, default: null },
-    credibility: { type: Number, default: null },
+    // The beliefs being weakened, each with the credibility just rated for
+    // it, so all of them stand side by side at the very end.
+    beliefs: { type: Array, default: () => [] },
     initialValue: { type: String, default: '' },
   },
   data() {
     return { text: this.initialValue };
-  },
-  computed: {
-    beliefText() { return this.belief ? this.belief.belief : ''; },
   },
   watch: {
     text(val) { this.$emit('changed', val); },

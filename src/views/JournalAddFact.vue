@@ -1,7 +1,5 @@
 <template>
   <div>
-    <journal-context :belief="belief" :patterns="patterns" :journal="journal"></journal-context>
-
     <p class="wizard-question">Was ist passiert?</p>
     <p class="wizard-body">Nur die Fakten — was du gesehen, gehört oder erlebt hast, ohne Deutung.</p>
 
@@ -16,16 +14,15 @@
 </template>
 
 <script>
-import JournalContext from '@/components/JournalContext.vue';
+// The entry starts from what happened, not from a belief: which beliefs it
+// speaks against is answered later, once there is something to hold them
+// against.
 import InputCard from '@/components/InputCard.vue';
 
 export default {
   name: 'journal-add-fact',
-  components: { JournalContext, InputCard },
+  components: { InputCard },
   props: {
-    belief: { type: Object, required: true },
-    patterns: { type: Array, default: () => [] },
-    journal: { type: Array, default: () => [] },
     initialValue: { type: String, default: '' },
   },
   data() {

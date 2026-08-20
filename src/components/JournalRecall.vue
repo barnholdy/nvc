@@ -26,11 +26,10 @@ export default {
     fact: { type: String, default: '' },
     feelings: { type: Array, default: () => [] },
     meaning: { type: String, default: '' },
-    // The belief being weakened and its affirmation — only handed in on the
-    // step that needs them, shown as plain quotes without their own meter.
-    belief: { type: String, default: '' },
-    affirmation: { type: String, default: '' },
-    credibility: { type: Number, default: null },
+    // The beliefs this entry was written against, each with what it was just
+    // rated at: [{ time, text, credibility }]. Only handed in on the step
+    // that needs them.
+    beliefs: { type: Array, default: () => [] },
   },
   computed: {
     rows() {
@@ -38,12 +37,17 @@ export default {
       if (this.fact) out.push({ key: 'fact', label: 'Was passiert ist', text: this.fact });
       if (this.feelings.length) out.push({ key: 'feelings', label: 'Gefühle', items: this.feelings });
       if (this.meaning) out.push({ key: 'meaning', label: 'Was das über mich sagt', text: this.meaning });
-      if (this.belief) out.push({ key: 'belief', label: 'Überzeugung', text: `„${this.belief}“` });
-      if (this.affirmation) out.push({ key: 'affirmation', label: 'Affirmation', text: `„${this.affirmation}“` });
-      // No label of its own — the score row already says "Glaubwürdigkeit".
-      if (typeof this.credibility === 'number') {
-        out.push({ key: 'credibility', score: this.credibility });
-      }
+      // One row per belief, each carrying the number just given to it. Only
+      // the first is labelled: repeating the word down a list says nothing
+      // the quotes do not already say.
+      this.beliefs.forEach((b, i) => {
+        out.push({
+          key: `belief-${b.time}`,
+          label: i === 0 ? (this.beliefs.length > 1 ? 'Überzeugungen' : 'Überzeugung') : '',
+          text: `„${b.text}“`,
+          score: typeof b.credibility === 'number' ? b.credibility : undefined,
+        });
+      });
       return out;
     },
   },

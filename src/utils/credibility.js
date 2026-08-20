@@ -10,6 +10,8 @@
 //                · every evaluated experiment (`experiment.affirmationTruth`),
 //                  which older data still carries — nothing writes it now
 
+import { journalTruthFor } from './journalBeliefs';
+
 export const SCALE_MAX = 10;
 
 function list(value) {
@@ -53,18 +55,23 @@ export function beliefTruthIn(pattern, belief) {
 }
 
 // Every journal entry written against one belief. The entry asks the same
-// 0-10 question a situation does, so it counts the same way.
+// 0-10 question a situation does, so it counts the same way — and like a
+// situation it can rate several beliefs at once, each on its own.
 export function journalPoints(journal, belief) {
   if (!belief) return [];
-  return list(journal)
-    .filter(e => e && e.beliefTime === belief.time && isRating(e.credibility))
-    .map(e => ({
+  const points = [];
+  list(journal).forEach((e) => {
+    const value = e ? journalTruthFor(e, belief.time) : null;
+    if (value === null) return;
+    points.push({
       time: e.time,
-      value: e.credibility,
+      value: value,
       source: 'journal',
       label: e.fact || '',
       targetId: e.time,
-    }));
+    });
+  });
+  return points;
 }
 
 // Every reading one belief has collected, oldest first.

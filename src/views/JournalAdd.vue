@@ -7,37 +7,21 @@
         :total="totalSteps"
       ></wizard-header>
       <div>
-        <journal-add-belief
-          v-if="!skipPicker"
-          v-show="step === 1"
-          :allBeliefs="allBeliefs"
-          :patterns="allPatterns"
-          :journal="allJournal"
-          :initialValue="beliefTime"
-          @changed="beliefTime = $event">
-        </journal-add-belief>
-
         <journal-add-fact
-          v-if="belief"
-          v-show="step === factStep"
-          :belief="belief"
-          :patterns="allPatterns"
-          :journal="allJournal"
+          v-show="step === 1"
           :initialValue="fact"
           @changed="fact = $event">
         </journal-add-fact>
 
         <journal-add-feelings
-          v-if="belief"
-          v-show="step === feelingsStep"
+          v-show="step === 2"
           :fact="fact"
           :initialValue="feelings"
           @changed="feelings = $event">
         </journal-add-feelings>
 
         <journal-add-meaning
-          v-if="belief"
-          v-show="step === meaningStep"
+          v-show="step === 3"
           :fact="fact"
           :feelings="feelings"
           :initialValue="meaning"
@@ -45,24 +29,25 @@
         </journal-add-meaning>
 
         <journal-add-fit
-          v-if="belief"
-          v-show="step === fitStep"
+          v-show="step === 4"
           :fact="fact"
           :feelings="feelings"
           :meaning="meaning"
-          :belief="belief"
-          :initialCredibility="credibility"
-          @changed="credibility = $event">
+          :allBeliefs="allBeliefs"
+          :patterns="allPatterns"
+          :journal="allJournal"
+          :initialSelected="beliefTimes"
+          :initialTruths="beliefTruths"
+          @changed="beliefTimes = $event"
+          @truthsChanged="beliefTruths = $event">
         </journal-add-fit>
 
         <journal-add-note
-          v-if="belief"
-          v-show="step === noteStep"
+          v-show="step === 5"
           :fact="fact"
           :feelings="feelings"
           :meaning="meaning"
-          :belief="belief"
-          :credibility="credibility"
+          :beliefs="chosenBeliefs"
           :initialValue="note"
           @changed="note = $event">
         </journal-add-note>
@@ -80,7 +65,6 @@
 </template>
 
 <script>
-import JournalAddBelief from '@/views/JournalAddBelief.vue';
 import JournalAddFact from '@/views/JournalAddFact.vue';
 import JournalAddFeelings from '@/views/JournalAddFeelings.vue';
 import JournalAddMeaning from '@/views/JournalAddMeaning.vue';
@@ -89,13 +73,15 @@ import JournalAddNote from '@/views/JournalAddNote.vue';
 import WizardHeader from '@/components/WizardHeader.vue';
 import WizardFooter from '@/components/WizardFooter.vue';
 import { MAX_FEELINGS } from '@/utils/emotions';
+import { journalBeliefTimes, journalBeliefTruths } from '@/utils/journalBeliefs';
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 5;
+const BELIEF_STEP = 4;
 
 export default {
   name: 'journal-add',
   components: {
-    JournalAddBelief, JournalAddFact, JournalAddFeelings, JournalAddMeaning, JournalAddFit, JournalAddNote,
+    JournalAddFact, JournalAddFeelings, JournalAddMeaning, JournalAddFit, JournalAddNote,
     WizardHeader, WizardFooter,
   },
   data() {
@@ -104,21 +90,19 @@ export default {
       ? this.$store.getters.journal
         .find(function(e) { return e.time === parseInt(this.$route.params.time, 10); }, this)
       : null;
-    // Opened from a belief's own swipe menu: the picker step is skipped the
-    // same way act-belief skips its own when a belief is already known.
+    // Opened from a belief's own card: that belief starts out chosen, and the
+    // belief step is reached like any other rather than being skipped.
     const isPreselect = this.$route.name === 'journal-belief';
-    const preselectedBelief = isPreselect ? parseInt(this.$route.params.time, 10) : null;
-    const skipPicker = preselectedBelief !== null;
+    const preselected = isPreselect ? [parseInt(this.$route.params.time, 10)] : [];
     return {
       step: 1,
-      totalSteps: skipPicker ? TOTAL_STEPS - 1 : TOTAL_STEPS,
-      skipPicker: skipPicker,
+      totalSteps: TOTAL_STEPS,
       editEntry: editEntry || null,
-      beliefTime: editEntry ? editEntry.beliefTime : preselectedBelief,
+      beliefTimes: editEntry ? journalBeliefTimes(editEntry) : preselected,
+      beliefTruths: editEntry ? Object.assign({}, journalBeliefTruths(editEntry)) : {},
       fact: editEntry ? editEntry.fact || '' : '',
       feelings: editEntry ? editEntry.feelings || [] : [],
       meaning: editEntry ? editEntry.meaning || '' : '',
-      credibility: editEntry && typeof editEntry.credibility === 'number' ? editEntry.credibility : null,
       note: editEntry ? editEntry.note || '' : '',
     };
   },
@@ -126,7 +110,7 @@ export default {
     isEditMode() {
       return !!this.editEntry;
     },
-    // Every belief that can be weakened this way — the picker step narrows
+    // Every belief that can be weakened this way — the belief step narrows
     // this down further to the ones with an affirmation of their own.
     allBeliefs() {
       return this.$store.getters.beliefs;
@@ -137,23 +121,27 @@ export default {
     allJournal() {
       return this.$store.getters.journal;
     },
-    // Resolved on demand: the belief only exists once one has been chosen.
-    belief() {
-      if (this.beliefTime === null) return null;
-      return this.allBeliefs.find(b => b.time === this.beliefTime) || null;
+    // What the belief step settled on, resolved for the steps after it.
+    chosenBeliefs() {
+      return this.beliefTimes
+        .map((time) => {
+          const belief = this.allBeliefs.find(b => b.time === time);
+          if (!belief) return null;
+          return {
+            time: time,
+            text: belief.belief,
+            credibility: this.beliefTruths[time],
+          };
+        })
+        .filter(Boolean);
     },
-    // Shifted down by one once the picker step is skipped — the same way
-    // act-belief renumbers its own steps around a skipped picker.
-    factStep() { return this.skipPicker ? 1 : 2; },
-    feelingsStep() { return this.skipPicker ? 2 : 3; },
-    meaningStep() { return this.skipPicker ? 3 : 4; },
-    fitStep() { return this.skipPicker ? 4 : 5; },
-    noteStep() { return this.skipPicker ? 5 : 6; },
     isStepComplete() {
-      if (!this.skipPicker && this.step === 1) return this.beliefTime !== null;
-      if (this.step === this.factStep) return this.fact.trim() !== '';
-      if (this.step === this.feelingsStep) return this.feelings.length <= MAX_FEELINGS;
-      if (this.step === this.meaningStep) return this.meaning.trim() !== '';
+      if (this.step === 1) return this.fact.trim() !== '';
+      if (this.step === 2) return this.feelings.length <= MAX_FEELINGS;
+      if (this.step === 3) return this.meaning.trim() !== '';
+      // An entry is evidence against something: without a belief there is
+      // nothing for it to be evidence against.
+      if (this.step === BELIEF_STEP) return this.beliefTimes.length > 0;
       return true;
     },
   },
@@ -172,16 +160,27 @@ export default {
       else this.prevStep();
     },
     save() {
+      // Only the ratings of beliefs that are actually named — one deselected
+      // again must not leave its number behind.
+      const truths = {};
+      this.beliefTimes.forEach((time) => {
+        if (typeof this.beliefTruths[time] === 'number') truths[time] = this.beliefTruths[time];
+      });
       const payload = {
-        beliefTime: this.beliefTime,
+        beliefTimes: this.beliefTimes.slice(),
+        beliefTruths: truths,
         fact: this.fact.trim(),
         feelings: this.feelings,
         meaning: this.meaning.trim(),
-        credibility: this.credibility,
         note: this.note.trim(),
       };
       if (this.isEditMode) {
-        this.$store.dispatch('updateJournalEntry', Object.assign({}, this.editEntry, payload));
+        // The old single-belief fields would otherwise survive the edit and
+        // be read in preference to what was just chosen.
+        const kept = Object.assign({}, this.editEntry, payload);
+        delete kept.beliefTime;
+        delete kept.credibility;
+        this.$store.dispatch('updateJournalEntry', kept);
       } else {
         this.$store.dispatch('saveJournalEntry', payload);
       }
