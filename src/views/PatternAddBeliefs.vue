@@ -80,7 +80,7 @@
         @click="addBelief(b.time)"
       >
         <p class="card-title available-title">„{{ b.belief }}“</p>
-        <credibility-meter :value="credibilityOf(b)" :baseline="baselineOf(b)"></credibility-meter>
+        <credibility-meter :standing="credibilityOf(b)" :baseline="baselineOf(b)"></credibility-meter>
       </div>
     </template>
   </div>

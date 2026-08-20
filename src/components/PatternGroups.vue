@@ -13,7 +13,7 @@
         v-for="(b, j) in k.beliefs"
         :key="j"
         :text="b.text"
-        :value="b.standing"
+        :standing="b.standing"
         :baseline="b.credibility"
         :tappable="b.time !== null"
         @open="openBelief(b)"

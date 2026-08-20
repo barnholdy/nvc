@@ -83,9 +83,9 @@
                     v-for="b in shownBeliefsOf(entry)"
                     :key="b.time"
                     :text="b.belief"
-                    :value="truthOf(entry, b)"
+                    :current="truthOf(entry, b)"
+                    :standing="standingOf(b)"
                     :baseline="credibilityOf(b)"
-                    :value-is-median="false"
                     @open="openBelief(b)"
                   ></belief-chip>
                 </div>
@@ -132,7 +132,7 @@
 <script>
 import moment from 'moment';
 import { isComplete } from '@/utils/beliefStatus';
-import { beliefTruthIn, beliefCredibility } from '@/utils/credibility';
+import { beliefTruthIn, beliefCredibility, beliefStanding } from '@/utils/credibility';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 import NavIcon from '@/components/NavIcon.vue';
 import BeliefChip from '@/components/BeliefChip.vue';
@@ -249,6 +249,9 @@ export default {
     truthOf(entry, belief) { return beliefTruthIn(entry, belief); },
     credibilityOf(belief) {
       return beliefCredibility(this.$store.getters.patterns, belief, this.$store.getters.journal);
+    },
+    standingOf(belief) {
+      return beliefStanding(this.$store.getters.patterns, belief, this.$store.getters.journal);
     },
     dayLabel(time) {
       moment.locale('de');

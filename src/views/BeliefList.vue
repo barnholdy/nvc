@@ -94,7 +94,7 @@
           <span class="card-pill">{{ statusLabel(entry) }}</span>
 
           <div v-if="credibility(entry) !== null" class="score-row">
-            <credibility-meter :value="credibility(entry)" :baseline="anchorOf(entry)"></credibility-meter>
+            <credibility-meter :standing="credibility(entry)" :baseline="anchorOf(entry)"></credibility-meter>
           </div>
 
           <div v-if="!compact" class="card-sep"></div>

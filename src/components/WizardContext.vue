@@ -3,7 +3,7 @@
     <template v-if="quote">
       <p class="wc-label">{{ label }}</p>
       <p class="card-title wc-quote">„{{ quote }}“</p>
-      <credibility-meter :value="credibility" :baseline="credibilityBaseline"></credibility-meter>
+      <credibility-meter :standing="credibility" :baseline="credibilityBaseline"></credibility-meter>
     </template>
 
     <!-- What was feared against what happened, as one bar — the same one the

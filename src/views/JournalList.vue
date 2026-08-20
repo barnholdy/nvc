@@ -102,9 +102,9 @@
                   v-for="b in beliefsOf(entry)"
                   :key="b.time"
                   :text="b.text"
-                  :value="b.value"
+                  :current="b.current"
+                  :standing="b.standing"
                   :baseline="b.baseline"
-                  :value-is-median="false"
                   :tappable="b.exists"
                   @open="openBelief(b.time)"
                 ></belief-chip>
@@ -151,7 +151,7 @@
 <script>
 import moment from 'moment';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
-import { beliefCredibility } from '@/utils/credibility';
+import { beliefCredibility, beliefStanding } from '@/utils/credibility';
 import { journalBeliefTimes, journalNames, journalTruthFor } from '@/utils/journalBeliefs';
 import NavIcon from '@/components/NavIcon.vue';
 import BeliefChip from '@/components/BeliefChip.vue';
@@ -249,7 +249,8 @@ export default {
           time: time,
           text: belief ? belief.belief : 'Gelöschte Überzeugung',
           exists: !!belief,
-          value: journalTruthFor(entry, time),
+          current: journalTruthFor(entry, time),
+          standing: belief ? beliefStanding(patterns, belief, journal) : null,
           baseline: belief ? beliefCredibility(patterns, belief, journal) : null,
         };
       });

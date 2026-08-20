@@ -39,7 +39,7 @@
         @click="add(b.time)"
       >
         <p class="card-title">„{{ b.belief }}“</p>
-        <credibility-meter :value="standingOf(b)" :baseline="baselineOf(b)"></credibility-meter>
+        <credibility-meter :standing="standingOf(b)" :baseline="baselineOf(b)"></credibility-meter>
         <p v-if="affirmationOf(b)" class="pick-belief-aff">„{{ affirmationOf(b) }}“</p>
       </div>
     </template>

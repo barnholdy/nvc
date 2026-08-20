@@ -5,11 +5,14 @@
       <v-icon v-if="tappable" class="detail-chevron">chevron_right</v-icon>
     </div>
 
-    <!-- The reading taken here against where the belief stands: the blue
-         blocks reach as far as this one entry rated it, the orange line marks
-         the belief's own standing. Two numbers on one scale say more than a
-         difference would — the gap is the point, and it is visible. -->
-    <credibility-meter :value="value" :baseline="baseline" :value-is-median="valueIsMedian"></credibility-meter>
+    <!-- The reading taken here against where the belief started and where it
+         stands: the gap between the marks is the point, and it is visible
+         without a number having to state it. -->
+    <credibility-meter
+      :baseline="baseline"
+      :standing="standing"
+      :current="current"
+    ></credibility-meter>
   </div>
 </template>
 
@@ -21,14 +24,14 @@ export default {
   components: { CredibilityMeter },
   props: {
     text: { type: String, default: '' },
-    // What this one entry rated the belief at. Null where there is no reading
-    // of its own to show — the Muster chips name a belief, they do not rate it.
-    value: { type: Number, default: null },
-    // Where the belief itself stands, the same number its own card shows.
+    // Where the belief started — the anchor every row marks in orange.
     baseline: { type: Number, default: null },
-    // False for a history row: what that one entry itself rated is a single
-    // reading, not a median, so its number stays plain.
-    valueIsMedian: { type: Boolean, default: true },
+    // Where it stands now, which is where the bar turns from red to green.
+    standing: { type: Number, default: null },
+    // What this one situation, run or entry rated it at. Null where there is
+    // no reading of its own — the Muster chips name a belief, they do not
+    // rate it.
+    current: { type: Number, default: null },
     // A chip whose belief no longer exists is a label, not a link.
     tappable: { type: Boolean, default: true },
   },

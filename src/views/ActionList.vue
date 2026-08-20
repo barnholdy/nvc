@@ -185,9 +185,9 @@
                        the subject here, the belief is what it is aimed at. -->
                   <belief-chip
                     :text="row.beliefText"
-                    :value="rowTruth(row)"
+                    :current="rowTruth(row)"
+                    :standing="beliefStandingOf(row)"
                     :baseline="beliefTruth(row)"
-                    :value-is-median="false"
                     @open="openBelief(row)"
                   ></belief-chip>
                 </div>
@@ -330,7 +330,7 @@ import {
   isDue,
   isPlanned,
 } from '@/utils/experiment';
-import { beliefCredibility } from '@/utils/credibility';
+import { beliefCredibility, beliefStanding } from '@/utils/credibility';
 import { beliefStatusLabel, beliefStatusColor } from '@/utils/beliefStatus';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 import NavIcon from '@/components/NavIcon.vue';
@@ -585,6 +585,9 @@ export default {
     // list. The reading this experiment took is shown further down, separately.
     beliefTruth(row) {
       return beliefCredibility(this.$store.getters.patterns, this.beliefOf(row), this.$store.getters.journal);
+    },
+    beliefStandingOf(row) {
+      return beliefStanding(this.$store.getters.patterns, this.beliefOf(row), this.$store.getters.journal);
     },
     // What this run itself rated the belief at, recorded when it was
     // evaluated. Null while it has not been.

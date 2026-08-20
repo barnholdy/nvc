@@ -15,7 +15,7 @@
       @click="pick(b.time)"
     >
       <p class="card-title">„{{ b.belief }}“</p>
-      <credibility-meter :value="credibility(b)" :baseline="baselineOf(b)"></credibility-meter>
+      <credibility-meter :standing="credibility(b)" :baseline="baselineOf(b)"></credibility-meter>
       <!-- The sentence the action is meant to act from, the way the journal's
            own picker shows it. Guarded: a belief can reach "gewandelt" by
            having been acted on, without an affirmation ever being written. -->
