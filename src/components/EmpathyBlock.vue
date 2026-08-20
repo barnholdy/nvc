@@ -121,9 +121,9 @@ export default {
         lines.push('MUSTER:');
         patterns.forEach((p, i) => {
           lines.push('');
-          lines.push(`Muster ${i + 1}${p.trigger ? ` (${p.trigger})` : ''}:`);
-          if (p.trigger) lines.push(`  Situation: ${p.trigger}`);
-          const linked = (p.beliefs || []).map(id => beliefs.find(b => b.time === id)).filter(Boolean);
+          lines.push(`Muster ${i + 1}${p.fact ? ` (${p.fact})` : ''}:`);
+          if (p.fact) lines.push(`  Situation: ${p.fact}`);
+          const linked = (p.beliefTimes || []).map(id => beliefs.find(b => b.time === id)).filter(Boolean);
           if (linked.length) {
             // With the rating this situation recorded, where there is one.
             const truths = p.beliefTruths || {};

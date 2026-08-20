@@ -26,7 +26,7 @@ function round(value) {
 function situationLines(situations, belief) {
   return (Array.isArray(situations) ? situations : []).map((p) => {
     const truth = beliefTruthIn(p, belief);
-    const text = (p && p.trigger) || '';
+    const text = (p && p.fact) || '';
     return truth === null ? `- ${text}` : `- ${text} (Glaubwürdigkeit damals: ${truth}/10)`;
   }).filter(l => l !== '- ');
 }

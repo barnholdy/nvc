@@ -120,7 +120,7 @@ export default {
       var situations = situationsForBelief(this.$store.getters.patterns, e.time);
       if (situations.length) {
         lines.push('Situation: ' + situations.map(function(p) {
-          return p.trigger;
+          return p.fact;
         }).join(' | '));
       }
       if (e.withBelief) lines.push('Reaktion: ' + e.withBelief);

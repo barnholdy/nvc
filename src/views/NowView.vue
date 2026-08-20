@@ -13,20 +13,15 @@
       </div>
 
       <!-- Above everything, and always there: writing down what just happened
-           or what already has is the one thing that does not depend on
-           anything already being in the app. -->
+           is the one thing that does not depend on anything already being in
+           the app. One way in — which of the two kinds it is, is the wizard's
+           own first question, so it is not asked twice. -->
       <div class="capture-grid">
-        <div class="capture-card" @click="$router.push('/add-pattern')">
-          <svg class="capture-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path :d="captureIcon" fill="currentColor"></path>
-          </svg>
-          <p class="capture-title">Situation erfassen</p>
-        </div>
-        <div class="capture-card" @click="$router.push('/add-journal')">
+        <div class="capture-card capture-wide" @click="$router.push('/add-journal')">
           <svg class="capture-icon" viewBox="0 0 24 24" aria-hidden="true">
             <path :d="journalIcon" fill="currentColor"></path>
           </svg>
-          <p class="capture-title">Tagebucheintrag schreiben</p>
+          <p class="capture-title">Eintrag erfassen</p>
         </div>
       </div>
 
@@ -36,7 +31,7 @@
 
       <div v-if="!topTileSection && !practiseSection && !trendRows.length" class="list-empty">
         <p class="list-empty-title">Nichts offen</p>
-        <p class="list-empty-sub">Lege eine Situation an, wenn dir etwas begegnet.</p>
+        <p class="list-empty-sub">Erfasse einen Eintrag, wenn dir etwas begegnet.</p>
       </div>
 
       <!-- Affirmations first: saying one again is the lightest next step, and
@@ -140,17 +135,14 @@
       <v-btn flat color="primary" to="/now">
         <nav-icon name="now"></nav-icon>
       </v-btn>
-      <v-btn flat color="grey" to="/patterns">
-        <nav-icon name="patterns"></nav-icon>
+      <v-btn flat color="grey" to="/journal">
+        <nav-icon name="journal"></nav-icon>
       </v-btn>
       <v-btn flat color="grey" to="/beliefs">
         <nav-icon name="beliefs"></nav-icon>
       </v-btn>
       <v-btn flat color="grey" to="/actions">
         <nav-icon name="actions"></nav-icon>
-      </v-btn>
-      <v-btn flat color="grey" to="/journal">
-        <nav-icon name="journal"></nav-icon>
       </v-btn>
     </v-bottom-nav>
   </div>
@@ -169,7 +161,7 @@ import {
 import {
   beliefCredibility, beliefRows, baselineOf,
 } from '@/utils/credibility';
-import { mdiLightningBolt, mdiBookOpenPageVariant } from '@mdi/js';
+import { mdiBookOpenPageVariant } from '@mdi/js';
 import NavIcon from '@/components/NavIcon.vue';
 import TrendChart from '@/components/TrendChart.vue';
 import ProfileStats from '@/components/ProfileStats.vue';
@@ -204,9 +196,6 @@ export default {
     };
   },
   computed: {
-    // A situation is the moment something struck — the bolt this app used for
-    // Situationen before the nav went to a history icon.
-    captureIcon() { return mdiLightningBolt; },
     journalIcon() { return mdiBookOpenPageVariant; },
     beliefs() { return this.$store.getters.beliefs; },
     patterns() { return this.$store.getters.patterns; },
@@ -449,13 +438,17 @@ export default {
 }
 
 /* The two actions that always apply, so they get the top of the screen —
-   side by side, since picking which one happens in the wizard each opens,
-   not here. */
+   in one card, since which of the two it is, is the wizard's first question. */
 .capture-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 10px;
   margin: 4px 14px 0;
+}
+/* Alone in its row it reads better as a bar than as a tall tile. */
+.capture-card.capture-wide {
+  flex-direction: row;
+  align-items: center;
 }
 .capture-card {
   background: #141416;

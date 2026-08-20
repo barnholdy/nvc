@@ -299,17 +299,14 @@
       <v-btn flat color="grey" to="/now">
         <nav-icon name="now"></nav-icon>
       </v-btn>
-      <v-btn flat color="grey" to="/patterns">
-        <nav-icon name="patterns"></nav-icon>
+      <v-btn flat color="grey" to="/journal">
+        <nav-icon name="journal"></nav-icon>
       </v-btn>
       <v-btn flat color="primary" to="/beliefs">
         <nav-icon name="beliefs"></nav-icon>
       </v-btn>
       <v-btn flat color="grey" to="/actions">
         <nav-icon name="actions"></nav-icon>
-      </v-btn>
-      <v-btn flat color="grey" to="/journal">
-        <nav-icon name="journal"></nav-icon>
       </v-btn>
     </v-bottom-nav>
   </div>
@@ -414,7 +411,7 @@ export default {
     lastMentionMap() {
       const map = {};
       this.$store.getters.patterns.forEach((p) => {
-        (p.beliefs || []).forEach((id) => {
+        (p.beliefTimes || []).forEach((id) => {
           if (map[id] === undefined || p.time > map[id]) map[id] = p.time;
         });
       });
@@ -441,7 +438,7 @@ export default {
     patternCountMap() {
       const map = {};
       this.$store.getters.patterns.forEach((p) => {
-        (p.beliefs || []).forEach((id) => { map[id] = (map[id] || 0) + 1; });
+        (p.beliefTimes || []).forEach((id) => { map[id] = (map[id] || 0) + 1; });
       });
       return map;
     },

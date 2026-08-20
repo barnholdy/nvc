@@ -1,7 +1,7 @@
 <template>
   <div class="card">
     <div v-for="p in situations" :key="p.time" class="situation-row">
-      <p class="situation-text">{{ p.trigger }}</p>
+      <p class="situation-text">{{ p.fact }}</p>
     </div>
   </div>
 </template>

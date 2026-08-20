@@ -4,6 +4,23 @@
 // (`beliefs` + `beliefTruths`). Every reader goes through here, so entries
 // written before the change keep working without being rewritten on disk.
 
+// What an entry records. A Trigger is a moment that set a belief off — it
+// speaks for the belief. A Reflexion is a moment that spoke against it. Both
+// rate the beliefs they name, which is why they now live in one book.
+export const TRIGGER = 'trigger';
+export const REFLECTION = 'reflection';
+
+// Entries written before the two books were merged carry no type: the ones
+// that came from the Verlauf are stamped on migration, and anything left
+// without one is a Reflexion, which is all the Tagebuch used to hold.
+export function entryType(entry) {
+  return entry && entry.type === TRIGGER ? TRIGGER : REFLECTION;
+}
+
+export function isTrigger(entry) {
+  return entryType(entry) === TRIGGER;
+}
+
 function isRating(value) {
   return typeof value === 'number' && !isNaN(value);
 }

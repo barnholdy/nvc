@@ -10,7 +10,7 @@
 //                · every evaluated experiment (`experiment.affirmationTruth`),
 //                  which older data still carries — nothing writes it now
 
-import { journalTruthFor } from './journalBeliefs';
+import { journalTruthFor, isTrigger } from './journalBeliefs';
 
 export const SCALE_MAX = 10;
 
@@ -61,7 +61,10 @@ export function journalPoints(journal, belief) {
   if (!belief) return [];
   const points = [];
   list(journal).forEach((e) => {
-    const value = e ? journalTruthFor(e, belief.time) : null;
+    // Trigger entries are read as situations a few lines below; counting them
+    // here too would give every one of them two votes.
+    if (!e || isTrigger(e)) return;
+    const value = journalTruthFor(e, belief.time);
     if (value === null) return;
     points.push({
       time: e.time,
@@ -85,7 +88,7 @@ export function beliefPoints(patterns, belief, journal) {
       time: p.time,
       value: value,
       source: 'situation',
-      label: p.trigger || '',
+      label: p.fact || '',
       targetId: p.time,
     });
   });

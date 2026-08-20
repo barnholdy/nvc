@@ -295,17 +295,14 @@
       <v-btn flat color="grey" to="/now">
         <nav-icon name="now"></nav-icon>
       </v-btn>
-      <v-btn flat color="grey" to="/patterns">
-        <nav-icon name="patterns"></nav-icon>
+      <v-btn flat color="grey" to="/journal">
+        <nav-icon name="journal"></nav-icon>
       </v-btn>
       <v-btn flat color="grey" to="/beliefs">
         <nav-icon name="beliefs"></nav-icon>
       </v-btn>
       <v-btn flat color="primary" to="/actions">
         <nav-icon name="actions"></nav-icon>
-      </v-btn>
-      <v-btn flat color="grey" to="/journal">
-        <nav-icon name="journal"></nav-icon>
       </v-btn>
     </v-bottom-nav>
   </div>

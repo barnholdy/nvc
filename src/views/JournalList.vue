@@ -33,7 +33,7 @@
 
       <div v-if="!groups.length" class="list-empty">
         <p class="list-empty-title">Noch keine Einträge</p>
-        <p class="list-empty-sub">Täglich kleine Gegenbeispiele notieren.</p>
+        <p class="list-empty-sub">Halte fest, was dich getroffen hat — und was dagegen sprach.</p>
       </div>
 
       <template v-for="group in groups">
@@ -72,6 +72,16 @@
                     @touchmove="tsMove($event, entry.time)"
                     @touchend="tsEnd($event, entry.time)"
                   >
+                    <!-- Which of the two an entry is, said by its mark rather
+                         than by a word: a bolt for the moment a belief struck,
+                         a page for the moment it did not hold. -->
+                    <svg
+                      class="entry-icon"
+                      :class="`entry-icon-${typeOf(entry)}`"
+                      viewBox="0 0 24 24"
+                      width="17"
+                      height="17"
+                    ><path :d="typeIcon(entry)" fill="currentColor"></path></svg>
                     <p class="card-title">{{ entry.fact }}</p>
                   </div>
                 </div>
@@ -90,8 +100,9 @@
                      the affirmation gets the last word. -->
                 <p v-if="entry.note" class="journal-note">„{{ entry.note }}“</p>
 
-                <!-- The sentences this entry is evidence for. -->
-                <div v-if="affirmationsOf(entry)" class="aff-box">
+                <!-- The sentences this entry is evidence for. A Trigger is
+                     evidence the other way, so it gets no such box. -->
+                <div v-if="!isTriggerEntry(entry) && affirmationsOf(entry)" class="aff-box">
                   <p class="aff-label">{{ affirmationLabel(entry) }}</p>
                   <p class="aff-text">„{{ affirmationsOf(entry) }}“</p>
                 </div>
@@ -132,17 +143,14 @@
       <v-btn flat color="grey" to="/now">
         <nav-icon name="now"></nav-icon>
       </v-btn>
-      <v-btn flat color="grey" to="/patterns">
-        <nav-icon name="patterns"></nav-icon>
+      <v-btn flat color="primary" to="/journal">
+        <nav-icon name="journal"></nav-icon>
       </v-btn>
       <v-btn flat color="grey" to="/beliefs">
         <nav-icon name="beliefs"></nav-icon>
       </v-btn>
       <v-btn flat color="grey" to="/actions">
         <nav-icon name="actions"></nav-icon>
-      </v-btn>
-      <v-btn flat color="primary" to="/journal">
-        <nav-icon name="journal"></nav-icon>
       </v-btn>
     </v-bottom-nav>
   </div>
@@ -152,7 +160,10 @@
 import moment from 'moment';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 import { beliefCredibility, beliefStanding } from '@/utils/credibility';
-import { journalBeliefTimes, journalNames, journalTruthFor } from '@/utils/journalBeliefs';
+import {
+  journalBeliefTimes, journalNames, journalTruthFor, entryType, isTrigger,
+} from '@/utils/journalBeliefs';
+import { mdiLightningBolt, mdiBookOpenPageVariant } from '@mdi/js';
 import NavIcon from '@/components/NavIcon.vue';
 import BeliefChip from '@/components/BeliefChip.vue';
 import FeelingChips from '@/components/FeelingChips.vue';
@@ -237,6 +248,9 @@ export default {
       this.$nextTick(() => scrollRowIntoView(this.$el, id));
     },
     isSwiping(key) { return this.sw.openKey === key || this.sw.touchKey === key; },
+    typeOf(entry) { return entryType(entry); },
+    isTriggerEntry(entry) { return isTrigger(entry); },
+    typeIcon(entry) { return isTrigger(entry) ? mdiLightningBolt : mdiBookOpenPageVariant; },
     // Every belief this entry names: what it is called, what this one entry
     // rated it at, and where the belief itself stands.
     beliefsOf(entry) {
@@ -401,6 +415,14 @@ export default {
 /* The card is the handle, so it keeps its own fill and radius and only
    drops the side margin .card carries for a full-width list. */
 .journal-card { margin: 0; }
+/* Sits with the first line of the text rather than centred on the whole
+   block, so a wrapped sentence does not push it out of line. */
+.entry-icon {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.entry-icon-trigger { color: #fd9927; }
+.entry-icon-reflection { color: #4ade80; }
 /* .aff-box carries no top margin of its own — everywhere else it follows a
    detail row whose padding already holds it off. Here a paragraph sits above
    it, and a paragraph's bottom margin is zero. */

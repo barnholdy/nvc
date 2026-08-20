@@ -24,10 +24,10 @@
             <div class="card">
               <div class="ob-row">
                 <div class="ob-row-head">
-                  <nav-icon name="patterns" class="ob-row-icon"></nav-icon>
-                  <span class="ob-row-label">Verlauf</span>
+                  <nav-icon name="journal" class="ob-row-icon"></nav-icon>
+                  <span class="ob-row-label">Tagebuch</span>
                 </div>
-                <p class="ob-row-text">Erfasse Auslöser in Situationen deines Alltags.</p>
+                <p class="ob-row-text">Erfasse Trigger aus deinem Alltag — und Reflexionen, die dagegensprechen.</p>
               </div>
               <div class="ob-row">
                 <div class="ob-row-head">

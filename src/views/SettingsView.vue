@@ -155,7 +155,8 @@ export default {
         try { return JSON.parse(localStorage.getItem(key)); } catch (e) { return null; }
       }
       const data = {
-        patterns: this.$store.getters.patterns,
+        // No separate situations any more: they are Trigger entries in the
+        // journal, and writing them out twice would import them twice.
         beliefs: this.$store.getters.beliefs,
         journal: this.$store.getters.journal,
         amen: tryParse('nvc.amen') || {},
@@ -190,13 +191,21 @@ export default {
       reader.onload = (e) => {
         try {
           const data = JSON.parse(e.target.result);
-          if (!Array.isArray(data.patterns) || !Array.isArray(data.beliefs)) {
+          // A backup written before the two books were merged carries its
+          // situations separately; one written since carries only the
+          // journal. Either is enough, and a file with neither is not a
+          // backup of this app.
+          const hasPatterns = Array.isArray(data.patterns);
+          const hasJournal = Array.isArray(data.journal);
+          if (!Array.isArray(data.beliefs) || (!hasPatterns && !hasJournal)) {
             this.importError = 'Ungültiges Format.';
             return;
           }
-          localStorage.setItem('nvc.patterns', JSON.stringify(data.patterns));
+          localStorage.removeItem('nvc.patterns');
+          localStorage.removeItem('nvc.journal');
+          if (hasPatterns) localStorage.setItem('nvc.patterns', JSON.stringify(data.patterns));
           localStorage.setItem('nvc.beliefs', JSON.stringify(data.beliefs));
-          if (Array.isArray(data.journal)) localStorage.setItem('nvc.journal', JSON.stringify(data.journal));
+          if (hasJournal) localStorage.setItem('nvc.journal', JSON.stringify(data.journal));
           if (data.amen) localStorage.setItem('nvc.amen', JSON.stringify(data.amen));
           if (data.globalEmpathy) localStorage.setItem('nvc.globalEmpathy', JSON.stringify(data.globalEmpathy));
           if (data.affirmationStatus) localStorage.setItem('nvc.affirmationStatus', JSON.stringify(data.affirmationStatus));
@@ -229,7 +238,6 @@ export default {
     },
     resetData() {
       this.showResetDialog = false;
-      this.$store.commit('setPatterns', []);
       this.$store.commit('setBeliefs', []);
       this.$store.commit('setJournal', []);
       localStorage.removeItem('nvc.patterns');

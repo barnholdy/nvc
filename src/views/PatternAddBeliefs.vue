@@ -2,7 +2,7 @@
   <div>
     <!-- The situation this step is about, labelled the same way every other
          wizard step labels the text it carries forward. -->
-    <wizard-context label="Situation" :quote="trigger"></wizard-context>
+    <wizard-context label="Situation" :quote="fact"></wizard-context>
 
     <p class="wizard-question">Welche Überzeugungen stecken dahinter?</p>
     <p class="wizard-body">Welche tiefer liegenden Überzeugungen sind damit verbunden? Sie wird in der Regel beim Aussprechen eine Emotion auslösen. Schreibe in Ich-Form.</p>
@@ -127,7 +127,7 @@ export default {
     journal: { type: Array, default: function() { return []; } },
     selectedBeliefIds: { type: Array, default: function() { return []; } },
     initialTruths: { type: Object, default: function() { return {}; } },
-    trigger: { type: String, default: '' },
+    fact: { type: String, default: '' },
   },
   data() {
     return {

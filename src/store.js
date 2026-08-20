@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import { migrateFearScale, needsFearScaleMigration } from '@/utils/experiment';
+import { TRIGGER, REFLECTION, isTrigger } from '@/utils/journalBeliefs';
 
 Vue.use(Vuex);
 
@@ -26,37 +27,61 @@ function storageAvailable(type) {
   }
 }
 
+// Everything the old Verlauf carried, brought into the shape the Tagebuch
+// uses: a situation's text is what happened, and the beliefs it names are
+// named the same way an entry names them.
+function patternAsEntry(pattern) {
+  const entry = Object.assign({}, pattern, {
+    type: TRIGGER,
+    // Tolerates a situation that already speaks the journal's language, so
+    // running the move twice cannot empty it out.
+    fact: pattern.fact || pattern.trigger || '',
+    beliefTimes: Array.isArray(pattern.beliefTimes)
+      ? pattern.beliefTimes
+      : (Array.isArray(pattern.beliefs) ? pattern.beliefs : []),
+    beliefTruths: pattern.beliefTruths || {},
+  });
+  delete entry.trigger;
+  delete entry.beliefs;
+  return entry;
+}
+
+// The two books become one, once. Situations move over as Trigger entries,
+// everything already in the Tagebuch is a Reflexion, and the old key is
+// dropped so the move cannot happen twice.
+function mergedJournal(migratedPatterns) {
+  const journalJson = localStorage.getItem(JOURNAL_STORAGE_KEY);
+  const existing = journalJson ? JSON.parse(journalJson) : [];
+  const typed = existing.map(e => (e && e.type ? e : Object.assign({}, e, { type: REFLECTION })));
+
+  const known = {};
+  typed.forEach((e) => { known[e.time] = true; });
+  const moved = (migratedPatterns || [])
+    .filter(p => p && !known[p.time])
+    .map(patternAsEntry);
+
+  const all = typed.concat(moved).sort((a, b) => a.time - b.time);
+  if (moved.length || existing.some(e => e && !e.type)) {
+    localStorage.setItem(JOURNAL_STORAGE_KEY, JSON.stringify(all));
+  }
+  localStorage.removeItem(PATTERNS_STORAGE_KEY);
+  return all;
+}
+
 export default new Vuex.Store({
   state: {
-    patterns: [],
     beliefs: [],
     journal: [],
   },
   getters: {
-    patterns: state => state.patterns,
+    // The situations, read out of the one book they now live in. Everything
+    // that asks what a belief was rated at in the moment it struck reads
+    // these, and nothing else needs to know they are journal entries.
+    patterns: state => state.journal.filter(isTrigger),
     beliefs: state => state.beliefs,
     journal: state => state.journal,
   },
   mutations: {
-    setPatterns(state, entries) {
-      state.patterns = entries; // eslint-disable-line no-param-reassign
-    },
-    addPattern(state, entry) {
-      entry.time = +new Date(); // eslint-disable-line no-param-reassign
-      state.patterns.push(entry);
-    },
-    deletePattern(state, entry) {
-      const index = state.patterns.indexOf(entry);
-      if (index > -1) {
-        state.patterns.splice(index, 1);
-      }
-    },
-    updatePattern(state, updated) {
-      const index = state.patterns.findIndex(p => p.time === updated.time);
-      if (index > -1) {
-        state.patterns.splice(index, 1, updated);
-      }
-    },
     setBeliefs(state, beliefs) {
       state.beliefs = beliefs; // eslint-disable-line no-param-reassign
     },
@@ -113,14 +138,14 @@ export default new Vuex.Store({
     },
   },
   actions: {
+    // Named for what it used to load. It still runs every old situation
+    // through its migrations, but they end up in the journal now.
     loadPatterns({ commit }) {
       if (storageAvailable('localStorage')) {
         const legacyJson = localStorage.getItem('nvc.theWork');
         if (legacyJson) {
           localStorage.setItem(PATTERNS_STORAGE_KEY, legacyJson);
           localStorage.removeItem('nvc.theWork');
-          commit('setPatterns', JSON.parse(legacyJson));
-          return;
         }
         const json = localStorage.getItem(PATTERNS_STORAGE_KEY);
         if (json) {
@@ -184,34 +209,12 @@ export default new Vuex.Store({
           if (droppedName) {
             localStorage.setItem(PATTERNS_STORAGE_KEY, JSON.stringify(patterns));
           }
-          commit('setPatterns', patterns);
+          commit('setJournal', mergedJournal(patterns));
+        } else {
+          commit('setJournal', mergedJournal([]));
         }
       } else {
         throw new Error('Patterns were not loaded.');
-      }
-    },
-    savePattern({ commit, getters }, entry) {
-      commit('addPattern', entry);
-      if (storageAvailable('localStorage')) {
-        localStorage.setItem(PATTERNS_STORAGE_KEY, JSON.stringify(getters.patterns));
-      } else {
-        throw new Error('Pattern was not saved persistently.');
-      }
-    },
-    updatePattern({ commit, getters }, entry) {
-      commit('updatePattern', entry);
-      if (storageAvailable('localStorage')) {
-        localStorage.setItem(PATTERNS_STORAGE_KEY, JSON.stringify(getters.patterns));
-      } else {
-        throw new Error('Pattern was not updated persistently.');
-      }
-    },
-    deletePattern({ commit, getters }, entry) {
-      commit('deletePattern', entry);
-      if (storageAvailable('localStorage')) {
-        localStorage.setItem(PATTERNS_STORAGE_KEY, JSON.stringify(getters.patterns));
-      } else {
-        throw new Error('Pattern was not deleted persistently.');
       }
     },
     loadBeliefs({ commit }) {
@@ -335,12 +338,13 @@ export default new Vuex.Store({
         localStorage.setItem(BELIEFS_STORAGE_KEY, JSON.stringify(getters.beliefs));
       }
     },
+    // Reads the same one book. Situations left over from before the merge are
+    // folded in here too, so it does not matter which of the two loads runs
+    // first.
     loadJournal({ commit }) {
       if (storageAvailable('localStorage')) {
-        const json = localStorage.getItem(JOURNAL_STORAGE_KEY);
-        if (json) {
-          commit('setJournal', JSON.parse(json));
-        }
+        const patternsJson = localStorage.getItem(PATTERNS_STORAGE_KEY);
+        commit('setJournal', mergedJournal(patternsJson ? JSON.parse(patternsJson) : []));
       }
     },
     saveJournalEntry({ commit, getters }, entry) {

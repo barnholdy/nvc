@@ -5,21 +5,11 @@ Vue.use(Router);
 
 export default new Router({
   routes: [
-    {
-      path: '/patterns',
-      name: 'patterns',
-      component: () => import('./views/PatternList.vue'),
-    },
-    {
-      path: '/add-pattern',
-      name: 'add-pattern',
-      component: () => import('./views/PatternAdd.vue'),
-    },
-    {
-      path: '/edit-pattern/:time',
-      name: 'edit-pattern',
-      component: () => import('./views/PatternAdd.vue'),
-    },
+    // The Verlauf and the Tagebuch are one book now. Its old addresses still
+    // lead somewhere, so a link kept from before does not dead-end.
+    { path: '/patterns', redirect: '/journal' },
+    { path: '/add-pattern', redirect: '/add-journal' },
+    { path: '/edit-pattern/:time', redirect: to => `/edit-journal/${to.params.time}` },
     {
       path: '/beliefs',
       name: 'beliefs',

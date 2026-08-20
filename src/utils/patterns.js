@@ -3,5 +3,5 @@
 export function situationsForBelief(patterns, beliefTime) {
   if (typeof beliefTime !== 'number') return [];
   return (Array.isArray(patterns) ? patterns : [])
-    .filter(p => p && Array.isArray(p.beliefs) && p.beliefs.indexOf(beliefTime) !== -1);
+    .filter(p => p && Array.isArray(p.beliefTimes) && p.beliefTimes.indexOf(beliefTime) !== -1);
 }

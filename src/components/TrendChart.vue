@@ -36,8 +36,19 @@
             </div>
             <span class="bar-date">{{ shortDate(p.time) }}</span>
             <!-- Where the reading was taken; the same scale is filled in
-                 several different places. -->
-            <span class="bar-source">{{ sourceLabel(p.source) }}</span>
+                 several different places. A Trigger and a Reflexion both come
+                 from the Tagebuch, so each carries its own mark. -->
+            <span class="bar-source">
+              <svg
+                v-if="sourceIcon(p.source)"
+                class="bar-icon"
+                :class="`bar-icon-${p.source}`"
+                viewBox="0 0 24 24"
+                width="11"
+                height="11"
+              ><path :d="sourceIcon(p.source)" fill="currentColor"></path></svg>
+              {{ sourceLabel(p.source) }}
+            </span>
           </div>
         </div>
       </div>
@@ -53,19 +64,26 @@
 import moment from 'moment';
 import { TRUTH_SCALE_MAX } from '@/utils/beliefTrend';
 import { openQuery } from '@/utils/reveal';
+import { mdiLightningBolt, mdiBookOpenPageVariant } from '@mdi/js';
 
 // Which side a reading came from — the same 0-10 question is asked in several
 // different places, and a bar means something else depending on where.
 const SOURCES = {
-  situation: 'Situation',
+  situation: 'Trigger',
   wandeln: 'Wandeln',
   action: 'Handlung',
-  journal: 'Tagebuch',
+  journal: 'Reflexion',
+};
+
+// The two kinds of Tagebuch entry carry the same marks the list gives them.
+const SOURCE_ICONS = {
+  situation: mdiLightningBolt,
+  journal: mdiBookOpenPageVariant,
 };
 
 // The list each kind of reading can be followed back into.
 const ROUTES = {
-  situation: '/patterns',
+  situation: '/journal',
   wandeln: '/beliefs',
   action: '/actions',
   journal: '/journal',
@@ -100,6 +118,7 @@ export default {
       if (el) el.scrollLeft = el.scrollWidth;
     },
     sourceLabel(source) { return SOURCES[source] || ''; },
+    sourceIcon(source) { return SOURCE_ICONS[source] || null; },
     routeFor(point) {
       return point && ROUTES[point.source] ? ROUTES[point.source] : null;
     },
@@ -216,6 +235,9 @@ export default {
   white-space: nowrap;
 }
 .bar-source {
+  display: flex;
+  align-items: center;
+  gap: 2px;
   font-size: 0.58rem;
   color: #48484a;
   text-transform: uppercase;
@@ -223,6 +245,9 @@ export default {
   height: 12px;
   white-space: nowrap;
 }
+.bar-icon { flex-shrink: 0; }
+.bar-icon-situation { color: #fd9927; }
+.bar-icon-journal { color: #4ade80; }
 
 .trend-hint {
   font-size: 0.72rem;
