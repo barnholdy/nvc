@@ -19,15 +19,40 @@
         :tappable="b.time !== null"
         @open="openBelief(b)"
       ></belief-chip>
-      <!-- Every feeling any belief in the cluster carries, once each — the
-           cluster is the pattern, not any one sentence in it. -->
-      <feeling-chips
-        v-if="k.feelings.length"
-        :items="k.feelings"
-        type="feelings"
-        flat
-        class="group-feelings"
-      ></feeling-chips>
+      <!-- What the cluster is about underneath, and what it feels like on
+           either side of the work. All of it belongs to the cluster as a
+           whole rather than to any one sentence in it. -->
+      <div v-if="k.needs.length" class="group-block">
+        <p class="group-label">Bedürfnisse</p>
+        <feeling-chips :items="k.needs" type="needs" flat></feeling-chips>
+      </div>
+
+      <div v-if="k.oldFeelings.length || k.newFeelings.length" class="affect-row">
+        <!-- Marked the way the credibility bar marks the same two sides: red
+             for what still holds, green for what is taking its place. The
+             words keep their own colours — those say which feeling it is,
+             not which side it is on. -->
+        <div class="affect-col affect-col-old">
+          <p class="group-label">Reaktion</p>
+          <feeling-chips
+            v-if="k.oldFeelings.length"
+            :items="k.oldFeelings"
+            type="feelings"
+            flat
+          ></feeling-chips>
+          <p v-else class="affect-empty">–</p>
+        </div>
+        <div class="affect-col affect-col-new">
+          <p class="group-label">Neue Reaktion</p>
+          <feeling-chips
+            v-if="k.newFeelings.length"
+            :items="k.newFeelings"
+            type="feelings"
+            flat
+          ></feeling-chips>
+          <p v-else class="affect-empty">–</p>
+        </div>
+      </div>
     </div>
 
     <div class="card now-card" @click="generateKernmuster">
@@ -121,15 +146,20 @@ export default {
             time: belief ? belief.time : null,
           };
         });
+        const gather = pick => beliefs
+          .map(b => (b.resolved ? pick(b.resolved) : []))
+          .map(list => (Array.isArray(list) ? list : []))
+          .flat();
         return {
           title: k.title,
           beliefs,
-          // What it feels like when any belief in the cluster is true, all
-          // together — the cluster is the pattern, so its feelings belong to
-          // it as a whole rather than repeated under each sentence in it.
-          feelings: beliefs
-            .map(b => (b.resolved && Array.isArray(b.resolved.feelings) ? b.resolved.feelings : []))
-            .flat(),
+          // The cluster is the pattern, so what it needs and what it feels
+          // belong to it as a whole rather than repeated under each sentence.
+          needs: gather(b => b.needs),
+          // The two sides of the same question: what it feels like while the
+          // belief holds, and what stands there once it does not.
+          oldFeelings: gather(b => b.feelings),
+          newFeelings: gather(b => (b.reflection || {}).withoutBeliefFeelings),
         };
       });
     },
@@ -170,6 +200,9 @@ export default {
       // beside each group is gone, so there is nothing else to ask for.
       const prompt = 'Analysiere diese Glaubenssätze und gruppiere sie in 3–5 Kernmuster (Cluster).\n'
         + 'Jedes Cluster erhält einen prägnanten deutschen Namen und listet die dazugehörigen Glaubenssätze auf.\n'
+        + 'Benenne die Cluster neutral und beschreibend — nach dem Thema oder Lebensbereich, um den es geht '
+        + '(z. B. "Leistung und Anerkennung", "Nähe und Abgrenzung"). '
+        + 'Keine Defizit- oder Diagnosesprache, keine Wertung, kein Wort wie Angst, Mangel, Störung oder Problem im Namen.\n'
         + 'Gib jeden Glaubenssatz genau so zurück, wie er dasteht.\n\n'
         + `Glaubenssätze:\n${beliefTexts}\n\n`
         + 'Antworte ausschließlich mit einem JSON-Array (kein Markdown, kein Text davor oder danach):\n'
@@ -221,8 +254,42 @@ export default {
   color: #8e8e93;
   margin: 18px 20px 8px;
 }
-/* The feelings ride under their own belief's chip, not the next one's. */
-.group-feelings { margin-top: 8px; }
+/* What the cluster carries as a whole, held off from the beliefs above it. */
+.group-block { margin-top: 14px; }
+.group-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  color: #8e8e93;
+  margin: 0 0 6px;
+}
+/* Old on the left, new on the right, each behind the rule that says which
+   side it is — the same red and green the credibility bar uses. */
+.affect-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 14px;
+}
+.affect-col {
+  min-width: 0;
+  border-left: 3px solid;
+  padding-left: 10px;
+}
+.affect-col-old {
+  border-color: #c0483d;
+  .group-label { color: #c0483d; }
+}
+.affect-col-new {
+  border-color: #46955f;
+  .group-label { color: #46955f; }
+}
+.affect-empty {
+  font-size: 0.8125rem;
+  color: #48484a;
+  margin: 0;
+}
 
 .now-card {
   cursor: pointer;

@@ -1,10 +1,20 @@
 <template>
   <div>
     <div class="chart-row">
+      <!-- The scale is named rather than numbered, the way the credibility bar
+           names it: where the belief started and the last reading taken. The
+           labels stay put while the bars scroll past them. -->
       <div class="axis">
-        <span class="axis-label">10</span>
-        <span class="axis-label">5</span>
-        <span class="axis-label">0</span>
+        <span
+          v-if="row.baseline !== null"
+          class="axis-mark axis-mark-start"
+          :style="{ bottom: levelOf(row.baseline) }"
+        >Start</span>
+        <span
+          v-if="row.current !== null"
+          class="axis-mark axis-mark-now"
+          :style="{ bottom: levelOf(row.current) }"
+        >aktuell</span>
       </div>
       <div class="chart-scroll" ref="scroll">
         <div class="chart">
@@ -17,21 +27,26 @@
             :class="{ tappable: canOpen(p) }"
             @click="openPoint(p)"
           >
-            <span class="bar-value">{{ p.value }}</span>
             <div class="bar-track">
               <div class="bar-mid"></div>
+              <!-- Filled to what this reading said, in the colours the bar
+                   uses everywhere: red as far as the belief still stands,
+                   green for whatever reaches past it. -->
               <span
                 v-for="n in scale"
                 :key="n"
                 class="bar-seg"
-                :class="{ filled: n <= p.value }"
+                :class="segClass(n, p.value)"
               ></span>
-              <!-- Where the belief itself stands, held against every single
-                   reading — the same anchor its own card and chip show. -->
               <div
                 v-if="row.baseline !== null"
-                class="bar-baseline"
-                :style="{ bottom: baselinePct }"
+                class="bar-level bar-level-start"
+                :style="{ bottom: levelOf(row.baseline) }"
+              ></div>
+              <div
+                v-if="row.current !== null"
+                class="bar-level bar-level-now"
+                :style="{ bottom: levelOf(row.current) }"
               ></div>
             </div>
             <span class="bar-date">{{ shortDate(p.time) }}</span>
@@ -98,9 +113,6 @@ export default {
     scale() {
       return TRUTH_SCALE_MAX;
     },
-    baselinePct() {
-      return `${(Math.max(0, Math.min(TRUTH_SCALE_MAX, this.row.baseline)) / TRUTH_SCALE_MAX) * 100}%`;
-    },
   },
   watch: {
     // A different belief's trend, or a newly added reading — either way the
@@ -116,6 +128,18 @@ export default {
     scrollToEnd() {
       const el = this.$refs.scroll;
       if (el) el.scrollLeft = el.scrollWidth;
+    },
+    levelOf(value) {
+      const v = Math.max(0, Math.min(TRUTH_SCALE_MAX, value));
+      return `${(v / TRUTH_SCALE_MAX) * 100}%`;
+    },
+    // Only as far as this reading went, and split where the belief stands
+    // today — the same red-then-green the credibility bar draws.
+    segClass(n, value) {
+      if (n > value) return {};
+      const standing = this.row.standing;
+      if (standing === null || standing === undefined) return { held: true };
+      return n <= standing ? { held: true } : { freed: true };
     },
     sourceLabel(source) { return SOURCES[source] || ''; },
     sourceIcon(source) { return SOURCE_ICONS[source] || null; },
@@ -141,24 +165,28 @@ export default {
 <style scoped lang="scss">
 .chart-row {
   display: flex;
-  align-items: stretch;
+  align-items: flex-start;
   gap: 8px;
   margin-top: 16px;
 }
-// The axis is aligned to the track only, not to the value and date rows above
-// and below it, so the numbers sit where the bars actually start and end.
+/* Exactly as tall as a bar's track, so a label placed by its own value lines
+   up with the rule drawn at that value across every bar. */
 .axis {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 20px 0 20px;
+  position: relative;
+  width: 44px;
+  height: 165px;
   flex-shrink: 0;
 }
-.axis-label {
+.axis-mark {
+  position: absolute;
+  right: 0;
+  transform: translateY(50%);
   font-size: 0.62rem;
-  color: #636366;
-  line-height: 1;
+  font-weight: 600;
+  white-space: nowrap;
 }
+.axis-mark-start { color: #fd9927; }
+.axis-mark-now { color: #4ade80; }
 .chart-scroll {
   flex: 1;
   overflow-x: auto;
@@ -166,7 +194,7 @@ export default {
 }
 .chart {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 10px;
   min-width: min-content;
 }
@@ -181,14 +209,6 @@ export default {
     -webkit-tap-highlight-color: transparent;
     &:active { opacity: 0.6; }
   }
-}
-.bar-value {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: #6aaef7;
-  line-height: 1;
-  margin-bottom: 4px;
-  height: 16px;
 }
 .bar-track {
   position: relative;
@@ -205,7 +225,9 @@ export default {
   border-radius: 2px;
   background: #3a3a3c;
 }
-.bar-seg.filled { background: #6aaef7; }
+/* The same two colours the credibility bar is read in. */
+.bar-seg.held { background: #c0483d; }
+.bar-seg.freed { background: #46955f; }
 .bar-mid {
   position: absolute;
   left: 0;
@@ -214,19 +236,20 @@ export default {
   border-top: 1px dashed #48484a;
   z-index: 1;
 }
-/* Drawn over the segments and reaching past them, so it reads as a line held
-   against the scale rather than as one more block in it — the same marker
-   the belief chip draws across its own row. */
-.bar-baseline {
+/* Drawn over the segments and reaching past them, so they read as levels held
+   against every bar rather than as part of any one of them. */
+.bar-level {
   position: absolute;
   left: -2px;
   right: -2px;
   height: 2px;
   margin-bottom: -1px;
   border-radius: 1px;
-  background: #fd9927;
   z-index: 2;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
 }
+.bar-level-start { background: #fd9927; }
+.bar-level-now { background: #4ade80; }
 .bar-date {
   font-size: 0.62rem;
   color: #636366;

@@ -113,12 +113,14 @@
         </div>
       </template>
 
-      <profile-stats></profile-stats>
-
-      <!-- Last: what the beliefs have in common, and the same material read
-           back to you. Both are a look around, not a next step. -->
+      <!-- What the beliefs have in common, and the same material read back to
+           you. Both are a look around, not a next step. -->
       <pattern-groups></pattern-groups>
       <empathy-block></empathy-block>
+
+      <!-- Last of all: the tally across everything. It answers "what am I
+           like", which is the least urgent question on this screen. -->
+      <profile-stats></profile-stats>
 
       <div class="list-bottom-space"></div>
     </v-content>
@@ -159,7 +161,7 @@ import {
   experimentState,
 } from '@/utils/experiment';
 import {
-  beliefCredibility, beliefRows, baselineOf,
+  beliefCredibility, beliefRows, baselineOf, standingOf,
 } from '@/utils/credibility';
 import { mdiBookOpenPageVariant } from '@mdi/js';
 import NavIcon from '@/components/NavIcon.vue';
@@ -253,7 +255,11 @@ export default {
         .filter(r => r.hasTrend)
         .map(r => Object.assign({}, r, {
           short: shorten(r.text),
+          // The same three readings the credibility bar is read in: where it
+          // started, where it stands, and the last reading taken.
           baseline: baselineOf(r.points),
+          standing: standingOf(r.points),
+          current: r.points.length ? r.points[r.points.length - 1].value : null,
         }));
     },
     // The chosen chip, or the first one — a chip that vanished (a rating
