@@ -14,12 +14,12 @@
       :class="{ selected: b.time === selected }"
       @click="pick(b.time)"
     >
-      <p class="card-title">„{{ b.belief }}“</p>
-      <credibility-meter :standing="credibility(b)" :baseline="baselineOf(b)"></credibility-meter>
-      <!-- The sentence the action is meant to act from, the way the journal's
-           own picker shows it. Guarded: a belief can reach "gewandelt" by
+      <p class="quote-belief">„{{ b.belief }}“</p>
+      <!-- The sentence the action is meant to act from, read straight under
+           the belief it replaces. Guarded: a belief can reach "gewandelt" by
            having been acted on, without an affirmation ever being written. -->
-      <p v-if="affirmationOf(b)" class="pick-belief-aff">„{{ affirmationOf(b) }}“</p>
+      <p v-if="affirmationOf(b)" class="quote-affirmation">„{{ affirmationOf(b) }}“</p>
+      <credibility-meter :standing="credibility(b)" :baseline="baselineOf(b)" compact></credibility-meter>
     </div>
 
     <!-- Says why the list is as short as it is. -->
@@ -72,13 +72,6 @@ export default {
   &:active { opacity: 0.7; }
   &.selected {
     border-color: #4ade80;
-    .card-title { color: #4ade80; }
   }
-}
-.pick-belief-aff {
-  font-size: 0.88rem;
-  color: #8e8e93;
-  margin: 10px 0 0;
-  line-height: 1.4;
 }
 </style>

@@ -1110,6 +1110,29 @@ html { overflow-x: hidden; }
    card that is meant to be true rather than merely recorded. */
 /* Butted straight against the line above it: the affirmation is the end of
    that list, not a separate card floating under it. */
+/* A belief and the sentence meant to replace it, read as a pair: each marked
+   down its left in the colour the credibility bar gives it — red for what is
+   still held, green for what is being grown into. Compact on purpose; only
+   the Überzeugungen list, where the belief is the subject, spells it out. */
+.quote-belief,
+.quote-affirmation {
+  border-left: 3px solid;
+  padding-left: 10px;
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.quote-belief {
+  border-color: #c0483d;
+  color: #ebebf5;
+}
+.quote-affirmation {
+  border-color: #46955f;
+  color: #8e8e93;
+  margin-top: 6px;
+}
+
 .aff-box {
   border-left: 3px solid #4ade80;
   background: #1c1c1e;

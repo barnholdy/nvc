@@ -13,6 +13,7 @@
         v-for="(b, j) in k.beliefs"
         :key="j"
         :text="b.text"
+        :affirmation="b.affirmation"
         :standing="b.standing"
         :baseline="b.credibility"
         :tappable="b.time !== null"
@@ -109,6 +110,11 @@ export default {
             // rounding and the German comma itself.
             credibility: c,
             standing: belief ? beliefStanding(patterns, belief, journal) : null,
+            // The sentence meant to take its place, where the belief has got
+            // one — read directly under it, in the bar's own green.
+            affirmation: belief
+              ? (belief.affirmations || []).map(a => a && a.text).filter(Boolean).join(' · ')
+              : '',
             resolved: belief,
             // Only set when the text still matches something stored — that is
             // what makes the chip a link rather than just a label.

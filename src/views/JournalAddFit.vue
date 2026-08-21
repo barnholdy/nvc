@@ -12,10 +12,10 @@
     <div v-for="b in selectedBeliefs" :key="b.time">
       <div class="card belief-head-card">
         <div class="belief-head-main">
-          <p class="card-title">„{{ b.belief }}“</p>
+          <p class="quote-belief">„{{ b.belief }}“</p>
           <!-- The sentence this entry is evidence for, kept in view while the
                belief it replaces is being rated. -->
-          <p v-if="affirmationOf(b)" class="pick-belief-aff">„{{ affirmationOf(b) }}“</p>
+          <p v-if="affirmationOf(b)" class="quote-affirmation">„{{ affirmationOf(b) }}“</p>
         </div>
         <button class="belief-remove" @click="remove(b.time)">
           <v-icon small color="#ff453a">close</v-icon>
@@ -38,9 +38,9 @@
         class="card pick-belief"
         @click="add(b.time)"
       >
-        <p class="card-title">„{{ b.belief }}“</p>
-        <credibility-meter :standing="standingOf(b)" :baseline="baselineOf(b)"></credibility-meter>
-        <p v-if="affirmationOf(b)" class="pick-belief-aff">„{{ affirmationOf(b) }}“</p>
+        <p class="quote-belief">„{{ b.belief }}“</p>
+        <p v-if="affirmationOf(b)" class="quote-affirmation">„{{ affirmationOf(b) }}“</p>
+        <credibility-meter :standing="standingOf(b)" :baseline="baselineOf(b)" compact></credibility-meter>
       </div>
     </template>
 
@@ -176,11 +176,5 @@ export default {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.7; }
-}
-.pick-belief-aff {
-  font-size: 0.88rem;
-  color: #8e8e93;
-  margin: 10px 0 0;
-  line-height: 1.4;
 }
 </style>

@@ -56,7 +56,7 @@
       <p class="wizard-question">Wie glaubwürdig sind sie gerade?</p>
       <div v-for="b in selectedBeliefObjects" :key="b.time">
         <div class="card belief-head-card">
-          <p class="card-title">„{{ b.belief }}“</p>
+          <p class="quote-belief">„{{ b.belief }}“</p>
           <button class="belief-remove" @click="removeSelected(b.time)">
             <v-icon small color="#ff453a">close</v-icon>
           </button>
@@ -79,8 +79,8 @@
         class="card available-card"
         @click="addBelief(b.time)"
       >
-        <p class="card-title available-title">„{{ b.belief }}“</p>
-        <credibility-meter :standing="credibilityOf(b)" :baseline="baselineOf(b)"></credibility-meter>
+        <p class="quote-belief">„{{ b.belief }}“</p>
+        <credibility-meter :standing="credibilityOf(b)" :baseline="baselineOf(b)" compact></credibility-meter>
       </div>
     </template>
   </div>
@@ -288,7 +288,6 @@ export default {
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
 }
-.available-title { color: #ebebf5; }
 
 /* Full-width cards rather than chips: a suggestion is a whole sentence. */
 .suggestion-card {

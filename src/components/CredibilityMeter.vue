@@ -1,5 +1,5 @@
 <template>
-  <div v-if="hasMeter" class="cred-meter">
+  <div v-if="hasMeter" class="cred-meter" :class="{ compact: compact }">
     <div class="meter-track">
       <span
         v-for="n in max"
@@ -72,6 +72,10 @@ export default {
     // as opposed to a median over several. Null where the row is about the
     // belief itself rather than about one reading of it.
     current: { type: Number, default: null },
+    // Thinner blocks and smaller labels, for the rows that carry a belief
+    // among other things rather than being about it. The Überzeugungen list
+    // keeps the full size — there the bar is the subject.
+    compact: { type: Boolean, default: false },
   },
   computed: {
     max() { return SCALE_MAX; },
@@ -172,4 +176,15 @@ export default {
 }
 .meter-label-start { color: #fd9927; }
 .meter-label-now { color: #4ade80; }
+
+/* Same reading, less room: the blocks thin out and the words shrink with
+   them, so the bar sits inside a row instead of dominating it. */
+.cred-meter.compact {
+  margin-top: 8px;
+  .meter-seg { height: 6px; }
+  .meter-track { gap: 2px; }
+  .meter-mark { top: -2px; bottom: -2px; }
+  .meter-labels { height: 13px; margin-top: 3px; }
+  .meter-label { font-size: 0.62rem; }
+}
 </style>

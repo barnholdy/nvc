@@ -114,19 +114,14 @@
                      the affirmation gets the last word. -->
                 <p v-if="!collapsed && entry.note" class="journal-note">„{{ entry.note }}“</p>
 
-                <!-- The sentences this entry is evidence for. A Trigger is
-                     evidence the other way, so it gets no such box. -->
-                <div v-if="!isTriggerEntry(entry) && affirmationsOf(entry)" class="aff-box">
-                  <p class="aff-label">{{ affirmationLabel(entry) }}</p>
-                  <p class="aff-text">„{{ affirmationsOf(entry) }}“</p>
-                </div>
-
                 <!-- Every belief this entry was written against, each with
-                     what this one entry rated it at. -->
+                     the sentence meant to replace it and what this one entry
+                     rated it at. -->
                 <belief-chip
                   v-for="b in beliefsOf(entry)"
                   :key="b.time"
                   :text="b.text"
+                  :affirmation="b.affirmation"
                   :current="b.current"
                   :standing="b.standing"
                   :baseline="b.baseline"
@@ -183,6 +178,11 @@ import BeliefChip from '@/components/BeliefChip.vue';
 import FeelingChips from '@/components/FeelingChips.vue';
 
 const COLLAPSED_KEY = 'nvc.journalCollapsed';
+
+// A belief can carry more than one sentence to grow into; they read as one.
+function affirmationTextOf(belief) {
+  return (belief.affirmations || []).map(a => a && a.text).filter(Boolean).join(' · ');
+}
 
 export default {
   name: 'journal-list',
@@ -267,7 +267,6 @@ export default {
     },
     isSwiping(key) { return this.sw.openKey === key || this.sw.touchKey === key; },
     typeOf(entry) { return entryType(entry); },
-    isTriggerEntry(entry) { return isTrigger(entry); },
     typeIcon(entry) { return isTrigger(entry) ? mdiLightningBolt : mdiBookOpenPageVariant; },
     // Every belief this entry names: what it is called, what this one entry
     // rated it at, and where the belief itself stands.
@@ -280,32 +279,15 @@ export default {
         return {
           time: time,
           text: belief ? belief.belief : 'Gelöschte Überzeugung',
+          // A Trigger speaks for the belief, so the sentence meant to replace
+          // it has no business being quoted underneath.
+          affirmation: belief && !isTrigger(entry) ? affirmationTextOf(belief) : '',
           exists: !!belief,
           current: journalTruthFor(entry, time),
           standing: belief ? beliefStanding(patterns, belief, journal) : null,
           baseline: belief ? beliefCredibility(patterns, belief, journal) : null,
         };
       });
-    },
-    // The affirmations of everything this entry speaks for, each named once —
-    // two beliefs can have been given the same sentence to grow into.
-    affirmationTextsOf(entry) {
-      const beliefs = this.$store.getters.beliefs;
-      const seen = [];
-      journalBeliefTimes(entry).forEach((time) => {
-        const belief = beliefs.find(b => b.time === time);
-        if (!belief) return;
-        (belief.affirmations || []).forEach((a) => {
-          if (a && a.text && seen.indexOf(a.text) === -1) seen.push(a.text);
-        });
-      });
-      return seen;
-    },
-    affirmationsOf(entry) {
-      return this.affirmationTextsOf(entry).join(' · ');
-    },
-    affirmationLabel(entry) {
-      return this.affirmationTextsOf(entry).length > 1 ? 'Affirmationen' : 'Affirmation';
     },
     feelingsOf(entry) {
       return Array.isArray(entry.feelings) ? entry.feelings : [];
@@ -443,10 +425,6 @@ export default {
    for the belief, a Reflexion evidence against it. */
 .entry-icon-trigger { color: #c0483d; }
 .entry-icon-reflection { color: #46955f; }
-/* .aff-box carries no top margin of its own — everywhere else it follows a
-   detail row whose padding already holds it off. Here a paragraph sits above
-   it, and a paragraph's bottom margin is zero. */
-.aff-box { margin-top: 14px; }
 .journal-meaning {
   font-size: 0.92rem;
   color: #8e8e93;

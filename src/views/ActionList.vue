@@ -176,15 +176,12 @@
                     <v-icon v-if="!isOpen(row, 'learning')" class="detail-chevron">chevron_right</v-icon>
                   </div>
 
-                  <div v-if="affirmationOf(row)" class="aff-box" :class="{ 'aff-box-loose': compact }">
-                    <p class="aff-label">Affirmation</p>
-                    <p class="aff-text">„{{ affirmationOf(row) }}“</p>
-                  </div>
-
-                  <!-- The belief under test, kept at the foot of the card: the run is
-                       the subject here, the belief is what it is aimed at. -->
+                  <!-- The belief under test with the sentence meant to replace
+                       it, kept at the foot of the card: the run is the subject
+                       here, the belief is what it is aimed at. -->
                   <belief-chip
                     :text="row.beliefText"
+                    :affirmation="affirmationOf(row)"
                     :current="rowTruth(row)"
                     :standing="beliefStandingOf(row)"
                     :baseline="beliefTruth(row)"
