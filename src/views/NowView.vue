@@ -161,7 +161,7 @@ import {
   experimentState,
 } from '@/utils/experiment';
 import {
-  beliefCredibility, beliefRows, baselineOf, standingOf,
+  beliefCredibility, beliefRows, baselineOf,
 } from '@/utils/credibility';
 import { mdiBookOpenPageVariant } from '@mdi/js';
 import NavIcon from '@/components/NavIcon.vue';
@@ -255,11 +255,9 @@ export default {
         .filter(r => r.hasTrend)
         .map(r => Object.assign({}, r, {
           short: shorten(r.text),
-          // The same three readings the credibility bar is read in: where it
-          // started, where it stands, and the last reading taken.
+          // The frozen anchor the whole row is held against; where it stood
+          // at each single reading is worked out per bar by the chart.
           baseline: baselineOf(r.points),
-          standing: standingOf(r.points),
-          current: r.points.length ? r.points[r.points.length - 1].value : null,
         }));
     },
     // The chosen chip, or the first one — a chip that vanished (a rating

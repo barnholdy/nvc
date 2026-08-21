@@ -12,24 +12,8 @@
           </div>
         </div>
 
-        <!-- Which belief is being worked on, the same way the Verlauf list
-             narrows to one. Only worth offering once more than one has an
-             entry. -->
-        <div v-if="filterBeliefs.length > 1" class="pill-row">
-          <button
-            class="pill"
-            :class="{ active: beliefFilter === null }"
-            @click="beliefFilter = null"
-          >Alle</button>
-          <button
-            v-for="b in filterBeliefs"
-            :key="b.time"
-            class="pill"
-            :class="{ active: beliefFilter === b.time }"
-            @click="beliefFilter = b.time"
-          >„{{ b.belief }}“<span class="pill-count"> · {{ b.count }}</span></button>
-        </div>
-
+        <!-- How much of an entry to show, and which belief to narrow to —
+             one row, since both say what the list below is showing. -->
         <div class="pill-row">
           <!-- Collapsed strips an entry back to what it is about: the moment,
                the sentence it speaks for, and the belief it speaks to. The
@@ -42,6 +26,21 @@
           >
             <v-icon small>{{ collapsed ? 'unfold_more' : 'unfold_less' }}</v-icon>
           </button>
+          <!-- Only worth offering once more than one belief has an entry. -->
+          <template v-if="filterBeliefs.length > 1">
+            <button
+              class="pill"
+              :class="{ active: beliefFilter === null }"
+              @click="beliefFilter = null"
+            >Alle</button>
+            <button
+              v-for="b in filterBeliefs"
+              :key="b.time"
+              class="pill"
+              :class="{ active: beliefFilter === b.time }"
+              @click="beliefFilter = b.time"
+            >„{{ b.belief }}“<span class="pill-count"> · {{ b.count }}</span></button>
+          </template>
         </div>
       </div>
 
@@ -118,7 +117,7 @@
                      the sentence meant to replace it and what this one entry
                      rated it at. -->
                 <belief-chip
-                  v-for="b in beliefsOf(entry)"
+                  v-for="b in shownBeliefsOf(entry)"
                   :key="b.time"
                   :text="b.text"
                   :affirmation="b.affirmation"
@@ -288,6 +287,14 @@ export default {
           baseline: belief ? beliefCredibility(patterns, belief, journal) : null,
         };
       });
+    },
+    // Once the list is narrowed to one belief, that is the only one an entry
+    // is being read for here — the others would just repeat what their own
+    // cards already say.
+    shownBeliefsOf(entry) {
+      const list = this.beliefsOf(entry);
+      if (this.beliefFilter === null) return list;
+      return list.filter(b => b.time === this.beliefFilter);
     },
     feelingsOf(entry) {
       return Array.isArray(entry.feelings) ? entry.feelings : [];

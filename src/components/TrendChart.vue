@@ -2,19 +2,14 @@
   <div>
     <div class="chart-row">
       <!-- The scale is named rather than numbered, the way the credibility bar
-           names it: where the belief started and the last reading taken. The
-           labels stay put while the bars scroll past them. -->
+           names it. Only the anchor sits at one fixed height and so belongs
+           here; what each reading said is marked on its own bar. -->
       <div class="axis">
         <span
           v-if="row.baseline !== null"
           class="axis-mark axis-mark-start"
           :style="{ bottom: levelOf(row.baseline) }"
         >Start</span>
-        <span
-          v-if="row.current !== null"
-          class="axis-mark axis-mark-now"
-          :style="{ bottom: levelOf(row.current) }"
-        >aktuell</span>
       </div>
       <div class="chart-scroll" ref="scroll">
         <div class="chart">
@@ -29,24 +24,25 @@
           >
             <div class="bar-track">
               <div class="bar-mid"></div>
-              <!-- Filled to what this reading said, in the colours the bar
-                   uses everywhere: red as far as the belief still stands,
-                   green for whatever reaches past it. -->
+              <!-- Each bar is the credibility bar stood on its end, read as
+                   of this moment: red as far as the belief stood then, green
+                   above it. "Then" is the median of this reading and the two
+                   before it, so the turn walks along with the bars. -->
               <span
                 v-for="n in scale"
                 :key="n"
                 class="bar-seg"
-                :class="segClass(n, p.value)"
+                :class="segClass(n, i)"
               ></span>
               <div
                 v-if="row.baseline !== null"
                 class="bar-level bar-level-start"
                 :style="{ bottom: levelOf(row.baseline) }"
               ></div>
+              <!-- What this one reading actually said. -->
               <div
-                v-if="row.current !== null"
                 class="bar-level bar-level-now"
-                :style="{ bottom: levelOf(row.current) }"
+                :style="{ bottom: levelOf(p.value) }"
               ></div>
             </div>
             <span class="bar-date">{{ shortDate(p.time) }}</span>
@@ -78,6 +74,7 @@
 <script>
 import moment from 'moment';
 import { TRUTH_SCALE_MAX } from '@/utils/beliefTrend';
+import { standingOf } from '@/utils/credibility';
 import { openQuery } from '@/utils/reveal';
 import { mdiLightningBolt, mdiBookOpenPageVariant } from '@mdi/js';
 
@@ -113,6 +110,13 @@ export default {
     scale() {
       return TRUTH_SCALE_MAX;
     },
+    // Where the belief stood at each reading in turn, rather than one number
+    // for the whole row: the median of that reading and the two before it,
+    // walked from left to right.
+    runningStanding() {
+      const points = this.row.points || [];
+      return points.map((p, i) => standingOf(points.slice(0, i + 1)));
+    },
   },
   watch: {
     // A different belief's trend, or a newly added reading — either way the
@@ -133,12 +137,11 @@ export default {
       const v = Math.max(0, Math.min(TRUTH_SCALE_MAX, value));
       return `${(v / TRUTH_SCALE_MAX) * 100}%`;
     },
-    // Only as far as this reading went, and split where the belief stands
-    // today — the same red-then-green the credibility bar draws.
-    segClass(n, value) {
-      if (n > value) return {};
-      const standing = this.row.standing;
-      if (standing === null || standing === undefined) return { held: true };
+    // The whole scale is coloured, the way the credibility bar colours it, so
+    // the turn stays visible however low the reading itself was.
+    segClass(n, i) {
+      const standing = this.runningStanding[i];
+      if (standing === null || standing === undefined) return {};
       return n <= standing ? { held: true } : { freed: true };
     },
     sourceLabel(source) { return SOURCES[source] || ''; },
@@ -186,7 +189,6 @@ export default {
   white-space: nowrap;
 }
 .axis-mark-start { color: #fd9927; }
-.axis-mark-now { color: #4ade80; }
 .chart-scroll {
   flex: 1;
   overflow-x: auto;
