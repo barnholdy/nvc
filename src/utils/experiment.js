@@ -3,23 +3,21 @@
 // happened, so `fearExpected` is locked once the experiment is planned.
 
 
-// The lifecycle keeps four internal states, but only three are ever shown —
-// they line up one-to-one with the tabs in the Handlungen list.
-export const EXPERIMENT_DISPLAY_STATES = ['open', 'planned', 'done'];
+// A run is planned from the moment it is saved, so only two states are ever
+// shown — they line up one-to-one with the tabs in the Handlungen list.
+export const EXPERIMENT_DISPLAY_STATES = ['planned', 'done'];
 
 export function isExperimentDisplayState(value) {
   return EXPERIMENT_DISPLAY_STATES.indexOf(value) !== -1;
 }
 
 export const EXPERIMENT_DISPLAY_LABELS = {
-  open: 'Neu',
   planned: 'Geplant',
   done: 'Ausgewertet',
 };
 
 // Same grey / orange / green convention as the affirmation statuses.
 export const EXPERIMENT_DISPLAY_COLORS = {
-  open: '#636366',
   planned: '#fd9927',
   done: '#4ade80',
 };
@@ -92,16 +90,11 @@ export function experimentState(x) {
   return 'draft';
 }
 
-// "Offen" is an experiment still missing its anchor, "Geplant" one that is ready
-// but not yet evaluated, "Ausgewertet" one with a result.
-// `done` (carried out, no result) only exists in data written before evaluating
-// moved directly onto the Geplant row — it belongs with the ones still to
-// evaluate, not with the finished ones.
+// "Geplant" is a run still waiting to be evaluated, "Ausgewertet" one with a
+// result. Anything without a result is waiting — including the drafts written
+// before the wizard required an anchor, which have nowhere else to go.
 export function experimentDisplayState(x) {
-  const s = experimentState(x);
-  if (s === 'evaluated') return 'done';
-  if (s === 'planned' || s === 'done') return 'planned';
-  return 'open';
+  return experimentState(x) === 'evaluated' ? 'done' : 'planned';
 }
 
 export function experimentStateLabel(x) {

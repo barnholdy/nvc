@@ -37,7 +37,7 @@
     </v-content>
 
     <wizard-footer
-      :disabled="step < totalSteps && !isStepComplete"
+      :disabled="!isStepComplete"
       :nextLabel="step < totalSteps ? 'Weiter' : 'Speichern'"
       @back="back"
       @next="step < totalSteps ? nextStep() : save()"
@@ -151,7 +151,10 @@ export default {
     fearStep() { return this.needsBelief ? 3 : 2; },
     isStepComplete() {
       if (this.needsBelief && this.step === 1) return this.beliefTime !== null;
-      return this.experiment.situation.trim() !== '';
+      if (this.step === this.situationStep) return this.experiment.situation.trim() !== '';
+      // The last step is what makes it a plan: without the fear and its
+      // anchor there is nothing for the result to be measured against.
+      return isPlanned(this.experiment);
     },
   },
   methods: {
@@ -178,7 +181,9 @@ export default {
       const r = (this.entry && this.entry.reflection) || {};
       const list = (r.experiments || []).slice();
       const current = Object.assign({}, this.experiment);
-      if (!current.plannedAt && isPlanned(current)) current.plannedAt = Date.now();
+      // Saved means planned: the wizard does not let go of a run until it has
+      // both a situation and an anchor.
+      if (!current.plannedAt) current.plannedAt = Date.now();
       if (!current.situation && !current.fear) {
         return list.filter(function(x) { return x.id !== current.id; });
       }

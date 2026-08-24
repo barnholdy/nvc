@@ -10,7 +10,7 @@
         <journal-add-type
           v-show="step === 1"
           :initialValue="type"
-          @changed="type = $event">
+          @changed="onTypeChanged">
         </journal-add-type>
 
         <journal-add-fact
@@ -101,7 +101,7 @@ import WizardHeader from '@/components/WizardHeader.vue';
 import WizardFooter from '@/components/WizardFooter.vue';
 import { MAX_FEELINGS } from '@/utils/emotions';
 import {
-  TRIGGER, REFLECTION, entryType, journalBeliefTimes, journalBeliefTruths,
+  TRIGGER, REFLECTION, ACTION, entryType, journalBeliefTimes, journalBeliefTruths,
 } from '@/utils/journalBeliefs';
 
 // A Trigger is done after naming what happened and what it set off; a
@@ -193,6 +193,15 @@ export default {
     },
   },
   methods: {
+    // A Handlung is planned rather than recorded, so it hands straight over to
+    // the wizard that plans one instead of carrying on here.
+    onTypeChanged(value) {
+      if (value === ACTION) {
+        this.$router.push('/add-action');
+        return;
+      }
+      this.type = value;
+    },
     nextStep() {
       this.step += 1;
       this.$vuetify.goTo(0, { duration: 0 });

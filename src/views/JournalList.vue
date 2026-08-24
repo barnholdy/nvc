@@ -85,18 +85,25 @@
                 <!-- Only the head answers the swipe; the rest of the card
                      stays put, the way the belief and action cards work. -->
                 <div class="head-swipe">
-                  <!-- A run belongs to the Handlungen list, which is where it
-                       is edited and deleted; here it only offers the way
-                       across to it. -->
+                  <!-- A run can be planned again or evaluated from here, just
+                       as in its own list; whichever the card already offers is
+                       left out. -->
                   <div v-if="isSwiping(entry.time)" class="swipe-panel left">
-                    <div v-if="isAction(entry)" class="swipe-group single swipe-btn-edit">
-                      <button class="swipe-btn swipe-btn-edit" @click.stop="openAction(entry)">Öffnen</button>
-                    </div>
-                    <div v-else class="swipe-group single swipe-btn-edit">
-                      <button class="swipe-btn swipe-btn-edit" @click.stop="editEntry(entry)">Bearbeiten</button>
+                    <div
+                      class="swipe-group"
+                      :class="{ single: swipeSteps(entry).length === 1 }"
+                      :style="groupStyle(swipeSteps(entry))"
+                    >
+                      <button
+                        v-for="step in swipeSteps(entry)"
+                        :key="step.key"
+                        class="swipe-btn"
+                        :style="{ color: step.color }"
+                        @click.stop="step.run(entry)"
+                      >{{ step.label }}</button>
                     </div>
                   </div>
-                  <div v-if="isSwiping(entry.time) && !isAction(entry)" class="swipe-panel right">
+                  <div v-if="isSwiping(entry.time)" class="swipe-panel right">
                     <div class="swipe-group single swipe-btn-delete">
                       <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">Löschen</button>
                     </div>
@@ -120,8 +127,16 @@
                       height="17"
                     ><path :d="typeIcon(entry)" fill="currentColor"></path></svg>
                     <p class="card-title">{{ entry.fact }}</p>
+                    <button
+                      v-if="isAction(entry) && entry.state === 'planned'"
+                      class="card-btn"
+                      @click.stop="startResult(entry)"
+                    >Auswerten</button>
                   </div>
                 </div>
+
+                <!-- Where the run stands, the same badge its own list shows. -->
+                <span v-if="isAction(entry)" class="card-pill">{{ entry.stateLabel }}</span>
 
                 <feeling-chips
                   v-if="!collapsed && feelingsOf(entry).length"
@@ -139,11 +154,29 @@
                   </div>
                 </template>
 
-                <p v-if="!collapsed && entry.meaning" class="journal-meaning">{{ entry.meaning }}</p>
+                <template v-if="isAction(entry)">
+                  <div v-if="!collapsed && (entry.fear || entry.outcome || entry.meaning)" class="card-sep"></div>
 
-                <!-- The objection first, then the sentence it is aimed at:
-                     the affirmation gets the last word. -->
-                <p v-if="!collapsed && entry.note" class="journal-note">„{{ entry.note }}“</p>
+                  <div
+                    v-for="d in actionDetails(entry)"
+                    :key="d.key"
+                    class="detail-row"
+                    :class="{ open: isOpen(entry, d.key) }"
+                    @click.stop="toggleRow(entry, d.key)"
+                  >
+                    <span class="detail-label">{{ d.label }}</span>
+                    <p class="detail-value" :class="{ open: isOpen(entry, d.key) }">{{ d.value }}</p>
+                    <v-icon v-if="!isOpen(entry, d.key)" class="detail-chevron">chevron_right</v-icon>
+                  </div>
+                </template>
+
+                <template v-else>
+                  <p v-if="!collapsed && entry.meaning" class="journal-meaning">{{ entry.meaning }}</p>
+
+                  <!-- The objection first, then the sentence it is aimed at:
+                       the affirmation gets the last word. -->
+                  <p v-if="!collapsed && entry.note" class="journal-note">„{{ entry.note }}“</p>
+                </template>
 
                 <!-- Every belief this entry was written against, each with
                      the sentence meant to replace it and what this one entry
@@ -164,6 +197,12 @@
           </div>
         </div>
       </template>
+
+      <!-- Evaluating is the same four questions as in the Handlungen list. -->
+      <action-result-dialog
+        :row="resultRow"
+        @close="resultRow = null"
+      ></action-result-dialog>
 
       <div class="list-bottom-space"></div>
 
@@ -204,7 +243,11 @@ import {
   journalBeliefTimes, journalNames, journalTruthFor, entryType, isTrigger,
   TRIGGER, REFLECTION, ACTION,
 } from '@/utils/journalBeliefs';
-import { experimentsOf, experimentDisplayState, experimentDate } from '@/utils/experiment';
+import {
+  experimentsOf, experimentDisplayState, experimentDate, EXPERIMENT_DISPLAY_LABELS,
+} from '@/utils/experiment';
+import { deleteExperiment } from '@/utils/experimentWrite';
+import ActionResultDialog from '@/components/ActionResultDialog.vue';
 import { mdiLightningBolt, mdiBookOpenPageVariant, mdiFlaskOutline } from '@mdi/js';
 import NavIcon from '@/components/NavIcon.vue';
 import BeliefChip from '@/components/BeliefChip.vue';
@@ -220,12 +263,14 @@ function affirmationTextOf(belief) {
 
 export default {
   name: 'journal-list',
-  components: { NavIcon, BeliefChip, FeelingChips, GapBar },
+  components: { NavIcon, BeliefChip, FeelingChips, GapBar, ActionResultDialog },
   data() {
     return {
       collapsed: localStorage.getItem(COLLAPSED_KEY) === '1',
       beliefFilter: null,
       typeFilter: null,
+      resultRow: null,
+      openRows: {},
       entryToDelete: null,
       isDeleteDialogShowing: false,
       sw: { openKey: null, handleHeight: 0, openDir: null, touchKey: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
@@ -240,7 +285,6 @@ export default {
       const out = [];
       this.$store.getters.beliefs.forEach((belief) => {
         experimentsOf(belief).forEach((x) => {
-          if (experimentDisplayState(x) !== 'done') return;
           const truths = {};
           if (typeof x.beliefTruth === 'number') truths[belief.time] = x.beliefTruth;
           out.push({
@@ -259,6 +303,13 @@ export default {
             beliefTruths: truths,
             fearExpected: typeof x.fearExpected === 'number' ? x.fearExpected : null,
             fearActual: typeof x.fearActual === 'number' ? x.fearActual : null,
+            // What the Handlungen list shows on it, and what it can do next.
+            state: experimentDisplayState(x),
+            stateLabel: EXPERIMENT_DISPLAY_LABELS[experimentDisplayState(x)],
+            outcome: x.outcome || '',
+            fear: x.fear || '',
+            // The row shape the shared evaluation dialog and the writer expect.
+            row: { experiment: x, beliefTime: belief.time, beliefText: belief.belief },
           });
         });
       });
@@ -370,16 +421,55 @@ export default {
     isSwiping(key) { return this.sw.openKey === key || this.sw.touchKey === key; },
     typeOf(entry) { return entryType(entry); },
     isAction(entry) { return entryType(entry) === ACTION; },
+    // What a run offers besides deleting: planning it again re-opens the
+    // wizard on it, evaluating records its result. The card already carries
+    // whichever one is next, so that one is left out here.
+    swipeSteps(entry) {
+      if (!this.isAction(entry)) {
+        return [{ key: 'edit', label: 'Bearbeiten', color: '#4ade80', run: e => this.editEntry(e) }];
+      }
+      const steps = [
+        { key: 'plan', label: 'Planen', color: '#4ade80', run: e => this.editAction(e) },
+        { key: 'evaluate', label: 'Auswerten', color: '#4ade80', run: e => this.startResult(e) },
+      ];
+      const here = entry.state === 'planned' ? 'Auswerten' : '';
+      return steps.filter(x => x.label !== here);
+    },
+    // A single button's group takes that button's colour, so its outline
+    // matches it rather than the card's inherited text colour.
+    groupStyle(steps) {
+      return steps.length === 1 ? { color: steps[0].color } : null;
+    },
+    // The three answers a run collects, in the order it collects them.
+    actionDetails(entry) {
+      if (this.collapsed) return [];
+      return [
+        { key: 'fear', label: 'Befürchtung', value: entry.fear },
+        { key: 'outcome', label: 'Was passiert ist', value: entry.outcome },
+        { key: 'learning', label: 'Was sagt dir das?', value: entry.meaning },
+      ].filter(d => d.value);
+    },
+    isOpen(entry, key) { return !!this.openRows[`${entry.key}:${key}`]; },
+    toggleRow(entry, key) {
+      const k = `${entry.key}:${key}`;
+      this.openRows = Object.assign({}, this.openRows, { [k]: !this.openRows[k] });
+    },
+    // The same wizard as "Handeln" on a belief, so there is one place a run
+    // is planned.
+    editAction(entry) {
+      this.sw.openKey = null; this.sw.openDir = null;
+      this.$router.push(`/act-belief/${entry.beliefTime}/${entry.actionId}`);
+    },
+    startResult(entry) {
+      this.sw.openKey = null; this.sw.openDir = null;
+      this.resultRow = entry.row;
+    },
     typeIcon(entry) {
       const t = entryType(entry);
       if (t === TRIGGER) return mdiLightningBolt;
       return t === ACTION ? mdiFlaskOutline : mdiBookOpenPageVariant;
     },
-    // Straight to the run in the list that owns it, unfolded.
-    openAction(entry) {
-      this.sw.openKey = null; this.sw.openDir = null;
-      this.$router.push({ path: '/actions', query: openQuery(entry.actionId) });
-    },
+
     // Every belief this entry names: what it is called, what this one entry
     // rated it at, and where the belief itself stands.
     beliefsOf(entry) {
@@ -435,6 +525,10 @@ export default {
       const entry = this.entryToDelete;
       this.entryToDelete = null;
       if (!entry) return;
+      if (this.isAction(entry)) {
+        deleteExperiment(this.$store, entry.beliefTime, entry.actionId);
+        return;
+      }
       this.$store.dispatch('deleteJournalEntry', entry);
     },
     // Same swipe mechanics the Verlauf timeline uses, keyed by entry rather
@@ -456,9 +550,7 @@ export default {
         this.sw.isH = Math.abs(dx) > Math.abs(dy) * 1.5;
       if (!this.sw.isH) return;
       e.preventDefault();
-      // A run has nothing to delete here, so it does not open that way at all.
-      const left = this.hasDelete(key) ? -110 : 0;
-      this.sw.dx = Math.max(left, Math.min(dx, 120));
+      this.sw.dx = Math.max(-110, Math.min(dx, this.rightWidth(key)));
       this.sw.drag = true;
     },
     tsEnd(e, key) {
@@ -472,17 +564,19 @@ export default {
       }
       this.sw.touchKey = null; this.sw.dx = 0; this.sw.drag = false; this.sw.isH = null;
     },
-    // Only an entry this book owns can be deleted from it.
-    hasDelete(key) {
+    // Keep in step with the buttons rendered above: a mismatch makes the card
+    // spring back before the second one can be tapped.
+    rightWidth(key) {
       const entry = this.entries.find(e => e.time === key);
-      return !!entry && !this.isAction(entry);
+      const n = entry ? this.swipeSteps(entry).length : 1;
+      return n >= 2 ? 190 : 120;
     },
     rowSt(key) {
       const s = this.sw;
       const live = s.touchKey === key && s.drag && s.isH;
       let x = 0;
       if (live) x = s.dx;
-      else if (s.openKey === key) x = s.openDir === 'left' ? -110 : 120;
+      else if (s.openKey === key) x = s.openDir === 'left' ? -110 : this.rightWidth(key);
       return { transform: `translateX(${x}px)`, transition: live ? 'none' : 'transform 0.2s ease' };
     },
   },

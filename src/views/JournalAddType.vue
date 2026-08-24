@@ -25,11 +25,13 @@
 </template>
 
 <script>
-// The one fork in the wizard. A Trigger records a moment that set a belief
-// off, a Reflexion one that spoke against it — the questions after this differ
-// because the two are asking about opposite kinds of evidence.
-import { mdiLightningBolt, mdiBookOpenPageVariant } from '@mdi/js';
-import { TRIGGER, REFLECTION } from '@/utils/journalBeliefs';
+// The fork in the wizard. A Trigger records a moment that set a belief off, a
+// Reflexion one that spoke against it — the questions after this differ
+// because the two ask about opposite kinds of evidence. A Handlung is not a
+// moment that happened but one you intend, so it is planned in the wizard
+// that owns it; picking it hands over to that one.
+import { mdiLightningBolt, mdiBookOpenPageVariant, mdiFlaskOutline } from '@mdi/js';
+import { TRIGGER, REFLECTION, ACTION } from '@/utils/journalBeliefs';
 
 export default {
   name: 'journal-add-type',
@@ -53,6 +55,12 @@ export default {
           label: 'Reflexion',
           desc: 'Ein Gegenbeispiel — etwas, das gegen eine Überzeugung spricht.',
           icon: mdiBookOpenPageVariant,
+        },
+        {
+          key: ACTION,
+          label: 'Handlung',
+          desc: 'Etwas, das du vorhast, um eine Überzeugung auf die Probe zu stellen.',
+          icon: mdiFlaskOutline,
         },
       ];
     },

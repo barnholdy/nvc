@@ -101,12 +101,7 @@
                     >
                       <p class="card-title">{{ row.experiment.situation || 'Ohne Situation' }}</p>
                       <button
-                        v-if="needsPlan(row.experiment)"
-                        class="card-btn"
-                        @click.stop="editExperiment(row)"
-                      >Planen</button>
-                      <button
-                        v-else-if="displayState(row.experiment) === 'planned'"
+                        v-if="displayState(row.experiment) === 'planned'"
                         class="card-btn"
                         @click.stop="startResult(row)"
                       >Auswerten</button>
@@ -188,85 +183,12 @@
 
       <div class="list-bottom-space"></div>
 
-      <!-- Step 4: result and comparison -->
-      <v-dialog v-model="isResultDialogShowing" fullscreen>
-        <div v-if="isResultDialogShowing" class="wizard-page">
-          <wizard-header title="Handlung auswerten" :step="resultStep" :total="4"></wizard-header>
-
-            <div v-show="resultStep === 1">
-              <wizard-context label="Situation" :quote="resultSituation"></wizard-context>
-              <p class="wizard-question">Was ist tatsächlich passiert?</p>
-              <p class="wizard-body">Beschreibe es, bevor du es bewertest.</p>
-              <input-card v-model="resultOutcome" label="Was ist passiert" :rows="4"></input-card>
-            </div>
-
-            <!-- The fear is shown again: rating it from memory is guesswork -->
-            <div v-show="resultStep === 2">
-              <wizard-context
-                label="Situation"
-                :quote="resultSituation"
-                :fear="resultFear"
-                :outcome="resultOutcome"
-              ></wizard-context>
-
-              <p class="wizard-question">Wie stark ist deine Befürchtung tatsächlich eingetreten?</p>
-              <meter-card
-                :value="resultActual"
-                label="Tatsächlich eingetreten"
-                minLabel="gar nicht"
-                maxLabel="genau so schlimm"
-                @input="resultActual = $event"
-              ></meter-card>
-            </div>
-
-            <div v-show="resultStep === 3">
-              <wizard-context
-                label="Situation"
-                :quote="resultSituation"
-                :fear="resultFear"
-                :outcome="resultOutcome"
-                :fear-expected="resultExpected"
-                :fear-actual="resultActual"
-              ></wizard-context>
-
-              <p class="wizard-question">Was sagt dir das?</p>
-              <input-card v-model="resultLearning" label="Deine Erkenntnis" :rows="3"></input-card>
-            </div>
-
-            <div v-show="resultStep === 4">
-              <wizard-context
-                label="Situation"
-                :quote="resultSituation"
-                :fear="resultFear"
-                :outcome="resultOutcome"
-                :learning="resultLearning"
-                :fear-expected="resultExpected"
-                :fear-actual="resultActual"
-              ></wizard-context>
-
-              <p class="wizard-question">Wie glaubwürdig fühlt sich die Überzeugung jetzt an?</p>
-              <p class="wizard-body">Fühle in dich hinein.</p>
-
-              <p class="wizard-note pole">{{ resultBeliefText }}</p>
-              <meter-card
-                :value="resultBeliefTruth"
-                label="Glaubwürdigkeit"
-                minLabel="gar nicht"
-                maxLabel="völlig"
-                @input="resultBeliefTruth = $event"
-              ></meter-card>
-            </div>
-
-            <div class="wizard-bottom-space"></div>
-
-          <wizard-footer
-            :disabled="resultStep === 1 && !resultOutcome.trim()"
-            :nextLabel="resultStep < 4 ? 'Weiter' : 'Speichern'"
-            @back="resultStep === 1 ? cancelResult() : resultStep--"
-            @next="resultStep < 4 ? resultStep++ : saveResult()"
-          ></wizard-footer>
-        </div>
-      </v-dialog>      </v-dialog>
+      <!-- Evaluating is the same four questions here and in the Tagebuch. -->
+      <action-result-dialog
+        :row="resultRow"
+        @saved="tab = 'done'"
+        @close="resultRow = null"
+      ></action-result-dialog>
 
       <v-dialog v-model="isDeleteDialogShowing" width="300">
         <v-card class="confirm-dialog">
@@ -299,11 +221,6 @@
 
 <script>
 import moment from 'moment';
-import WizardHeader from '@/components/WizardHeader.vue';
-import WizardFooter from '@/components/WizardFooter.vue';
-import WizardContext from '@/components/WizardContext.vue';
-import InputCard from '@/components/InputCard.vue';
-import MeterCard from '@/components/MeterCard.vue';
 import {
   EXPERIMENT_DISPLAY_STATES,
   EXPERIMENT_DISPLAY_LABELS,
@@ -314,7 +231,6 @@ import {
   experimentState,
   fearGap,
   experimentDate,
-  isPlanned,
 } from '@/utils/experiment';
 import { beliefCredibility, beliefStanding } from '@/utils/credibility';
 import { beliefStatusLabel, beliefStatusColor } from '@/utils/beliefStatus';
@@ -322,6 +238,8 @@ import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 import NavIcon from '@/components/NavIcon.vue';
 import BeliefChip from '@/components/BeliefChip.vue';
 import GapBar from '@/components/GapBar.vue';
+import ActionResultDialog from '@/components/ActionResultDialog.vue';
+import { deleteExperiment } from '@/utils/experimentWrite';
 
 const COMPACT_KEY = 'nvc.actionsCompact';
 
@@ -364,7 +282,7 @@ function triggerConfetti() {
 export default {
   name: 'action-list',
   components: {
-    NavIcon, WizardHeader, WizardFooter, WizardContext, InputCard, MeterCard, BeliefChip, GapBar,
+    NavIcon, BeliefChip, GapBar, ActionResultDialog,
   },
   data() {
     return {
@@ -381,14 +299,7 @@ export default {
       compact: localStorage.getItem(COMPACT_KEY) === '1',
       beliefFilter: null,
       sw: { openKey: null, handleHeight: 0, openDir: null, touchKey: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
-      isResultDialogShowing: false,
       resultRow: null,
-      resultStep: 1,
-      resultOutcome: '',
-      resultActual: 5,
-      resultLearning: '',
-      // 0 = the old belief still holds, 100 = the affirmation does.
-      resultBeliefTruth: 5,
       rowToDelete: null,
       isDeleteDialogShowing: false,
     };
@@ -462,22 +373,9 @@ export default {
       return out;
     },
     emptyText() {
-      if (this.tab === 'open') return 'Neu ist hier nur, was noch keine Befürchtung hat.';
       if (this.tab === 'planned') return 'Noch kein Experiment geplant.';
       if (this.tab === 'done') return 'Noch kein Experiment ausgewertet.';
       return 'Noch keine Handlung angelegt.';
-    },
-    resultSituation() {
-      return this.resultRow ? this.resultRow.experiment.situation : '';
-    },
-    resultExpected() {
-      return this.resultRow ? this.resultRow.experiment.fearExpected : null;
-    },
-    resultFear() {
-      return this.resultRow ? this.resultRow.experiment.fear : '';
-    },
-    resultBeliefText() {
-      return this.resultRow ? this.resultRow.beliefText : '';
     },
   },
   mounted() {
@@ -489,20 +387,14 @@ export default {
     displayState(x) { return experimentDisplayState(x); },
     gapOf(x) { return fearGap(x); },
     // A migrated action has a situation but no anchor — it cannot be evaluated.
-    needsPlan(x) { return experimentState(x) !== 'evaluated' && !isPlanned(x); },
-    // The card shows Planen while an anchor is missing and Auswerten once it
-    // is there; the swipe offers whichever of the two is not on screen.
+    // Planen re-opens the wizard on this run; Auswerten records its result.
+    // Whichever the card already offers is left out of the swipe.
     otherSteps(row) {
       const steps = [
         { key: 'plan', label: 'Planen', color: '#4ade80', run: r => this.editExperiment(r) },
+        { key: 'evaluate', label: 'Auswerten', color: '#4ade80', run: r => this.startResult(r) },
       ];
-      // Nothing to compare against until an anchor exists.
-      if (!this.needsPlan(row.experiment)) {
-        steps.push({ key: 'evaluate', label: 'Auswerten', color: '#4ade80', run: r => this.startResult(r) });
-      }
-      const here = this.needsPlan(row.experiment)
-        ? 'Planen'
-        : (this.displayState(row.experiment) === 'planned' ? 'Auswerten' : '');
+      const here = this.displayState(row.experiment) === 'planned' ? 'Auswerten' : '';
       return steps.filter(s => s.label !== here);
     },
     // `.swipe-group.single` outlines itself in currentColor; without this it
@@ -536,42 +428,9 @@ export default {
       return moment(ts).format('D. MMM').toUpperCase();
     },
 
-    // Writes the changed experiment back into its belief, matched by id.
-    // beliefChanges rides along in the SAME dispatch: two separate updates would
-    // both build from the same starting belief, and the second would silently
-    // undo the first.
-    persist(row, changes, beliefChanges) {
-      const belief = this.$store.getters.beliefs.find(b => b.time === row.beliefTime);
-      if (!belief) return;
-      const r = belief.reflection || {};
-      const list = experimentsOf(belief).map((x) => {
-        if (x.id !== row.experiment.id) return x;
-        return Object.assign({}, x, changes);
-      });
-      this.$store.dispatch('updateBelief', Object.assign({}, belief, beliefChanges || {}, {
-        reflection: Object.assign({}, r, { experiments: list }),
-      }));
-    },
-
     startResult(row) {
+      this.sw.openKey = null; this.sw.openDir = null;
       this.resultRow = row;
-      this.resultStep = 1;
-      this.resultOutcome = row.experiment.outcome || '';
-      this.resultActual = typeof row.experiment.fearActual === 'number' ? row.experiment.fearActual : 5;
-      this.resultLearning = row.experiment.learning || '';
-      this.resultBeliefTruth = typeof row.experiment.beliefTruth === 'number'
-        ? row.experiment.beliefTruth
-        : 5;
-      this.isResultDialogShowing = true;
-    },
-    cancelResult() {
-      this.isResultDialogShowing = false;
-      this.resultRow = null;
-      this.resultStep = 1;
-      this.resultOutcome = '';
-      this.resultActual = 50;
-      this.resultLearning = '';
-      this.resultBeliefTruth = 5;
     },
     // The belief's own standing, the same number its row shows in the belief
     // list. The reading this experiment took is shown further down, separately.
@@ -652,10 +511,7 @@ export default {
     // spring back before the second one can be tapped.
     rightWidth(key) {
       const row = this.filteredRows.find(r => r.experiment.id === key);
-      const n = row ? this.otherSteps(row).length : 0;
-      // Nothing to reveal, so the card does not move that way at all — a
-      // swipe that opens an empty panel just feels broken.
-      if (n === 0) return 0;
+      const n = row ? this.otherSteps(row).length : 1;
       return n >= 2 ? 190 : 110;
     },
     rowSt(key) {
@@ -678,30 +534,6 @@ export default {
     beliefOf(row) {
       return this.$store.getters.beliefs.find(b => b.time === row.beliefTime);
     },
-    saveResult() {
-      const row = this.resultRow;
-      const now = Date.now();
-      const changes = {
-        outcome: this.resultOutcome.trim(),
-        fearActual: this.resultActual,
-        learning: this.resultLearning.trim(),
-        // Evaluating implies it was carried out. Without this the belief would
-        // never count as acted on, which keys off doneAt — and that is one of
-        // the two ways it reaches "Gewandelt".
-        doneAt: (row && row.experiment.doneAt) || now,
-        completedAt: now,
-        // How credible the belief is after the experiment — the same 0-10
-        // question a situation asks, so it counts as another reading of it.
-        beliefTruth: this.resultBeliefTruth,
-      };
-      this.cancelResult();
-      if (row) {
-        this.persist(row, changes);
-        this.tab = 'done';
-        triggerConfetti();
-      }
-    },
-
     // Same wizard as "Handeln" on a belief, so there is one place to edit an
     // experiment.
     editExperiment(row) {
@@ -723,14 +555,7 @@ export default {
       this.isDeleteDialogShowing = false;
       this.rowToDelete = null;
       if (!row) return;
-      const belief = this.$store.getters.beliefs.find(b => b.time === row.beliefTime);
-      if (!belief) return;
-      const r = belief.reflection || {};
-      // Matched by id, so two experiments with the same situation text stay distinct.
-      const list = experimentsOf(belief).filter(x => x.id !== row.experiment.id);
-      this.$store.dispatch('updateBelief', Object.assign({}, belief, {
-        reflection: Object.assign({}, r, { experiments: list }),
-      }));
+      deleteExperiment(this.$store, row.beliefTime, row.experiment.id);
     },
   },
 };

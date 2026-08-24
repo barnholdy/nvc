@@ -72,6 +72,11 @@ export default {
     fear() { this.emitChange(); },
     fearExpected() { this.emitChange(); },
   },
+  // Sent once at the start too, so the anchor shown on the slider is the one
+  // that gets saved even when nobody moves it.
+  created() {
+    this.emitChange();
+  },
   methods: {
     emitChange() {
       this.$emit('changed', { fear: this.fear, fearExpected: this.fearExpected });
