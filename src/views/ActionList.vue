@@ -68,7 +68,7 @@
             >
               <span class="timeline-dot"></span>
               <div class="timeline-body">
-                <p class="timeline-meta">{{ dayLabel(row.experiment.id) }}</p>
+                <p class="timeline-meta">{{ dayLabel(experimentDate(row.experiment)) }}</p>
                 <div class="card action-card">
                   <div class="head-swipe">
                     <!-- Whatever the card's own button already offers is left out. -->
@@ -313,7 +313,7 @@ import {
   isExperimentDisplayState,
   experimentState,
   fearGap,
-  isDue,
+  experimentDate,
   isPlanned,
 } from '@/utils/experiment';
 import { beliefCredibility, beliefStanding } from '@/utils/credibility';
@@ -381,7 +381,6 @@ export default {
       compact: localStorage.getItem(COMPACT_KEY) === '1',
       beliefFilter: null,
       sw: { openKey: null, handleHeight: 0, openDir: null, touchKey: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
-      now: Date.now(),
       isResultDialogShowing: false,
       resultRow: null,
       resultStep: 1,
@@ -452,10 +451,11 @@ export default {
       const index = {};
       moment.locale('de');
       this.filteredRows.forEach((row) => {
-        const key = moment(row.experiment.id).format('YYYY-MM');
+        const when = experimentDate(row.experiment);
+        const key = moment(when).format('YYYY-MM');
         if (index[key] === undefined) {
           index[key] = out.length;
-          out.push({ key, label: moment(row.experiment.id).format('MMMM YYYY').toUpperCase(), entries: [] });
+          out.push({ key, label: moment(when).format('MMMM YYYY').toUpperCase(), entries: [] });
         }
         out[index[key]].entries.push(row);
       });
@@ -488,7 +488,6 @@ export default {
     state(x) { return experimentState(x); },
     displayState(x) { return experimentDisplayState(x); },
     gapOf(x) { return fearGap(x); },
-    isDue(x) { return isDue(x, this.now); },
     // A migrated action has a situation but no anchor — it cannot be evaluated.
     needsPlan(x) { return experimentState(x) !== 'evaluated' && !isPlanned(x); },
     // The card shows Planen while an anchor is missing and Auswerten once it
@@ -531,6 +530,7 @@ export default {
     stateLine(x) {
       return EXPERIMENT_DISPLAY_LABELS[experimentDisplayState(x)];
     },
+    experimentDate(x) { return experimentDate(x); },
     dayLabel(ts) {
       moment.locale('de');
       return moment(ts).format('D. MMM').toUpperCase();

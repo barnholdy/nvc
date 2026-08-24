@@ -2,8 +2,6 @@
 // measurable gap between the fear written down BEFORE acting and what actually
 // happened, so `fearExpected` is locked once the experiment is planned.
 
-export const EXPERIMENT_DUE_DAYS = 7;
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 // The lifecycle keeps four internal states, but only three are ever shown —
 // they line up one-to-one with the tabs in the Handlungen list.
@@ -76,6 +74,16 @@ export function needsFearScaleMigration(experiments) {
     .some(x => x && typeof x === 'object' && x.fearScale !== FEAR_SCALE_MAX);
 }
 
+// When an experiment last moved, which is what dates it in the list and
+// orders it there. Evaluated ones are dated by their result, planned ones by
+// the plan, and one that is still only started by the moment it was started —
+// its id is that moment. The same precedence the trend chart reads a run's
+// own rating at, so a card and its bar agree on when it happened.
+export function experimentDate(x) {
+  if (!x) return 0;
+  return x.completedAt || x.doneAt || x.plannedAt || x.id || 0;
+}
+
 export function experimentState(x) {
   if (!x) return 'draft';
   if (x.completedAt || typeof x.fearActual === 'number') return 'evaluated';
@@ -108,12 +116,6 @@ export function experimentStateColor(x) {
 // measure against.
 export function isPlanned(x) {
   return !!(x && x.situation && x.fear && typeof x.fearExpected === 'number');
-}
-
-// Time to ask "Schon durchgeführt?".
-export function isDue(x, now) {
-  if (experimentState(x) !== 'planned' || !x.plannedAt) return false;
-  return (now - x.plannedAt) >= EXPERIMENT_DUE_DAYS * DAY_MS;
 }
 
 // The action really happened — this is what lifts a belief to "Umgesetzt".
@@ -158,5 +160,5 @@ export function collectExperiments(beliefs) {
       rows.push({ experiment: x, beliefTime: belief.time, beliefText: belief.belief });
     });
   });
-  return rows.sort((a, b) => (b.experiment.id || 0) - (a.experiment.id || 0));
+  return rows.sort((a, b) => experimentDate(b.experiment) - experimentDate(a.experiment));
 }
