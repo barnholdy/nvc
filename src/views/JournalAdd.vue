@@ -10,7 +10,7 @@
         <journal-add-type
           v-show="step === 1"
           :initialValue="type"
-          @changed="onTypeChanged">
+          @changed="type = $event">
         </journal-add-type>
 
         <journal-add-fact
@@ -193,16 +193,13 @@ export default {
     },
   },
   methods: {
-    // A Handlung is planned rather than recorded, so it hands straight over to
-    // the wizard that plans one instead of carrying on here.
-    onTypeChanged(value) {
-      if (value === ACTION) {
+    nextStep() {
+      // A Handlung is planned rather than recorded, so from the fork it hands
+      // over to the wizard that plans one instead of carrying on here.
+      if (this.step === 1 && this.type === ACTION) {
         this.$router.push('/add-action');
         return;
       }
-      this.type = value;
-    },
-    nextStep() {
       this.step += 1;
       this.$vuetify.goTo(0, { duration: 0 });
     },

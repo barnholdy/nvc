@@ -46,19 +46,19 @@
               ></div>
             </div>
             <span class="bar-date">{{ shortDate(p.time) }}</span>
-            <!-- Where the reading was taken; the same scale is filled in
-                 several different places. A Trigger and a Reflexion both come
-                 from the Tagebuch, so each carries its own mark. -->
-            <span class="bar-source">
+            <!-- Where the reading was taken. Everything the Tagebuch holds
+                 has a mark of its own there, and the mark says it on its own;
+                 only what has none is spelled out. -->
+            <span class="bar-source" :title="sourceLabel(p.source)">
               <svg
                 v-if="sourceIcon(p.source)"
                 class="bar-icon"
                 :class="`bar-icon-${p.source}`"
                 viewBox="0 0 24 24"
-                width="11"
-                height="11"
+                width="13"
+                height="13"
               ><path :d="sourceIcon(p.source)" fill="currentColor"></path></svg>
-              {{ sourceLabel(p.source) }}
+              <template v-else>{{ sourceLabel(p.source) }}</template>
             </span>
           </div>
         </div>
@@ -94,6 +94,9 @@ const SOURCE_ICONS = {
   journal: mdiBookOpenPageVariant,
   action: mdiFlaskOutline,
 };
+
+// Everything but a wandeln reading comes from the Tagebuch and carries a mark
+// there; wandeln has none, so its row keeps the word.
 
 // The list each kind of reading can be followed back into.
 const ROUTES = {

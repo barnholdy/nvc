@@ -31,14 +31,14 @@
             <button
               class="pill"
               :class="{ active: beliefFilter === null }"
-              @click="beliefFilter = null"
+              @click="pick($event, 'beliefFilter', null)"
             >Alle</button>
             <button
               v-for="b in filterBeliefs"
               :key="b.time"
               class="pill"
               :class="{ active: beliefFilter === b.time }"
-              @click="beliefFilter = b.time"
+              @click="pick($event, 'beliefFilter', b.time)"
             >„{{ b.belief }}“<span class="pill-count"> · {{ b.count }}</span></button>
           </template>
         </div>
@@ -49,15 +49,32 @@
           <button
             class="pill"
             :class="{ active: typeFilter === null }"
-            @click="typeFilter = null"
+            @click="pick($event, 'typeFilter', null)"
           >Alle</button>
           <button
             v-for="t in typeFilters"
             :key="t.key"
             class="pill"
             :class="{ active: typeFilter === t.key }"
-            @click="typeFilter = t.key"
+            @click="pick($event, 'typeFilter', t.key)"
           >{{ t.label }}<span class="pill-count"> · {{ t.count }}</span></button>
+        </div>
+
+        <!-- Once it is runs being read, which of them: the same two states
+             their own list is split by. -->
+        <div v-if="typeFilter === ACTION" class="pill-row">
+          <button
+            class="pill"
+            :class="{ active: actionState === null }"
+            @click="pick($event, 'actionState', null)"
+          >Alle</button>
+          <button
+            v-for="f in actionStateFilters"
+            :key="f.key"
+            class="pill"
+            :class="{ active: actionState === f.key }"
+            @click="pick($event, 'actionState', f.key)"
+          >{{ f.label }}<span class="pill-count"> · {{ f.count }}</span></button>
         </div>
       </div>
 
@@ -244,7 +261,8 @@ import {
   TRIGGER, REFLECTION, ACTION,
 } from '@/utils/journalBeliefs';
 import {
-  experimentsOf, experimentDisplayState, experimentDate, EXPERIMENT_DISPLAY_LABELS,
+  experimentsOf, experimentDisplayState, experimentDate,
+  EXPERIMENT_DISPLAY_LABELS, EXPERIMENT_DISPLAY_STATES,
 } from '@/utils/experiment';
 import { deleteExperiment } from '@/utils/experimentWrite';
 import ActionResultDialog from '@/components/ActionResultDialog.vue';
@@ -269,6 +287,7 @@ export default {
       collapsed: localStorage.getItem(COLLAPSED_KEY) === '1',
       beliefFilter: null,
       typeFilter: null,
+      actionState: null,
       resultRow: null,
       openRows: {},
       entryToDelete: null,
@@ -325,7 +344,9 @@ export default {
     // numbers on the chips describe the list you would actually get.
     byType() {
       if (this.typeFilter === null) return this.entries;
-      return this.entries.filter(e => entryType(e) === this.typeFilter);
+      const ofType = this.entries.filter(e => entryType(e) === this.typeFilter);
+      if (this.typeFilter !== ACTION || this.actionState === null) return ofType;
+      return ofType.filter(e => e.state === this.actionState);
     },
     byBelief() {
       if (this.beliefFilter === null) return this.entries;
@@ -348,6 +369,17 @@ export default {
     hasTypeFilter() {
       return this.typeFilters.length > 1;
     },
+    // Counted against the beliefs left standing, the same way the kinds are.
+    actionStateFilters() {
+      const runs = this.byBelief.filter(e => entryType(e) === ACTION);
+      return EXPERIMENT_DISPLAY_STATES.map(key => ({
+        key,
+        label: EXPERIMENT_DISPLAY_LABELS[key],
+        count: runs.filter(e => e.state === key).length,
+      }));
+    },
+    // Exposed so the row can ask whether runs are what is being read.
+    ACTION() { return ACTION; },
     // Only beliefs an entry was actually written against can filter one. An
     // entry naming several counts once for each of them.
     filterBeliefs() {
@@ -382,6 +414,7 @@ export default {
   },
   watch: {
     collapsed(v) { localStorage.setItem(COLLAPSED_KEY, v ? '1' : '0'); },
+    typeFilter(v) { if (v !== ACTION) this.actionState = null; },
     '$route.query.open': function() { this.revealRequested(); },
     '$route.query.belief': function() { this.applyBeliefQuery(); },
     '$route.query.type': function() { this.applyTypeQuery(); },
@@ -391,7 +424,12 @@ export default {
     // one kind, and the chip row shows which one is being read.
     applyTypeQuery() {
       const raw = this.$route.query.type;
-      if (raw === TRIGGER || raw === REFLECTION) this.typeFilter = raw;
+      if (raw !== TRIGGER && raw !== REFLECTION && raw !== ACTION) return;
+      this.typeFilter = raw;
+      this.$nextTick(() => {
+        const row = this.$el.querySelectorAll('.screen-header .pill-row')[1];
+        this.alignPill(row && row.querySelector('.pill.active'));
+      });
     },
     // Coming from a belief card: select its chip, and scroll the pill row so
     // the selection is visible rather than somewhere off to the right.
@@ -402,10 +440,8 @@ export default {
       if (!this.filterBeliefs.some(b => b.time === time)) return;
       this.beliefFilter = time;
       this.$nextTick(() => {
-        const el = this.$el.querySelector('.pill.active');
-        if (el && el.scrollIntoView) {
-          el.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
-        }
+        const row = this.$el.querySelectorAll('.screen-header .pill-row')[0];
+        this.alignPill(row && row.querySelector('.pill.active'));
       });
     },
     // Coming from a trend bar: clear the filter so the row it points at is
@@ -417,6 +453,22 @@ export default {
       this.beliefFilter = null;
       this.typeFilter = null;
       this.$nextTick(() => scrollRowIntoView(this.$el, id));
+    },
+    // Picking a chip brings it to the left edge of its row, where the first
+    // chip sits — so what the list is narrowed to is the first thing read,
+    // however far along the row it was tapped.
+    pick(event, filter, value) {
+      this[filter] = value;
+      this.alignPill(event.currentTarget);
+    },
+    alignPill(btn) {
+      if (!btn || !btn.closest) return;
+      const row = btn.closest('.pill-row');
+      if (!row || !row.scrollTo) return;
+      const pad = parseFloat(getComputedStyle(row).paddingLeft) || 0;
+      const left = (btn.getBoundingClientRect().left - row.getBoundingClientRect().left)
+        + row.scrollLeft - pad;
+      row.scrollTo({ left: Math.max(0, left), behavior: 'smooth' });
     },
     isSwiping(key) { return this.sw.openKey === key || this.sw.touchKey === key; },
     typeOf(entry) { return entryType(entry); },
