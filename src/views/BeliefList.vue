@@ -329,7 +329,9 @@ import {
 } from '@/utils/beliefStatus';
 import { experimentsOf, experimentDisplayState } from '@/utils/experiment';
 import { beliefCredibility, beliefStanding } from '@/utils/credibility';
-import { journalBeliefTimes } from '@/utils/journalBeliefs';
+import {
+  journalBeliefTimes, isTrigger, TRIGGER, REFLECTION,
+} from '@/utils/journalBeliefs';
 import { copingLabel } from '@/utils/coping';
 import { requestedId, scrollRowIntoView, scrollRowToTop } from '@/utils/reveal';
 import NavIcon from '@/components/NavIcon.vue';
@@ -449,7 +451,7 @@ export default {
     journalCountMap() {
       const map = {};
       this.$store.getters.journal.forEach((e) => {
-        if (!e) return;
+        if (!e || isTrigger(e)) return;
         // One entry can be written against several beliefs, and counts for
         // each of them.
         journalBeliefTimes(e).forEach((t) => { map[t] = (map[t] || 0) + 1; });
@@ -576,7 +578,7 @@ export default {
     // The compact chip has room for the count and nothing else.
     situationsShort(entry) {
       const n = this.patternCount(entry.time);
-      return n === 1 ? '1 Situation' : `${n} Situationen`;
+      return n === 1 ? '1 Trigger' : `${n} Trigger`;
     },
     experimentsShort(entry) {
       const n = experimentsOf(entry).length;
@@ -584,12 +586,12 @@ export default {
     },
     journalShort(entry) {
       const n = this.journalCount(entry.time);
-      return n === 1 ? '1 Eintrag' : `${n} Einträge`;
+      return n === 1 ? '1 Reflexion' : `${n} Reflexionen`;
     },
     situationsLabel(entry) {
       const n = this.patternCount(entry.time);
-      if (!n) return 'Keine Situationen';
-      return n === 1 ? '1 Situation ansehen' : `${n} Situationen ansehen`;
+      if (!n) return 'Keine Trigger';
+      return n === 1 ? '1 Trigger ansehen' : `${n} Trigger ansehen`;
     },
     // How many runs there are and how many still wait — the two numbers that
     // say whether there is anything to do here.
@@ -602,19 +604,25 @@ export default {
     },
     journalLabel(entry) {
       const n = this.journalCount(entry.time);
-      if (!n) return 'Keine Tagebucheinträge';
-      return n === 1 ? '1 Tagebucheintrag ansehen' : `${n} Tagebucheinträge ansehen`;
+      if (!n) return 'Keine Reflexionen';
+      return n === 1 ? '1 Reflexion ansehen' : `${n} Reflexionen ansehen`;
     },
     // The target list opens filtered to this belief rather than at one of its
     // rows: the question being asked is "all of them", not "that one".
     openSituations(entry) {
-      this.$router.push({ path: '/patterns', query: { belief: String(entry.time) } });
+      this.$router.push({
+        path: '/journal',
+        query: { belief: String(entry.time), type: TRIGGER },
+      });
     },
     openExperiments(entry) {
       this.$router.push({ path: '/actions', query: { belief: String(entry.time) } });
     },
     openJournal(entry) {
-      this.$router.push({ path: '/journal', query: { belief: String(entry.time) } });
+      this.$router.push({
+        path: '/journal',
+        query: { belief: String(entry.time), type: REFLECTION },
+      });
     },
     // The one step that moves this belief forward from where it stands.
     rowActionLabel(entry) {

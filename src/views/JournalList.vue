@@ -42,6 +42,23 @@
             >„{{ b.belief }}“<span class="pill-count"> · {{ b.count }}</span></button>
           </template>
         </div>
+
+        <!-- Which kind of entry: what set a belief off, or what spoke
+             against it. Only worth offering once both kinds exist. -->
+        <div v-if="hasBothTypes" class="pill-row">
+          <button
+            class="pill"
+            :class="{ active: typeFilter === null }"
+            @click="typeFilter = null"
+          >Alle</button>
+          <button
+            v-for="t in typeFilters"
+            :key="t.key"
+            class="pill"
+            :class="{ active: typeFilter === t.key }"
+            @click="typeFilter = t.key"
+          >{{ t.label }}<span class="pill-count"> · {{ t.count }}</span></button>
+        </div>
       </div>
 
       <div v-if="!groups.length" class="list-empty">
@@ -170,6 +187,7 @@ import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 import { beliefCredibility, beliefStanding } from '@/utils/credibility';
 import {
   journalBeliefTimes, journalNames, journalTruthFor, entryType, isTrigger,
+  TRIGGER, REFLECTION,
 } from '@/utils/journalBeliefs';
 import { mdiLightningBolt, mdiBookOpenPageVariant } from '@mdi/js';
 import NavIcon from '@/components/NavIcon.vue';
@@ -190,6 +208,7 @@ export default {
     return {
       collapsed: localStorage.getItem(COLLAPSED_KEY) === '1',
       beliefFilter: null,
+      typeFilter: null,
       entryToDelete: null,
       isDeleteDialogShowing: false,
       sw: { openKey: null, handleHeight: 0, openDir: null, touchKey: null, startX: 0, startY: 0, dx: 0, isH: null, drag: false },
@@ -199,15 +218,35 @@ export default {
     entries() {
       return this.$store.getters.journal.concat().sort((a, b) => b.time - a.time);
     },
-    filtered() {
+    // Each filter counts against what the other one left standing, so the
+    // numbers on the chips describe the list you would actually get.
+    byType() {
+      if (this.typeFilter === null) return this.entries;
+      return this.entries.filter(e => entryType(e) === this.typeFilter);
+    },
+    byBelief() {
       if (this.beliefFilter === null) return this.entries;
       return this.entries.filter(e => journalNames(e, this.beliefFilter));
+    },
+    filtered() {
+      if (this.beliefFilter === null) return this.byType;
+      return this.byType.filter(e => journalNames(e, this.beliefFilter));
+    },
+    typeFilters() {
+      const list = this.byBelief;
+      return [
+        { key: TRIGGER, label: 'Trigger', count: list.filter(isTrigger).length },
+        { key: REFLECTION, label: 'Reflexionen', count: list.filter(e => !isTrigger(e)).length },
+      ];
+    },
+    hasBothTypes() {
+      return this.typeFilters.every(t => t.count > 0);
     },
     // Only beliefs an entry was actually written against can filter one. An
     // entry naming several counts once for each of them.
     filterBeliefs() {
       const counts = {};
-      this.entries.forEach((e) => {
+      this.byType.forEach((e) => {
         journalBeliefTimes(e).forEach((t) => { counts[t] = (counts[t] || 0) + 1; });
       });
       return this.$store.getters.beliefs
@@ -231,6 +270,7 @@ export default {
     },
   },
   mounted() {
+    this.applyTypeQuery();
     this.applyBeliefQuery();
     this.revealRequested();
   },
@@ -238,8 +278,15 @@ export default {
     collapsed(v) { localStorage.setItem(COLLAPSED_KEY, v ? '1' : '0'); },
     '$route.query.open': function() { this.revealRequested(); },
     '$route.query.belief': function() { this.applyBeliefQuery(); },
+    '$route.query.type': function() { this.applyTypeQuery(); },
   },
   methods: {
+    // Coming from a belief card's "Trigger" or "Reflexionen" row: it asks for
+    // one kind, and the chip row shows which one is being read.
+    applyTypeQuery() {
+      const raw = this.$route.query.type;
+      if (raw === TRIGGER || raw === REFLECTION) this.typeFilter = raw;
+    },
     // Coming from a belief card: select its chip, and scroll the pill row so
     // the selection is visible rather than somewhere off to the right.
     applyBeliefQuery() {
@@ -262,6 +309,7 @@ export default {
       if (!id) return;
       if (!this.entries.some(e => String(e.time) === id)) return;
       this.beliefFilter = null;
+      this.typeFilter = null;
       this.$nextTick(() => scrollRowIntoView(this.$el, id));
     },
     isSwiping(key) { return this.sw.openKey === key || this.sw.touchKey === key; },
