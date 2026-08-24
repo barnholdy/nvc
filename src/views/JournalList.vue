@@ -45,7 +45,7 @@
 
         <!-- Which kind of entry: what set a belief off, or what spoke
              against it. Only worth offering once both kinds exist. -->
-        <div v-if="hasBothTypes" class="pill-row">
+        <div v-if="hasTypeFilter" class="pill-row">
           <button
             class="pill"
             :class="{ active: typeFilter === null }"
@@ -71,12 +71,12 @@
 
         <div
           v-for="entry in group.entries"
-          :key="entry.time"
+          :key="entry.key"
           :data-row-id="entry.time"
         >
           <div
             class="timeline-row"
-            :class="{ 'timeline-first': entry.time === group.entries[0].time }"
+            :class="{ 'timeline-first': entry.key === group.entries[0].key }"
           >
             <span class="timeline-dot"></span>
             <div class="timeline-body">
@@ -85,12 +85,18 @@
                 <!-- Only the head answers the swipe; the rest of the card
                      stays put, the way the belief and action cards work. -->
                 <div class="head-swipe">
+                  <!-- A run belongs to the Handlungen list, which is where it
+                       is edited and deleted; here it only offers the way
+                       across to it. -->
                   <div v-if="isSwiping(entry.time)" class="swipe-panel left">
-                    <div class="swipe-group single swipe-btn-edit">
+                    <div v-if="isAction(entry)" class="swipe-group single swipe-btn-edit">
+                      <button class="swipe-btn swipe-btn-edit" @click.stop="openAction(entry)">Öffnen</button>
+                    </div>
+                    <div v-else class="swipe-group single swipe-btn-edit">
                       <button class="swipe-btn swipe-btn-edit" @click.stop="editEntry(entry)">Bearbeiten</button>
                     </div>
                   </div>
-                  <div v-if="isSwiping(entry.time)" class="swipe-panel right">
+                  <div v-if="isSwiping(entry.time) && !isAction(entry)" class="swipe-panel right">
                     <div class="swipe-group single swipe-btn-delete">
                       <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">Löschen</button>
                     </div>
@@ -102,9 +108,10 @@
                     @touchmove="tsMove($event, entry.time)"
                     @touchend="tsEnd($event, entry.time)"
                   >
-                    <!-- Which of the two an entry is, said by its mark rather
-                         than by a word: a bolt for the moment a belief struck,
-                         a page for the moment it did not hold. -->
+                    <!-- Which kind an entry is, said by its mark rather than
+                         by a word: a bolt for the moment a belief struck, a
+                         page for the moment it did not hold, a flask for the
+                         run that put it to the test. -->
                     <svg
                       class="entry-icon"
                       :class="`entry-icon-${typeOf(entry)}`"
@@ -123,6 +130,14 @@
                   flat
                   class="journal-feelings"
                 ></feeling-chips>
+
+                <template v-if="!collapsed && isAction(entry) && entry.fearExpected !== null">
+                  <gap-bar :expected="entry.fearExpected" :actual="entry.fearActual"></gap-bar>
+                  <div class="gap-legend">
+                    <span class="gap-key"><i class="gap-dot gap-dot-expected"></i>erwartet</span>
+                    <span v-if="entry.fearActual !== null" class="gap-key"><i class="gap-dot gap-dot-real"></i>real</span>
+                  </div>
+                </template>
 
                 <p v-if="!collapsed && entry.meaning" class="journal-meaning">{{ entry.meaning }}</p>
 
@@ -187,12 +202,14 @@ import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 import { beliefCredibility, beliefStanding } from '@/utils/credibility';
 import {
   journalBeliefTimes, journalNames, journalTruthFor, entryType, isTrigger,
-  TRIGGER, REFLECTION,
+  TRIGGER, REFLECTION, ACTION,
 } from '@/utils/journalBeliefs';
-import { mdiLightningBolt, mdiBookOpenPageVariant } from '@mdi/js';
+import { experimentsOf, experimentDisplayState, experimentDate } from '@/utils/experiment';
+import { mdiLightningBolt, mdiBookOpenPageVariant, mdiFlaskOutline } from '@mdi/js';
 import NavIcon from '@/components/NavIcon.vue';
 import BeliefChip from '@/components/BeliefChip.vue';
 import FeelingChips from '@/components/FeelingChips.vue';
+import GapBar from '@/components/GapBar.vue';
 
 const COLLAPSED_KEY = 'nvc.journalCollapsed';
 
@@ -203,7 +220,7 @@ function affirmationTextOf(belief) {
 
 export default {
   name: 'journal-list',
-  components: { NavIcon, BeliefChip, FeelingChips },
+  components: { NavIcon, BeliefChip, FeelingChips, GapBar },
   data() {
     return {
       collapsed: localStorage.getItem(COLLAPSED_KEY) === '1',
@@ -215,8 +232,43 @@ export default {
     };
   },
   computed: {
+    // An evaluated run belongs to its belief, not to this book — but it is a
+    // moment that was lived through and rated, like the other two, so the
+    // Tagebuch reads it alongside them. Read-only: it is written and changed
+    // in the Handlungen list, which owns it.
+    actionEntries() {
+      const out = [];
+      this.$store.getters.beliefs.forEach((belief) => {
+        experimentsOf(belief).forEach((x) => {
+          if (experimentDisplayState(x) !== 'done') return;
+          const truths = {};
+          if (typeof x.beliefTruth === 'number') truths[belief.time] = x.beliefTruth;
+          out.push({
+            key: `a${x.id}`,
+            actionId: x.id,
+            beliefTime: belief.time,
+            time: experimentDate(x),
+            type: ACTION,
+            fact: x.situation || 'Ohne Situation',
+            // What it told you — the same place a Reflexion's own reading of
+            // the moment goes.
+            meaning: x.learning || '',
+            feelings: [],
+            note: '',
+            beliefTimes: [belief.time],
+            beliefTruths: truths,
+            fearExpected: typeof x.fearExpected === 'number' ? x.fearExpected : null,
+            fearActual: typeof x.fearActual === 'number' ? x.fearActual : null,
+          });
+        });
+      });
+      return out;
+    },
     entries() {
-      return this.$store.getters.journal.concat().sort((a, b) => b.time - a.time);
+      return this.$store.getters.journal
+        .map(e => Object.assign({ key: e.time }, e))
+        .concat(this.actionEntries)
+        .sort((a, b) => b.time - a.time);
     },
     // Each filter counts against what the other one left standing, so the
     // numbers on the chips describe the list you would actually get.
@@ -234,13 +286,16 @@ export default {
     },
     typeFilters() {
       const list = this.byBelief;
+      const count = t => list.filter(e => entryType(e) === t).length;
       return [
-        { key: TRIGGER, label: 'Trigger', count: list.filter(isTrigger).length },
-        { key: REFLECTION, label: 'Reflexionen', count: list.filter(e => !isTrigger(e)).length },
-      ];
+        { key: TRIGGER, label: 'Trigger', count: count(TRIGGER) },
+        { key: REFLECTION, label: 'Reflexionen', count: count(REFLECTION) },
+        { key: ACTION, label: 'Handlungen', count: count(ACTION) },
+      ].filter(t => t.count > 0);
     },
-    hasBothTypes() {
-      return this.typeFilters.every(t => t.count > 0);
+    // Nothing to narrow down to while only one kind has been written.
+    hasTypeFilter() {
+      return this.typeFilters.length > 1;
     },
     // Only beliefs an entry was actually written against can filter one. An
     // entry naming several counts once for each of them.
@@ -314,7 +369,17 @@ export default {
     },
     isSwiping(key) { return this.sw.openKey === key || this.sw.touchKey === key; },
     typeOf(entry) { return entryType(entry); },
-    typeIcon(entry) { return isTrigger(entry) ? mdiLightningBolt : mdiBookOpenPageVariant; },
+    isAction(entry) { return entryType(entry) === ACTION; },
+    typeIcon(entry) {
+      const t = entryType(entry);
+      if (t === TRIGGER) return mdiLightningBolt;
+      return t === ACTION ? mdiFlaskOutline : mdiBookOpenPageVariant;
+    },
+    // Straight to the run in the list that owns it, unfolded.
+    openAction(entry) {
+      this.sw.openKey = null; this.sw.openDir = null;
+      this.$router.push({ path: '/actions', query: openQuery(entry.actionId) });
+    },
     // Every belief this entry names: what it is called, what this one entry
     // rated it at, and where the belief itself stands.
     beliefsOf(entry) {
@@ -391,7 +456,9 @@ export default {
         this.sw.isH = Math.abs(dx) > Math.abs(dy) * 1.5;
       if (!this.sw.isH) return;
       e.preventDefault();
-      this.sw.dx = Math.max(-110, Math.min(dx, 120));
+      // A run has nothing to delete here, so it does not open that way at all.
+      const left = this.hasDelete(key) ? -110 : 0;
+      this.sw.dx = Math.max(left, Math.min(dx, 120));
       this.sw.drag = true;
     },
     tsEnd(e, key) {
@@ -404,6 +471,11 @@ export default {
         this.sw.openKey = null; this.sw.openDir = null;
       }
       this.sw.touchKey = null; this.sw.dx = 0; this.sw.drag = false; this.sw.isH = null;
+    },
+    // Only an entry this book owns can be deleted from it.
+    hasDelete(key) {
+      const entry = this.entries.find(e => e.time === key);
+      return !!entry && !this.isAction(entry);
     },
     rowSt(key) {
       const s = this.sw;
@@ -481,7 +553,9 @@ export default {
 /* The same two colours the credibility bar is read in: a Trigger is evidence
    for the belief, a Reflexion evidence against it. */
 .entry-icon-trigger { color: #c0483d; }
+/* Both speak against the belief, so both are green; the shape says which. */
 .entry-icon-reflection { color: #46955f; }
+.entry-icon-action { color: #46955f; }
 .journal-meaning {
   font-size: 0.92rem;
   color: #8e8e93;

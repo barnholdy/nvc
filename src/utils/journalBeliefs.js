@@ -6,15 +6,21 @@
 
 // What an entry records. A Trigger is a moment that set a belief off — it
 // speaks for the belief. A Reflexion is a moment that spoke against it. Both
-// rate the beliefs they name, which is why they now live in one book.
+// rate the beliefs they name, which is why they live in one book.
+//
+// An Aktion is the third: a carried-out experiment, rated once it was
+// evaluated. It is not stored here — it belongs to its belief — but the
+// Tagebuch reads it alongside the other two, so it needs a name of its own.
 export const TRIGGER = 'trigger';
 export const REFLECTION = 'reflection';
+export const ACTION = 'action';
 
 // Entries written before the two books were merged carry no type: the ones
 // that came from the Verlauf are stamped on migration, and anything left
 // without one is a Reflexion, which is all the Tagebuch used to hold.
 export function entryType(entry) {
-  return entry && entry.type === TRIGGER ? TRIGGER : REFLECTION;
+  const t = entry && entry.type;
+  return t === TRIGGER || t === ACTION ? t : REFLECTION;
 }
 
 export function isTrigger(entry) {
