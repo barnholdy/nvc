@@ -76,7 +76,7 @@ import moment from 'moment';
 import { TRUTH_SCALE_MAX } from '@/utils/beliefTrend';
 import { standingOf } from '@/utils/credibility';
 import { openQuery } from '@/utils/reveal';
-import { mdiLightningBolt, mdiBookOpenPageVariant } from '@mdi/js';
+import { mdiLightningBolt, mdiBookOpenPageVariant, mdiFlaskOutline } from '@mdi/js';
 
 // Which side a reading came from — the same 0-10 question is asked in several
 // different places, and a bar means something else depending on where.
@@ -87,10 +87,12 @@ const SOURCES = {
   journal: 'Reflexion',
 };
 
-// The two kinds of Tagebuch entry carry the same marks the list gives them.
+// Every kind that stands in the Tagebuch carries the same mark the list gives
+// it there — a run included, since an evaluated one is read among them.
 const SOURCE_ICONS = {
   situation: mdiLightningBolt,
   journal: mdiBookOpenPageVariant,
+  action: mdiFlaskOutline,
 };
 
 // The list each kind of reading can be followed back into.
@@ -274,7 +276,9 @@ export default {
 /* The same two colours the credibility bar is read in, so a bar's mark means
    the same thing here as it does in the list. */
 .bar-icon-situation { color: #c0483d; }
+/* Both speak against the belief, so both are green; the shape says which. */
 .bar-icon-journal { color: #46955f; }
+.bar-icon-action { color: #46955f; }
 
 .trend-hint {
   font-size: 0.72rem;
