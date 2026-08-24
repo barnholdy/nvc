@@ -1027,20 +1027,20 @@ html { overflow-x: hidden; }
    the difference is the part of the bar that is only orange. Shared by the
    Handlungen list's own rows and the result wizard's recap card. */
 .gap-bar {
-  position: relative;
-  height: 10px;
-  border-radius: 999px;
-  background: #2c2c2e;
+  display: flex;
+  gap: 3px;
   margin-top: 16px;
-  overflow: hidden;
 }
-.gap-fill {
-  position: absolute;
-  top: 0; left: 0; bottom: 0;
-  border-radius: 999px;
+/* The same ten blocks the credibility bar is drawn in, so both read the
+   same way: a whole point per block, with the gaps saying so. */
+.gap-seg {
+  flex: 1;
+  height: 10px;
+  border-radius: 2px;
+  background: #3a3a3c;
 }
-.gap-expected { background: #fd9927; }
-.gap-real { background: #6aaef7; }
+.gap-seg.expected { background: #fd9927; }
+.gap-seg.real { background: #6aaef7; }
 .gap-legend {
   display: flex;
   align-items: center;
@@ -1125,11 +1125,13 @@ html { overflow-x: hidden; }
 }
 .quote-belief {
   border-color: #c0483d;
-  color: #ebebf5;
+  color: #8e8e93;
 }
+/* The brighter of the two: it is the sentence being grown into, and the one
+   the eye should land on. */
 .quote-affirmation {
   border-color: #46955f;
-  color: #8e8e93;
+  color: #ebebf5;
   margin-top: 6px;
 }
 

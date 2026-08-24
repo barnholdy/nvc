@@ -398,8 +398,10 @@ export default {
     width: 1px;
     background: #2c2c2e;
   }
-  &::before { top: 14px; bottom: 0; }
-  &::after { top: 0; height: 14px; }
+  /* Up to the dot and on from it, never across it: the dot starts 6px down
+     and ends 9px later. */
+  &::before { top: 15px; bottom: 0; }
+  &::after { top: 0; height: 6px; }
   &.timeline-first::after { display: none; }
 }
 .timeline-dot {

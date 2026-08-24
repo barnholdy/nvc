@@ -9,13 +9,10 @@
     <!-- What was feared against what happened, as one bar — the same one the
          Handlungen list draws for a finished run. -->
     <template v-if="hasGap">
-      <div class="gap-bar">
-        <span class="gap-fill gap-expected" :style="{ width: pct(fearExpected) }"></span>
-        <span class="gap-fill gap-real" :style="{ width: pct(fearActual) }"></span>
-      </div>
+      <gap-bar :expected="fearExpected" :actual="fearActual"></gap-bar>
       <div class="gap-legend">
-        <span class="gap-key"><i class="gap-dot gap-dot-expected"></i>erwartet {{ fearExpected }}</span>
-        <span class="gap-key"><i class="gap-dot gap-dot-real"></i>real {{ fearActual }}</span>
+        <span class="gap-key"><i class="gap-dot gap-dot-expected"></i>erwartet</span>
+        <span class="gap-key"><i class="gap-dot gap-dot-real"></i>real</span>
         <span class="gap-delta" :style="{ color: gapColorValue }">
           {{ gap > 0 ? '−' : '+' }}{{ Math.abs(gap) }}
         </span>
@@ -56,6 +53,7 @@
 <script>
 import FeelingChips from '@/components/FeelingChips.vue';
 import CredibilityMeter from '@/components/CredibilityMeter.vue';
+import GapBar from '@/components/GapBar.vue';
 import { fearGap, fearGapColor } from '@/utils/experiment';
 import { copingLabel } from '@/utils/coping';
 
@@ -64,7 +62,7 @@ import { copingLabel } from '@/utils/coping';
 // belief cards use — a step should not invent its own way of showing them.
 export default {
   name: 'wizard-context',
-  components: { FeelingChips, CredibilityMeter },
+  components: { FeelingChips, CredibilityMeter, GapBar },
   props: {
     label: { type: String, default: 'Überzeugung' },
     quote: { type: String, default: '' },

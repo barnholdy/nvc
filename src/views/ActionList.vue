@@ -73,7 +73,11 @@
                   <div class="head-swipe">
                     <!-- Whatever the card's own button already offers is left out. -->
                     <div v-if="isSwiping(row.experiment.id) && otherSteps(row).length" class="swipe-panel left">
-                      <div class="swipe-group" :class="{ single: otherSteps(row).length === 1 }">
+                      <div
+                        class="swipe-group"
+                        :class="{ single: otherSteps(row).length === 1 }"
+                        :style="groupStyle(otherSteps(row))"
+                      >
                         <button
                           v-for="step in otherSteps(row)"
                           :key="step.key"
@@ -109,35 +113,23 @@
                     </div>
                   </div>
                   <span class="card-pill">{{ stateLine(row.experiment) }}</span>
-                  <p v-if="isDue(row.experiment)" class="due-hint">Schon durchgeführt?</p>
 
                   <!-- What was feared against what happened, as one bar: the orange
                        reaches as far as the fear did, the blue as far as reality. -->
                   <template v-if="gapOf(row.experiment) !== null">
-                    <div class="gap-bar">
-                      <span
-                        class="gap-fill gap-expected"
-                        :style="{ width: pct(row.experiment.fearExpected) }"
-                      ></span>
-                      <span
-                        class="gap-fill gap-real"
-                        :style="{ width: pct(row.experiment.fearActual) }"
-                      ></span>
-                    </div>
+                    <gap-bar
+                      :expected="row.experiment.fearExpected"
+                      :actual="row.experiment.fearActual"
+                    ></gap-bar>
                     <div class="gap-legend">
-                      <span class="gap-key"><i class="gap-dot gap-dot-expected"></i>erwartet {{ row.experiment.fearExpected }}</span>
-                      <span class="gap-key"><i class="gap-dot gap-dot-real"></i>real {{ row.experiment.fearActual }}</span>
+                      <span class="gap-key"><i class="gap-dot gap-dot-expected"></i>erwartet</span>
+                      <span class="gap-key"><i class="gap-dot gap-dot-real"></i>real</span>
                     </div>
                   </template>
                   <template v-else-if="row.experiment.fearExpected !== null">
-                    <div class="gap-bar">
-                      <span
-                        class="gap-fill gap-expected"
-                        :style="{ width: pct(row.experiment.fearExpected) }"
-                      ></span>
-                    </div>
+                    <gap-bar :expected="row.experiment.fearExpected"></gap-bar>
                     <div class="gap-legend">
-                      <span class="gap-key"><i class="gap-dot gap-dot-expected"></i>erwartet {{ row.experiment.fearExpected }}</span>
+                      <span class="gap-key"><i class="gap-dot gap-dot-expected"></i>erwartet</span>
                     </div>
                   </template>
 
@@ -329,6 +321,7 @@ import { beliefStatusLabel, beliefStatusColor } from '@/utils/beliefStatus';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 import NavIcon from '@/components/NavIcon.vue';
 import BeliefChip from '@/components/BeliefChip.vue';
+import GapBar from '@/components/GapBar.vue';
 
 const COMPACT_KEY = 'nvc.actionsCompact';
 
@@ -371,7 +364,7 @@ function triggerConfetti() {
 export default {
   name: 'action-list',
   components: {
-    NavIcon, WizardHeader, WizardFooter, WizardContext, InputCard, MeterCard, BeliefChip,
+    NavIcon, WizardHeader, WizardFooter, WizardContext, InputCard, MeterCard, BeliefChip, GapBar,
   },
   data() {
     return {
@@ -512,6 +505,11 @@ export default {
         ? 'Planen'
         : (this.displayState(row.experiment) === 'planned' ? 'Auswerten' : '');
       return steps.filter(s => s.label !== here);
+    },
+    // `.swipe-group.single` outlines itself in currentColor; without this it
+    // would inherit the card's text colour instead of the button's own.
+    groupStyle(steps) {
+      return steps.length === 1 ? { color: steps[0].color } : null;
     },
     isSwiping(key) { return this.sw.openKey === key || this.sw.touchKey === key; },
     isOpen(row, key) { return !!this.openRows[`${row.experiment.id}:${key}`]; },
@@ -655,6 +653,9 @@ export default {
     rightWidth(key) {
       const row = this.filteredRows.find(r => r.experiment.id === key);
       const n = row ? this.otherSteps(row).length : 0;
+      // Nothing to reveal, so the card does not move that way at all — a
+      // swipe that opens an empty panel just feels broken.
+      if (n === 0) return 0;
       return n >= 2 ? 190 : 110;
     },
     rowSt(key) {
@@ -762,8 +763,10 @@ export default {
     width: 1px;
     background: #2c2c2e;
   }
-  &::before { top: 14px; bottom: 0; }
-  &::after { top: 0; height: 14px; }
+  /* Up to the dot and on from it, never across it: the dot starts 6px down
+     and ends 9px later. */
+  &::before { top: 15px; bottom: 0; }
+  &::after { top: 0; height: 6px; }
   &.timeline-first::after { display: none; }
 }
 .timeline-dot {

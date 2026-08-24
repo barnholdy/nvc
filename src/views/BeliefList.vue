@@ -58,7 +58,11 @@
           <!-- The step the card already offers is left out: it is on screen a
                few pixels away. -->
           <div v-if="isSwiping(idx)" class="swipe-panel left">
-            <div class="swipe-group" :class="{ single: otherSteps(entry).length === 1 }">
+            <div
+              class="swipe-group"
+              :class="{ single: otherSteps(entry).length === 1 }"
+              :style="groupStyle(otherSteps(entry))"
+            >
               <button
                 v-for="step in otherSteps(entry)"
                 :key="step.key"
@@ -536,6 +540,11 @@ export default {
       }
       return steps.filter(s => !shown.includes(s.label));
     },
+    // `.swipe-group.single` outlines itself in currentColor; without this it
+    // would inherit the card's text colour instead of the button's own.
+    groupStyle(steps) {
+      return steps.length === 1 ? { color: steps[0].color } : null;
+    },
     isSwiping(idx) { return this.sw.openIdx === idx || this.sw.touchIdx === idx; },
     isOpen(entry, key) { return !!this.openRows[`${entry.time}:${key}`]; },
     toggleRow(entry, key) {
@@ -679,6 +688,8 @@ export default {
     rightWidth(i) {
       const entry = this.filteredBeliefs[i];
       const n = entry ? this.otherSteps(entry).length : 1;
+      // Nothing to reveal, so the card does not move that way at all.
+      if (n === 0) return 0;
       // ~80px per button plus the shared outline — matches how wide 1 and 2
       // already read, just extended for the belief that also offers Eintragen.
       return Math.max(110, 30 + n * 80);
