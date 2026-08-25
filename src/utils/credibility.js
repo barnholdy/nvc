@@ -131,6 +131,32 @@ export function affirmationPoints(beliefs, text) {
   return byTime(points);
 }
 
+// Every reading of every belief in one series: how they stand taken together,
+// rather than one at a time. The scale is the same question in each of them,
+// so they can share a chart.
+export function allBeliefPoints(patterns, beliefs, journal) {
+  const out = [];
+  list(beliefs).forEach((b) => {
+    beliefPoints(patterns, b, journal).forEach(p => out.push(p));
+  });
+  return byTime(out);
+}
+
+// The same across every affirmation. Counted per belief and per text, so a
+// belief carrying one text twice does not vote twice.
+export function allAffirmationPoints(beliefs) {
+  const out = [];
+  list(beliefs).forEach((b) => {
+    const seen = {};
+    list(b.affirmations).forEach((a) => {
+      if (!a || !a.text || seen[a.text]) return;
+      seen[a.text] = true;
+      affirmationPoints([b], a.text).forEach(p => out.push(p));
+    });
+  });
+  return byTime(out);
+}
+
 // Null rather than zero when nothing was ever rated: a slider at zero would
 // claim an answer nobody gave.
 export function averageOf(points) {

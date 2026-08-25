@@ -25,9 +25,10 @@
             <div class="bar-track">
               <div class="bar-mid"></div>
               <!-- Each bar is the credibility bar stood on its end, read as
-                   of this moment: red as far as the belief stood then, green
-                   above it. "Then" is the median of this reading and the two
-                   before it, so the turn walks along with the bars. -->
+                   of this moment: as much red as the old belief still had,
+                   green for the ground it had lost. "Then" is the median of
+                   this reading and the two before it, so the turn walks along
+                   with the bars. -->
               <span
                 v-for="n in scale"
                 :key="n"
@@ -46,9 +47,8 @@
               ></div>
             </div>
             <span class="bar-date">{{ shortDate(p.time) }}</span>
-            <!-- Where the reading was taken. Everything the Tagebuch holds
-                 has a mark of its own there, and the mark says it on its own;
-                 only what has none is spelled out. -->
+            <!-- Where the reading was taken, said by the mark that side is
+                 known by elsewhere in the app; the word stays as its title. -->
             <span class="bar-source" :title="sourceLabel(p.source)">
               <svg
                 v-if="sourceIcon(p.source)"
@@ -65,9 +65,7 @@
       </div>
     </div>
 
-    <p v-if="!row.hasTrend" class="trend-hint">
-      Eine zweite Bewertung in einer späteren Situation zeigt, ob sich etwas bewegt.
-    </p>
+    <p v-if="!row.hasTrend" class="trend-hint">{{ hint }}</p>
   </div>
 </template>
 
@@ -76,7 +74,9 @@ import moment from 'moment';
 import { TRUTH_SCALE_MAX } from '@/utils/beliefTrend';
 import { standingOf } from '@/utils/credibility';
 import { openQuery } from '@/utils/reveal';
-import { mdiLightningBolt, mdiBookOpenPageVariant, mdiFlaskOutline } from '@mdi/js';
+import {
+  mdiLightningBolt, mdiBookOpenPageVariant, mdiFlaskOutline, mdiVanish,
+} from '@mdi/js';
 
 // Which side a reading came from — the same 0-10 question is asked in several
 // different places, and a bar means something else depending on where.
@@ -93,10 +93,10 @@ const SOURCE_ICONS = {
   situation: mdiLightningBolt,
   journal: mdiBookOpenPageVariant,
   action: mdiFlaskOutline,
+  // A wandeln reading is not in the Tagebuch at all — it carries the mark the
+  // Überzeugungen tab is known by instead.
+  wandeln: mdiVanish,
 };
-
-// Everything but a wandeln reading comes from the Tagebuch and carries a mark
-// there; wandeln has none, so its row keeps the word.
 
 // The list each kind of reading can be followed back into.
 const ROUTES = {
@@ -110,10 +110,18 @@ export default {
   name: 'trend-chart',
   props: {
     row: { type: Object, required: true },
+    // An affirmation is the same scale read the other way round: what a
+    // belief loses, it gains. The bars say so by filling from the other end.
+    kind: { type: String, default: 'belief' },
   },
   computed: {
     scale() {
       return TRUTH_SCALE_MAX;
+    },
+    hint() {
+      return this.kind === 'affirmation'
+        ? 'Jedes Wandeln bewertet die Affirmation neu — dann zeigt sich, ob sie trägt.'
+        : 'Eine zweite Bewertung in einer späteren Situation zeigt, ob sich etwas bewegt.';
     },
     // Where the belief stood at each reading in turn, rather than one number
     // for the whole row: the median of that reading and the two before it,
@@ -147,7 +155,11 @@ export default {
     segClass(n, i) {
       const standing = this.runningStanding[i];
       if (standing === null || standing === undefined) return {};
-      return n <= standing ? { held: true } : { freed: true };
+      // Red always means the same thing — how much of the old belief still
+      // has you. On an affirmation that is what it has not yet won over.
+      const below = n <= standing;
+      if (this.kind === 'affirmation') return below ? { freed: true } : { held: true };
+      return below ? { held: true } : { freed: true };
     },
     sourceLabel(source) { return SOURCES[source] || ''; },
     sourceIcon(source) { return SOURCE_ICONS[source] || null; },
@@ -286,6 +298,7 @@ export default {
 /* Both speak against the belief, so both are green; the shape says which. */
 .bar-icon-journal { color: #46955f; }
 .bar-icon-action { color: #46955f; }
+.bar-icon-wandeln { color: #46955f; }
 
 .trend-hint {
   font-size: 0.72rem;

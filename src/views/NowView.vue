@@ -91,9 +91,10 @@
         </div>
       </template>
 
-      <!-- Then what has moved. One chip per belief: an affirmation is read on
-           the opposite scale, so mixing both in here only invites reading a
-           bar the wrong way round. -->
+      <!-- Then what has moved. One chip per belief, and one for all of them
+           taken together; the affirmation is read on the opposite scale, so
+           it gets its own chart under the belief's rather than being mixed
+           into the same bars. -->
       <template v-if="trendRows.length">
         <p class="section-head">Trends</p>
 
@@ -103,13 +104,24 @@
             :key="r.key"
             class="pill trend-pill"
             :class="{ active: r.key === shownTrendKey }"
-            @click="trendKey = r.key"
-          >„{{ r.short }}“<span class="pill-count"> · {{ r.points.length }}</span></button>
+            @click="pickTrend($event, r.key)"
+          >{{ r.quoted ? `„${r.short}“` : r.short
+          }}<span class="pill-count"> · {{ r.points.length }}</span></button>
         </div>
 
         <div v-if="shownTrend" class="card">
-          <p class="card-title">„{{ shownTrend.text }}“</p>
+          <p class="card-title">{{ shownTrend.quoted ? `„${shownTrend.text}“` : shownTrend.text }}</p>
           <trend-chart :row="shownTrend"></trend-chart>
+
+          <!-- What the same work built up in place of the belief, read the
+               other way round: here green is the ground it has won. -->
+          <template v-if="shownAffirmation">
+            <p class="trend-split">Affirmation</p>
+            <p v-if="shownAffirmation.quoted" class="quote-affirmation">
+              „{{ shownAffirmation.text }}“
+            </p>
+            <trend-chart :row="shownAffirmation" kind="affirmation"></trend-chart>
+          </template>
         </div>
       </template>
 
@@ -158,8 +170,10 @@ import {
   experimentState,
 } from '@/utils/experiment';
 import {
-  beliefCredibility, beliefRows, baselineOf,
+  beliefCredibility, beliefRows, baselineOf, affirmationPoints,
+  allBeliefPoints, allAffirmationPoints,
 } from '@/utils/credibility';
+import { alignPill } from '@/utils/pillScroll';
 import { ACTION } from '@/utils/journalBeliefs';
 import { mdiBookOpenPageVariant } from '@mdi/js';
 import NavIcon from '@/components/NavIcon.vue';
@@ -174,6 +188,8 @@ import BreathCircle from '@/components/BreathCircle.vue';
 // the one nearest thing now — a single next step, not a list to choose from.
 const ONE = 1;
 const PRACTICE_KEY = 'nvc.amen';
+// The chip that adds every belief up, rather than reading one of them.
+const ALL_TRENDS = 'all';
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 function readPractised() {
@@ -249,14 +265,44 @@ export default {
     // all rate the same belief on the same scale, so they share a chart.
     trendRows() {
       const shorten = t => (t.length > 28 ? `${t.slice(0, 27)}…` : t);
-      return beliefRows(this.patterns, this.beliefs, this.journal)
+      const rows = beliefRows(this.patterns, this.beliefs, this.journal)
         .filter(r => r.hasTrend)
         .map(r => Object.assign({}, r, {
           short: shorten(r.text),
+          quoted: true,
           // The frozen anchor the whole row is held against; where it stood
           // at each single reading is worked out per bar by the chart.
           baseline: baselineOf(r.points),
         }));
+      // Only worth offering once there is more than one belief to add up: with
+      // a single one the sum is that belief, said twice.
+      if (rows.length < 2) return rows;
+      const points = allBeliefPoints(this.patterns, this.beliefs, this.journal);
+      rows.unshift({
+        key: ALL_TRENDS,
+        text: 'Alle Glaubenssätze',
+        short: 'Alle Glaubenssätze',
+        quoted: false,
+        points: points,
+        baseline: baselineOf(points),
+        hasTrend: points.length > 1,
+      });
+      return rows;
+    },
+    // The affirmation that belongs to whatever the chips are showing: one
+    // belief's, or every one of them where the sum is shown.
+    shownAffirmation() {
+      const row = this.shownTrend;
+      if (!row) return null;
+      if (row.key === ALL_TRENDS) {
+        return this.affirmationRow('all', 'Alle Affirmationen',
+          allAffirmationPoints(this.beliefs), false);
+      }
+      const belief = this.beliefs.find(b => b.time === row.key);
+      const first = (belief && belief.affirmations && belief.affirmations[0]) || null;
+      if (!first || !first.text) return null;
+      return this.affirmationRow(first.text, first.text,
+        affirmationPoints([belief], first.text), true);
     },
     // The chosen chip, or the first one — a chip that vanished (a rating
     // undone elsewhere) must not leave the block blank.
@@ -405,6 +451,23 @@ export default {
   },
   methods: {
     round(v) { return String(Math.round(v * 10) / 10).replace('.', ','); },
+    // The same shape a belief row has, so one chart draws both.
+    affirmationRow(key, text, points, quoted) {
+      if (!points.length) return null;
+      return {
+        key: key,
+        text: text,
+        quoted: quoted,
+        points: points,
+        baseline: baselineOf(points),
+        hasTrend: points.length > 1,
+      };
+    },
+    // Like the Tagebuch's chips: what is being read moves to the left edge.
+    pickTrend(event, key) {
+      this.trendKey = key;
+      alignPill(event.currentTarget);
+    },
     sinceLabel(days) {
       if (days === null) return 'noch nie geübt';
       if (days <= 0) return 'heute geübt';
@@ -429,6 +492,13 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.trend-split {
+  margin: 18px 0 8px;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #636366;
+}
 .dark-page { background: #000; min-height: 100vh; }
 
 /* Small grey capitals: the heading names the pile, the cards below are the
