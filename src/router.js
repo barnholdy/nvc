@@ -8,6 +8,18 @@ export default new Router({
     // The Verlauf and the Tagebuch are one book now. Its old addresses still
     // lead somewhere, so a link kept from before does not dead-end.
     { path: '/patterns', redirect: '/journal' },
+    // Handlungen are read in the Tagebuch now, under their own chip. An old
+    // address still lands on them, with whatever it was narrowed to kept:
+    // the list's `tab` was the same two states its `state` chip offers.
+    {
+      path: '/actions',
+      redirect: (to) => {
+        const query = Object.assign({}, to.query, { type: 'action' });
+        if (query.tab === 'planned' || query.tab === 'done') query.state = query.tab;
+        delete query.tab;
+        return { path: '/journal', query };
+      },
+    },
     { path: '/add-pattern', redirect: '/add-journal' },
     { path: '/edit-pattern/:time', redirect: to => `/edit-journal/${to.params.time}` },
     {
@@ -54,11 +66,6 @@ export default new Router({
       path: '/now',
       name: 'now',
       component: () => import('./views/NowView.vue'),
-    },
-    {
-      path: '/actions',
-      name: 'actions',
-      component: () => import('./views/ActionList.vue'),
     },
     {
       path: '/settings',

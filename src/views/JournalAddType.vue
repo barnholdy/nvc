@@ -2,8 +2,9 @@
   <div>
     <p class="wizard-question">Was willst du erfassen?</p>
     <p class="wizard-body">
-      Beides gehört ins selbe Buch: das eine hält fest, wann eine Überzeugung
-      zugeschlagen hat, das andere, wann sie danebenlag.
+      Alles gehört ins selbe Buch: das eine hält fest, wann eine Überzeugung
+      zugeschlagen hat, das andere, wann sie danebenlag — und das dritte
+      stellt sie auf die Probe.
     </p>
 
     <div

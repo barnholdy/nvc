@@ -143,9 +143,6 @@
       <v-btn flat color="grey" to="/beliefs">
         <nav-icon name="beliefs"></nav-icon>
       </v-btn>
-      <v-btn flat color="grey" to="/actions">
-        <nav-icon name="actions"></nav-icon>
-      </v-btn>
     </v-bottom-nav>
   </div>
 </template>
@@ -163,6 +160,7 @@ import {
 import {
   beliefCredibility, beliefRows, baselineOf,
 } from '@/utils/credibility';
+import { ACTION } from '@/utils/journalBeliefs';
 import { mdiBookOpenPageVariant } from '@mdi/js';
 import NavIcon from '@/components/NavIcon.vue';
 import TrendChart from '@/components/TrendChart.vue';
@@ -318,12 +316,15 @@ export default {
           action: 'Auswerten',
           count: this.plannedExperiments.length,
           items: this.plannedExperiments.map(experiment),
-          // Evaluating happens in the Handlungen list, which owns that wizard.
+          // Evaluating happens in the Tagebuch, which owns that wizard.
           run: item => this.$router.push({
-            path: '/actions',
+            path: '/journal',
             query: { open: String(item.row.experiment.id) },
           }),
-          more: () => this.$router.push({ path: '/actions', query: { tab: 'planned' } }),
+          more: () => this.$router.push({
+            path: '/journal',
+            query: { type: ACTION, state: 'planned' },
+          }),
         },
         {
           key: 'plan',
@@ -336,7 +337,7 @@ export default {
           run: item => this.$router.push(
             `/act-belief/${item.row.beliefTime}/${item.row.experiment.id}`,
           ),
-          more: () => this.$router.push({ path: '/actions', query: { tab: 'open' } }),
+          more: () => this.$router.push({ path: '/journal', query: { type: ACTION } }),
         },
         {
           key: 'act',

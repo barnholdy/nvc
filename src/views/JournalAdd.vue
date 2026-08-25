@@ -109,6 +109,10 @@ import {
 // leaves room for the objection afterwards.
 const TRIGGER_STEPS = 3;
 const REFLECTION_STEPS = 6;
+// A Handlung is not written here at all: after the fork it is planned in its
+// own wizard, which asks three questions. The bar counts the whole way, so
+// choosing it shortens the bar the same way choosing a Trigger does.
+const ACTION_STEPS = 4;
 
 export default {
   name: 'journal-add',
@@ -128,7 +132,9 @@ export default {
     const preselected = isPreselect ? [parseInt(this.$route.params.time, 10)] : [];
     return {
       step: 1,
-      type: editEntry ? entryType(editEntry) : (isPreselect ? REFLECTION : null),
+      type: editEntry
+        ? entryType(editEntry)
+        : (isPreselect ? REFLECTION : (this.$route.query.type === ACTION ? ACTION : null)),
       editEntry: editEntry || null,
       beliefTimes: editEntry ? journalBeliefTimes(editEntry) : preselected,
       beliefTruths: editEntry ? Object.assign({}, journalBeliefTruths(editEntry)) : {},
@@ -153,6 +159,7 @@ export default {
     // longer of the two keeps the bar from jumping backwards once it is.
     totalSteps() {
       if (this.type === null) return REFLECTION_STEPS;
+      if (this.type === ACTION) return ACTION_STEPS;
       return this.isTriggerEntry ? TRIGGER_STEPS : REFLECTION_STEPS;
     },
     factStep() { return 2; },
@@ -197,7 +204,8 @@ export default {
       // A Handlung is planned rather than recorded, so from the fork it hands
       // over to the wizard that plans one instead of carrying on here.
       if (this.step === 1 && this.type === ACTION) {
-        this.$router.push('/add-action');
+        // It carries on counting from here rather than starting over at one.
+        this.$router.push({ path: '/add-action', query: { from: 'journal' } });
         return;
       }
       this.step += 1;

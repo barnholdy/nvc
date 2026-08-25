@@ -38,7 +38,7 @@
             :key="f.key"
             class="pill"
             :class="{ active: tab === f.key }"
-            @click="tab = f.key"
+            @click="pick($event, f.key)"
           >{{ f.label }}<span class="pill-count"> · {{ f.count }}</span></button>
         </div>
       </div>
@@ -309,9 +309,6 @@
       <v-btn flat color="primary" to="/beliefs">
         <nav-icon name="beliefs"></nav-icon>
       </v-btn>
-      <v-btn flat color="grey" to="/actions">
-        <nav-icon name="actions"></nav-icon>
-      </v-btn>
     </v-bottom-nav>
   </div>
 </template>
@@ -330,10 +327,11 @@ import {
 import { experimentsOf, experimentDisplayState } from '@/utils/experiment';
 import { beliefCredibility, beliefStanding } from '@/utils/credibility';
 import {
-  journalBeliefTimes, isTrigger, TRIGGER, REFLECTION,
+  journalBeliefTimes, isTrigger, TRIGGER, REFLECTION, ACTION,
 } from '@/utils/journalBeliefs';
 import { copingLabel } from '@/utils/coping';
 import { requestedId, scrollRowIntoView, scrollRowToTop } from '@/utils/reveal';
+import { alignPill } from '@/utils/pillScroll';
 import NavIcon from '@/components/NavIcon.vue';
 
 const PRACTICE_KEY = 'nvc.amen';
@@ -460,6 +458,13 @@ export default {
     },
   },
   methods: {
+    // Picking a filter brings its chip to the left edge of the row, so what
+    // the list is narrowed to is the first thing read — the same way the
+    // Tagebuch's chips behave.
+    pick(event, value) {
+      this.tab = value;
+      alignPill(event.currentTarget);
+    },
     // Fixed rather than absolute, and rendered outside the header entirely:
     // the pill row scrolls horizontally, and anything anchored inside it —
     // absolutely positioned or not — risks being clipped or buried by that
@@ -616,7 +621,10 @@ export default {
       });
     },
     openExperiments(entry) {
-      this.$router.push({ path: '/actions', query: { belief: String(entry.time) } });
+      this.$router.push({
+        path: '/journal',
+        query: { belief: String(entry.time), type: ACTION },
+      });
     },
     openJournal(entry) {
       this.$router.push({

@@ -27,7 +27,7 @@
                   <nav-icon name="journal" class="ob-row-icon"></nav-icon>
                   <span class="ob-row-label">Tagebuch</span>
                 </div>
-                <p class="ob-row-text">Erfasse Trigger aus deinem Alltag — und Reflexionen, die dagegensprechen.</p>
+                <p class="ob-row-text">Erfasse Trigger aus deinem Alltag, Reflexionen, die dagegensprechen — und Handlungen, in denen du eine Überzeugung auf die Probe stellst.</p>
               </div>
               <div class="ob-row">
                 <div class="ob-row-head">
@@ -35,13 +35,6 @@
                   <span class="ob-row-label">Überzeugungen</span>
                 </div>
                 <p class="ob-row-text">Ergründe die Überzeugungen hinter den Auslösern und wandle sie in positive Affirmationen.</p>
-              </div>
-              <div class="ob-row">
-                <div class="ob-row-head">
-                  <nav-icon name="actions" class="ob-row-icon"></nav-icon>
-                  <span class="ob-row-label">Handlungen</span>
-                </div>
-                <p class="ob-row-text">Überprüfe die Glaubwürdigkeit deiner Überzeugungen in konkreten Handlungsexperimenten.</p>
               </div>
             </div>
           </div>

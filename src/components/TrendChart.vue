@@ -102,7 +102,7 @@ const SOURCE_ICONS = {
 const ROUTES = {
   situation: '/journal',
   wandeln: '/beliefs',
-  action: '/actions',
+  action: '/journal',
   journal: '/journal',
 };
 
@@ -197,6 +197,10 @@ export default {
 .chart-scroll {
   flex: 1;
   overflow-x: auto;
+  /* Sideways is the only direction there is anything to see in. Left on its
+     own, overflow-x turns the other axis into `auto` too, and a single
+     sub-pixel of height is then enough to make the whole chart wobble. */
+  overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
 }
 .chart {
@@ -272,7 +276,7 @@ export default {
   color: #48484a;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  height: 12px;
+  height: 13px;
   white-space: nowrap;
 }
 .bar-icon { flex-shrink: 0; }

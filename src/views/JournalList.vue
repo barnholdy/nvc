@@ -14,7 +14,7 @@
 
         <!-- How much of an entry to show, and which belief to narrow to —
              one row, since both say what the list below is showing. -->
-        <div class="pill-row">
+        <div class="pill-row" data-pill-row="belief">
           <!-- Collapsed strips an entry back to what it is about: the moment,
                the sentence it speaks for, and the belief it speaks to. The
                feelings, the meaning and the „Ja, aber“ stay one tap away. -->
@@ -45,7 +45,7 @@
 
         <!-- Which kind of entry: what set a belief off, or what spoke
              against it. Only worth offering once both kinds exist. -->
-        <div v-if="hasTypeFilter" class="pill-row">
+        <div v-if="hasTypeFilter" class="pill-row" data-pill-row="type">
           <button
             class="pill"
             :class="{ active: typeFilter === null }"
@@ -62,7 +62,7 @@
 
         <!-- Once it is runs being read, which of them: the same two states
              their own list is split by. -->
-        <div v-if="typeFilter === ACTION" class="pill-row">
+        <div v-if="typeFilter === ACTION" class="pill-row" data-pill-row="state">
           <button
             class="pill"
             :class="{ active: actionState === null }"
@@ -89,7 +89,7 @@
         <div
           v-for="entry in group.entries"
           :key="entry.key"
-          :data-row-id="entry.time"
+          :data-row-id="rowId(entry)"
         >
           <div
             class="timeline-row"
@@ -245,9 +245,6 @@
       <v-btn flat color="grey" to="/beliefs">
         <nav-icon name="beliefs"></nav-icon>
       </v-btn>
-      <v-btn flat color="grey" to="/actions">
-        <nav-icon name="actions"></nav-icon>
-      </v-btn>
     </v-bottom-nav>
   </div>
 </template>
@@ -255,6 +252,7 @@
 <script>
 import moment from 'moment';
 import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
+import { alignPill } from '@/utils/pillScroll';
 import { beliefCredibility, beliefStanding } from '@/utils/credibility';
 import {
   journalBeliefTimes, journalNames, journalTruthFor, entryType, isTrigger,
@@ -409,6 +407,7 @@ export default {
   },
   mounted() {
     this.applyTypeQuery();
+    this.applyStateQuery();
     this.applyBeliefQuery();
     this.revealRequested();
   },
@@ -418,6 +417,7 @@ export default {
     '$route.query.open': function() { this.revealRequested(); },
     '$route.query.belief': function() { this.applyBeliefQuery(); },
     '$route.query.type': function() { this.applyTypeQuery(); },
+    '$route.query.state': function() { this.applyStateQuery(); },
   },
   methods: {
     // Coming from a belief card's "Trigger" or "Reflexionen" row: it asks for
@@ -427,8 +427,18 @@ export default {
       if (raw !== TRIGGER && raw !== REFLECTION && raw !== ACTION) return;
       this.typeFilter = raw;
       this.$nextTick(() => {
-        const row = this.$el.querySelectorAll('.screen-header .pill-row')[1];
-        this.alignPill(row && row.querySelector('.pill.active'));
+        this.alignActive('type');
+      });
+    },
+    // Narrowing the runs further: which of the two states is being read.
+    // Only meaningful once the runs themselves are what the list shows.
+    applyStateQuery() {
+      const raw = this.$route.query.state;
+      if (EXPERIMENT_DISPLAY_STATES.indexOf(raw) === -1) return;
+      this.typeFilter = ACTION;
+      this.actionState = raw;
+      this.$nextTick(() => {
+        this.alignActive('state');
       });
     },
     // Coming from a belief card: select its chip, and scroll the pill row so
@@ -440,8 +450,7 @@ export default {
       if (!this.filterBeliefs.some(b => b.time === time)) return;
       this.beliefFilter = time;
       this.$nextTick(() => {
-        const row = this.$el.querySelectorAll('.screen-header .pill-row')[0];
-        this.alignPill(row && row.querySelector('.pill.active'));
+        this.alignActive('belief');
       });
     },
     // Coming from a trend bar: clear the filter so the row it points at is
@@ -449,9 +458,10 @@ export default {
     revealRequested() {
       const id = requestedId(this.$route);
       if (!id) return;
-      if (!this.entries.some(e => String(e.time) === id)) return;
+      if (!this.entries.some(e => String(this.rowId(e)) === id)) return;
       this.beliefFilter = null;
       this.typeFilter = null;
+      this.actionState = null;
       this.$nextTick(() => scrollRowIntoView(this.$el, id));
     },
     // Picking a chip brings it to the left edge of its row, where the first
@@ -459,17 +469,15 @@ export default {
     // however far along the row it was tapped.
     pick(event, filter, value) {
       this[filter] = value;
-      this.alignPill(event.currentTarget);
+      alignPill(event.currentTarget);
     },
-    alignPill(btn) {
-      if (!btn || !btn.closest) return;
-      const row = btn.closest('.pill-row');
-      if (!row || !row.scrollTo) return;
-      const pad = parseFloat(getComputedStyle(row).paddingLeft) || 0;
-      const left = (btn.getBoundingClientRect().left - row.getBoundingClientRect().left)
-        + row.scrollLeft - pad;
-      row.scrollTo({ left: Math.max(0, left), behavior: 'smooth' });
+    // Which row a filter lives in depends on how many of them are shown, so
+    // it is named rather than counted.
+    alignActive(kind) {
+      const row = this.$el.querySelector(`.pill-row[data-pill-row="${kind}"]`);
+      alignPill(row && row.querySelector('.pill.active'));
     },
+    rowId(entry) { return entry.actionId || entry.time; },
     isSwiping(key) { return this.sw.openKey === key || this.sw.touchKey === key; },
     typeOf(entry) { return entryType(entry); },
     isAction(entry) { return entryType(entry) === ACTION; },

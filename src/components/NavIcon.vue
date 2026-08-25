@@ -9,14 +9,13 @@
 // come from Material Design Icons as bare path data — strings rather than
 // another font file.
 import {
-  mdiViewDashboard, mdiHistory, mdiVanish, mdiFlask, mdiBookOpenPageVariant,
+  mdiViewDashboard, mdiHistory, mdiVanish, mdiBookOpenPageVariant,
 } from '@mdi/js';
 
 const PATHS = {
   now: mdiViewDashboard,
   patterns: mdiHistory,
   beliefs: mdiVanish,
-  actions: mdiFlask,
   journal: mdiBookOpenPageVariant,
 };
 

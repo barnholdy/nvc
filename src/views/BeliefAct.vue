@@ -1,7 +1,11 @@
 <template>
   <div class="wizard-page">
     <v-content>
-      <wizard-header title="Handlung planen" :step="step" :total="totalSteps"></wizard-header>
+      <wizard-header
+        title="Handlung planen"
+        :step="step + stepOffset"
+        :total="totalSteps + stepOffset"
+      ></wizard-header>
       <div>
         <!-- Only when the wizard was opened without a belief, from the
              Handlungen list. -->
@@ -52,6 +56,7 @@ import BeliefActFear from '@/views/BeliefActFear.vue';
 import WizardHeader from '@/components/WizardHeader.vue';
 import WizardFooter from '@/components/WizardFooter.vue';
 import { createExperiment, isPlanned } from '@/utils/experiment';
+import { ACTION } from '@/utils/journalBeliefs';
 import { beliefStatus } from '@/utils/beliefStatus';
 import { beliefCredibility } from '@/utils/credibility';
 import { situationsForBelief } from '@/utils/patterns';
@@ -85,6 +90,10 @@ export default {
       ? (r.experiments || []).find(function(x) { return x.id === wanted; })
       : null;
     return {
+      // Reached through the Tagebuch's fork, the first question was already
+      // answered there — so the bar carries on from it instead of starting
+      // over at one.
+      stepOffset: this.$route.query.from === 'journal' ? 1 : 0,
       needsBelief: needsBelief,
       beliefTime: entry ? entry.time : null,
       step: 1,
@@ -200,11 +209,16 @@ export default {
       });
       this.$store.dispatch('updateBelief', saved);
       // The experiment is now planned — show it where it waits to be carried out.
-      this.$router.push({ path: '/actions', query: { tab: 'planned' } });
+      this.$router.push({ path: '/journal', query: { type: ACTION, state: 'planned' } });
     },
     close() {
-      // Back where the wizard was opened from.
-      this.$router.push(this.needsBelief ? '/actions' : '/beliefs');
+      // Back where the wizard was opened from — for the fork, that is the
+      // question it forked on, with the answer still given.
+      if (this.stepOffset) {
+        this.$router.push({ path: '/add-journal', query: { type: ACTION } });
+        return;
+      }
+      this.$router.push(this.needsBelief ? { path: '/journal', query: { type: ACTION } } : '/beliefs');
     },
   },
 };
