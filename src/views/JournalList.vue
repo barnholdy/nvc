@@ -475,7 +475,10 @@ export default {
     // it is named rather than counted.
     alignActive(kind) {
       const row = this.$el.querySelector(`.pill-row[data-pill-row="${kind}"]`);
-      alignPill(row && row.querySelector('.pill.active'));
+      // Not just any active chip: the collapse toggle shares this row and is
+      // marked active whenever the compact view is on. It sits at the very
+      // left, so aligning that one scrolls nowhere at all.
+      alignPill(row && row.querySelector('.pill.active:not(.pill-icon)'));
     },
     rowId(entry) { return entry.actionId || entry.time; },
     isSwiping(key) { return this.sw.openKey === key || this.sw.touchKey === key; },

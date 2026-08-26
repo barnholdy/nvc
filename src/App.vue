@@ -833,16 +833,6 @@ html { overflow-x: hidden; }
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   &::-webkit-scrollbar { display: none; }
-  /* Room behind the last chip, so it too can be scrolled to the left edge.
-     Zero until a selection asks for it, which is what keeps a row that never
-     needed to scroll from suddenly being able to. */
-  &::after {
-    content: '';
-    flex: 0 0 auto;
-    width: var(--pill-tail, 0px);
-    /* Cancels the row's own gap, so an unasked-for tail takes no space. */
-    margin-left: -8px;
-  }
 }
 /* Stacked filter rows sit as close together as the last row sits to the
    card: they are one control, not two separate blocks. */
