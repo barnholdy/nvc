@@ -10,7 +10,9 @@
         <belief-add-belief
           v-show="step === 1"
           :initialValue="belief"
-          @beliefChanged="belief = $event">
+          :initialLinked="linkedBeliefs"
+          @beliefChanged="belief = $event"
+          @linkedChanged="linkedBeliefs = $event">
         </belief-add-belief>
 
         <belief-add-reaction
@@ -166,6 +168,7 @@ export default {
       taxonomy: taxonomy,
       editEntry: editEntry || null,
       belief: editEntry ? editEntry.belief : '',
+      linkedBeliefs: editEntry ? editEntry.linkedBeliefs || '' : '',
       selectedFeelings: editEntry ? editEntry.feelings || [] : [],
       selectedNeeds: editEntry ? editEntry.needs || [] : [],
       withBelief: editEntry ? editEntry.withBelief || '' : '',
@@ -248,6 +251,7 @@ export default {
     persist(withOrigin) {
       const payload = {
         belief: this.belief,
+        linkedBeliefs: this.linkedBeliefs.trim(),
         feelings: this.selectedFeelings,
         withBelief: this.withBelief,
         coping: this.coping,
