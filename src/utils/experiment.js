@@ -1,6 +1,7 @@
 // A Verhaltensexperiment tests one belief against reality. Its point is the
 // measurable gap between the fear written down BEFORE acting and what actually
-// happened, so `fearExpected` is locked once the experiment is planned.
+// happened — so `fearExpected` stays open for as long as the run is still
+// ahead of you, and it is the auswerten step that closes the question.
 
 
 // A run is planned from the moment it is saved, so only two states are ever

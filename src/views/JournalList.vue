@@ -144,11 +144,6 @@
                       height="17"
                     ><path :d="typeIcon(entry)" fill="currentColor"></path></svg>
                     <p class="card-title">{{ entry.fact }}</p>
-                    <button
-                      v-if="isAction(entry) && entry.state === 'planned'"
-                      class="card-btn"
-                      @click.stop="startResult(entry)"
-                    >Auswerten</button>
                   </div>
                 </div>
 
@@ -485,18 +480,16 @@ export default {
     typeOf(entry) { return entryType(entry); },
     isAction(entry) { return entryType(entry) === ACTION; },
     // What a run offers besides deleting: planning it again re-opens the
-    // wizard on it, evaluating records its result. The card already carries
-    // whichever one is next, so that one is left out here.
+    // wizard on it, evaluating records its result. Both live in the swipe
+    // menu, so the card itself stays a record rather than a control panel.
     swipeSteps(entry) {
       if (!this.isAction(entry)) {
         return [{ key: 'edit', label: 'Bearbeiten', color: '#4ade80', run: e => this.editEntry(e) }];
       }
-      const steps = [
+      return [
         { key: 'plan', label: 'Planen', color: '#4ade80', run: e => this.editAction(e) },
         { key: 'evaluate', label: 'Auswerten', color: '#4ade80', run: e => this.startResult(e) },
       ];
-      const here = entry.state === 'planned' ? 'Auswerten' : '';
-      return steps.filter(x => x.label !== here);
     },
     // A single button's group takes that button's colour, so its outline
     // matches it rather than the card's inherited text colour.

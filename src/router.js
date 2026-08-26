@@ -49,7 +49,7 @@ export default new Router({
       component: () => import('./views/BeliefAct.vue'),
     },
     {
-      // Plan a specific experiment: situation plus the locked anchor.
+      // Plan a specific experiment: its situation and what it expects.
       path: '/act-belief/:time/:experimentId',
       name: 'plan-experiment',
       component: () => import('./views/BeliefAct.vue'),

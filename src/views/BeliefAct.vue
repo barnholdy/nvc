@@ -190,9 +190,11 @@ export default {
       const r = (this.entry && this.entry.reflection) || {};
       const list = (r.experiments || []).slice();
       const current = Object.assign({}, this.experiment);
-      // Saved means planned: the wizard does not let go of a run until it has
-      // both a situation and an anchor.
-      if (!current.plannedAt) current.plannedAt = Date.now();
+      // Saved means planned — the wizard does not let go of a run until it has
+      // both a situation and an anchor — and saved again means planned again:
+      // the date a run carries is the last time it was worked on, so a run
+      // picked up today reads as today's plan rather than last month's.
+      current.plannedAt = Date.now();
       if (!current.situation && !current.fear) {
         return list.filter(function(x) { return x.id !== current.id; });
       }

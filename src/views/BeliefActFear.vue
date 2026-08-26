@@ -18,22 +18,26 @@
     <meter-card
       :value="fearExpected"
       label="Erwartet"
-      :readonly="isLocked"
       minLabel="gar nicht"
       maxLabel="genau so schlimm"
-      :color="isLocked ? '#fd9927' : ''"
       @input="fearExpected = $event"
     >
-      <template v-if="isLocked" slot="hint">
-        Festgeschrieben am {{ plannedAtLabel }} — bleibt unverändert, damit der spätere
-        Vergleich etwas wert ist.
+      <!-- The number is what the result is later held against, so it says
+           where it stands — but it is yours to move. -->
+      <template v-if="isEvaluated" slot="hint">
+        Diese Handlung ist schon ausgewertet. Änderst du das hier, ändert sich auch der
+        Vergleich mit dem, was wirklich passiert ist.
+      </template>
+      <template v-else-if="plannedAtLabel" slot="hint">
+        Notiert am {{ plannedAtLabel }} — solange die Handlung noch aussteht, kannst du
+        das anpassen.
       </template>
     </meter-card>
 
     <p class="wizard-note">
       Danach führst du genau das aus — nicht mehr, nicht weniger. Der Impuls, im letzten
       Moment doch ins alte Muster zu kippen, ist die Überzeugung selbst. Bemerke ihn,
-      folge ihm nicht. Das Ergebnis trägst du später unter „Handlungen“ ein.
+      folge ihm nicht. Das Ergebnis trägst du später im Tagebuch ein.
     </p>
   </div>
 </template>
@@ -43,6 +47,7 @@ import moment from 'moment';
 import WizardContext from '@/components/WizardContext.vue';
 import InputCard from '@/components/InputCard.vue';
 import MeterCard from '@/components/MeterCard.vue';
+import { experimentState } from '@/utils/experiment';
 
 export default {
   name: 'belief-act-fear',
@@ -57,11 +62,12 @@ export default {
       fearExpected: typeof this.experiment.fearExpected === 'number'
         ? this.experiment.fearExpected
         : 5,
-      // Once planned, the anchor must not move.
-      isLocked: !!this.experiment.plannedAt,
     };
   },
   computed: {
+    isEvaluated() {
+      return experimentState(this.experiment) === 'evaluated';
+    },
     plannedAtLabel() {
       if (!this.experiment.plannedAt) return '';
       moment.locale('de');
