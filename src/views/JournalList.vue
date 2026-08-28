@@ -191,9 +191,11 @@
                 </template>
 
                 <!-- Every belief this entry was written against, each with
-                     the sentence meant to replace it and what this one entry
-                     rated it at. -->
+                     the sentence meant to replace it. The blocks show what
+                     this one entry rated it at; the mark is the trend it sits
+                     in — the median of the last three readings. -->
                 <belief-chip
+                  trend-mark
                   v-for="b in shownBeliefsOf(entry)"
                   :key="b.time"
                   :text="b.text"
@@ -250,7 +252,7 @@ import { openQuery, requestedId, scrollRowIntoView } from '@/utils/reveal';
 import { alignPill } from '@/utils/pillScroll';
 import { beliefCredibility, beliefStanding } from '@/utils/credibility';
 import {
-  journalBeliefTimes, journalNames, journalTruthFor, entryType, isTrigger,
+  journalBeliefTimes, journalNames, journalTruthFor, entryType,
   TRIGGER, REFLECTION, ACTION,
 } from '@/utils/journalBeliefs';
 import {
@@ -537,9 +539,10 @@ export default {
         return {
           time: time,
           text: belief ? belief.belief : 'Gelöschte Überzeugung',
-          // A Trigger speaks for the belief, so the sentence meant to replace
-          // it has no business being quoted underneath.
-          affirmation: belief && !isTrigger(entry) ? affirmationTextOf(belief) : '',
+          // Quoted under every kind of entry, a Trigger included: the moment
+          // the belief strikes is exactly when the sentence meant to replace
+          // it is worth having in front of you.
+          affirmation: belief ? affirmationTextOf(belief) : '',
           exists: !!belief,
           current: journalTruthFor(entry, time),
           standing: belief ? beliefStanding(patterns, belief, journal) : null,

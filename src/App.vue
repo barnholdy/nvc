@@ -1109,23 +1109,21 @@ html { overflow-x: hidden; }
    down its left in the colour the credibility bar gives it — red for what is
    still held, green for what is being grown into. Compact on purpose; only
    the Überzeugungen list, where the belief is the subject, spells it out. */
+/* No bar down the side any more: the two are told apart by how bright they
+   are, which is enough where they always stand one above the other. */
 .quote-belief,
 .quote-affirmation {
-  border-left: 3px solid;
-  padding-left: 10px;
   margin: 0;
   font-size: 0.88rem;
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
 .quote-belief {
-  border-color: #c0483d;
   color: #8e8e93;
 }
 /* The brighter of the two: it is the sentence being grown into, and the one
    the eye should land on. */
 .quote-affirmation {
-  border-color: #46955f;
   color: #ebebf5;
   margin-top: 6px;
 }

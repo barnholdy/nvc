@@ -1,8 +1,8 @@
 <template>
   <div class="card meter-card">
     <div class="meter-head">
-      <span class="meter-value" :style="valueStyle">{{ value }}</span>
-      <span class="meter-max">/{{ max }}</span>
+      <span class="meter-value" :style="valueStyle">{{ percent }}</span>
+      <span class="meter-max">%</span>
       <span class="meter-label">{{ label }}</span>
     </div>
     <input
@@ -25,6 +25,8 @@
 <script>
 // A number on a scale, shown the same way wherever one is recorded: the value
 // large on the left, what it measures on the right, the scale under both.
+// Read as a percentage rather than as a fraction of the scale — „60 %“ says
+// how far along it stands without the reader having to do the division.
 export default {
   name: 'meter-card',
   props: {
@@ -40,6 +42,12 @@ export default {
   },
   computed: {
     valueStyle() { return this.color ? { color: this.color } : null; },
+    // The scale itself is still answered in whole steps; only the way the
+    // number is read changes.
+    percent() {
+      if (!this.max) return 0;
+      return Math.round((this.value / this.max) * 100);
+    },
   },
 };
 </script>

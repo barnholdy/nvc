@@ -22,9 +22,9 @@
           :style="{ left: pct(baseline) }"
         ></span>
         <span
-          v-if="current !== null"
+          v-if="markValue !== null"
           class="meter-mark meter-mark-now"
-          :style="{ left: pct(current) }"
+          :style="{ left: pct(markValue) }"
         ></span>
       </template>
     </div>
@@ -43,12 +43,16 @@
 <script>
 import { SCALE_MAX } from '@/utils/credibility';
 
-// One scale, read three ways. The bar itself turns from red to green where the
-// belief stands today: red is what is still believed, green what has already
-// been let go of — the turn needs no mark of its own, the colours are the
-// mark. The orange line is where it started, the green one the single reading
-// this row is about, so the distance between them is the movement without a
-// number having to state it.
+// One scale, read three ways. The bar turns from red to green at one of the
+// readings — red is what is still believed, green what has already been let
+// go of, and the turn needs no mark of its own, the colours are the mark. The
+// orange line is where it started, the green one the second reading, so the
+// distance between them is the movement without a number having to state it.
+//
+// Which reading goes where depends on what the row is for. On a row about the
+// belief itself the blocks show where it stands and the green line the one
+// reading this row took. In the Tagebuch it is the other way round: the blocks
+// are that entry's own reading, and the line is the trend it sits in.
 
 // Each label sits on its own mark and is only moved when it has to be: far
 // enough inside the track not to hang off the end, and far enough from the
@@ -76,22 +80,36 @@ export default {
     // among other things rather than being about it. The Überzeugungen list
     // keeps the full size — there the bar is the subject.
     compact: { type: Boolean, default: false },
+    // Turns the two around: the blocks show this row's own reading and the
+    // second mark becomes the trend the belief is in.
+    trendMark: { type: Boolean, default: false },
   },
   computed: {
     max() { return SCALE_MAX; },
+    // An entry that named a belief without rating it has no reading of its
+    // own — then the blocks fall back to where the belief stands, rather than
+    // going colourless.
+    barValue() {
+      if (!this.trendMark) return this.standing;
+      return this.current !== null ? this.current : this.standing;
+    },
+    markValue() { return this.trendMark ? this.standing : this.current; },
+    markLabel() { return this.trendMark ? 'Trend' : 'aktuell'; },
     hasMeter() {
       return this.baseline !== null || this.standing !== null || this.current !== null;
     },
     marksCoincide() {
-      if (this.baseline === null || this.current === null) return false;
-      return Math.abs(this.percent(this.baseline) - this.percent(this.current)) < SAME_SPOT;
+      if (this.baseline === null || this.markValue === null) return false;
+      return Math.abs(this.percent(this.baseline) - this.percent(this.markValue)) < SAME_SPOT;
     },
     // Each label on its own mark, moved only far enough to stay inside the
     // track and clear of the other one.
     labels() {
       const items = [];
       if (this.baseline !== null) items.push({ key: 'start', text: 'Start', pos: this.percent(this.baseline) });
-      if (this.current !== null) items.push({ key: 'now', text: 'aktuell', pos: this.percent(this.current) });
+      if (this.markValue !== null) {
+        items.push({ key: 'now', text: this.markLabel, pos: this.percent(this.markValue) });
+      }
 
       const clamp = p => Math.max(EDGE, Math.min(100 - EDGE, p));
       const sorted = items
@@ -113,10 +131,11 @@ export default {
   methods: {
     percent(v) { return (Math.max(0, Math.min(SCALE_MAX, v)) / SCALE_MAX) * 100; },
     pct(v) { return `${this.percent(v)}%`; },
-    // Up to where the belief stands it is still held; past it, let go of.
+    // Up to the reading the blocks are drawn for it is still held; past it,
+    // let go of.
     segClass(n) {
-      if (this.standing === null) return {};
-      return n <= this.standing ? { held: true } : { freed: true };
+      if (this.barValue === null) return {};
+      return n <= this.barValue ? { held: true } : { freed: true };
     },
   },
 };

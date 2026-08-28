@@ -19,6 +19,7 @@
       :baseline="baseline"
       :standing="standing"
       :current="current"
+      :trendMark="trendMark"
       compact
     ></credibility-meter>
   </div>
@@ -46,6 +47,9 @@ export default {
     current: { type: Number, default: null },
     // A chip whose belief no longer exists is a label, not a link.
     tappable: { type: Boolean, default: true },
+    // Passed through: whether the blocks show this row's own reading and the
+    // mark the trend, or the other way round.
+    trendMark: { type: Boolean, default: false },
   },
 };
 </script>

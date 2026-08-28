@@ -92,9 +92,7 @@
       </template>
 
       <!-- Then what has moved. One chip per belief, and one for all of them
-           taken together; the affirmation is read on the opposite scale, so
-           it gets its own chart under the belief's rather than being mixed
-           into the same bars. -->
+           taken together. -->
       <template v-if="trendRows.length">
         <p class="section-head">Trends</p>
 
@@ -112,16 +110,18 @@
         <div v-if="shownTrend" class="card">
           <p class="card-title">{{ shownTrend.quoted ? `„${shownTrend.text}“` : shownTrend.text }}</p>
           <trend-chart :row="shownTrend"></trend-chart>
+        </div>
+      </template>
 
-          <!-- What the same work built up in place of the belief, read the
-               other way round: here green is the ground it has won. -->
-          <template v-if="shownAffirmation">
-            <p class="trend-split">Affirmation</p>
-            <p v-if="shownAffirmation.quoted" class="quote-affirmation">
-              „{{ shownAffirmation.text }}“
-            </p>
-            <trend-chart :row="shownAffirmation" kind="affirmation"></trend-chart>
-          </template>
+      <!-- Which beliefs keep turning up in the same moment. Counted from the
+           entries, so it says what happened rather than what was expected. -->
+      <template v-if="pairRows.length">
+        <p class="section-head">Häufig zusammen genannt</p>
+
+        <div v-for="pair in pairRows" :key="pair.key" class="card pair-card">
+          <p class="quote-belief">„{{ pair.aText }}“</p>
+          <p class="quote-belief">„{{ pair.bText }}“</p>
+          <p class="pair-count">{{ pairLabel(pair.count) }}</p>
         </div>
       </template>
 
@@ -170,9 +170,9 @@ import {
   experimentState,
 } from '@/utils/experiment';
 import {
-  beliefCredibility, beliefRows, baselineOf, affirmationPoints,
-  allBeliefPoints, allAffirmationPoints,
+  beliefCredibility, beliefRows, baselineOf, allBeliefPoints,
 } from '@/utils/credibility';
+import { beliefPairs } from '@/utils/beliefPairs';
 import { alignPill } from '@/utils/pillScroll';
 import { ACTION } from '@/utils/journalBeliefs';
 import { mdiBookOpenPageVariant } from '@mdi/js';
@@ -289,20 +289,9 @@ export default {
       });
       return rows;
     },
-    // The affirmation that belongs to whatever the chips are showing: one
-    // belief's, or every one of them where the sum is shown.
-    shownAffirmation() {
-      const row = this.shownTrend;
-      if (!row) return null;
-      if (row.key === ALL_TRENDS) {
-        return this.affirmationRow('all', 'Alle Affirmationen',
-          allAffirmationPoints(this.beliefs), false);
-      }
-      const belief = this.beliefs.find(b => b.time === row.key);
-      const first = (belief && belief.affirmations && belief.affirmations[0]) || null;
-      if (!first || !first.text) return null;
-      return this.affirmationRow(first.text, first.text,
-        affirmationPoints([belief], first.text), true);
+    // Pairs of beliefs the same entry named, most frequent first.
+    pairRows() {
+      return beliefPairs(this.beliefs, this.journal);
     },
     // The chosen chip, or the first one — a chip that vanished (a rating
     // undone elsewhere) must not leave the block blank.
@@ -451,17 +440,8 @@ export default {
   },
   methods: {
     round(v) { return String(Math.round(v * 10) / 10).replace('.', ','); },
-    // The same shape a belief row has, so one chart draws both.
-    affirmationRow(key, text, points, quoted) {
-      if (!points.length) return null;
-      return {
-        key: key,
-        text: text,
-        quoted: quoted,
-        points: points,
-        baseline: baselineOf(points),
-        hasTrend: points.length > 1,
-      };
+    pairLabel(n) {
+      return n === 1 ? 'einmal zusammen genannt' : `${n}× zusammen genannt`;
     },
     // Like the Tagebuch's chips: what is being read moves to the left edge.
     pickTrend(event, key) {
@@ -492,12 +472,11 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.trend-split {
-  margin: 18px 0 8px;
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #636366;
+.pair-card .quote-belief + .quote-belief { margin-top: 8px; }
+.pair-count {
+  margin: 10px 0 0;
+  font-size: 0.78rem;
+  color: #8e8e93;
 }
 .dark-page { background: #000; min-height: 100vh; }
 

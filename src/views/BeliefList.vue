@@ -232,30 +232,47 @@
               v-if="patternCount(entry.time)"
               class="link-chip"
               @click.stop="openSituations(entry)"
-            >{{ situationsShort(entry) }}</span>
+            ><svg class="link-icon link-icon-trigger" viewBox="0 0 24 24" width="13" height="13"
+              ><path :d="icons.trigger" fill="currentColor"></path></svg
+              >{{ situationsShort(entry) }}</span>
             <span
               v-if="experimentCount(entry)"
               class="link-chip"
               @click.stop="openExperiments(entry)"
-            >{{ experimentsShort(entry) }}</span>
+            ><svg class="link-icon link-icon-action" viewBox="0 0 24 24" width="13" height="13"
+              ><path :d="icons.action" fill="currentColor"></path></svg
+              >{{ experimentsShort(entry) }}</span>
             <span
               v-if="journalCount(entry.time)"
               class="link-chip"
               @click.stop="openJournal(entry)"
-            >{{ journalShort(entry) }}</span>
+            ><svg class="link-icon link-icon-reflection" viewBox="0 0 24 24" width="13" height="13"
+              ><path :d="icons.reflection" fill="currentColor"></path></svg
+              >{{ journalShort(entry) }}</span>
           </div>
 
+          <!-- Each row carries the mark its own list is read by, so what it
+               leads to is recognisable before the words are. -->
           <div v-if="!compact && patternCount(entry.time)" class="card-link" @click.stop="openSituations(entry)">
+            <svg class="link-icon link-icon-trigger" viewBox="0 0 24 24" width="16" height="16">
+              <path :d="icons.trigger" fill="currentColor"></path>
+            </svg>
             <span class="card-link-text">{{ situationsLabel(entry) }}</span>
             <v-icon class="detail-chevron">chevron_right</v-icon>
           </div>
 
           <div v-if="!compact && experimentCount(entry)" class="card-link" @click.stop="openExperiments(entry)">
+            <svg class="link-icon link-icon-action" viewBox="0 0 24 24" width="16" height="16">
+              <path :d="icons.action" fill="currentColor"></path>
+            </svg>
             <span class="card-link-text">{{ experimentsLabel(entry) }}</span>
             <v-icon class="detail-chevron">chevron_right</v-icon>
           </div>
 
           <div v-if="!compact && journalCount(entry.time)" class="card-link" @click.stop="openJournal(entry)">
+            <svg class="link-icon link-icon-reflection" viewBox="0 0 24 24" width="16" height="16">
+              <path :d="icons.reflection" fill="currentColor"></path>
+            </svg>
             <span class="card-link-text">{{ journalLabel(entry) }}</span>
             <v-icon class="detail-chevron">chevron_right</v-icon>
           </div>
@@ -333,6 +350,7 @@ import { copingLabel } from '@/utils/coping';
 import { requestedId, scrollRowIntoView, scrollRowToTop } from '@/utils/reveal';
 import { alignPill } from '@/utils/pillScroll';
 import NavIcon from '@/components/NavIcon.vue';
+import { mdiLightningBolt, mdiBookOpenPageVariant, mdiFlaskOutline } from '@mdi/js';
 
 const PRACTICE_KEY = 'nvc.amen';
 const COMPACT_KEY = 'nvc.beliefsCompact';
@@ -377,6 +395,14 @@ export default {
     tab() { this.sw.openIdx = null; this.sw.openDir = null; },
   },
   computed: {
+    // The same three marks the Tagebuch and the trends read their rows by.
+    icons() {
+      return {
+        trigger: mdiLightningBolt,
+        reflection: mdiBookOpenPageVariant,
+        action: mdiFlaskOutline,
+      };
+    },
     // The panels reach only as far down as the part that answers the
     // swipe, so a tall card does not get a full-height slab behind it.
     panelStyle() {
@@ -828,6 +854,13 @@ export default {
   color: #d1d1d6;
 }
 .link-chip:active { opacity: 0.6; }
+.link-icon { flex-shrink: 0; }
+.link-chip .link-icon { margin-right: 6px; }
+/* The same two colours the credibility bar is read in: a Trigger is evidence
+   for the belief, a Reflexion and a Handlung evidence against it. */
+.link-icon-trigger { color: #c0483d; }
+.link-icon-reflection { color: #46955f; }
+.link-icon-action { color: #46955f; }
 /* Only the head answers a swipe; the rest of the card scrolls freely. */
 
 .confirm-dialog { background: #1c1c1e !important; }

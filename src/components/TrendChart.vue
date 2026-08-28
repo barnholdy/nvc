@@ -205,7 +205,9 @@ export default {
   font-weight: 600;
   white-space: nowrap;
 }
-.axis-mark-start { color: #fd9927; }
+/* The anchor is read in the same red the bars are: it marks where the belief
+   started out, which is the ground the red is measuring. */
+.axis-mark-start { color: #c0483d; }
 .chart-scroll {
   flex: 1;
   overflow-x: auto;
@@ -271,7 +273,7 @@ export default {
   z-index: 2;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
 }
-.bar-level-start { background: #fd9927; }
+.bar-level-start { background: #c0483d; }
 .bar-level-now { background: #4ade80; }
 .bar-date {
   font-size: 0.62rem;
