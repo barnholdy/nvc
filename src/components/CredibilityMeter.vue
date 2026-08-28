@@ -175,11 +175,13 @@ export default {
      the green one is otherwise read against green blocks. */
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
 }
-.meter-mark-start { background: #fd9927; }
+/* The anchor is read in the same red the blocks are: it marks where the
+   belief started out, which is the ground the red is measuring. */
+.meter-mark-start { background: #c0483d; }
 .meter-mark-now { background: #4ade80; }
 /* Where it started and where it stands are the same reading: one mark, both
    colours, rather than one of them hidden behind the other. */
-.meter-mark-both { background: linear-gradient(to bottom, #fd9927 50%, #4ade80 50%); }
+.meter-mark-both { background: linear-gradient(to bottom, #c0483d 50%, #4ade80 50%); }
 .meter-labels {
   position: relative;
   height: 16px;
@@ -193,7 +195,7 @@ export default {
   font-weight: 600;
   white-space: nowrap;
 }
-.meter-label-start { color: #fd9927; }
+.meter-label-start { color: #c0483d; }
 .meter-label-now { color: #4ade80; }
 
 /* Same reading, less room: the blocks thin out and the words shrink with
