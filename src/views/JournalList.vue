@@ -5,7 +5,7 @@
         <div class="screen-title-row">
           <h1 class="screen-title">Tagebuch</h1>
           <div class="screen-actions">
-            <button class="screen-add" @click="$router.push('/add-journal')" aria-label="Neuer Eintrag">+</button>
+            <button class="screen-add" @click="$router.push(addTarget)" aria-label="Neuer Eintrag">+</button>
             <button class="screen-add" @click="$router.push('/settings')" aria-label="Einstellungen">
               <v-icon color="#8e8e93">settings</v-icon>
             </button>
@@ -386,6 +386,21 @@ export default {
         .filter(b => counts[b.time])
         .map(b => ({ time: b.time, belief: b.belief, count: counts[b.time] }))
         .sort((a, b) => b.count - a.count);
+    },
+    // What the „+“ opens: whatever the chips have already answered is
+    // answered in the wizard too. A run with its belief already named is the
+    // same thing as pressing „Handeln“ on that belief, so it goes straight
+    // there rather than through a fork it would only pass through.
+    addTarget() {
+      if (this.typeFilter === ACTION) {
+        return this.beliefFilter !== null
+          ? `/act-belief/${this.beliefFilter}`
+          : '/add-action';
+      }
+      const query = {};
+      if (this.typeFilter !== null) query.type = this.typeFilter;
+      if (this.beliefFilter !== null) query.belief = String(this.beliefFilter);
+      return { path: '/add-journal', query };
     },
     groups() {
       const out = [];

@@ -6,16 +6,11 @@
 // them, so the list says what actually happened, not what was expected.
 import { journalBeliefTimes } from './journalBeliefs';
 
-// Twice is the least that can be called a habit — a single moment that named
-// two beliefs is a coincidence, not a pattern.
-export const MIN_TOGETHER = 2;
-
 function list(value) {
   return Array.isArray(value) ? value : [];
 }
 
-export function beliefPairs(beliefs, journal, minCount) {
-  const min = typeof minCount === 'number' ? minCount : MIN_TOGETHER;
+export function beliefPairs(beliefs, journal) {
   const texts = {};
   list(beliefs).forEach((b) => { if (b) texts[b.time] = b.belief || ''; });
 
@@ -52,9 +47,10 @@ export function beliefPairs(beliefs, journal, minCount) {
     }))
     // Two beliefs belong together when neither of them turns up apart more
     // often than the two of them turn up as one moment: the middle of the
-    // ring has to be at least as heavy as either side of it. Below the
-    // threshold it is a coincidence rather than a habit, however lopsided.
-    .filter(p => p.count >= min && p.count >= p.onlyA && p.count >= p.onlyB)
+    // ring has to be at least as heavy as either side of it. That is the
+    // whole test — a pair that has only ever appeared as a pair passes it on
+    // its first moment, and rightly so: nothing about it says otherwise yet.
+    .filter(p => p.count >= p.onlyA && p.count >= p.onlyB)
     // The strongest knot first; between equals, the one named most recently.
     .sort((x, y) => (y.count - x.count)
       || (Math.max.apply(null, y.entries) - Math.max.apply(null, x.entries)));

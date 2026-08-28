@@ -129,12 +129,19 @@ export default {
     // Opened from a belief's own card: that belief starts out chosen, and it
     // is always a Reflexion — that button only appears on a wandelte belief.
     const isPreselect = this.$route.name === 'journal-belief';
-    const preselected = isPreselect ? [parseInt(this.$route.params.time, 10)] : [];
+    // Opened from the Tagebuch's „+“: whatever its chips had already narrowed
+    // the list to is answered here too, rather than being asked again.
+    const asked = this.$route.query.type;
+    const fromQuery = [TRIGGER, REFLECTION, ACTION].indexOf(asked) !== -1 ? asked : null;
+    const namedBelief = parseInt(this.$route.query.belief, 10);
+    const preselected = isPreselect
+      ? [parseInt(this.$route.params.time, 10)]
+      : (isNaN(namedBelief) ? [] : [namedBelief]);
     return {
       step: 1,
       type: editEntry
         ? entryType(editEntry)
-        : (isPreselect ? REFLECTION : (this.$route.query.type === ACTION ? ACTION : null)),
+        : (isPreselect ? REFLECTION : fromQuery),
       editEntry: editEntry || null,
       beliefTimes: editEntry ? journalBeliefTimes(editEntry) : preselected,
       beliefTruths: editEntry ? Object.assign({}, journalBeliefTruths(editEntry)) : {},

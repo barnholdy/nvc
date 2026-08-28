@@ -213,8 +213,11 @@
             <p class="aff-text">„{{ affirmationOf(entry).text }}“</p>
           </div>
 
+          <!-- One row of chips, whichever view the list is in: what a belief
+               has collected reads the same either way, and each chip carries
+               the mark of the list it leads to. -->
           <div
-            v-if="compact && (patternCount(entry.time) || experimentCount(entry) || journalCount(entry.time))"
+            v-if="patternCount(entry.time) || experimentCount(entry) || journalCount(entry.time)"
             class="link-chips"
           >
             <span
@@ -238,32 +241,6 @@
             ><svg class="link-icon link-icon-reflection" viewBox="0 0 24 24" width="13" height="13"
               ><path :d="icons.reflection" fill="currentColor"></path></svg
               >{{ journalShort(entry) }}</span>
-          </div>
-
-          <!-- Each row carries the mark its own list is read by, so what it
-               leads to is recognisable before the words are. -->
-          <div v-if="!compact && patternCount(entry.time)" class="card-link" @click.stop="openSituations(entry)">
-            <svg class="link-icon link-icon-trigger" viewBox="0 0 24 24" width="16" height="16">
-              <path :d="icons.trigger" fill="currentColor"></path>
-            </svg>
-            <span class="card-link-text">{{ situationsLabel(entry) }}</span>
-            <v-icon class="detail-chevron">chevron_right</v-icon>
-          </div>
-
-          <div v-if="!compact && experimentCount(entry)" class="card-link" @click.stop="openExperiments(entry)">
-            <svg class="link-icon link-icon-action" viewBox="0 0 24 24" width="16" height="16">
-              <path :d="icons.action" fill="currentColor"></path>
-            </svg>
-            <span class="card-link-text">{{ experimentsLabel(entry) }}</span>
-            <v-icon class="detail-chevron">chevron_right</v-icon>
-          </div>
-
-          <div v-if="!compact && journalCount(entry.time)" class="card-link" @click.stop="openJournal(entry)">
-            <svg class="link-icon link-icon-reflection" viewBox="0 0 24 24" width="16" height="16">
-              <path :d="icons.reflection" fill="currentColor"></path>
-            </svg>
-            <span class="card-link-text">{{ journalLabel(entry) }}</span>
-            <v-icon class="detail-chevron">chevron_right</v-icon>
           </div>
 
           <!-- What to do next with this belief, at the foot of the card: each
@@ -346,7 +323,7 @@ import {
   BELIEF_STATUSES,
   BELIEF_STATUS_LABELS,
 } from '@/utils/beliefStatus';
-import { experimentsOf, experimentDisplayState } from '@/utils/experiment';
+import { experimentsOf } from '@/utils/experiment';
 import { beliefCredibility, beliefStanding } from '@/utils/credibility';
 import {
   journalBeliefTimes, isTrigger, TRIGGER, REFLECTION, ACTION,
@@ -576,8 +553,13 @@ export default {
       const steps = [
         { key: 'edit', label: 'Ergründen', color: '#4ade80', run: e => this.editEntry(e) },
         { key: 'change', label: 'Wandeln', color: '#4ade80', run: e => this.changeEntry(e) },
-        { key: 'act', label: 'Handeln', color: '#4ade80', run: e => this.actEntry(e) },
       ];
+      // An experiment tests a new perspective against reality, so there has
+      // to be one first: until the belief is wandelt there is nothing to act
+      // from, and its own wizard would not offer the belief either.
+      if (beliefStatus(entry) === 'done') {
+        steps.push({ key: 'act', label: 'Handeln', color: '#4ade80', run: e => this.actEntry(e) });
+      }
       // Only once the belief has an affirmation to hold a fact against —
       // the same reach a Tagebuch entry needs its picker step to offer it.
       if (beliefStatus(entry) === 'done' && this.affirmationOf(entry)) {
@@ -630,25 +612,6 @@ export default {
     journalShort(entry) {
       const n = this.journalCount(entry.time);
       return n === 1 ? '1 Reflexion' : `${n} Reflexionen`;
-    },
-    situationsLabel(entry) {
-      const n = this.patternCount(entry.time);
-      if (!n) return 'Keine Trigger';
-      return n === 1 ? '1 Trigger ansehen' : `${n} Trigger ansehen`;
-    },
-    // How many runs there are and how many still wait — the two numbers that
-    // say whether there is anything to do here.
-    experimentsLabel(entry) {
-      const list = experimentsOf(entry);
-      if (!list.length) return 'Keine Handlungen';
-      const openCount = list.filter(x => experimentDisplayState(x) !== 'done').length;
-      const head = list.length === 1 ? '1 Handlung' : `${list.length} Handlungen`;
-      return openCount ? `${head} · ${openCount} offen` : head;
-    },
-    journalLabel(entry) {
-      const n = this.journalCount(entry.time);
-      if (!n) return 'Keine Reflexionen';
-      return n === 1 ? '1 Reflexion ansehen' : `${n} Reflexionen ansehen`;
     },
     // The target list opens filtered to this belief rather than at one of its
     // rows: the question being asked is "all of them", not "that one".
