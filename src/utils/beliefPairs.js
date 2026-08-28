@@ -19,6 +19,9 @@ export function beliefPairs(beliefs, journal, minCount) {
   const texts = {};
   list(beliefs).forEach((b) => { if (b) texts[b.time] = b.belief || ''; });
 
+  // How often each belief was named at all, so a pair can say what each of
+  // the two did on its own as well as what they did together.
+  const named = {};
   const counts = {};
   list(journal).forEach((entry) => {
     // Only beliefs that still exist: one deleted since would otherwise pair
@@ -26,6 +29,7 @@ export function beliefPairs(beliefs, journal, minCount) {
     const times = journalBeliefTimes(entry)
       .filter(t => texts[t] !== undefined)
       .sort((x, y) => x - y);
+    times.forEach((t) => { named[t] = (named[t] || 0) + 1; });
     for (let i = 0; i < times.length; i += 1) {
       for (let k = i + 1; k < times.length; k += 1) {
         const key = `${times[i]}:${times[k]}`;
@@ -43,6 +47,9 @@ export function beliefPairs(beliefs, journal, minCount) {
       key: `${p.a}:${p.b}`,
       aText: texts[p.a],
       bText: texts[p.b],
+      // Without the other one of the pair — the two outer parts of the ring.
+      onlyA: (named[p.a] || 0) - p.count,
+      onlyB: (named[p.b] || 0) - p.count,
     }))
     // The strongest knot first; between equals, the one named most recently.
     .sort((x, y) => (y.count - x.count)

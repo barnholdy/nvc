@@ -1,16 +1,6 @@
 <template>
   <div>
     <div class="chart-row">
-      <!-- The scale is named rather than numbered, the way the credibility bar
-           names it. Only the anchor sits at one fixed height and so belongs
-           here; what each reading said is marked on its own bar. -->
-      <div class="axis">
-        <span
-          v-if="row.baseline !== null"
-          class="axis-mark axis-mark-start"
-          :style="{ bottom: levelOf(row.baseline) }"
-        >Start</span>
-      </div>
       <div class="chart-scroll" ref="scroll">
         <div class="chart">
           <!-- A bar is a reading taken somewhere; tapping it opens that
@@ -22,6 +12,9 @@
             :class="{ tappable: canOpen(p) }"
             @click="openPoint(p)"
           >
+            <!-- What this reading said, in figures: no line to read off a
+                 scale, the number is the reading. -->
+            <span class="bar-value">{{ percentOf(p.value) }}%</span>
             <div class="bar-track">
               <div class="bar-mid"></div>
               <!-- Each bar is the credibility bar stood on its end, read as
@@ -35,16 +28,6 @@
                 class="bar-seg"
                 :class="segClass(n, i)"
               ></span>
-              <div
-                v-if="row.baseline !== null"
-                class="bar-level bar-level-start"
-                :style="{ bottom: levelOf(row.baseline) }"
-              ></div>
-              <!-- What this one reading actually said. -->
-              <div
-                class="bar-level bar-level-now"
-                :style="{ bottom: levelOf(p.value) }"
-              ></div>
             </div>
             <span class="bar-date">{{ shortDate(p.time) }}</span>
             <!-- Where the reading was taken, said by the mark that side is
@@ -146,9 +129,10 @@ export default {
       const el = this.$refs.scroll;
       if (el) el.scrollLeft = el.scrollWidth;
     },
-    levelOf(value) {
+    // The reading as a share of the scale, the way every slider states it.
+    percentOf(value) {
       const v = Math.max(0, Math.min(TRUTH_SCALE_MAX, value));
-      return `${(v / TRUTH_SCALE_MAX) * 100}%`;
+      return Math.round((v / TRUTH_SCALE_MAX) * 100);
     },
     // The whole scale is coloured, the way the credibility bar colours it, so
     // the turn stays visible however low the reading itself was.
@@ -189,25 +173,6 @@ export default {
   gap: 8px;
   margin-top: 16px;
 }
-/* Exactly as tall as a bar's track, so a label placed by its own value lines
-   up with the rule drawn at that value across every bar. */
-.axis {
-  position: relative;
-  width: 44px;
-  height: 165px;
-  flex-shrink: 0;
-}
-.axis-mark {
-  position: absolute;
-  right: 0;
-  transform: translateY(50%);
-  font-size: 0.62rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-/* The anchor is read in the same red the bars are: it marks where the belief
-   started out, which is the ground the red is measuring. */
-.axis-mark-start { color: #c0483d; }
 .chart-scroll {
   flex: 1;
   overflow-x: auto;
@@ -245,6 +210,14 @@ export default {
   border-radius: 6px;
   overflow: hidden;
 }
+/* Above its bar, so the column reads number first, then how far it stands. */
+.bar-value {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #ebebf5;
+  white-space: nowrap;
+  margin-bottom: 4px;
+}
 .bar-seg {
   flex: 1;
   border-radius: 2px;
@@ -261,20 +234,6 @@ export default {
   border-top: 1px dashed #48484a;
   z-index: 1;
 }
-/* Drawn over the segments and reaching past them, so they read as levels held
-   against every bar rather than as part of any one of them. */
-.bar-level {
-  position: absolute;
-  left: -2px;
-  right: -2px;
-  height: 2px;
-  margin-bottom: -1px;
-  border-radius: 1px;
-  z-index: 2;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
-}
-.bar-level-start { background: #c0483d; }
-.bar-level-now { background: #4ade80; }
 .bar-date {
   font-size: 0.62rem;
   color: #636366;

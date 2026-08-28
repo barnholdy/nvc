@@ -119,9 +119,21 @@
         <p class="section-head">Häufig zusammen genannt</p>
 
         <div v-for="pair in pairRows" :key="pair.key" class="card pair-card">
-          <p class="quote-belief">„{{ pair.aText }}“</p>
-          <p class="quote-belief">„{{ pair.bText }}“</p>
-          <p class="pair-count">{{ pairLabel(pair.count) }}</p>
+          <!-- Two rings: what each belief did without the other, and the
+               overlap where the same moment named both. -->
+          <svg class="venn" viewBox="0 0 200 124" role="img"
+               :aria-label="vennLabel(pair)">
+            <circle class="venn-ring venn-a" cx="75" cy="62" r="48"></circle>
+            <circle class="venn-ring venn-b" cx="125" cy="62" r="48"></circle>
+            <text class="venn-count" x="49" y="62">{{ pair.onlyA }}</text>
+            <text class="venn-count venn-count-both" x="100" y="62">{{ pair.count }}</text>
+            <text class="venn-count" x="151" y="62">{{ pair.onlyB }}</text>
+          </svg>
+
+          <p class="venn-key venn-key-a">„{{ pair.aText }}“</p>
+          <p class="venn-key venn-key-b">„{{ pair.bText }}“</p>
+          <p class="pair-count">{{ pairLabel(pair.count) }}, je {{ pair.onlyA }}× und
+            {{ pair.onlyB }}× für sich</p>
         </div>
       </template>
 
@@ -441,7 +453,12 @@ export default {
   methods: {
     round(v) { return String(Math.round(v * 10) / 10).replace('.', ','); },
     pairLabel(n) {
-      return n === 1 ? 'einmal zusammen genannt' : `${n}× zusammen genannt`;
+      return n === 1 ? 'Einmal zusammen genannt' : `${n}× zusammen genannt`;
+    },
+    // What the picture says, for anyone who cannot see it.
+    vennLabel(pair) {
+      return `„${pair.aText}“ ${pair.onlyA}× allein, „${pair.bText}“ ${pair.onlyB}× allein, `
+        + `${pair.count}× zusammen genannt`;
     },
     // Like the Tagebuch's chips: what is being read moves to the left edge.
     pickTrend(event, key) {
@@ -472,7 +489,40 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.pair-card .quote-belief + .quote-belief { margin-top: 8px; }
+/* The two rings carry no fill of their own beyond a wash, so the lens where
+   they cross is simply where both washes lie — the overlap draws itself. */
+.venn {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  margin: 2px auto 12px;
+  overflow: visible;
+}
+.venn-ring {
+  stroke-width: 1.5;
+  fill-opacity: 0.28;
+}
+.venn-a { fill: #c0483d; stroke: #c0483d; }
+.venn-b { fill: #6aaef7; stroke: #6aaef7; }
+.venn-count {
+  fill: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.venn-count-both { font-size: 17px; }
+/* Each sentence in the colour of the ring it belongs to, so the picture and
+   the words are read as one. */
+.venn-key {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.venn-key + .venn-key { margin-top: 4px; }
+.venn-key-a { color: #d98a82; }
+.venn-key-b { color: #9ecbfa; }
 .pair-count {
   margin: 10px 0 0;
   font-size: 0.78rem;
