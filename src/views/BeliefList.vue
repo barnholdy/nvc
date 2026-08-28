@@ -85,17 +85,9 @@
             @touchend="tsEnd($event, idx)"
           >
             <p class="card-title">„{{ entry.belief }}“</p>
-            <div v-if="cardActions(entry).length" class="card-action-group">
-              <button
-                v-for="act in cardActions(entry)"
-                :key="act.key"
-                class="card-action-btn"
-                @click.stop="act.run(entry)"
-              >{{ act.label }}</button>
-            </div>
+            <span class="card-pill card-pill-corner">{{ statusLabel(entry) }}</span>
           </div>
         </div>
-          <span class="card-pill">{{ statusLabel(entry) }}</span>
 
           <div v-if="credibility(entry) !== null" class="score-row">
             <credibility-meter :standing="credibility(entry)" :baseline="anchorOf(entry)"></credibility-meter>
@@ -276,6 +268,22 @@
             <span class="card-link-text">{{ journalLabel(entry) }}</span>
             <v-icon class="detail-chevron">chevron_right</v-icon>
           </div>
+
+          <!-- What to do next with this belief, at the foot of the card: each
+               step with the mark its own part of the app is known by. -->
+          <div v-if="cardActions(entry).length" class="card-actions">
+            <button
+              v-for="act in cardActions(entry)"
+              :key="act.key"
+              class="card-action"
+              @click.stop="act.run(entry)"
+            >
+              <svg class="action-icon" viewBox="0 0 24 24" width="16" height="16">
+                <path :d="act.icon" fill="currentColor"></path>
+              </svg>
+              <span>{{ act.label }}</span>
+            </button>
+          </div>
       </div>
 
       <div class="list-bottom-space"></div>
@@ -350,7 +358,9 @@ import { copingLabel } from '@/utils/coping';
 import { requestedId, scrollRowIntoView, scrollRowToTop } from '@/utils/reveal';
 import { alignPill } from '@/utils/pillScroll';
 import NavIcon from '@/components/NavIcon.vue';
-import { mdiLightningBolt, mdiBookOpenPageVariant, mdiFlaskOutline } from '@mdi/js';
+import {
+  mdiLightningBolt, mdiBookOpenPageVariant, mdiFlaskOutline, mdiMagnify, mdiVanish,
+} from '@mdi/js';
 
 const PRACTICE_KEY = 'nvc.amen';
 const COMPACT_KEY = 'nvc.beliefsCompact';
@@ -401,6 +411,8 @@ export default {
         trigger: mdiLightningBolt,
         reflection: mdiBookOpenPageVariant,
         action: mdiFlaskOutline,
+        explore: mdiMagnify,
+        change: mdiVanish,
       };
     },
     // The panels reach only as far down as the part that answers the
@@ -672,11 +684,24 @@ export default {
     cardActions(entry) {
       const label = this.rowActionLabel(entry);
       if (!label) return [];
-      const actions = [{ key: 'primary', label, run: e => this.runRowAction(e) }];
+      const actions = [{
+        key: 'primary', label, icon: this.rowActionIcon(entry), run: e => this.runRowAction(e),
+      }];
       if (beliefStatus(entry) === 'done' && this.affirmationOf(entry)) {
-        actions.push({ key: 'journal', label: 'Eintragen', run: e => this.journalEntry(e) });
+        actions.push({
+          key: 'journal', label: 'Eintragen', icon: this.icons.reflection, run: e => this.journalEntry(e),
+        });
       }
       return actions;
+    },
+    // Each step wears the mark of the place it leads to: the flask of a
+    // Handlung, the open book of a Tagebuch entry, and for the two steps that
+    // stay inside the belief itself the marks its own wizards carry.
+    rowActionIcon(entry) {
+      const s = beliefStatus(entry);
+      if (s === 'open') return this.icons.explore;
+      if (s === 'working') return this.icons.change;
+      return this.icons.action;
     },
     runRowAction(entry) {
       const s = beliefStatus(entry);
@@ -699,7 +724,7 @@ export default {
     // counts — otherwise scrolling past a card would drag it sideways.
     tsStart(e, i) {
       if (e.target && e.target.closest
-        && (e.target.closest('.swipe-btn') || e.target.closest('.card-btn') || e.target.closest('.card-action-btn'))) return;
+        && (e.target.closest('.swipe-btn') || e.target.closest('.card-btn') || e.target.closest('.card-action'))) return;
       this.sw.handleHeight = e.currentTarget ? e.currentTarget.offsetHeight : 0;
       const t = e.touches[0];
       this.sw.touchIdx = i; this.sw.startX = t.clientX; this.sw.startY = t.clientY;
@@ -854,6 +879,33 @@ export default {
   color: #d1d1d6;
 }
 .link-chip:active { opacity: 0.6; }
+/* Top right of the head, beside the sentence rather than under it. */
+.card-pill-corner { flex-shrink: 0; margin-top: 2px; }
+/* Side by side at the foot of the card, sharing the width evenly: they are
+   alternatives, not a first and a second choice. */
+.card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+.card-action {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid #4ade80;
+  border-radius: 999px;
+  color: #4ade80;
+  font-size: 0.9rem;
+  font-family: inherit;
+  padding: 8px 14px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  &:active { opacity: 0.6; }
+}
+.action-icon { flex-shrink: 0; }
 .link-icon { flex-shrink: 0; }
 .link-chip .link-icon { margin-right: 6px; }
 /* The same two colours the credibility bar is read in: a Trigger is evidence

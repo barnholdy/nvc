@@ -16,7 +16,6 @@
                  scale, the number is the reading. -->
             <span class="bar-value">{{ percentOf(p.value) }}%</span>
             <div class="bar-track">
-              <div class="bar-mid"></div>
               <!-- Each bar is the credibility bar stood on its end, read as
                    of this moment: as much red as the old belief still had,
                    green for the ground it had lost. "Then" is the median of
@@ -226,14 +225,6 @@ export default {
 /* The same two colours the credibility bar is read in. */
 .bar-seg.held { background: #c0483d; }
 .bar-seg.freed { background: #46955f; }
-.bar-mid {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  border-top: 1px dashed #48484a;
-  z-index: 1;
-}
 .bar-date {
   font-size: 0.62rem;
   color: #636366;
