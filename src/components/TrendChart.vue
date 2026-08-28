@@ -16,11 +16,10 @@
                  scale, the number is the reading. -->
             <span class="bar-value">{{ percentOf(p.value) }}%</span>
             <div class="bar-track">
-              <!-- Each bar is the credibility bar stood on its end, read as
-                   of this moment: as much red as the old belief still had,
-                   green for the ground it had lost. "Then" is the median of
-                   this reading and the two before it, so the turn walks along
-                   with the bars. -->
+              <!-- Each bar is the credibility bar stood on its end: as much
+                   red as the belief was given in that moment, green for the
+                   ground it had lost there. The figure above says the same
+                   number, so colour and text cannot drift apart. -->
               <span
                 v-for="n in scale"
                 :key="n"
@@ -54,7 +53,6 @@
 <script>
 import moment from 'moment';
 import { TRUTH_SCALE_MAX } from '@/utils/beliefTrend';
-import { standingOf } from '@/utils/credibility';
 import { openQuery } from '@/utils/reveal';
 import {
   mdiLightningBolt, mdiBookOpenPageVariant, mdiFlaskOutline, mdiVanish,
@@ -105,13 +103,6 @@ export default {
         ? 'Jedes Wandeln bewertet die Affirmation neu — dann zeigt sich, ob sie trägt.'
         : 'Eine zweite Bewertung in einer späteren Situation zeigt, ob sich etwas bewegt.';
     },
-    // Where the belief stood at each reading in turn, rather than one number
-    // for the whole row: the median of that reading and the two before it,
-    // walked from left to right.
-    runningStanding() {
-      const points = this.row.points || [];
-      return points.map((p, i) => standingOf(points.slice(0, i + 1)));
-    },
   },
   watch: {
     // A different belief's trend, or a newly added reading — either way the
@@ -134,13 +125,15 @@ export default {
       return Math.round((v / TRUTH_SCALE_MAX) * 100);
     },
     // The whole scale is coloured, the way the credibility bar colours it, so
-    // the turn stays visible however low the reading itself was.
+    // the turn stays visible however low the reading itself was. It is that
+    // reading and no median over its neighbours: the figure above the bar
+    // states the same number, and the two must not say different things.
     segClass(n, i) {
-      const standing = this.runningStanding[i];
-      if (standing === null || standing === undefined) return {};
+      const point = (this.row.points || [])[i];
+      if (!point || typeof point.value !== 'number') return {};
       // Red always means the same thing — how much of the old belief still
       // has you. On an affirmation that is what it has not yet won over.
-      const below = n <= standing;
+      const below = n <= point.value;
       if (this.kind === 'affirmation') return below ? { freed: true } : { held: true };
       return below ? { held: true } : { freed: true };
     },

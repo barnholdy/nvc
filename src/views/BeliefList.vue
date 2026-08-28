@@ -211,9 +211,6 @@
           >
             <p class="aff-label">Affirmation</p>
             <p class="aff-text">„{{ affirmationOf(entry).text }}“</p>
-            <div class="aff-foot">
-              <button class="card-btn" @click.stop="startPractice(entry)">Üben</button>
-            </div>
           </div>
 
           <div
@@ -360,6 +357,7 @@ import { alignPill } from '@/utils/pillScroll';
 import NavIcon from '@/components/NavIcon.vue';
 import {
   mdiLightningBolt, mdiBookOpenPageVariant, mdiFlaskOutline, mdiMagnify, mdiVanish,
+  mdiWeatherWindy,
 } from '@mdi/js';
 
 const PRACTICE_KEY = 'nvc.amen';
@@ -413,6 +411,8 @@ export default {
         action: mdiFlaskOutline,
         explore: mdiMagnify,
         change: mdiVanish,
+        // The affirmation is practised on the breath, so it wears one.
+        breath: mdiWeatherWindy,
       };
     },
     // The panels reach only as far down as the part that answers the
@@ -684,9 +684,17 @@ export default {
     cardActions(entry) {
       const label = this.rowActionLabel(entry);
       if (!label) return [];
-      const actions = [{
+      const actions = [];
+      // Practising comes first: it is the sentence on the card itself, and it
+      // asks the least of you.
+      if (this.affirmationOf(entry)) {
+        actions.push({
+          key: 'practice', label: 'Üben', icon: this.icons.breath, run: e => this.startPractice(e),
+        });
+      }
+      actions.push({
         key: 'primary', label, icon: this.rowActionIcon(entry), run: e => this.runRowAction(e),
-      }];
+      });
       if (beliefStatus(entry) === 'done' && this.affirmationOf(entry)) {
         actions.push({
           key: 'journal', label: 'Eintragen', icon: this.icons.reflection, run: e => this.journalEntry(e),

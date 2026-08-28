@@ -1128,16 +1128,6 @@ html { overflow-x: hidden; }
   line-height: 1.4;
   margin: 0;
 }
-.aff-foot {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 12px;
-}
-.aff-score { display: flex; align-items: baseline; gap: 5px; flex: 1; min-width: 0; }
-.aff-value { font-size: 1.4rem; font-weight: 700; color: #fff; line-height: 1; }
-.aff-max { font-size: 0.85rem; color: #636366; }
-.aff-word { font-size: 0.9rem; color: #8e8e93; }
 
 /* Links out of the card, to the lists that own the detail. */
 .card-link {

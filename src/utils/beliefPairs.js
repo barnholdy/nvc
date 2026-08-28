@@ -42,7 +42,6 @@ export function beliefPairs(beliefs, journal, minCount) {
 
   return Object.keys(counts)
     .map(k => counts[k])
-    .filter(p => p.count >= min)
     .map(p => Object.assign({}, p, {
       key: `${p.a}:${p.b}`,
       aText: texts[p.a],
@@ -51,6 +50,11 @@ export function beliefPairs(beliefs, journal, minCount) {
       onlyA: (named[p.a] || 0) - p.count,
       onlyB: (named[p.b] || 0) - p.count,
     }))
+    // Two beliefs belong together when neither of them turns up apart more
+    // often than the two of them turn up as one moment: the middle of the
+    // ring has to be at least as heavy as either side of it. Below the
+    // threshold it is a coincidence rather than a habit, however lopsided.
+    .filter(p => p.count >= min && p.count >= p.onlyA && p.count >= p.onlyB)
     // The strongest knot first; between equals, the one named most recently.
     .sort((x, y) => (y.count - x.count)
       || (Math.max.apply(null, y.entries) - Math.max.apply(null, x.entries)));
