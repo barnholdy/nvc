@@ -21,7 +21,7 @@
         jemandem, dem du vertraust, oder hol dir Unterstützung.
       </p>
       <a class="signpost-link" :href="support.phoneHref">
-        <v-icon small color="#4ade80">phone</v-icon>
+        <v-icon small color="#afa9ec">phone</v-icon>
         <span>{{ supportLine }}</span>
       </a>
     </div>
@@ -69,8 +69,8 @@ export default {
   width: 100%;
   text-align: left;
   font-size: 1rem;
-  color: #ebebf5;
-  background: #141416;
+  color: var(--text-primary);
+  background: var(--bg-card);
   border: 1px solid transparent;
   border-radius: 18px;
   padding: 16px 18px;
@@ -78,25 +78,25 @@ export default {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   &:focus-visible {
-    outline: 2px solid #4ade80;
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
   &.selected {
-    border-color: #4ade80;
-    color: #4ade80;
+    border-color: var(--accent);
+    color: var(--accent-light);
     font-weight: 600;
   }
 }
 
 .signpost {
-  background: #1c1c1e;
+  background: var(--bg-card);
   border-radius: 18px;
   margin: 14px 14px 0;
   padding: 16px 18px;
 }
 .signpost-text {
   font-size: 0.9rem;
-  color: #fff;
+  color: var(--text-primary);
   line-height: 1.6;
   margin: 0 0 10px;
 }
@@ -105,11 +105,11 @@ export default {
   align-items: center;
   gap: 8px;
   font-size: 0.85rem;
-  color: #4ade80;
+  color: var(--accent-light);
   text-decoration: none;
   font-weight: 600;
   &:focus-visible {
-    outline: 2px solid #4ade80;
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
 }

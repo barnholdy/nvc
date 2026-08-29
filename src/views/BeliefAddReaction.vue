@@ -67,13 +67,13 @@ export default {
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.7; }
   &.selected {
-    border-color: #4ade80;
-    .card-title { color: #4ade80; }
+    border-color: var(--accent);
+    .card-title { color: var(--accent-light); }
   }
 }
 .coping-option-text {
   font-size: 0.88rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   margin: 4px 0 0;
 }
 </style>

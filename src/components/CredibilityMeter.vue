@@ -156,12 +156,12 @@ export default {
   flex: 1;
   height: 10px;
   border-radius: 2px;
-  background: #3a3a3c;
+  background: var(--border-default);
 }
 /* Muted against the marks drawn over them: the blocks are the ground the
    three readings are read against, not a reading themselves. */
-.meter-seg.held { background: #c0483d; }
-.meter-seg.freed { background: #46955f; }
+.meter-seg.held { background: var(--old-belief); }
+.meter-seg.freed { background: var(--accent-fill); }
 /* Drawn over the blocks and reaching past them, so they read as lines held
    against the scale rather than as one more block in it. */
 .meter-mark {
@@ -177,11 +177,11 @@ export default {
 }
 /* The anchor is read in the same red the blocks are: it marks where the
    belief started out, which is the ground the red is measuring. */
-.meter-mark-start { background: #c0483d; }
-.meter-mark-now { background: #4ade80; }
+.meter-mark-start { background: var(--start-marker); }
+.meter-mark-now { background: var(--accent-light); }
 /* Where it started and where it stands are the same reading: one mark, both
    colours, rather than one of them hidden behind the other. */
-.meter-mark-both { background: linear-gradient(to bottom, #c0483d 50%, #4ade80 50%); }
+.meter-mark-both { background: linear-gradient(to bottom, var(--start-marker) 50%, var(--accent-light) 50%); }
 .meter-labels {
   position: relative;
   height: 16px;
@@ -195,8 +195,8 @@ export default {
   font-weight: 600;
   white-space: nowrap;
 }
-.meter-label-start { color: #c0483d; }
-.meter-label-now { color: #4ade80; }
+.meter-label-start { color: var(--start-marker); }
+.meter-label-now { color: var(--accent-light); }
 
 /* Same reading, less room: the blocks thin out and the words shrink with
    them, so the bar sits inside a row instead of dominating it. */

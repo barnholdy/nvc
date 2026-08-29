@@ -6,7 +6,7 @@
           <h1 class="screen-title">Jetzt</h1>
           <div class="screen-actions">
             <button class="screen-add" @click="$router.push('/settings')" aria-label="Einstellungen">
-              <v-icon color="#8e8e93">settings</v-icon>
+              <v-icon color="#888780">settings</v-icon>
             </button>
           </div>
         </div>
@@ -157,7 +157,7 @@
       @close="practising = null"
     ></affirmation-practice>
 
-    <v-bottom-nav :value="true" fixed app color="#1c1c1e" class="dark-nav">
+    <v-bottom-nav :value="true" fixed app color="#141414" class="dark-nav">
       <v-btn flat color="primary" to="/now">
         <nav-icon name="now"></nav-icon>
       </v-btn>
@@ -502,10 +502,10 @@ export default {
   stroke-width: 1.5;
   fill-opacity: 0.28;
 }
-.venn-a { fill: #c0483d; stroke: #c0483d; }
-.venn-b { fill: #6aaef7; stroke: #6aaef7; }
+.venn-a { fill: var(--trigger-icon); stroke: var(--trigger-icon); }
+.venn-b { fill: var(--accent); stroke: var(--accent); }
 .venn-count {
-  fill: #fff;
+  fill: var(--text-primary);
   font-size: 15px;
   font-weight: 700;
   text-anchor: middle;
@@ -521,12 +521,12 @@ export default {
   overflow-wrap: anywhere;
 }
 .venn-key + .venn-key { margin-top: 4px; }
-.venn-key-a { color: #d98a82; }
-.venn-key-b { color: #9ecbfa; }
+.venn-key-a { color: var(--trigger-icon); }
+.venn-key-b { color: var(--accent-light); }
 .pair-count {
   margin: 10px 0 0;
   font-size: 0.78rem;
-  color: #8e8e93;
+  color: var(--text-muted);
 }
 .dark-page { background: #000; min-height: 100vh; }
 
@@ -537,7 +537,7 @@ export default {
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #8e8e93;
+  color: var(--text-muted);
   margin: 18px 20px 8px;
 }
 
@@ -555,7 +555,7 @@ export default {
   align-items: center;
 }
 .capture-card {
-  background: #141416;
+  background: var(--bg-card);
   border-radius: 18px;
   padding: 16px;
   display: flex;
@@ -571,12 +571,12 @@ export default {
   width: 24px;
   height: 24px;
   flex-shrink: 0;
-  color: #4ade80;
+  color: var(--accent-light);
 }
 .capture-title {
   font-size: 0.95rem;
   font-weight: 500;
-  color: #fff;
+  color: var(--text-primary);
   line-height: 1.3;
   margin: 0;
 }
@@ -591,7 +591,7 @@ export default {
   margin: 0 14px 12px;
 }
 .tile-card {
-  background: #141416;
+  background: var(--bg-card);
   border-radius: 18px;
   padding: 16px 16px 18px;
   display: flex;
@@ -617,7 +617,7 @@ export default {
 }
 .tile-label {
   font-size: 0.85rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   line-height: 1.3;
   margin: 0;
   min-width: 0;
@@ -634,12 +634,12 @@ export default {
 .tile-number {
   font-size: 2rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-primary);
   line-height: 1;
 }
 .tile-action {
   font-size: 1rem;
-  color: #fff;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
@@ -667,7 +667,7 @@ export default {
 
 .now-sub {
   font-size: 0.88rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   margin: 4px 0 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -676,9 +676,9 @@ export default {
 .now-btn {
   flex-shrink: 0;
   background: none;
-  border: 1px solid #4ade80;
+  border: 1px solid var(--accent);
   border-radius: 999px;
-  color: #4ade80;
+  color: var(--accent-light);
   font-family: inherit;
   font-size: 0.95rem;
   padding: 9px 20px;
@@ -703,13 +703,13 @@ export default {
   gap: 2px;
   margin: -2px 20px 12px;
   font-size: 0.9rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
 
 .dark-nav {
-  border-top: 1px solid #2c2c2e;
+  border-top: 1px solid var(--border-subtle);
   .v-btn { min-width: 0; }
 }
 </style>

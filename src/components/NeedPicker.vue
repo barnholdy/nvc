@@ -23,7 +23,7 @@
           <v-progress-circular
             v-if="isLoading"
             indeterminate
-            color="#4ade80"
+            color="#afa9ec"
             size="20"
             width="2"
           ></v-progress-circular>
@@ -301,5 +301,5 @@ export default {
 /* Turns orange once the recommendation is exceeded — the way forward is
    blocked at that point and needs a reason on screen. */
 .over-limit { color: #fd9927; font-weight: 600; }
-.error-text { color: #ff453a !important; }
+.error-text { color: var(--danger) !important; }
 </style>

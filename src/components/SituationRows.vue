@@ -20,13 +20,13 @@ export default {
 <style scoped lang="scss">
 .situation-row {
   padding: 10px 0;
-  border-top: 1px solid #2c2c2e;
+  border-top: 1px solid var(--border-subtle);
   &:first-of-type { border-top: none; padding-top: 0; }
   &:last-of-type { padding-bottom: 0; }
 }
 .situation-text {
   font-size: 0.95rem;
-  color: #ebebf5;
+  color: var(--text-primary);
   line-height: 1.5;
   margin: 0;
 }

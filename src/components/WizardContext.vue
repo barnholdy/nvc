@@ -162,7 +162,7 @@ export default {
 <style scoped lang="scss">
 .wc-label {
   font-size: 0.68rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-weight: 600;
@@ -181,22 +181,22 @@ export default {
   display: inline-flex;
   align-items: center;
   margin-top: 8px;
-  border: 1px solid #3a3a3c;
+  border: 1px solid var(--border-default);
   border-radius: 999px;
   padding: 4px 11px;
   font-size: 0.78rem;
-  color: #8e8e93;
+  color: var(--text-muted);
 }
 /* The first row only needs a rule above it when a quote sits there. */
 .detail-row:first-child { border-top: none; }
 .card-title + .detail-row,
 .cred-meter + .detail-row,
-.gap-legend + .detail-row { border-top: 1px solid #2c2c2e; margin-top: 12px; }
+.gap-legend + .detail-row { border-top: 1px solid var(--border-subtle); margin-top: 12px; }
 /* .gap-bar's own margin-top assumes it opens the card; following a quote it
    needs the same divider treatment the rows get instead. */
 .card-title + .gap-bar,
 .cred-meter + .gap-bar {
-  border-top: 1px solid #2c2c2e;
+  border-top: 1px solid var(--border-subtle);
   margin-top: 12px;
   padding-top: 12px;
 }

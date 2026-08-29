@@ -24,7 +24,7 @@ export default {
   name: 'sparkline',
   props: {
     values: { type: Array, default: function() { return []; } },
-    color: { type: String, default: '#4ade80' },
+    color: { type: String, default: '#afa9ec' },
     // The scale the readings were given on, so a flat line at 8 sits high and
     // a flat line at 2 sits low rather than both landing in the middle.
     max: { type: Number, default: 10 },

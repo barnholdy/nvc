@@ -57,13 +57,13 @@ export default {
 <style scoped lang="scss">
 .recall-row {
   padding: 12px 0;
-  border-top: 1px solid #2c2c2e;
+  border-top: 1px solid var(--border-subtle);
   &:first-child { border-top: none; padding-top: 0; }
   &:last-child { padding-bottom: 0; }
 }
 .recall-label {
   font-size: 0.68rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-weight: 600;
@@ -71,7 +71,7 @@ export default {
 }
 .recall-text {
   font-size: 0.95rem;
-  color: #ebebf5;
+  color: var(--text-primary);
   line-height: 1.5;
   margin: 0;
   white-space: pre-wrap;

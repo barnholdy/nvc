@@ -11,7 +11,7 @@
         <v-progress-circular
           v-if="isLoading"
           indeterminate
-          color="#4ade80"
+          color="#afa9ec"
           size="20"
           width="2"
         ></v-progress-circular>
@@ -273,7 +273,7 @@ export default {
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #8e8e93;
+  color: var(--text-muted);
   margin: 18px 20px 8px;
 }
 
@@ -286,33 +286,33 @@ export default {
 .now-title {
   font-size: 1.05rem;
   font-weight: 400;
-  color: #fff;
+  color: var(--text-primary);
   line-height: 1.35;
   margin: 0;
 }
 .now-sub {
   font-size: 0.88rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   margin: 4px 0 0;
   line-height: 1.4;
 }
-.sub-error { color: #ff453a; }
+.sub-error { color: var(--danger); }
 .now-btn {
   flex-shrink: 0;
   background: none;
-  border: 1px solid #4ade80;
+  border: 1px solid var(--accent);
   border-radius: 999px;
-  color: #4ade80;
+  color: var(--accent-light);
   font-family: inherit;
   font-size: 0.95rem;
   padding: 9px 20px;
   cursor: pointer;
-  &:disabled { border-color: #3a3a3c; color: #636366; cursor: default; }
+  &:disabled { border-color: var(--border-default); color: var(--text-disabled); cursor: default; }
 }
 .ghost-btn {
   background: none;
   border: none;
-  color: #8e8e93;
+  color: var(--text-muted);
   font-family: inherit;
   font-size: 0.95rem;
   padding: 9px 12px;
@@ -327,7 +327,7 @@ export default {
 
 .empathy-text {
   font-size: 0.95rem;
-  color: #ebebf5;
+  color: var(--text-primary);
   line-height: 1.7;
   margin: 0;
 }
@@ -339,15 +339,15 @@ export default {
   mask-image: linear-gradient(#000 60%, transparent);
 }
 .md-content {
-  h1, h2, h3 { color: #fff; font-weight: 700; margin: 0 0 6px; line-height: 1.3; }
+  h1, h2, h3 { color: var(--text-primary); font-weight: 700; margin: 0 0 6px; line-height: 1.3; }
   h1 { font-size: 1.1rem; }
   h2 { font-size: 1rem; }
-  h3 { font-size: 0.95rem; color: #4ade80; }
+  h3 { font-size: 0.95rem; color: var(--accent-light); }
   p { margin: 0 0 8px; }
   p:last-child { margin-bottom: 0; }
   ul { margin: 0 0 8px; padding-left: 18px; }
   li { margin-bottom: 4px; }
-  strong { color: #fff; font-weight: 700; }
+  strong { color: var(--text-primary); font-weight: 700; }
   em { color: #c9c9d3; font-style: italic; }
   .md-gap { height: 10px; }
 }
@@ -358,7 +358,7 @@ export default {
   gap: 2px;
   margin-top: 10px;
   font-size: 0.9rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }

@@ -94,7 +94,7 @@ export default {
 .context-block { margin-top: 14px; }
 .context-label {
   font-size: 0.68rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-weight: 600;
@@ -102,7 +102,7 @@ export default {
 }
 .context-text {
   font-size: 0.95rem;
-  color: #ebebf5;
+  color: var(--text-primary);
   line-height: 1.5;
   margin: 0;
   /* Every block here comes from a multi-line field, so the paragraphs someone
@@ -118,6 +118,6 @@ export default {
 // The label carries the tap, so its bottom margin would space the collapsed
 // block out for nothing.
 .toggle-label { margin: 0; }
-.context-chevron { color: #636366 !important; margin-left: 2px; }
+.context-chevron { color: var(--text-disabled) !important; margin-left: 2px; }
 .mt-1 { margin-top: 6px !important; }
 </style>

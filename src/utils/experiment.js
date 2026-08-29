@@ -20,7 +20,7 @@ export const EXPERIMENT_DISPLAY_LABELS = {
 // Same grey / orange / green convention as the affirmation statuses.
 export const EXPERIMENT_DISPLAY_COLORS = {
   planned: '#fd9927',
-  done: '#4ade80',
+  done: '#7f77dd',
 };
 
 // Fear is rated on the same 0-10 scale as everything else in the app. It used
@@ -132,8 +132,8 @@ export function fearGap(x) {
 }
 
 export function fearGapColor(gap) {
-  if (gap === null) return '#8e8e93';
-  if (gap > 0) return '#4ade80';
+  if (gap === null) return '#888780';
+  if (gap > 0) return '#7f77dd';
   if (gap === 0) return '#fd9927';
   return '#f87171';
 }

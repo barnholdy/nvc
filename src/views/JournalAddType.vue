@@ -85,20 +85,20 @@ export default {
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.7; }
   &.selected {
-    border-color: #4ade80;
+    border-color: var(--accent);
     .card-title,
-    .type-icon { color: #4ade80; }
+    .type-icon { color: var(--accent-light); }
   }
 }
 .type-icon {
   flex-shrink: 0;
-  color: #8e8e93;
+  color: var(--text-muted);
   margin-top: 2px;
 }
 .type-main { flex: 1; min-width: 0; }
 .type-desc {
   font-size: 0.88rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   margin: 6px 0 0;
   line-height: 1.4;
 }

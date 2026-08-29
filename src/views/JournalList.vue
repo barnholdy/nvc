@@ -7,7 +7,7 @@
           <div class="screen-actions">
             <button class="screen-add" @click="$router.push(addTarget)" aria-label="Neuer Eintrag">+</button>
             <button class="screen-add" @click="$router.push('/settings')" aria-label="Einstellungen">
-              <v-icon color="#8e8e93">settings</v-icon>
+              <v-icon color="#888780">settings</v-icon>
             </button>
           </div>
         </div>
@@ -232,7 +232,7 @@
       </v-dialog>
     </v-content>
 
-    <v-bottom-nav :value="true" fixed app color="#1c1c1e" class="dark-nav">
+    <v-bottom-nav :value="true" fixed app color="#141414" class="dark-nav">
       <v-btn flat color="grey" to="/now">
         <nav-icon name="now"></nav-icon>
       </v-btn>
@@ -503,11 +503,11 @@ export default {
     // menu, so the card itself stays a record rather than a control panel.
     swipeSteps(entry) {
       if (!this.isAction(entry)) {
-        return [{ key: 'edit', label: 'Bearbeiten', color: '#4ade80', run: e => this.editEntry(e) }];
+        return [{ key: 'edit', label: 'Bearbeiten', color: '#afa9ec', run: e => this.editEntry(e) }];
       }
       return [
-        { key: 'plan', label: 'Planen', color: '#4ade80', run: e => this.editAction(e) },
-        { key: 'evaluate', label: 'Auswerten', color: '#4ade80', run: e => this.startResult(e) },
+        { key: 'plan', label: 'Planen', color: '#afa9ec', run: e => this.editAction(e) },
+        { key: 'evaluate', label: 'Auswerten', color: '#afa9ec', run: e => this.startResult(e) },
       ];
     },
     // A single button's group takes that button's colour, so its outline
@@ -665,7 +665,7 @@ export default {
 .month-head {
   font-size: 0.72rem;
   letter-spacing: 0.1em;
-  color: #636366;
+  color: var(--text-disabled);
   font-weight: 600;
   margin: 18px 0 10px;
   padding: 0 20px;
@@ -686,7 +686,7 @@ export default {
     position: absolute;
     left: 24px;
     width: 1px;
-    background: #2c2c2e;
+    background: var(--border-subtle);
   }
   /* Up to the dot and on from it, never across it: the dot starts 6px down
      and ends 9px later. */
@@ -707,7 +707,7 @@ export default {
 .timeline-meta {
   font-size: 0.78rem;
   letter-spacing: 0.06em;
-  color: #636366;
+  color: var(--text-disabled);
   margin: 0 0 6px;
   text-transform: uppercase;
 }
@@ -722,13 +722,13 @@ export default {
 }
 /* The same two colours the credibility bar is read in: a Trigger is evidence
    for the belief, a Reflexion evidence against it. */
-.entry-icon-trigger { color: #c0483d; }
+.entry-icon-trigger { color: var(--trigger-icon); }
 /* Both speak against the belief, so both are green; the shape says which. */
-.entry-icon-reflection { color: #46955f; }
-.entry-icon-action { color: #46955f; }
+.entry-icon-reflection { color: var(--accent-light); }
+.entry-icon-action { color: var(--accent-light); }
 .journal-meaning {
   font-size: 0.92rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   line-height: 1.45;
   margin: 8px 0 0;
   font-style: italic;
@@ -738,19 +738,19 @@ export default {
 .journal-feelings { margin-top: 12px; }
 .journal-note {
   font-size: 0.85rem;
-  color: #636366;
+  color: var(--text-disabled);
   line-height: 1.4;
   margin: 12px 0 0;
 }
 
-.confirm-dialog { background: #1c1c1e !important; }
-.confirm-title { color: #fff; font-size: 1rem; justify-content: center; padding: 16px; }
+.confirm-dialog { background: var(--bg-card) !important; }
+.confirm-title { color: var(--text-primary); font-size: 1rem; justify-content: center; padding: 16px; }
 .confirm-actions { justify-content: space-around; padding: 4px; }
-.confirm-cancel { color: #8e8e93 !important; }
-.confirm-delete { color: #ff453a !important; }
+.confirm-cancel { color: var(--text-muted) !important; }
+.confirm-delete { color: var(--danger) !important; }
 
 .dark-nav {
-  border-top: 1px solid #2c2c2e;
+  border-top: 1px solid var(--border-subtle);
   .v-btn { min-width: 0; }
 }
 </style>

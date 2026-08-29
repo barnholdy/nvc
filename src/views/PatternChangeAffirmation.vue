@@ -58,7 +58,7 @@
           <v-progress-circular
             v-if="isLoading"
             indeterminate
-            color="#4ade80"
+            color="#afa9ec"
             size="20"
             width="2"
           ></v-progress-circular>
@@ -380,7 +380,7 @@ export default {
 <style scoped lang="scss">
 .suggest-block { margin: 0 16px; }
 .action-row { display: flex; align-items: center; gap: 8px; }
-.error-text { color: #ff453a !important; }
+.error-text { color: var(--danger) !important; }
 
 .aff-pick {
   cursor: pointer;

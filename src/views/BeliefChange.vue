@@ -222,7 +222,7 @@ export default {
 }
 .intensity-hint-text {
   font-size: 0.9rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   line-height: 1.5;
   margin: 0 0 10px;
 }

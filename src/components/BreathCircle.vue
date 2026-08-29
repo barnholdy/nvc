@@ -37,12 +37,14 @@ export default {
   width: min(90vw, 38vh);
   height: min(90vw, 38vh);
   border-radius: 50%;
+  /* The accent, breathed out from the middle. Written in components rather
+     than as a token, because it has to fade to nothing at the edge. */
   background: radial-gradient(
     circle closest-side,
-    rgba(74, 222, 128, 1) 0%,
-    rgba(74, 222, 128, 0.92) 58%,
-    rgba(74, 222, 128, 0.55) 82%,
-    rgba(74, 222, 128, 0) 100%
+    rgba(127, 119, 221, 1) 0%,
+    rgba(127, 119, 221, 0.92) 58%,
+    rgba(127, 119, 221, 0.55) 82%,
+    rgba(127, 119, 221, 0) 100%
   );
   animation: breathe 8s ease-in-out infinite;
 }

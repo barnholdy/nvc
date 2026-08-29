@@ -1,7 +1,7 @@
 <template>
   <div class="practice">
     <button type="button" class="close-btn" aria-label="Schließen" @click="$emit('close')">
-      <v-icon color="#8e8e93">close</v-icon>
+      <v-icon color="#888780">close</v-icon>
     </button>
 
     <div class="breath-slot">
@@ -154,7 +154,7 @@ export default {
   line-height: 1.5;
   font-weight: 400;
   font-style: italic;
-  color: #fff;
+  color: var(--text-primary);
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.6);
 }
 .breath-slot {

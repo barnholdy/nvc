@@ -17,9 +17,9 @@ export const BELIEF_STATUS_LABELS = {
 
 // Same convention as the affirmation statuses: grey / orange / green.
 export const BELIEF_STATUS_COLORS = {
-  open: '#636366',
+  open: '#5f5e5a',
   working: '#fd9927',
-  done: '#4ade80',
+  done: '#7f77dd',
 };
 
 export function isComplete(belief) {

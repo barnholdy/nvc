@@ -2,7 +2,7 @@
   <div class="dark-page">
     <v-toolbar color="#000" dark flat app>
       <v-btn icon @click="$router.back()">
-        <v-icon color="#4ade80">arrow_back</v-icon>
+        <v-icon color="#afa9ec">arrow_back</v-icon>
       </v-btn>
       <v-toolbar-title>Einstellungen</v-toolbar-title>
     </v-toolbar>
@@ -40,7 +40,7 @@
             <p class="settings-label">Exportieren</p>
             <p class="settings-sub">Alle Daten als JSON herunterladen</p>
           </div>
-          <v-icon color="#4ade80">file_download</v-icon>
+          <v-icon color="#afa9ec">file_download</v-icon>
         </div>
         <div class="settings-sep"></div>
         <div class="settings-row tappable" @click="triggerImport">
@@ -48,7 +48,7 @@
             <p class="settings-label">Importieren</p>
             <p class="settings-sub">JSON-Datei laden (überschreibt bestehende Daten)</p>
           </div>
-          <v-icon color="#4ade80">file_upload</v-icon>
+          <v-icon color="#afa9ec">file_upload</v-icon>
         </div>
         <input ref="fileInput" type="file" accept=".json" style="display:none" @change="importData">
         <p v-if="importError" class="feedback-text error-text">{{ importError }}</p>
@@ -64,7 +64,7 @@
             <p class="settings-sub">{{ support.name }} · {{ support.phone }}</p>
             <p class="settings-sub">{{ support.availability }} · {{ support.online }}</p>
           </div>
-          <v-icon color="#4ade80">phone</v-icon>
+          <v-icon color="#afa9ec">phone</v-icon>
         </a>
       </div>
 
@@ -76,7 +76,7 @@
             <p class="settings-label">Einführung anzeigen</p>
             <p class="settings-sub">Intro-Slideshow erneut öffnen</p>
           </div>
-          <v-icon color="#4ade80">info_outline</v-icon>
+          <v-icon color="#afa9ec">info_outline</v-icon>
         </div>
         <div class="settings-sep"></div>
         <div class="settings-row tappable" @click="reloadApp">
@@ -84,7 +84,7 @@
             <p class="settings-label">App aktualisieren</p>
             <p class="settings-sub">Neueste Version laden</p>
           </div>
-          <v-icon color="#4ade80">refresh</v-icon>
+          <v-icon color="#afa9ec">refresh</v-icon>
         </div>
         <div class="settings-sep"></div>
         <div class="settings-row">
@@ -266,22 +266,22 @@ export default {
 .page-title {
   font-size: 2rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-primary);
   letter-spacing: -0.5px;
   margin: 0;
 }
 .section-header {
   font-size: 0.75rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.07em;
   font-weight: 600;
   margin: 20px 20px 6px;
 }
-.danger-header { color: #ff453a !important; }
+.danger-header { color: var(--danger) !important; }
 
 .settings-group {
-  background: #1c1c1e;
+  background: var(--bg-card);
   border-radius: 12px;
   margin: 0 16px;
   overflow: hidden;
@@ -293,21 +293,21 @@ export default {
   &.tappable {
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    &:active { background: #2c2c2e; }
+    &:active { background: var(--border-subtle); }
   }
 }
 .settings-row-body { flex: 1; min-width: 0; }
 .support-row { text-decoration: none; }
 .settings-label {
   font-size: 0.95rem;
-  color: #fff;
+  color: var(--text-primary);
   margin: 0 0 2px;
   font-weight: 500;
 }
-.danger-label { color: #ff453a !important; }
+.danger-label { color: var(--danger) !important; }
 .settings-sub {
   font-size: 0.78rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   margin: 0;
 }
 .settings-input-row {
@@ -315,16 +315,16 @@ export default {
   align-items: center;
   gap: 8px;
   padding: 4px 16px 12px;
-  border-top: 1px solid #2c2c2e;
+  border-top: 1px solid var(--border-subtle);
 }
 .settings-sep {
   height: 1px;
-  background: #2c2c2e;
+  background: var(--border-subtle);
   margin: 0 0 0 16px;
 }
 .save-btn {
-  background: #4ade80;
-  color: #000;
+  background: var(--accent);
+  color: var(--accent-on-fill);
   border: none;
   border-radius: 10px;
   padding: 8px 14px;
@@ -340,8 +340,8 @@ export default {
 .version-badge {
   font-size: 0.8rem;
   font-weight: 600;
-  color: #8e8e93;
-  background: #2c2c2e;
+  color: var(--text-muted);
+  background: var(--border-subtle);
   border-radius: 20px;
   padding: 3px 10px;
   flex-shrink: 0;
@@ -351,24 +351,24 @@ export default {
   padding: 0 16px 10px;
   margin: 0;
 }
-.error-text { color: #ff453a; }
-.success-text { color: #4ade80; }
+.error-text { color: var(--danger); }
+.success-text { color: var(--accent-light); }
 
 .confirm-dialog { border-radius: 14px !important; overflow: hidden; }
 .confirm-title {
   font-size: 1rem !important;
   font-weight: 600 !important;
-  color: #fff !important;
+  color: var(--text-primary) !important;
   justify-content: center !important;
   padding: 16px !important;
 }
 .confirm-body {
   font-size: 0.875rem !important;
-  color: #8e8e93 !important;
+  color: var(--text-muted) !important;
   text-align: center;
   padding: 8px 16px 16px !important;
 }
 .confirm-actions { padding: 0 !important; display: flex; }
-.confirm-cancel { flex: 1; color: #4ade80 !important; border-right: 1px solid #3a3a3c; }
-.confirm-delete { flex: 1; color: #ff453a !important; font-weight: 600 !important; }
+.confirm-cancel { flex: 1; color: var(--accent) !important; border-right: 1px solid var(--border-default); }
+.confirm-delete { flex: 1; color: var(--danger) !important; font-weight: 600 !important; }
 </style>

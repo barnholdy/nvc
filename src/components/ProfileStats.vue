@@ -116,7 +116,7 @@ export default {
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #8e8e93;
+  color: var(--text-muted);
   margin: 18px 20px 8px;
 }
 
@@ -131,7 +131,7 @@ export default {
 .affect-card { padding: 14px; }
 .col-label {
   font-size: 0.7rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -149,7 +149,7 @@ export default {
 }
 .stat-name {
   font-size: 0.95rem;
-  color: #fff;
+  color: var(--text-primary);
   font-weight: 400;
   white-space: nowrap;
   overflow: hidden;
@@ -158,13 +158,13 @@ export default {
 }
 .stat-count {
   font-size: 0.78rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   flex-shrink: 0;
   margin-left: 8px;
 }
 .stat-bar-bg {
   height: 14px;
-  background: #2c2c2e;
+  background: var(--border-subtle);
   border-radius: 7px;
   overflow: hidden;
 }
@@ -176,7 +176,7 @@ export default {
 }
 .stat-empty {
   font-size: 0.9rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   margin: 0;
 }
 </style>

@@ -29,7 +29,7 @@ export function truthHint(value) {
   }
   if (value <= 8) {
     return {
-      color: '#4ade80',
+      color: '#7f77dd',
       title: 'Guter Bereich',
       text: 'Positiv und trotzdem glaubwürdig — dieser Satz trägt.',
     };

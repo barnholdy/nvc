@@ -71,7 +71,7 @@ export default {
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.7; }
   &.selected {
-    border-color: #4ade80;
+    border-color: var(--accent);
   }
 }
 </style>

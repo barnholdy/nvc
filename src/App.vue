@@ -150,6 +150,44 @@ export default {
 </script>
 
 <style lang="scss">
+/* ─── Design tokens ───────────────────────────────────────────────────────
+   One place for what the app is coloured in, so a change of palette is a
+   change here rather than a hunt through every component. The names say what
+   a colour is for, not what it looks like: „accent“ carries every step the
+   app offers, „old-belief“ the ground a belief still holds, „start-marker“
+   where it began. */
+:root {
+  /* Flächen */
+  --bg-app: #000000;
+  --bg-card: #141414;
+  --bg-sunken: #0a0a0a;
+  --bg-card-gradient: linear-gradient(160deg, #1b1730 0%, #14141b 55%, #0a0a0a 100%);
+  --border-subtle: #2c2c2a;
+  --border-default: #444441;
+
+  /* Text */
+  --text-primary: #eeeeea;
+  --text-secondary: #d3d1c7;
+  --text-tertiary: #b4b2a9;
+  --text-muted: #888780;
+  --text-disabled: #5f5e5a;
+
+  /* Akzent */
+  --accent: #7f77dd;
+  --accent-light: #afa9ec;
+  --accent-fill: #534ab7;
+  --accent-on-fill: #181534;
+
+  /* Die alte Überzeugung und was sie auslöst */
+  --old-belief: #993c1d;
+  --start-marker: #e24b4a;
+  --trigger-icon: #f0997b;
+
+  /* Unverändert: Warnung und Gefahr sagen weiter, was sie immer sagten. */
+  --warn: #fd9927;
+  --danger: #ff453a;
+}
+
 /* ─── Dark theme base ─── */
 html, body {
   background: #000 !important;
@@ -163,7 +201,7 @@ html { overflow-x: hidden; }
 
 .application, .v-application {
   background: #000 !important;
-  color: #fff !important;
+  color: var(--text-primary) !important;
 }
 
 .v-content, main.v-content {
@@ -173,12 +211,12 @@ html { overflow-x: hidden; }
 /* ─── Toolbar ─── */
 .v-toolbar, .v-toolbar.theme--light {
   background-color: #000 !important;
-  color: #fff !important;
+  color: var(--text-primary) !important;
   box-shadow: none !important;
-  border-bottom: 1px solid #2c2c2e !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
 }
 .v-toolbar__title {
-  color: #fff !important;
+  color: var(--text-primary) !important;
   font-weight: 700 !important;
   font-size: 1.45rem !important;
   letter-spacing: -0.3px;
@@ -186,7 +224,7 @@ html { overflow-x: hidden; }
 
 /* ─── Shared intro card ─── */
 .intro-card {
-  background: #1c1c1e;
+  background: var(--bg-card);
   border-radius: 16px;
   margin: 16px 16px 16px;
   padding: 24px 20px;
@@ -203,30 +241,30 @@ html { overflow-x: hidden; }
 .intro-title {
   font-size: 1.05rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-primary);
   margin: 0 0 8px;
 }
 .intro-text {
   font-size: 0.875rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   line-height: 1.65;
   margin: 0;
 }
 .v-toolbar .v-btn .v-icon {
-  color: #4ade80 !important;
+  color: var(--accent-light) !important;
 }
 .v-toolbar .v-btn {
-  color: #4ade80 !important;
+  color: var(--accent-light) !important;
 }
 
 /* ─── Bottom nav ─── */
 .v-bottom-nav {
-  background: #1c1c1e !important;
-  border-top: 1px solid #2c2c2e !important;
+  background: var(--bg-card) !important;
+  border-top: 1px solid var(--border-subtle) !important;
   box-shadow: none !important;
 }
 .v-bottom-nav .v-btn {
-  color: #636366 !important;
+  color: var(--text-disabled) !important;
   opacity: 1 !important;
 }
 .v-bottom-nav .v-btn .v-icon {
@@ -237,23 +275,23 @@ html { overflow-x: hidden; }
   color: inherit !important;
 }
 .v-bottom-nav .v-btn.primary--text {
-  color: #4ade80 !important;
+  color: var(--accent-light) !important;
 }
 
 /* ─── Cards ─── */
 .v-card {
-  background: #1c1c1e !important;
-  color: #fff !important;
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
   box-shadow: none !important;
 }
-.v-card__title { color: #fff !important; }
-.v-card__text { color: #ebebf5 !important; }
-.v-card__actions .v-btn { color: #4ade80 !important; }
-.v-card__actions .v-btn.red--text { color: #ff453a !important; }
+.v-card__title { color: var(--text-primary) !important; }
+.v-card__text { color: var(--text-primary) !important; }
+.v-card__actions .v-btn { color: var(--accent-light) !important; }
+.v-card__actions .v-btn.red--text { color: var(--danger) !important; }
 
 /* ─── Dividers ─── */
 .v-divider {
-  border-color: #2c2c2e !important;
+  border-color: var(--border-subtle) !important;
 }
 
 /* ─── Dialogs ─── */
@@ -268,24 +306,24 @@ html { overflow-x: hidden; }
   -webkit-overflow-scrolling: touch;
 }
 .v-dialog .v-card {
-  background: #2c2c2e !important;
+  background: var(--border-subtle) !important;
   border-radius: 14px !important;
   overflow: hidden;
 }
 .v-dialog .v-card__title {
-  color: #fff !important;
+  color: var(--text-primary) !important;
   font-size: 1rem !important;
   font-weight: 600 !important;
 }
-.v-dialog .v-card__text { color: #ebebf5 !important; }
+.v-dialog .v-card__text { color: var(--text-primary) !important; }
 
 /* ─── Chips ─── */
 .v-chip {
   height: auto !important;
   white-space: normal !important;
   max-width: 100% !important;
-  background: #3a3a3c !important;
-  color: #fff !important;
+  background: var(--border-default) !important;
+  color: var(--text-primary) !important;
   border: none !important;
 }
 .v-chip .v-chip__content {
@@ -295,9 +333,9 @@ html { overflow-x: hidden; }
   min-height: 28px;
   padding-top: 4px;
   padding-bottom: 4px;
-  color: #fff !important;
+  color: var(--text-primary) !important;
 }
-.v-chip .v-icon { color: #8e8e93 !important; }
+.v-chip .v-icon { color: var(--text-muted) !important; }
 
 /* ─── Wizards ───
    The steps borrow the list screens' language: a dark page, cards with the
@@ -319,7 +357,7 @@ html { overflow-x: hidden; }
 .wizard-title {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-primary);
   margin: 0 0 12px;
   letter-spacing: -0.02em;
 }
@@ -332,9 +370,9 @@ html { overflow-x: hidden; }
   flex: 1;
   height: 3px;
   border-radius: 2px;
-  background: #2c2c2e;
+  background: var(--border-subtle);
   transition: background 0.25s ease;
-  &.done { background: #4ade80; }
+  &.done { background: var(--accent); }
 }
 
 /* What the step asks. Large and white — it is the one thing on the screen
@@ -345,25 +383,25 @@ html { overflow-x: hidden; }
 .wizard-question {
   font-size: 1.35rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-primary);
   line-height: 1.3;
   margin: 22px 32px 10px;
 }
 /* The elaboration under the question. */
 .wizard-body {
   font-size: 1rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   line-height: 1.55;
   margin: 0 32px 16px;
 }
 /* Quieter still: a rule of thumb, a count, a caveat. */
 .wizard-note {
   font-size: 0.85rem;
-  color: #636366;
+  color: var(--text-disabled);
   line-height: 1.5;
   margin: 0 32px 14px;
 }
-.wizard-note strong, .wizard-body strong { color: #fff; font-weight: 600; }
+.wizard-note strong, .wizard-body strong { color: var(--text-primary); font-weight: 600; }
 /* Clears the fixed footer. */
 .wizard-bottom-space { height: 96px; }
 
@@ -381,14 +419,14 @@ html { overflow-x: hidden; }
      calc(). The bare fallback covers phones without an inset. */
   padding-bottom: env(safe-area-inset-bottom, 12px);
   background: #000;
-  border-top: 1px solid #1c1c1e;
+  border-top: 1px solid var(--bg-card);
 }
 .wizard-back {
   flex: 0 0 auto;
   background: none;
-  border: 1px solid #3a3a3c;
+  border: 1px solid var(--border-default);
   border-radius: 999px;
-  color: #8e8e93;
+  color: var(--text-muted);
   font-family: inherit;
   font-size: 1rem;
   padding: 13px 28px;
@@ -398,10 +436,10 @@ html { overflow-x: hidden; }
 }
 .wizard-next {
   flex: 1;
-  background: #4ade80;
+  background: var(--accent);
   border: none;
   border-radius: 999px;
-  color: #000;
+  color: var(--accent-on-fill);
   font-family: inherit;
   font-size: 1rem;
   font-weight: 600;
@@ -409,14 +447,14 @@ html { overflow-x: hidden; }
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.8; }
-  &:disabled { background: #2c2c2e; color: #636366; cursor: default; }
+  &:disabled { background: var(--border-subtle); color: var(--text-disabled); cursor: default; }
 }
 
 /* The answer field, set apart by a green edge the way a saved affirmation is:
    this is the part of the screen that is yours to write. */
 .input-card {
-  background: #0e0e0f;
-  border: 1px solid #4ade80;
+  background: var(--bg-sunken);
+  border: 1px solid var(--accent);
   border-radius: 18px;
   margin: 0 14px 12px;
   padding: 14px 16px;
@@ -426,12 +464,12 @@ html { overflow-x: hidden; }
   align-items: center;
   gap: 6px;
   font-size: 0.68rem;
-  color: #4ade80;
+  color: var(--accent-light);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-weight: 700;
   margin: 0 0 8px;
-  .v-icon { color: #4ade80 !important; font-size: 0.95rem !important; }
+  .v-icon { color: var(--accent-light) !important; font-size: 0.95rem !important; }
 }
 .input-card-field {
   display: block;
@@ -440,7 +478,7 @@ html { overflow-x: hidden; }
   border: none;
   outline: none;
   resize: none;
-  color: #fff;
+  color: var(--text-primary);
   font-family: inherit;
   font-size: 1rem;
   line-height: 1.5;
@@ -456,19 +494,19 @@ html { overflow-x: hidden; }
   gap: 5px;
   margin-bottom: 12px;
 }
-.meter-value { font-size: 2rem; font-weight: 700; color: #fff; line-height: 1; }
-.meter-max { font-size: 0.9rem; color: #636366; }
-.meter-label { font-size: 0.9rem; color: #8e8e93; margin-left: auto; }
+.meter-value { font-size: 2rem; font-weight: 700; color: var(--text-primary); line-height: 1; }
+.meter-max { font-size: 0.9rem; color: var(--text-disabled); }
+.meter-label { font-size: 0.9rem; color: var(--text-muted); margin-left: auto; }
 .meter-ends {
   display: flex;
   justify-content: space-between;
   font-size: 0.78rem;
-  color: #636366;
+  color: var(--text-disabled);
   margin-top: 8px;
 }
 .meter-hint {
   font-size: 0.82rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   line-height: 1.5;
   margin: 12px 0 0;
   text-align: center;
@@ -480,7 +518,7 @@ html { overflow-x: hidden; }
   appearance: none;
   height: 4px;
   border-radius: 2px;
-  background: #2c2c2e;
+  background: var(--border-subtle);
   outline: none;
   cursor: pointer;
   &::-webkit-slider-thumb {
@@ -489,7 +527,7 @@ html { overflow-x: hidden; }
     width: 26px;
     height: 26px;
     border-radius: 50%;
-    background: #4ade80;
+    background: var(--accent);
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
   }
@@ -498,7 +536,7 @@ html { overflow-x: hidden; }
     height: 26px;
     border: none;
     border-radius: 50%;
-    background: #4ade80;
+    background: var(--accent);
     cursor: pointer;
   }
   &:disabled {
@@ -510,7 +548,7 @@ html { overflow-x: hidden; }
 /* A group to open and pick from — feelings, needs. Same card as everywhere;
    the colour lives in a dot and in what is already chosen, not in a border. */
 .pick-card {
-  background: #141416;
+  background: var(--bg-card);
   border-radius: 18px;
   margin: 0 14px 10px;
   overflow: hidden;
@@ -534,12 +572,12 @@ html { overflow-x: hidden; }
   min-width: 0;
   font-size: 1.05rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--text-primary);
 }
-.pick-count { font-size: 0.9rem; color: #8e8e93; flex-shrink: 0; }
+.pick-count { font-size: 0.9rem; color: var(--text-muted); flex-shrink: 0; }
 .pick-desc {
   font-size: 0.88rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   line-height: 1.45;
   margin: 0 16px 12px;
 }
@@ -563,13 +601,13 @@ html { overflow-x: hidden; }
   &:active { opacity: 0.6; }
 }
 .pick-chip-x { opacity: 0.7; font-size: 0.95rem; line-height: 1; }
-.pick-body { border-top: 1px solid #2c2c2e; }
+.pick-body { border-top: 1px solid var(--border-subtle); }
 .pick-cluster {
   position: relative;
   display: flex;
   align-items: center;
   padding: 12px 16px;
-  border-bottom: 1px solid #2c2c2e;
+  border-bottom: 1px solid var(--border-subtle);
   cursor: pointer;
   overflow: hidden;
   -webkit-tap-highlight-color: transparent;
@@ -591,12 +629,12 @@ html { overflow-x: hidden; }
   position: relative;
   flex: 1;
   font-size: 0.95rem;
-  color: #ebebf5;
+  color: var(--text-primary);
 }
 .pick-cluster-count {
   position: relative;
   font-size: 0.8rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   flex-shrink: 0;
   margin-left: 8px;
 }
@@ -605,7 +643,7 @@ html { overflow-x: hidden; }
    cluster the same way every closed row already holds itself apart. */
 .pick-chips-open {
   padding-top: 12px;
-  border-bottom: 1px solid #2c2c2e;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 /* The question a wizard step asks, wherever it is asked. */
@@ -613,11 +651,11 @@ html { overflow-x: hidden; }
 
 /* ─── Text inputs ─── */
 /* One field everywhere: a filled surface with a hairline border and a green
-   ring on focus. Colours and radius are the app's own — #1c1c1e like the cards,
-   #2c2c2e for the hairline, #4ade80 for the accent. */
+   ring on focus. Colours and radius are the app's own — var(--bg-card) like the cards,
+   var(--border-subtle) for the hairline, var(--accent) for the accent. */
 .v-text-field .v-input__slot {
-  background: #1c1c1e !important;
-  border: 1px solid #2c2c2e;
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-subtle);
   border-radius: 12px;
   padding: 12px 16px;
   transition:
@@ -631,14 +669,14 @@ html { overflow-x: hidden; }
   display: none !important;
 }
 .v-text-field.v-input--is-focused .v-input__slot {
-  border-color: #4ade80;
+  border-color: var(--accent);
   box-shadow:
-    0 0 0 1px rgba(74, 222, 128, 0.2),
-    0 0 20px rgba(74, 222, 128, 0.08);
+    0 0 0 1px rgba(127, 119, 221, 0.2),
+    0 0 20px rgba(127, 119, 221, 0.08);
 }
 .v-input input, .v-input textarea {
-  color: #ebebf5 !important;
-  caret-color: #4ade80 !important;
+  color: var(--text-primary) !important;
+  caret-color: var(--accent) !important;
   /* Back to the app's own 16px — 17px sat larger than the prompts above it. */
   font-size: 16px;
   font-weight: 400;
@@ -655,70 +693,70 @@ html { overflow-x: hidden; }
 }
 .v-input input::placeholder,
 .v-input textarea::placeholder {
-  color: #8e8e93 !important;
+  color: var(--text-muted) !important;
   opacity: 1;
 }
-.v-input .v-label { color: #8e8e93 !important; }
+.v-input .v-label { color: var(--text-muted) !important; }
 .v-text-field__slot { background: transparent !important; }
 /* The API key fields sit on a card of the same colour, so they take the next
    surface up to stay visible against it. */
 .v-text-field.dark-input .v-input__slot {
-  background: #2c2c2e !important;
+  background: var(--border-subtle) !important;
 }
 
 /* ─── Buttons ─── */
 .v-btn.primary {
-  background-color: #4ade80 !important;
-  color: #000 !important;
+  background-color: var(--accent) !important;
+  color: var(--accent-on-fill) !important;
   font-weight: 600 !important;
 }
-.v-btn.primary--text { color: #4ade80 !important; }
-.v-btn.secondary--text { color: #3dcc70 !important; }
-.v-btn.grey--text { color: #636366 !important; }
-.v-btn.red--text { color: #ff453a !important; }
-.v-btn.red { background-color: #ff453a !important; color: #fff !important; }
+.v-btn.primary--text { color: var(--accent-light) !important; }
+.v-btn.secondary--text { color: var(--accent-fill) !important; }
+.v-btn.grey--text { color: var(--text-disabled) !important; }
+.v-btn.red--text { color: var(--danger) !important; }
+.v-btn.red { background-color: var(--danger) !important; color: var(--text-primary) !important; }
 .v-btn[disabled] { opacity: 0.35 !important; }
-.v-btn:not(.primary):not(.red) { color: #4ade80 !important; }
+.v-btn:not(.primary):not(.red) { color: var(--accent-light) !important; }
 
 /* ─── Typography ─── */
-.grey--text, .grey--text.text--darken-2 { color: #8e8e93 !important; }
-.white--text { color: #fff !important; }
-.subheading { color: #fff !important; }
-.headline { color: #fff !important; }
-.caption { color: #8e8e93 !important; }
-.body-1 { color: #ebebf5 !important; }
+.grey--text, .grey--text.text--darken-2 { color: var(--text-muted) !important; }
+.white--text { color: var(--text-primary) !important; }
+.subheading { color: var(--text-primary) !important; }
+.headline { color: var(--text-primary) !important; }
+.caption { color: var(--text-muted) !important; }
+.body-1 { color: var(--text-primary) !important; }
 
 /* ─── List ─── */
-.v-list { background: #1c1c1e !important; }
-.v-list__tile__title { color: #fff !important; }
-.v-list__tile__sub-title { color: #8e8e93 !important; }
-.v-list__tile { color: #fff !important; }
+.v-list { background: var(--bg-card) !important; }
+.v-list__tile__title { color: var(--text-primary) !important; }
+.v-list__tile__sub-title { color: var(--text-muted) !important; }
+.v-list__tile { color: var(--text-primary) !important; }
 
 /* ─── Menu ─── */
 .v-menu__content {
-  background: #2c2c2e !important;
+  background: var(--border-subtle) !important;
   border-radius: 12px !important;
   box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
 }
-.v-menu__content .v-list { background: #2c2c2e !important; }
+.v-menu__content .v-list { background: var(--border-subtle) !important; }
 
 /* ─── Footer / wizard ─── */
 .v-footer {
-  background: #1c1c1e !important;
-  border-top: 1px solid #2c2c2e !important;
+  background: var(--bg-card) !important;
+  border-top: 1px solid var(--border-subtle) !important;
   box-shadow: none !important;
 }
-.v-footer .v-btn { color: #4ade80 !important; }
+.v-footer .v-btn { color: var(--accent-light) !important; }
 .v-footer .v-btn.primary {
-  background-color: #4ade80 !important;
-  color: #000 !important;
+  background-color: var(--accent) !important;
+  color: var(--accent-on-fill) !important;
   border-radius: 12px !important;
 }
 
 /* ─── Slider ─── */
-.v-slider__thumb { background: #4ade80 !important; border-color: #4ade80 !important; }
-.v-slider__track__fill { background: #4ade80 !important; }
-.v-slider__track { background: #3a3a3c !important; }
+.v-slider__thumb { background: var(--accent) !important; border-color: var(--accent) !important; }
+.v-slider__track__fill { background: var(--accent) !important; }
+.v-slider__track { background: var(--border-default) !important; }
 
 /* ─── Container ─── */
 .v-container { background: transparent !important; }
@@ -737,7 +775,7 @@ html { overflow-x: hidden; }
 }
 .ob-row {
   padding: 12px 0;
-  border-top: 1px solid #2c2c2e;
+  border-top: 1px solid var(--border-subtle);
   &:first-child { border-top: none; }
 }
 .ob-row-head {
@@ -748,14 +786,14 @@ html { overflow-x: hidden; }
 }
 /* Same 24px box the bottom bar's own icons use — recognisable as the same
    icon, not a shrunken copy of it. */
-.ob-row-icon { color: #4ade80; flex-shrink: 0; }
+.ob-row-icon { color: var(--accent-light); flex-shrink: 0; }
 .ob-row-label {
-  color: #fff;
+  color: var(--text-primary);
   font-weight: 600;
   font-size: 0.95rem;
 }
 .ob-row-text {
-  color: #8e8e93;
+  color: var(--text-muted);
   font-size: 0.88rem;
   line-height: 1.5;
   margin: 0;
@@ -785,7 +823,7 @@ html { overflow-x: hidden; }
 .screen-title {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-primary);
   margin: 0;
   letter-spacing: -0.02em;
 }
@@ -806,9 +844,9 @@ html { overflow-x: hidden; }
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: #1c1c1e;
+  background: var(--bg-card);
   border: none;
-  color: #8e8e93;
+  color: var(--text-muted);
   font-size: 1.5rem;
   line-height: 1;
   display: flex;
@@ -840,35 +878,39 @@ html { overflow-x: hidden; }
 .pill {
   flex-shrink: 0;
   background: none;
-  border: 1px solid #2c2c2e;
+  border: 1px solid var(--border-subtle);
   border-radius: 999px;
   padding: 8px 16px;
   font-size: 0.88rem;
   font-family: inherit;
-  color: #8e8e93;
+  color: var(--text-muted);
   cursor: pointer;
   white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
   &.active {
-    color: #fff;
-    background: #1c1c1e;
-    border-color: #3a3a3c;
+    color: var(--text-primary);
+    background: var(--bg-card);
+    border-color: var(--border-default);
   }
 }
-.pill-count { color: #636366; margin-left: 4px; }
+.pill-count { color: var(--text-disabled); margin-left: 4px; }
 /* Square-ish, because it holds an icon rather than a word. */
 .pill-icon {
   padding: 8px 10px;
   display: flex;
   align-items: center;
-  .v-icon { color: #8e8e93 !important; }
-  &.active .v-icon { color: #fff !important; }
+  .v-icon { color: var(--text-muted) !important; }
+  &.active .v-icon { color: var(--text-primary) !important; }
 }
-.pill.active .pill-count { color: #8e8e93; }
+.pill.active .pill-count { color: var(--text-muted); }
 
+/* A card is where the work is read, so it is lifted off the black with a
+   wash of the accent rather than a flat grey — barely there at the top,
+   gone by the bottom. */
 .card {
-  background: #141416;
+  background: var(--bg-card-gradient);
+  border: 1px solid var(--border-subtle);
   border-radius: 18px;
   margin: 0 14px 12px;
   padding: 16px 18px;
@@ -883,16 +925,16 @@ html { overflow-x: hidden; }
   min-width: 0;
   font-size: 1.1rem;
   line-height: 1.35;
-  color: #fff;
+  color: var(--text-primary);
   margin: 0;
   font-weight: 400;
 }
 .card-btn {
   flex-shrink: 0;
   background: none;
-  border: 1px solid #4ade80;
+  border: 1px solid var(--accent);
   border-radius: 999px;
-  color: #4ade80;
+  color: var(--accent-light);
   font-size: 0.9rem;
   font-family: inherit;
   padding: 7px 16px;
@@ -909,7 +951,7 @@ html { overflow-x: hidden; }
 .swipe-group {
   display: inline-flex;
   align-items: stretch;
-  border: 1px solid #4ade80;
+  border: 1px solid var(--accent);
   border-radius: 999px;
   overflow: hidden;
 }
@@ -924,17 +966,17 @@ html { overflow-x: hidden; }
   white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
-  & + & { border-left: 1px solid #4ade80; }
+  & + & { border-left: 1px solid var(--accent); }
 }
 /* On its own it carries its own outline in its own colour. */
 .swipe-group.single {
   border-color: currentColor;
 }
-.swipe-btn-edit { color: #4ade80; }
-.swipe-btn-change { color: #4ade80; }
-.swipe-btn-act { color: #4ade80; }
-.swipe-btn-evaluate { color: #4ade80; }
-.swipe-btn-delete { color: #ff453a; }
+.swipe-btn-edit { color: var(--accent-light); }
+.swipe-btn-change { color: var(--accent-light); }
+.swipe-btn-act { color: var(--accent-light); }
+.swipe-btn-evaluate { color: var(--accent-light); }
+.swipe-btn-delete { color: var(--danger); }
 
 /* The head slides on its own; the rest of the card stays put. */
 .head-swipe {
@@ -952,7 +994,7 @@ html { overflow-x: hidden; }
 .head-swipe .swipe-panel.right { right: 0; }
 .swipe-handle {
   position: relative;
-  background: #141416;
+  background: var(--bg-card);
   touch-action: pan-y;
 }
 
@@ -962,7 +1004,7 @@ html { overflow-x: hidden; }
   height: 36px;
   border-radius: 50%;
   background: none;
-  border: 1px solid #2c2c2e;
+  border: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -976,8 +1018,8 @@ html { overflow-x: hidden; }
   margin-top: 10px;
   font-size: 0.78rem;
   font-weight: 500;
-  color: #8e8e93;
-  background: #2c2c2e;
+  color: var(--text-muted);
+  background: var(--border-subtle);
   border-radius: 8px;
   padding: 4px 10px;
 }
@@ -991,11 +1033,11 @@ html { overflow-x: hidden; }
   gap: 5px;
   margin-top: 12px;
 }
-.score-value { font-size: 2rem; font-weight: 700; color: #fff; line-height: 1; }
-.score-max { font-size: 0.9rem; color: #636366; }
-.score-label { font-size: 0.9rem; color: #8e8e93; }
+.score-value { font-size: 2rem; font-weight: 700; color: var(--text-primary); line-height: 1; }
+.score-max { font-size: 0.9rem; color: var(--text-disabled); }
+.score-label { font-size: 0.9rem; color: var(--text-muted); }
 
-.card-sep { height: 1px; background: #2c2c2e; margin: 14px 0 0; }
+.card-sep { height: 1px; background: var(--border-subtle); margin: 14px 0 0; }
 
 /* One track, two fills: the fear laid over what reality turned out to be, so
    the difference is the part of the bar that is only orange. Shared by the
@@ -1011,22 +1053,22 @@ html { overflow-x: hidden; }
   flex: 1;
   height: 10px;
   border-radius: 2px;
-  background: #3a3a3c;
+  background: var(--border-default);
 }
-.gap-seg.expected { background: #fd9927; }
-.gap-seg.real { background: #6aaef7; }
+.gap-seg.expected { background: var(--trigger-icon); }
+.gap-seg.real { background: var(--accent); }
 .gap-legend {
   display: flex;
   align-items: center;
   gap: 16px;
   margin-top: 10px;
   font-size: 0.85rem;
-  color: #8e8e93;
+  color: var(--text-muted);
 }
 .gap-key { display: flex; align-items: center; gap: 6px; }
 .gap-dot { width: 9px; height: 9px; border-radius: 3px; display: inline-block; }
-.gap-dot-expected { background: #fd9927; }
-.gap-dot-real { background: #6aaef7; }
+.gap-dot-expected { background: var(--trigger-icon); }
+.gap-dot-real { background: var(--accent); }
 .gap-delta { margin-left: auto; font-weight: 600; }
 
 /* A written answer, folded to one line until it is asked for. */
@@ -1035,7 +1077,7 @@ html { overflow-x: hidden; }
   align-items: baseline;
   gap: 12px;
   padding: 12px 0;
-  border-bottom: 1px solid #2c2c2e;
+  border-bottom: 1px solid var(--border-subtle);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
@@ -1044,13 +1086,13 @@ html { overflow-x: hidden; }
 .detail-label {
   flex: 0 0 34%;
   font-size: 0.95rem;
-  color: #fff;
+  color: var(--text-primary);
 }
 .detail-value {
   flex: 1;
   min-width: 0;
   font-size: 0.95rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   text-align: left;
   margin: 0;
   overflow: hidden;
@@ -1098,25 +1140,25 @@ html { overflow-x: hidden; }
   overflow-wrap: anywhere;
 }
 .quote-belief {
-  color: #8e8e93;
+  color: var(--text-muted);
 }
 /* The brighter of the two: it is the sentence being grown into, and the one
    the eye should land on. */
 .quote-affirmation {
-  color: #ebebf5;
+  color: var(--text-primary);
   margin-top: 6px;
 }
 
 .aff-box {
-  border-left: 3px solid #4ade80;
-  background: #1c1c1e;
+  border-left: 3px solid var(--accent);
+  background: var(--bg-card);
   border-radius: 0;
   padding: 14px 16px;
   margin-top: 0;
 }
 .aff-label {
   font-size: 0.68rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-weight: 600;
@@ -1124,7 +1166,7 @@ html { overflow-x: hidden; }
 }
 .aff-text {
   font-size: 1rem;
-  color: #fff;
+  color: var(--text-primary);
   line-height: 1.4;
   margin: 0;
 }
@@ -1135,19 +1177,19 @@ html { overflow-x: hidden; }
   align-items: center;
   gap: 10px;
   padding: 13px 0;
-  border-top: 1px solid #2c2c2e;
+  border-top: 1px solid var(--border-subtle);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
 }
-.card-link-text { flex: 1; font-size: 0.95rem; color: #8e8e93; }
+.card-link-text { flex: 1; font-size: 0.95rem; color: var(--text-muted); }
 
 .list-empty {
   text-align: center;
   padding: 4rem 2rem;
 }
-.list-empty-title { font-size: 1.05rem; color: #fff; font-weight: 600; margin: 0 0 6px; }
-.list-empty-sub { font-size: 0.9rem; color: #8e8e93; margin: 0; line-height: 1.5; }
+.list-empty-title { font-size: 1.05rem; color: var(--text-primary); font-weight: 600; margin: 0 0 6px; }
+.list-empty-sub { font-size: 0.9rem; color: var(--text-muted); margin: 0; line-height: 1.5; }
 
 .list-bottom-space { height: 90px; }
 </style>

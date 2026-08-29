@@ -74,7 +74,7 @@ export default {
 .belief-chip-lines { flex: 1; min-width: 0; }
 .belief-chip-head .detail-chevron {
   flex-shrink: 0;
-  color: #636366 !important;
+  color: var(--text-disabled) !important;
   font-size: 1.1rem !important;
 }
 </style>

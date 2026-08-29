@@ -1,7 +1,7 @@
 // A small burst for the moment a run is evaluated: the one point in the app
 // where something is finished rather than begun. Drawn on a canvas laid over
 // everything and taken away again once it has run its course.
-const COLORS = ['#4ade80', '#f9e02e', '#ff6b6b', '#60c5f9', '#c084fc', '#fb923c'];
+const COLORS = ['#7f77dd', '#f9e02e', '#ff6b6b', '#60c5f9', '#c084fc', '#fb923c'];
 const COUNT = 72;
 const DURATION = 1500;
 

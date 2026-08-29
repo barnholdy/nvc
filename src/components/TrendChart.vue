@@ -206,21 +206,21 @@ export default {
 .bar-value {
   font-size: 0.68rem;
   font-weight: 600;
-  color: #ebebf5;
+  color: var(--text-primary);
   white-space: nowrap;
   margin-bottom: 4px;
 }
 .bar-seg {
   flex: 1;
   border-radius: 2px;
-  background: #3a3a3c;
+  background: var(--border-default);
 }
 /* The same two colours the credibility bar is read in. */
-.bar-seg.held { background: #c0483d; }
-.bar-seg.freed { background: #46955f; }
+.bar-seg.held { background: var(--old-belief); }
+.bar-seg.freed { background: var(--accent-fill); }
 .bar-date {
   font-size: 0.62rem;
-  color: #636366;
+  color: var(--text-disabled);
   margin-top: 6px;
   height: 14px;
   white-space: nowrap;
@@ -239,15 +239,15 @@ export default {
 .bar-icon { flex-shrink: 0; }
 /* The same two colours the credibility bar is read in, so a bar's mark means
    the same thing here as it does in the list. */
-.bar-icon-situation { color: #c0483d; }
+.bar-icon-situation { color: var(--trigger-icon); }
 /* Both speak against the belief, so both are green; the shape says which. */
-.bar-icon-journal { color: #46955f; }
-.bar-icon-action { color: #46955f; }
-.bar-icon-wandeln { color: #46955f; }
+.bar-icon-journal { color: var(--accent-light); }
+.bar-icon-action { color: var(--accent-light); }
+.bar-icon-wandeln { color: var(--accent-light); }
 
 .trend-hint {
   font-size: 0.72rem;
-  color: #636366;
+  color: var(--text-disabled);
   line-height: 1.45;
   margin: 12px 0 0;
 }

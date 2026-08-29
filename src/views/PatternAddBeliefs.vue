@@ -241,11 +241,11 @@ export default {
    was said on the way here, not what is being answered now. */
 .ladder-rung {
   font-size: 0.9rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   line-height: 1.4;
   margin: 0 16px 6px;
   padding-left: 10px;
-  border-left: 2px solid #2c2c2e;
+  border-left: 2px solid var(--border-subtle);
   word-break: break-word;
 }
 .ladder-question { margin-top: 10px; }
@@ -256,7 +256,7 @@ export default {
   margin: 0 16px;
 }
 /* Only Hinzufügen ends the ladder, so the other two step back. */
-.ladder-quiet { border-color: #3a3a3c; color: #8e8e93; }
+.ladder-quiet { border-color: var(--border-default); color: var(--text-muted); }
 .card-btn:disabled { opacity: 0.4; cursor: default; }
 
 /* The belief and its rating are one block, so the card above the meter loses
@@ -293,7 +293,7 @@ export default {
 .suggestion-card {
   font-size: 0.95rem;
   line-height: 1.45;
-  color: #ebebf5;
+  color: var(--text-primary);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }

@@ -3,7 +3,7 @@ import taxonomy from '../assets/taxonomy.json';
 // Single source of truth for the Grundemotion colours used by the feeling
 // selection menu, so every place that shows a feeling can match it.
 export const EMOTION_COLORS = {
-  freude: '#4ade80',
+  freude: '#7f77dd',
   traurigkeit: '#60a5fa',
   wut: '#f87171',
   angst: '#fb923c',

@@ -64,7 +64,7 @@
         <v-progress-circular
           v-if="isLoading"
           indeterminate
-          color="#4ade80"
+          color="#afa9ec"
           size="20"
           width="2"
         ></v-progress-circular>
@@ -251,7 +251,7 @@ export default {
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #8e8e93;
+  color: var(--text-muted);
   margin: 18px 20px 8px;
 }
 /* What the cluster carries as a whole, held off from the beliefs above it. */
@@ -261,7 +261,7 @@ export default {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-weight: 600;
-  color: #8e8e93;
+  color: var(--text-muted);
   margin: 0 0 6px;
 }
 /* Old on the left, new on the right, each behind the rule that says which
@@ -278,12 +278,12 @@ export default {
   padding-left: 10px;
 }
 .affect-col-old {
-  border-color: #c0483d;
-  .group-label { color: #c0483d; }
+  border-color: var(--trigger-icon);
+  .group-label { color: var(--trigger-icon); }
 }
 .affect-col-new {
-  border-color: #46955f;
-  .group-label { color: #46955f; }
+  border-color: var(--accent-light);
+  .group-label { color: var(--accent-light); }
 }
 .affect-empty {
   font-size: 0.8125rem;
@@ -305,21 +305,21 @@ export default {
 .now-title {
   font-size: 1.05rem;
   font-weight: 400;
-  color: #fff;
+  color: var(--text-primary);
   line-height: 1.35;
   margin: 0;
 }
 .now-sub {
   font-size: 0.88rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   margin: 4px 0 0;
 }
 .now-btn {
   flex-shrink: 0;
   background: none;
-  border: 1px solid #4ade80;
+  border: 1px solid var(--accent);
   border-radius: 999px;
-  color: #4ade80;
+  color: var(--accent-light);
   font-family: inherit;
   font-size: 0.95rem;
   padding: 9px 20px;

@@ -6,7 +6,7 @@
           <h1 class="screen-title">Überzeugungen</h1>
           <div class="screen-actions">
             <button class="screen-add" @click="$router.push('/settings')" aria-label="Einstellungen">
-              <v-icon color="#8e8e93">settings</v-icon>
+              <v-icon color="#888780">settings</v-icon>
             </button>
           </div>
         </div>
@@ -271,7 +271,7 @@
         @click="selectSort(opt.key)"
       >
         <span>{{ opt.label }}</span>
-        <v-icon v-if="sortMode === opt.key" small color="#4ade80">check</v-icon>
+        <v-icon v-if="sortMode === opt.key" small color="#afa9ec">check</v-icon>
       </button>
     </div>
 
@@ -283,7 +283,7 @@
       @close="practising = null"
     ></affirmation-practice>
 
-    <v-bottom-nav :value="true" fixed app color="#1c1c1e" class="dark-nav">
+    <v-bottom-nav :value="true" fixed app color="#141414" class="dark-nav">
       <v-btn flat color="grey" to="/now">
         <nav-icon name="now"></nav-icon>
       </v-btn>
@@ -677,7 +677,7 @@ export default {
   position: fixed;
   z-index: 41;
   min-width: 220px;
-  background: #2c2c2e;
+  background: var(--border-subtle);
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
   padding: 4px 0;
@@ -692,7 +692,7 @@ export default {
   padding: 12px 16px;
   background: none;
   border: none;
-  color: #fff;
+  color: var(--text-primary);
   font-family: inherit;
   font-size: 0.92rem;
   text-align: left;
@@ -710,11 +710,11 @@ export default {
 .empathy-reflection {
   margin-top: 14px;
   padding-top: 12px;
-  border-top: 1px solid #2c2c2e;
+  border-top: 1px solid var(--border-subtle);
 }
 .empathy-reflection-label {
   font-size: 0.68rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-weight: 600;
@@ -722,7 +722,7 @@ export default {
 }
 .empathy-reflection-text {
   font-size: 0.95rem;
-  color: #ebebf5;
+  color: var(--text-primary);
   line-height: 1.5;
   margin: 0;
   white-space: pre-wrap;
@@ -744,11 +744,11 @@ export default {
   display: inline-flex;
   align-items: center;
   margin-top: 8px;
-  border: 1px solid #3a3a3c;
+  border: 1px solid var(--border-default);
   border-radius: 999px;
   padding: 4px 11px;
   font-size: 0.78rem;
-  color: #8e8e93;
+  color: var(--text-muted);
 }
 /* Compact mode drops the full-width links but keeps the counts reachable,
    shrunk down to a tap target that names just the number and the noun. */
@@ -761,7 +761,7 @@ export default {
 .link-chip {
   display: inline-flex;
   align-items: center;
-  border: 1px solid #3a3a3c;
+  border: 1px solid var(--border-default);
   border-radius: 999px;
   padding: 4px 11px;
   font-size: 0.78rem;
@@ -784,9 +784,9 @@ export default {
   justify-content: center;
   gap: 6px;
   background: none;
-  border: 1px solid #4ade80;
+  border: 1px solid var(--accent);
   border-radius: 999px;
-  color: #4ade80;
+  color: var(--accent-light);
   font-size: 0.9rem;
   font-family: inherit;
   padding: 8px 14px;
@@ -799,19 +799,19 @@ export default {
 .link-chip .link-icon { margin-right: 6px; }
 /* The same two colours the credibility bar is read in: a Trigger is evidence
    for the belief, a Reflexion and a Handlung evidence against it. */
-.link-icon-trigger { color: #c0483d; }
-.link-icon-reflection { color: #46955f; }
-.link-icon-action { color: #46955f; }
+.link-icon-trigger { color: var(--trigger-icon); }
+.link-icon-reflection { color: var(--accent-light); }
+.link-icon-action { color: var(--accent-light); }
 /* Only the head answers a swipe; the rest of the card scrolls freely. */
 
-.confirm-dialog { background: #1c1c1e !important; }
-.confirm-title { color: #fff; font-size: 1rem; justify-content: center; padding: 16px; }
+.confirm-dialog { background: var(--bg-card) !important; }
+.confirm-title { color: var(--text-primary); font-size: 1rem; justify-content: center; padding: 16px; }
 .confirm-actions { justify-content: space-around; padding: 4px; }
-.confirm-cancel { color: #8e8e93 !important; }
-.confirm-delete { color: #ff453a !important; }
+.confirm-cancel { color: var(--text-muted) !important; }
+.confirm-delete { color: var(--danger) !important; }
 
 .dark-nav {
-  border-top: 1px solid #2c2c2e;
+  border-top: 1px solid var(--border-subtle);
   .v-btn { min-width: 0; }
 }
 </style>

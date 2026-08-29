@@ -18,7 +18,7 @@
         <v-progress-circular
           v-if="isLoading"
           indeterminate
-          color="#4ade80"
+          color="#afa9ec"
           size="20"
           width="2"
         ></v-progress-circular>
@@ -191,19 +191,19 @@ export default {
 .empathy-panel > .v-input,
 .empathy-panel > .v-btn { margin-left: 16px; margin-right: 16px; }
 .action-row { display: flex; align-items: center; gap: 8px; }
-.error-text { color: #ff453a !important; }
+.error-text { color: var(--danger) !important; }
 
 .empathy-rendered {
   margin-top: 12px;
   font-size: 0.95rem;
-  color: #ebebf5;
+  color: var(--text-primary);
   line-height: 1.7;
 }
 .md-content {
-  h1, h2, h3 { color: #fff; font-weight: 700; margin: 0 0 6px; line-height: 1.3; }
+  h1, h2, h3 { color: var(--text-primary); font-weight: 700; margin: 0 0 6px; line-height: 1.3; }
   h1 { font-size: 1.1rem; }
   h2 { font-size: 1rem; }
-  h3 { font-size: 0.95rem; color: #4ade80; }
+  h3 { font-size: 0.95rem; color: var(--accent-light); }
   p { margin: 0 0 8px; }
   p:last-child { margin-bottom: 0; }
   ul { margin: 0 0 8px; padding-left: 18px; }

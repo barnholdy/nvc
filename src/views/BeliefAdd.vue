@@ -299,14 +299,14 @@ export default {
   width: 100%;
   background: none;
   border: none;
-  color: #8e8e93;
+  color: var(--text-muted);
   font-family: inherit;
   font-size: 0.95rem;
   padding: 10px 0 2px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   &:focus-visible {
-    outline: 2px solid #4ade80;
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
 }
