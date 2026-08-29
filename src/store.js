@@ -130,8 +130,13 @@ export default new Vuex.Store({
         state.journal.splice(index, 1, updated);
       }
     },
+    // By its moment, not by object identity: a list that hands rows out as
+    // copies — the Tagebuch does, so a row can carry a key of its own — would
+    // otherwise pass something `indexOf` never finds, and the entry would
+    // quietly stay. `updateJournalEntry` right above matches the same way.
     deleteJournalEntry(state, entry) {
-      const index = state.journal.indexOf(entry);
+      const index = state.journal.findIndex(e => e === entry
+        || (e && entry && e.time === entry.time));
       if (index > -1) {
         state.journal.splice(index, 1);
       }
