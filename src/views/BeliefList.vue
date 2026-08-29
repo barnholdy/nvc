@@ -55,23 +55,8 @@
         :data-row-id="entry.time"
       >
         <div class="head-swipe">
-          <!-- The step the card already offers is left out: it is on screen a
-               few pixels away. -->
-          <div v-if="isSwiping(idx)" class="swipe-panel left">
-            <div
-              class="swipe-group"
-              :class="{ single: otherSteps(entry).length === 1 }"
-              :style="groupStyle(otherSteps(entry))"
-            >
-              <button
-                v-for="step in otherSteps(entry)"
-                :key="step.key"
-                class="swipe-btn"
-                :style="{ color: step.color }"
-                @click.stop="step.run(entry)"
-              >{{ step.label }}</button>
-            </div>
-          </div>
+          <!-- Every step this belief offers stands at the foot of its card, so
+               the only thing left to reach for is deleting it. -->
           <div v-if="isSwiping(idx)" class="swipe-panel right">
             <div class="swipe-group single swipe-btn-delete">
               <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">Löschen</button>
@@ -547,31 +532,6 @@ export default {
         localStorage.setItem(PRACTICE_KEY, JSON.stringify(map));
       } catch (e) { /* a full or blocked store must not stop the practice */ }
     },
-    // Every step except the ones the card's own head buttons already offer.
-    otherSteps(entry) {
-      const shown = this.cardActions(entry).map(a => a.label);
-      const steps = [
-        { key: 'edit', label: 'Ergründen', color: '#4ade80', run: e => this.editEntry(e) },
-        { key: 'change', label: 'Wandeln', color: '#4ade80', run: e => this.changeEntry(e) },
-      ];
-      // An experiment tests a new perspective against reality, so there has
-      // to be one first: until the belief is wandelt there is nothing to act
-      // from, and its own wizard would not offer the belief either.
-      if (beliefStatus(entry) === 'done') {
-        steps.push({ key: 'act', label: 'Handeln', color: '#4ade80', run: e => this.actEntry(e) });
-      }
-      // Only once the belief has an affirmation to hold a fact against —
-      // the same reach a Tagebuch entry needs its picker step to offer it.
-      if (beliefStatus(entry) === 'done' && this.affirmationOf(entry)) {
-        steps.push({ key: 'journal', label: 'Eintragen', color: '#4ade80', run: e => this.journalEntry(e) });
-      }
-      return steps.filter(s => !shown.includes(s.label));
-    },
-    // `.swipe-group.single` outlines itself in currentColor; without this it
-    // would inherit the card's text colour instead of the button's own.
-    groupStyle(steps) {
-      return steps.length === 1 ? { color: steps[0].color } : null;
-    },
     isSwiping(idx) { return this.sw.openIdx === idx || this.sw.touchIdx === idx; },
     isOpen(entry, key) { return !!this.openRows[`${entry.time}:${key}`]; },
     toggleRow(entry, key) {
@@ -633,57 +593,27 @@ export default {
         query: { belief: String(entry.time), type: REFLECTION },
       });
     },
-    // The one step that moves this belief forward from where it stands.
-    rowActionLabel(entry) {
-      const s = beliefStatus(entry);
-      if (s === 'open') return 'Ergründen';
-      if (s === 'working') return 'Wandeln';
-      if (s === 'done') return 'Handeln';
-      return '';
-    },
-    // The card's own head button — normally just the one step the belief is
-    // ready for, but a done belief with an affirmation also offers Eintragen
-    // right beside it, split the same way the swipe menu splits its own.
+    // The three steps a belief offers, in the order the work happens in.
     cardActions(entry) {
-      const label = this.rowActionLabel(entry);
-      if (!label) return [];
-      const actions = [];
-      // Practising comes first: it is the sentence on the card itself, and it
-      // asks the least of you.
+      const actions = [
+        {
+          key: 'edit', label: 'Ergründen', icon: this.icons.explore, run: e => this.editEntry(e),
+        },
+        {
+          key: 'change', label: 'Wandeln', icon: this.icons.change, run: e => this.changeEntry(e),
+        },
+      ];
+      // Only once there is a sentence to practise — without an affirmation the
+      // button would open on nothing.
       if (this.affirmationOf(entry)) {
         actions.push({
           key: 'practice', label: 'Üben', icon: this.icons.breath, run: e => this.startPractice(e),
         });
       }
-      actions.push({
-        key: 'primary', label, icon: this.rowActionIcon(entry), run: e => this.runRowAction(e),
-      });
-      if (beliefStatus(entry) === 'done' && this.affirmationOf(entry)) {
-        actions.push({
-          key: 'journal', label: 'Eintragen', icon: this.icons.reflection, run: e => this.journalEntry(e),
-        });
-      }
       return actions;
-    },
-    // Each step wears the mark of the place it leads to: the flask of a
-    // Handlung, the open book of a Tagebuch entry, and for the two steps that
-    // stay inside the belief itself the marks its own wizards carry.
-    rowActionIcon(entry) {
-      const s = beliefStatus(entry);
-      if (s === 'open') return this.icons.explore;
-      if (s === 'working') return this.icons.change;
-      return this.icons.action;
-    },
-    runRowAction(entry) {
-      const s = beliefStatus(entry);
-      if (s === 'open') this.editEntry(entry);
-      else if (s === 'working') this.changeEntry(entry);
-      else if (s === 'done') this.actEntry(entry);
     },
     editEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/edit-belief/${entry.time}`); },
     changeEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/change-belief/${entry.time}`); },
-    actEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/act-belief/${entry.time}`); },
-    journalEntry(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.$router.push(`/journal-belief/${entry.time}`); },
     preDelete(entry) { this.sw.openIdx = null; this.sw.openDir = null; this.entryToDelete = entry; this.isDeleteDialogShowing = true; },
     confirmDelete() {
       this.isDeleteDialogShowing = false;
@@ -709,35 +639,23 @@ export default {
         this.sw.isH = Math.abs(dx) > Math.abs(dy) * 1.5;
       if (!this.sw.isH) return;
       e.preventDefault();
-      this.sw.dx = Math.max(-110, Math.min(dx, this.rightWidth(i)));
+      this.sw.dx = Math.max(-110, Math.min(dx, 0));
       this.sw.drag = true;
     },
     tsEnd(e, i) {
       if (this.sw.touchIdx !== i) return;
       if (this.sw.drag) {
         if (this.sw.dx < -40) { this.sw.openIdx = i; this.sw.openDir = 'left'; }
-        else if (this.sw.dx > 40) { this.sw.openIdx = i; this.sw.openDir = 'right'; }
         else { this.sw.openIdx = null; this.sw.openDir = null; }
       }
       this.sw.touchIdx = null; this.sw.dx = 0; this.sw.drag = false; this.sw.isH = null;
-    },
-    // Keep in step with the buttons rendered above: a head that slides further
-    // than the chip is wide leaves a gap and reads as slack.
-    rightWidth(i) {
-      const entry = this.filteredBeliefs[i];
-      const n = entry ? this.otherSteps(entry).length : 1;
-      // Nothing to reveal, so the card does not move that way at all.
-      if (n === 0) return 0;
-      // ~80px per button plus the shared outline — matches how wide 1 and 2
-      // already read, just extended for the belief that also offers Eintragen.
-      return Math.max(110, 30 + n * 80);
     },
     rowSt(i) {
       const s = this.sw;
       const live = s.touchIdx === i && s.drag && s.isH;
       let x = 0;
       if (live) x = s.dx;
-      else if (s.openIdx === i) x = s.openDir === 'left' ? -110 : this.rightWidth(i);
+      else if (s.openIdx === i) x = -110;
       return { transform: `translateX(${x}px)`, transition: live ? 'none' : 'transform 0.2s ease' };
     },
   },

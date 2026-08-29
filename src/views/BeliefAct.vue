@@ -89,14 +89,19 @@ export default {
     const existing = wanted !== null
       ? (r.experiments || []).find(function(x) { return x.id === wanted; })
       : null;
+    // Handed in by the Tagebuch's chips rather than by the route: the belief
+    // is already answered, so the wizard opens on the question after it — and
+    // „Zurück“ still walks back through the picker to the fork before it.
+    const named = parseInt(this.$route.query.belief, 10);
+    const preset = needsBelief && !isNaN(named) ? named : null;
     return {
       // Reached through the Tagebuch's fork, the first question was already
       // answered there — so the bar carries on from it instead of starting
       // over at one.
       stepOffset: this.$route.query.from === 'journal' ? 1 : 0,
       needsBelief: needsBelief,
-      beliefTime: entry ? entry.time : null,
-      step: 1,
+      beliefTime: entry ? entry.time : preset,
+      step: preset !== null ? 2 : 1,
       totalSteps: needsBelief ? 3 : 2,
       experiment: existing
         ? Object.assign({}, existing)

@@ -393,9 +393,11 @@ export default {
     // there rather than through a fork it would only pass through.
     addTarget() {
       if (this.typeFilter === ACTION) {
-        return this.beliefFilter !== null
-          ? `/act-belief/${this.beliefFilter}`
-          : '/add-action';
+        // Always the wizard that knows about the belief step, so what the
+        // chips answered can be walked back to rather than being locked in.
+        const query = { from: 'journal' };
+        if (this.beliefFilter !== null) query.belief = String(this.beliefFilter);
+        return { path: '/add-action', query };
       }
       const query = {};
       if (this.typeFilter !== null) query.type = this.typeFilter;
