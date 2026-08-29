@@ -992,10 +992,16 @@ html { overflow-x: hidden; }
 }
 .head-swipe .swipe-panel.left { left: 0; }
 .head-swipe .swipe-panel.right { right: 0; }
+/* Left bare, so the card's own wash runs through the sentence rather than a
+   grey block sitting on top of it. */
 .swipe-handle {
   position: relative;
-  background: var(--bg-card);
   touch-action: pan-y;
+}
+/* It only has to hide anything while something is revealed behind it — and
+   the panels exist only then, so their presence is the condition. */
+.swipe-panel ~ .swipe-handle {
+  background: var(--bg-card);
 }
 
 .card-icon-btn {
