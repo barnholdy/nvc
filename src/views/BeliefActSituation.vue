@@ -11,7 +11,6 @@
     ></wizard-context>
 
     <div v-if="affirmationText" class="aff-box">
-      <p class="aff-label">Affirmation</p>
       <p class="aff-text">„{{ affirmationText }}“</p>
     </div>
 

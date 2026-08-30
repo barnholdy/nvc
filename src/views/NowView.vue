@@ -44,7 +44,6 @@
             @click="practiseSection.run(item)"
           >
             <div class="aff-box practise-aff">
-              <p class="aff-label">Affirmation</p>
               <p class="aff-text">{{ item.text }}</p>
             </div>
             <p class="now-sub">{{ item.sub }}</p>
@@ -612,7 +611,9 @@ export default {
   font-size: 0.82rem;
   line-height: 1.4;
   overflow-wrap: anywhere;
-  color: var(--accent-light);
+  /* The sentence is the belief, so it speaks in the colour a belief speaks in
+     everywhere else. */
+  color: var(--old-belief);
 }
 .venn-key-a { text-align: left; }
 .venn-key-b { text-align: right; }

@@ -188,6 +188,12 @@ export default {
   /* Unverändert: Warnung und Gefahr sagen weiter, was sie immer sagten. */
   --warn: #fd9927;
   --danger: #ff453a;
+
+  /* Saved to the homescreen, the app draws under the status bar. Everything
+     that sits at the very top adds this, so nothing hides behind the clock.
+     Held as a token rather than written out each time: cssnano cannot parse
+     env() inside calc(), so the inset has to stand on its own. */
+  --safe-top: env(safe-area-inset-top, 0px);
 }
 
 /* ─── Dark theme base ─── */
@@ -354,13 +360,16 @@ html { overflow-x: hidden; }
   top: 0;
   z-index: 4;
   background: #000;
-  padding: 6px 16px 12px;
+  padding: 0 16px 12px;
+  padding-top: var(--safe-top);
 }
 .wizard-title {
   font-size: 1.75rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin: 0 0 12px;
+  /* The 6px the padding used to carry, moved onto the title so the inset can
+     have the padding to itself. */
+  margin: 6px 0 12px;
   letter-spacing: -0.02em;
 }
 /* One segment per step: how far along is a shape, not a fraction to read. */
@@ -815,6 +824,7 @@ html { overflow-x: hidden; }
   top: 0;
   z-index: 4;
   background: #000;
+  padding-top: var(--safe-top);
 }
 .screen-title-row {
   display: flex;
@@ -955,16 +965,14 @@ html { overflow-x: hidden; }
 /* A second step offered right beside the first — split the same pill the
    swipe menu uses for its own grouped actions, instead of two separate
    buttons. */
-/* Swipe actions look like the button they sit beside: outlined, the same size.
-   Several of them share one outline and are divided by a hairline — stacked,
-   so the card only has to slide as far as the longest word, not their sum. */
+/* Swipe actions look like the buttons they replace: each one outlined for
+   itself, stacked one above the other, so the card only has to slide as far
+   as the longest word rather than the sum of them. */
 .swipe-group {
   display: inline-flex;
   flex-direction: column;
   align-items: stretch;
-  border: 1px solid var(--accent);
-  border-radius: 18px;
-  overflow: hidden;
+  gap: 8px;
 }
 .swipe-btn {
   flex-shrink: 0;
@@ -973,7 +981,8 @@ html { overflow-x: hidden; }
   justify-content: center;
   gap: 6px;
   background: none;
-  border: none;
+  border: 1px solid currentColor;
+  border-radius: 999px;
   font-size: 0.9rem;
   font-family: inherit;
   padding: 7px 14px;
@@ -981,11 +990,6 @@ html { overflow-x: hidden; }
   white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
-  & + & { border-top: 1px solid var(--accent); }
-}
-/* On its own it carries its own outline in its own colour. */
-.swipe-group.single {
-  border-color: currentColor;
 }
 .swipe-btn-edit { color: var(--accent-light); }
 .swipe-btn-change { color: var(--accent-light); }
@@ -1172,11 +1176,10 @@ html { overflow-x: hidden; }
   margin-top: 6px;
 }
 
+/* The affirmation needs no frame around it: it is the one sentence on the
+   card that speaks in the accent, and that is enough to set it apart. */
 .aff-box {
-  border-left: 3px solid var(--accent);
-  background: var(--bg-card);
-  border-radius: 0;
-  padding: 14px 16px;
+  padding: 12px 0 2px;
   margin-top: 0;
 }
 .aff-label {
@@ -1189,7 +1192,7 @@ html { overflow-x: hidden; }
 }
 .aff-text {
   font-size: 1rem;
-  color: var(--text-primary);
+  color: var(--accent-light);
   line-height: 1.4;
   margin: 0;
 }

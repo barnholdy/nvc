@@ -371,4 +371,12 @@ export default {
 .confirm-actions { padding: 0 !important; display: flex; }
 .confirm-cancel { flex: 1; color: var(--accent) !important; border-right: 1px solid var(--border-default); }
 .confirm-delete { flex: 1; color: var(--danger) !important; font-weight: 600 !important; }
+
+/* The toolbar is fixed to the top of the screen, so it carries the status-bar
+   inset itself and the page below it moves down by the same amount. */
+.v-toolbar--fixed {
+  box-sizing: content-box;
+  padding-top: var(--safe-top);
+}
+.v-content { margin-top: var(--safe-top); }
 </style>

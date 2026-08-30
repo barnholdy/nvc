@@ -58,7 +58,7 @@
              the order the work happens in; the card slides aside to show
              them. Deleting waits on the other side. -->
         <div v-if="isSwiping(idx) && cardActions(entry).length" class="swipe-panel left">
-          <div class="swipe-group" :class="{ single: cardActions(entry).length === 1 }">
+          <div class="swipe-group">
             <button
               v-for="act in cardActions(entry)"
               :key="act.key"
@@ -74,7 +74,7 @@
           </div>
         </div>
         <div v-if="isSwiping(idx)" class="swipe-panel right">
-          <div class="swipe-group single swipe-btn-delete">
+          <div class="swipe-group swipe-btn-delete">
             <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">Löschen</button>
           </div>
         </div>
@@ -96,8 +96,20 @@
 
           <div v-if="!compact" class="card-sep"></div>
 
-          <!-- The order the work happens in: what the belief does, where it
-               comes from, what it is for, then what has been put against it. -->
+          <!-- The order the work happens in: what else the belief hangs on,
+               what it does, where it comes from, what it is for, then what has
+               been put against it. -->
+          <div
+            v-if="!compact && entry.linkedBeliefs"
+            class="detail-row"
+            :class="{ open: isOpen(entry, 'linked') }"
+            @click.stop="toggleRow(entry, 'linked')"
+          >
+            <span class="detail-label">Verknüpft</span>
+            <p class="detail-value" :class="{ open: isOpen(entry, 'linked') }">{{ entry.linkedBeliefs }}</p>
+            <v-icon v-if="!isOpen(entry, 'linked')" class="detail-chevron">chevron_right</v-icon>
+          </div>
+
           <div
             v-if="!compact && (entry.withBelief || feelingsOf(entry).length || copingOf(entry))"
             class="detail-row"
@@ -210,7 +222,6 @@
             class="aff-box"
             :class="{ 'aff-box-loose': compact }"
           >
-            <p class="aff-label">Affirmation</p>
             <p class="aff-text">„{{ affirmationOf(entry).text }}“</p>
           </div>
 
@@ -806,8 +817,14 @@ export default {
 .card-pill-corner { flex-shrink: 0; margin-top: 2px; }
 /* All three steps stay reachable behind the card; only the one the belief is
    waiting for is spoken aloud. */
-.swipe-panel.left .swipe-btn { color: var(--text-secondary); }
-.swipe-panel.left .swipe-btn-next { color: var(--accent-light); }
+.swipe-panel.left .swipe-btn {
+  color: var(--text-secondary);
+  border-color: var(--border-default);
+}
+.swipe-panel.left .swipe-btn-next {
+  color: var(--accent-light);
+  border-color: var(--accent);
+}
 .action-icon { flex-shrink: 0; }
 .link-icon { flex-shrink: 0; }
 .link-chip .link-icon { margin-right: 6px; }

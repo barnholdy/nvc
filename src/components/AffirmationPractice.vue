@@ -129,7 +129,10 @@ export default {
 }
 .close-btn {
   position: absolute;
-  top: 12px;
+  /* Below the status bar when the app runs from the homescreen; the margin is
+     the gap it used to have from the top of the screen. */
+  top: var(--safe-top);
+  margin-top: 12px;
   left: 8px;
   width: 44px;
   height: 44px;

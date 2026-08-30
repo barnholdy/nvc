@@ -102,11 +102,7 @@
                 <!-- The menu waits behind the card, which slides aside to
                      show it — so nothing of it shows through the entry. -->
                 <div v-if="isSwiping(entry.time)" class="swipe-panel left">
-                  <div
-                    class="swipe-group"
-                    :class="{ single: swipeSteps(entry).length === 1 }"
-                    :style="groupStyle(swipeSteps(entry))"
-                  >
+                  <div class="swipe-group">
                     <button
                       v-for="step in swipeSteps(entry)"
                       :key="step.key"
@@ -117,7 +113,7 @@
                   </div>
                 </div>
                 <div v-if="isSwiping(entry.time)" class="swipe-panel right">
-                  <div class="swipe-group single swipe-btn-delete">
+                  <div class="swipe-group swipe-btn-delete">
                     <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">Löschen</button>
                   </div>
                 </div>
@@ -511,9 +507,6 @@ export default {
     },
     // A single button's group takes that button's colour, so its outline
     // matches it rather than the card's inherited text colour.
-    groupStyle(steps) {
-      return steps.length === 1 ? { color: steps[0].color } : null;
-    },
     // The three answers a run collects, in the order it collects them.
     actionDetails(entry) {
       if (this.collapsed) return [];
