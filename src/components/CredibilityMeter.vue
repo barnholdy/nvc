@@ -178,10 +178,10 @@ export default {
 /* The anchor is read in the same red the blocks are: it marks where the
    belief started out, which is the ground the red is measuring. */
 .meter-mark-start { background: var(--start-marker); }
-.meter-mark-now { background: var(--accent-light); }
+.meter-mark-now { background: var(--accent-fill); }
 /* Where it started and where it stands are the same reading: one mark, both
    colours, rather than one of them hidden behind the other. */
-.meter-mark-both { background: linear-gradient(to bottom, var(--start-marker) 50%, var(--accent-light) 50%); }
+.meter-mark-both { background: linear-gradient(to bottom, var(--start-marker) 50%, var(--accent-fill) 50%); }
 .meter-labels {
   position: relative;
   height: 16px;
@@ -196,7 +196,7 @@ export default {
   white-space: nowrap;
 }
 .meter-label-start { color: var(--start-marker); }
-.meter-label-now { color: var(--accent-light); }
+.meter-label-now { color: var(--accent-fill); }
 
 /* Same reading, less room: the blocks thin out and the words shrink with
    them, so the bar sits inside a row instead of dominating it. */

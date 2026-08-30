@@ -12,10 +12,12 @@
         </div>
       </div>
 
-      <!-- Above everything, and always there: writing down what just happened
-           is the one thing that does not depend on anything already being in
-           the app. One way in — which of the two kinds it is, is the wizard's
-           own first question, so it is not asked twice. -->
+      <!-- A breath before anything is asked of you — and only then the one
+           thing that does not depend on anything already being in the app:
+           writing down what just happened. Which of the two kinds it is, is
+           the wizard's own first question, so it is not asked twice. -->
+      <breath-circle></breath-circle>
+
       <div class="capture-grid">
         <div class="capture-card capture-wide" @click="$router.push('/add-journal')">
           <svg class="capture-icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -24,10 +26,6 @@
           <p class="capture-title">Eintrag erfassen</p>
         </div>
       </div>
-
-      <!-- A pause before the lists below ask anything of you. -->
-      <p class="section-head">Komme an</p>
-      <breath-circle></breath-circle>
 
       <div v-if="!topTileSection && !practiseSection && !trendRows.length" class="list-empty">
         <p class="list-empty-title">Nichts offen</p>
@@ -115,8 +113,27 @@
 
       <!-- Which beliefs keep turning up in the same moment. Counted from the
            entries, so it says what happened rather than what was expected. -->
-      <template v-if="pairRows.length">
+      <template v-if="allPairs.length">
         <p class="section-head">Häufig zusammen genannt</p>
+
+        <!-- One chip per belief that takes part in a pair, so a single
+             sentence can be followed through everything it travels with.
+             Only worth offering once there is more than one pair: with a
+             single one every chip would show the same thing. -->
+        <div v-if="allPairs.length > 1" class="pill-row">
+          <button
+            class="pill"
+            :class="{ active: shownPairFilter === null }"
+            @click="pickPair($event, null)"
+          >Alle</button>
+          <button
+            v-for="f in pairFilters"
+            :key="f.time"
+            class="pill"
+            :class="{ active: shownPairFilter === f.time }"
+            @click="pickPair($event, f.time)"
+          >„{{ f.short }}“<span class="pill-count"> · {{ f.count }}</span></button>
+        </div>
 
         <div v-for="pair in pairRows" :key="pair.key" class="card pair-card">
           <!-- Two rings: what each belief did without the other, and the
@@ -130,10 +147,13 @@
             <text class="venn-count" x="151" y="62">{{ pair.onlyB }}</text>
           </svg>
 
-          <!-- Which sentence belongs to which ring is said by where it
-               stands, so both rings can carry the same colour. -->
-          <p class="venn-key venn-key-a">„{{ pair.aText }}“</p>
-          <p class="venn-key venn-key-b">„{{ pair.bText }}“</p>
+          <!-- Side by side under their own rings: which sentence belongs to
+               which is said by the column it stands in, so both rings can
+               carry the same colour. -->
+          <div class="venn-keys">
+            <p class="venn-key venn-key-a">„{{ pair.aText }}“</p>
+            <p class="venn-key venn-key-b">„{{ pair.bText }}“</p>
+          </div>
         </div>
       </template>
 
@@ -221,6 +241,8 @@ export default {
   data() {
     return {
       practising: null, practised: readPractised(), now: Date.now(), trendKey: null,
+      // Which belief the pairs are being read for; null is all of them.
+      pairFilter: null,
     };
   },
   computed: {
@@ -302,8 +324,32 @@ export default {
       return rows;
     },
     // Pairs of beliefs the same entry named, most frequent first.
-    pairRows() {
+    allPairs() {
       return beliefPairs(this.beliefs, this.journal);
+    },
+    // Which beliefs take part in a pair at all, and in how many — the chips
+    // say how much there is to see before one is tapped.
+    pairFilters() {
+      const shorten = t => (t.length > 24 ? `${t.slice(0, 23)}…` : t);
+      const counts = {};
+      this.allPairs.forEach((p) => {
+        counts[p.a] = (counts[p.a] || 0) + 1;
+        counts[p.b] = (counts[p.b] || 0) + 1;
+      });
+      return this.beliefs
+        .filter(b => counts[b.time])
+        .map(b => ({ time: b.time, short: shorten(b.belief || ''), count: counts[b.time] }))
+        .sort((x, y) => y.count - x.count);
+    },
+    // A chip that vanished — a pair undone by a new entry — must not leave
+    // the block empty.
+    shownPairFilter() {
+      if (this.pairFilter === null) return null;
+      return this.pairFilters.some(f => f.time === this.pairFilter) ? this.pairFilter : null;
+    },
+    pairRows() {
+      if (this.shownPairFilter === null) return this.allPairs;
+      return this.allPairs.filter(p => p.a === this.shownPairFilter || p.b === this.shownPairFilter);
     },
     // The chosen chip, or the first one — a chip that vanished (a rating
     // undone elsewhere) must not leave the block blank.
@@ -462,6 +508,10 @@ export default {
       this.trendKey = key;
       alignPill(event.currentTarget);
     },
+    pickPair(event, time) {
+      this.pairFilter = time;
+      alignPill(event.currentTarget);
+    },
     sinceLabel(days) {
       if (days === null) return 'noch nie geübt';
       if (days <= 0) return 'heute geübt';
@@ -492,14 +542,14 @@ export default {
   display: block;
   width: 100%;
   max-width: 260px;
-  margin: 2px auto 12px;
+  margin: 2px auto 14px;
   overflow: visible;
 }
 .venn-ring {
   stroke-width: 1.5;
   fill-opacity: 0.28;
 }
-.venn-a, .venn-b { fill: var(--trigger-icon); stroke: var(--trigger-icon); }
+.venn-a, .venn-b { fill: var(--old-belief); stroke: var(--old-belief); }
 .venn-count {
   fill: var(--text-primary);
   font-size: 15px;
@@ -508,19 +558,25 @@ export default {
   dominant-baseline: central;
 }
 .venn-count-both { font-size: 17px; }
-/* Both sentences in the rings' own colour; which is which is read off the
-   side each one sits on. */
+/* One row, two columns — each sentence under the ring it belongs to. In the
+   rings' family of red, but the lighter one: the bar's own red is too dark
+   to read a sentence in against black. */
+.venn-keys {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
 .venn-key {
+  flex: 1;
+  min-width: 0;
   margin: 0;
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   line-height: 1.4;
   overflow-wrap: anywhere;
   color: var(--trigger-icon);
-  max-width: 88%;
 }
-.venn-key + .venn-key { margin-top: 6px; }
 .venn-key-a { text-align: left; }
-.venn-key-b { text-align: right; margin-left: auto; }
+.venn-key-b { text-align: right; }
 .dark-page { background: #000; min-height: 100vh; }
 
 /* Small grey capitals: the heading names the pile, the cards below are the
@@ -548,7 +604,8 @@ export default {
   align-items: center;
 }
 .capture-card {
-  background: var(--bg-card);
+  background: var(--bg-card-gradient);
+  border: 1px solid var(--border-subtle);
   border-radius: 18px;
   padding: 16px;
   display: flex;
@@ -584,7 +641,8 @@ export default {
   margin: 0 14px 12px;
 }
 .tile-card {
-  background: var(--bg-card);
+  background: var(--bg-card-gradient);
+  border: 1px solid var(--border-subtle);
   border-radius: 18px;
   padding: 16px 16px 18px;
   display: flex;
