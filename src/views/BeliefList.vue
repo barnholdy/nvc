@@ -656,7 +656,13 @@ export default {
       let x = 0;
       if (live) x = s.dx;
       else if (s.openIdx === i) x = -110;
-      return { transform: `translateX(${x}px)`, transition: live ? 'none' : 'transform 0.2s ease' };
+      return {
+        transform: `translateX(${x}px)`,
+        transition: live ? 'none' : 'transform 0.2s ease',
+        // Opaque only where it has slid off its own place; standing still it
+        // lets the card's wash through the sentence.
+        background: x === 0 ? '' : 'var(--bg-card)',
+      };
     },
   },
 };

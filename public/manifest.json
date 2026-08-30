@@ -16,6 +16,6 @@
   "start_url": "/nvc/index.html",
   "scope": "/nvc/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff"
+  "background_color": "#0f0e14",
+  "theme_color": "#0f0e14"
 }

@@ -5,7 +5,7 @@
         <div class="screen-title-row">
           <h1 class="screen-title">Tagebuch</h1>
           <div class="screen-actions">
-            <button class="screen-add" @click="$router.push(addTarget)" aria-label="Neuer Eintrag">+</button>
+            <button class="screen-add screen-add-primary" @click="$router.push(addTarget)" aria-label="Neuer Eintrag">+</button>
             <button class="screen-add" @click="$router.push('/settings')" aria-label="Einstellungen">
               <v-icon color="#888780">settings</v-icon>
             </button>
@@ -653,7 +653,13 @@ export default {
       let x = 0;
       if (live) x = s.dx;
       else if (s.openKey === key) x = s.openDir === 'left' ? -110 : this.rightWidth(key);
-      return { transform: `translateX(${x}px)`, transition: live ? 'none' : 'transform 0.2s ease' };
+      return {
+        transform: `translateX(${x}px)`,
+        transition: live ? 'none' : 'transform 0.2s ease',
+        // Opaque only where it has slid off its own place; standing still it
+        // lets the card's wash through the sentence.
+        background: x === 0 ? '' : 'var(--bg-card)',
+      };
     },
   },
 };

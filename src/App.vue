@@ -838,14 +838,14 @@ html { overflow-x: hidden; }
   overflow: hidden;
   justify-content: center;
 }
+/* Outlined rings rather than filled discs, so the header reads as a line of
+   controls in the same language the chips below it speak. */
 .screen-add {
-  /* Grey: adding and settings are always-there controls, not the step the
-     screen is inviting. */
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: var(--bg-card);
-  border: none;
+  background: none;
+  border: 1px solid var(--border-default);
   color: var(--text-muted);
   font-size: 1.5rem;
   line-height: 1;
@@ -857,6 +857,11 @@ html { overflow-x: hidden; }
   font-family: inherit;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
+}
+/* Adding is the one thing the header invites, so it wears the accent. */
+.screen-add-primary {
+  border-color: var(--accent);
+  color: var(--accent-light);
 }
 
 /* Filter pills. They scroll sideways rather than shrinking, so a long label
@@ -878,32 +883,35 @@ html { overflow-x: hidden; }
 .pill {
   flex-shrink: 0;
   background: none;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-default);
   border-radius: 999px;
   padding: 8px 16px;
   font-size: 0.88rem;
   font-family: inherit;
-  color: var(--text-muted);
+  color: var(--text-tertiary);
   cursor: pointer;
   white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
+  /* The chosen one says so in the accent rather than by being filled in:
+     the row stays a row of outlines, and only its colour moves. */
   &.active {
-    color: var(--text-primary);
-    background: var(--bg-card);
-    border-color: var(--border-default);
+    color: var(--accent-light);
+    background: none;
+    border-color: var(--accent-light);
+    font-weight: 500;
   }
 }
-.pill-count { color: var(--text-disabled); margin-left: 4px; }
+.pill-count { color: var(--text-muted); margin-left: 4px; }
 /* Square-ish, because it holds an icon rather than a word. */
 .pill-icon {
   padding: 8px 10px;
   display: flex;
   align-items: center;
-  .v-icon { color: var(--text-muted) !important; }
-  &.active .v-icon { color: var(--text-primary) !important; }
+  .v-icon { color: var(--text-tertiary) !important; }
+  &.active .v-icon { color: var(--accent-light) !important; }
 }
-.pill.active .pill-count { color: var(--text-muted); }
+.pill.active .pill-count { color: var(--accent-light); }
 
 /* A card is where the work is read, so it is lifted off the black with a
    wash of the accent rather than a flat grey — barely there at the top,
@@ -998,11 +1006,8 @@ html { overflow-x: hidden; }
   position: relative;
   touch-action: pan-y;
 }
-/* It only has to hide anything while something is revealed behind it — and
-   the panels exist only then, so their presence is the condition. */
-.swipe-panel ~ .swipe-handle {
-  background: var(--bg-card);
-}
+/* Whether it needs to hide anything depends on how far it has slid, which
+   only the component knows — so the background is set there, not here. */
 
 .card-icon-btn {
   flex-shrink: 0;
