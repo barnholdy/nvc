@@ -51,28 +51,28 @@
       <div
         v-for="(entry, idx) in filteredBeliefs"
         :key="entry.time"
-        class="card"
+        class="card-swipe"
         :data-row-id="entry.time"
       >
-        <div class="head-swipe">
-          <!-- Every step this belief offers stands at the foot of its card, so
-               the only thing left to reach for is deleting it. -->
-          <div v-if="isSwiping(idx)" class="swipe-panel right">
-            <div class="swipe-group single swipe-btn-delete">
-              <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">Löschen</button>
-            </div>
+        <!-- Every step this belief offers stands at the foot of its card, so
+             the only thing left to reach for is deleting it. It waits behind
+             the card, which slides aside to show it. -->
+        <div v-if="isSwiping(idx)" class="swipe-panel right">
+          <div class="swipe-group single swipe-btn-delete">
+            <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">Löschen</button>
           </div>
-          <div
-            class="card-head swipe-handle"
-            :style="rowSt(idx)"
-            @touchstart="tsStart($event, idx)"
-            @touchmove="tsMove($event, idx)"
-            @touchend="tsEnd($event, idx)"
-          >
+        </div>
+        <div
+          class="card swipe-handle"
+          :style="rowSt(idx)"
+          @touchstart="tsStart($event, idx)"
+          @touchmove="tsMove($event, idx)"
+          @touchend="tsEnd($event, idx)"
+        >
+          <div class="card-head">
             <p class="card-title">„{{ entry.belief }}“</p>
             <span class="card-pill card-pill-corner">{{ statusLabel(entry) }}</span>
           </div>
-        </div>
 
           <div v-if="credibility(entry) !== null" class="score-row">
             <credibility-meter :standing="credibility(entry)" :baseline="anchorOf(entry)"></credibility-meter>
@@ -235,6 +235,7 @@
               v-for="act in cardActions(entry)"
               :key="act.key"
               class="card-action"
+              :class="{ 'card-action-next': act.key === nextStepKey(entry) }"
               @click.stop="act.run(entry)"
             >
               <svg class="action-icon" viewBox="0 0 24 24" width="16" height="16">
@@ -243,6 +244,7 @@
               <span>{{ act.label }}</span>
             </button>
           </div>
+        </div>
       </div>
 
       <div class="list-bottom-space"></div>
@@ -593,6 +595,15 @@ export default {
         query: { belief: String(entry.time), type: REFLECTION },
       });
     },
+    // Which of the three is the one this belief is waiting for. It wears the
+    // accent; the others stay quiet, so a card says at a glance what is next
+    // rather than offering three equal doors.
+    nextStepKey(entry) {
+      const s = beliefStatus(entry);
+      if (s === 'open') return 'edit';
+      if (s === 'working') return 'change';
+      return 'practice';
+    },
     // The three steps a belief offers, in the order the work happens in.
     cardActions(entry) {
       const actions = [
@@ -669,6 +680,15 @@ export default {
 </script>
 
 <style scoped lang="scss">
+/* The wrapper takes the card's place in the list, so the menu behind it sits
+   exactly where the card does. */
+.card-swipe {
+  margin: 0 14px 12px;
+}
+.card-swipe > .card {
+  margin: 0;
+}
+
 .dark-page { background: #000; min-height: 100vh; }
 
 /* Catches the tap that dismisses the menu, without dimming the screen the
@@ -783,6 +803,8 @@ export default {
   gap: 8px;
   margin-top: 14px;
 }
+/* All three stay reachable; only the one the belief is waiting for is
+   spoken aloud. */
 .card-action {
   flex: 1;
   display: inline-flex;
@@ -790,15 +812,19 @@ export default {
   justify-content: center;
   gap: 6px;
   background: none;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--border-default);
   border-radius: 999px;
-  color: var(--accent-light);
+  color: var(--text-secondary);
   font-size: 0.9rem;
   font-family: inherit;
   padding: 8px 14px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
+}
+.card-action-next {
+  border-color: var(--accent);
+  color: var(--accent-light);
 }
 .action-icon { flex-shrink: 0; }
 .link-icon { flex-shrink: 0; }

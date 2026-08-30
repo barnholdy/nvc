@@ -130,10 +130,10 @@
             <text class="venn-count" x="151" y="62">{{ pair.onlyB }}</text>
           </svg>
 
+          <!-- Which sentence belongs to which ring is said by where it
+               stands, so both rings can carry the same colour. -->
           <p class="venn-key venn-key-a">„{{ pair.aText }}“</p>
           <p class="venn-key venn-key-b">„{{ pair.bText }}“</p>
-          <p class="pair-count">{{ pairLabel(pair.count) }}, je {{ pair.onlyA }}× und
-            {{ pair.onlyB }}× für sich</p>
         </div>
       </template>
 
@@ -452,9 +452,6 @@ export default {
   },
   methods: {
     round(v) { return String(Math.round(v * 10) / 10).replace('.', ','); },
-    pairLabel(n) {
-      return n === 1 ? 'Einmal zusammen genannt' : `${n}× zusammen genannt`;
-    },
     // What the picture says, for anyone who cannot see it.
     vennLabel(pair) {
       return `„${pair.aText}“ ${pair.onlyA}× allein, „${pair.bText}“ ${pair.onlyB}× allein, `
@@ -502,8 +499,7 @@ export default {
   stroke-width: 1.5;
   fill-opacity: 0.28;
 }
-.venn-a { fill: var(--trigger-icon); stroke: var(--trigger-icon); }
-.venn-b { fill: var(--accent); stroke: var(--accent); }
+.venn-a, .venn-b { fill: var(--trigger-icon); stroke: var(--trigger-icon); }
 .venn-count {
   fill: var(--text-primary);
   font-size: 15px;
@@ -512,22 +508,19 @@ export default {
   dominant-baseline: central;
 }
 .venn-count-both { font-size: 17px; }
-/* Each sentence in the colour of the ring it belongs to, so the picture and
-   the words are read as one. */
+/* Both sentences in the rings' own colour; which is which is read off the
+   side each one sits on. */
 .venn-key {
   margin: 0;
   font-size: 0.88rem;
   line-height: 1.4;
   overflow-wrap: anywhere;
+  color: var(--trigger-icon);
+  max-width: 88%;
 }
-.venn-key + .venn-key { margin-top: 4px; }
-.venn-key-a { color: var(--trigger-icon); }
-.venn-key-b { color: var(--accent-light); }
-.pair-count {
-  margin: 10px 0 0;
-  font-size: 0.78rem;
-  color: var(--text-muted);
-}
+.venn-key + .venn-key { margin-top: 6px; }
+.venn-key-a { text-align: left; }
+.venn-key-b { text-align: right; margin-left: auto; }
 .dark-page { background: #000; min-height: 100vh; }
 
 /* Small grey capitals: the heading names the pile, the cards below are the

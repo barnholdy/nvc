@@ -180,7 +180,9 @@ export default {
 
   /* Die alte Überzeugung und was sie auslöst */
   --old-belief: #993c1d;
-  --start-marker: #e24b4a;
+  /* The anchor is drawn in the very red the bar holds its ground in: where a
+     belief started is the same kind of fact as where it stands. */
+  --start-marker: #993c1d;
   --trigger-icon: #f0997b;
 
   /* Unverändert: Warnung und Gefahr sagen weiter, was sie immer sagten. */
@@ -986,28 +988,29 @@ html { overflow-x: hidden; }
 .swipe-btn-evaluate { color: var(--accent-light); }
 .swipe-btn-delete { color: var(--danger); }
 
-/* The head slides on its own; the rest of the card stays put. */
-.head-swipe {
+/* The menu lies behind the whole card rather than inside its head: the
+   card's own background covers it, so nothing shows through the sentence,
+   and sliding the card aside is what brings it out. */
+.card-swipe {
   position: relative;
   overflow: hidden;
 }
-.head-swipe .swipe-panel {
+.card-swipe > .swipe-panel {
   position: absolute;
   top: 0;
+  bottom: 0;
   display: flex;
   gap: 8px;
-  align-items: flex-start;
+  align-items: center;
 }
-.head-swipe .swipe-panel.left { left: 0; }
-.head-swipe .swipe-panel.right { right: 0; }
-/* Left bare, so the card's own wash runs through the sentence rather than a
-   grey block sitting on top of it. */
-.swipe-handle {
+.card-swipe > .swipe-panel.left { left: 0; }
+.card-swipe > .swipe-panel.right { right: 0; }
+.card-swipe > .card {
   position: relative;
+  z-index: 1;
   touch-action: pan-y;
 }
-/* Whether it needs to hide anything depends on how far it has slid, which
-   only the component knows — so the background is set there, not here. */
+
 
 .card-icon-btn {
   flex-shrink: 0;
@@ -1024,15 +1027,18 @@ html { overflow-x: hidden; }
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
 }
+/* An outline like everything else in the header speaks: the state is a label
+   on the card, not a filled-in thing of its own. */
 .card-pill {
   display: inline-block;
   margin-top: 10px;
   font-size: 0.78rem;
   font-weight: 500;
-  color: var(--text-muted);
-  background: var(--border-subtle);
-  border-radius: 8px;
-  padding: 4px 10px;
+  color: var(--text-secondary);
+  background: none;
+  border: 1px solid var(--border-default);
+  border-radius: 999px;
+  padding: 3px 11px;
 }
 
 /* The number first, then what it measures — the value is what the eye is
@@ -1150,13 +1156,14 @@ html { overflow-x: hidden; }
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
+/* The two sentences in the colours their halves of the bar are drawn in:
+   the belief in the warm tone of the ground it still holds, the affirmation
+   in the accent of what has been won. */
 .quote-belief {
-  color: var(--text-muted);
+  color: var(--trigger-icon);
 }
-/* The brighter of the two: it is the sentence being grown into, and the one
-   the eye should land on. */
 .quote-affirmation {
-  color: var(--text-primary);
+  color: var(--accent-light);
   margin-top: 6px;
 }
 

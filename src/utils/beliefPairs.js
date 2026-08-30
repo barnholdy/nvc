@@ -45,12 +45,13 @@ export function beliefPairs(beliefs, journal) {
       onlyA: (named[p.a] || 0) - p.count,
       onlyB: (named[p.b] || 0) - p.count,
     }))
-    // Two beliefs belong together when neither of them turns up apart more
-    // often than the two of them turn up as one moment: the middle of the
-    // ring has to be at least as heavy as either side of it. That is the
-    // whole test — a pair that has only ever appeared as a pair passes it on
-    // its first moment, and rightly so: nothing about it says otherwise yet.
-    .filter(p => p.count >= p.onlyA && p.count >= p.onlyB)
+    // Two beliefs belong together when, for at least one of them, the pair
+    // is the rule rather than the exception: their shared moments outweigh
+    // that one's moments without the other. Measuring both against the pair
+    // would silence every pairing with a belief that carries the whole book —
+    // a sentence that never turns up without its partner says something even
+    // when the partner turns up everywhere.
+    .filter(p => p.count >= Math.min(p.onlyA, p.onlyB))
     // The strongest knot first; between equals, the one named most recently.
     .sort((x, y) => (y.count - x.count)
       || (Math.max.apply(null, y.entries) - Math.max.apply(null, x.entries)));

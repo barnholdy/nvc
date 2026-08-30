@@ -98,40 +98,37 @@
             <span class="timeline-dot"></span>
             <div class="timeline-body">
               <p class="timeline-meta">{{ dayLabel(entry.time) }}</p>
-              <div class="card journal-card">
-                <!-- Only the head answers the swipe; the rest of the card
-                     stays put, the way the belief and action cards work. -->
-                <div class="head-swipe">
-                  <!-- A run can be planned again or evaluated from here, just
-                       as in its own list; whichever the card already offers is
-                       left out. -->
-                  <div v-if="isSwiping(entry.time)" class="swipe-panel left">
-                    <div
-                      class="swipe-group"
-                      :class="{ single: swipeSteps(entry).length === 1 }"
-                      :style="groupStyle(swipeSteps(entry))"
-                    >
-                      <button
-                        v-for="step in swipeSteps(entry)"
-                        :key="step.key"
-                        class="swipe-btn"
-                        :style="{ color: step.color }"
-                        @click.stop="step.run(entry)"
-                      >{{ step.label }}</button>
-                    </div>
-                  </div>
-                  <div v-if="isSwiping(entry.time)" class="swipe-panel right">
-                    <div class="swipe-group single swipe-btn-delete">
-                      <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">Löschen</button>
-                    </div>
-                  </div>
+              <div class="card-swipe">
+                <!-- The menu waits behind the card, which slides aside to
+                     show it — so nothing of it shows through the entry. -->
+                <div v-if="isSwiping(entry.time)" class="swipe-panel left">
                   <div
-                    class="card-head swipe-handle"
-                    :style="rowSt(entry.time)"
-                    @touchstart="tsStart($event, entry.time)"
-                    @touchmove="tsMove($event, entry.time)"
-                    @touchend="tsEnd($event, entry.time)"
+                    class="swipe-group"
+                    :class="{ single: swipeSteps(entry).length === 1 }"
+                    :style="groupStyle(swipeSteps(entry))"
                   >
+                    <button
+                      v-for="step in swipeSteps(entry)"
+                      :key="step.key"
+                      class="swipe-btn"
+                      :style="{ color: step.color }"
+                      @click.stop="step.run(entry)"
+                    >{{ step.label }}</button>
+                  </div>
+                </div>
+                <div v-if="isSwiping(entry.time)" class="swipe-panel right">
+                  <div class="swipe-group single swipe-btn-delete">
+                    <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">Löschen</button>
+                  </div>
+                </div>
+                <div
+                  class="card journal-card swipe-handle"
+                  :style="rowSt(entry.time)"
+                  @touchstart="tsStart($event, entry.time)"
+                  @touchmove="tsMove($event, entry.time)"
+                  @touchend="tsEnd($event, entry.time)"
+                >
+                  <div class="card-head">
                     <!-- Which kind an entry is, said by its mark rather than
                          by a word: a bolt for the moment a belief struck, a
                          page for the moment it did not hold, a flask for the
@@ -145,9 +142,8 @@
                     ><path :d="typeIcon(entry)" fill="currentColor"></path></svg>
                     <p class="card-title">{{ entry.fact }}</p>
                   </div>
-                </div>
 
-                <!-- Where the run stands, the same badge its own list shows. -->
+                  <!-- Where the run stands, the same badge its own list shows. -->
                 <span v-if="isAction(entry)" class="card-pill">{{ entry.stateLabel }}</span>
 
                 <feeling-chips
@@ -206,6 +202,7 @@
                   :tappable="b.exists"
                   @open="openBelief(b.time)"
                 ></belief-chip>
+                </div>
               </div>
             </div>
           </div>
