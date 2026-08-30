@@ -142,6 +142,20 @@
                :aria-label="vennLabel(pair)">
             <circle class="venn-ring venn-a" cx="75" cy="62" r="48"></circle>
             <circle class="venn-ring venn-b" cx="125" cy="62" r="48"></circle>
+            <circle
+              v-if="pair.aHeld !== null"
+              class="venn-core"
+              cx="75"
+              cy="62"
+              :r="heldRadius(pair.aHeld)"
+            ></circle>
+            <circle
+              v-if="pair.bHeld !== null"
+              class="venn-core"
+              cx="125"
+              cy="62"
+              :r="heldRadius(pair.bHeld)"
+            ></circle>
             <text class="venn-count" x="49" y="62">{{ pair.onlyA }}</text>
             <text class="venn-count venn-count-both" x="100" y="62">{{ pair.count }}</text>
             <text class="venn-count" x="151" y="62">{{ pair.onlyB }}</text>
@@ -202,7 +216,7 @@ import {
   experimentState,
 } from '@/utils/experiment';
 import {
-  beliefCredibility, beliefRows, baselineOf, allBeliefPoints,
+  beliefCredibility, beliefStanding, beliefRows, baselineOf, allBeliefPoints,
 } from '@/utils/credibility';
 import { beliefPairs } from '@/utils/beliefPairs';
 import { alignPill } from '@/utils/pillScroll';
@@ -325,7 +339,19 @@ export default {
     },
     // Pairs of beliefs the same entry named, most frequent first.
     allPairs() {
-      return beliefPairs(this.beliefs, this.journal);
+      // Each ring also says how much of its belief still stands: the same
+      // reading the credibility bar gives, wound into a circle — a red core
+      // for the ground it holds, the violet ring around it for what it has
+      // lost. A belief nobody has rated yet keeps its ring empty.
+      const standing = (time) => {
+        const belief = this.beliefs.find(b => b.time === time);
+        if (!belief) return null;
+        return beliefStanding(this.patterns, belief, this.journal);
+      };
+      return beliefPairs(this.beliefs, this.journal).map(p => Object.assign({}, p, {
+        aHeld: standing(p.a),
+        bHeld: standing(p.b),
+      }));
     },
     // Which beliefs take part in a pair at all, and in how many — the chips
     // say how much there is to see before one is tapped.
@@ -508,6 +534,12 @@ export default {
       this.trendKey = key;
       alignPill(event.currentTarget);
     },
+    // How far the red core reaches: the belief's standing on the same 0-10
+    // scale the bar is read on, as a share of the ring's own radius.
+    heldRadius(held) {
+      const v = Math.max(0, Math.min(10, held));
+      return (48 * (v / 10)).toFixed(2);
+    },
     pickPair(event, time) {
       this.pairFilter = time;
       alignPill(event.currentTarget);
@@ -549,7 +581,14 @@ export default {
   stroke-width: 1.5;
   fill-opacity: 0.28;
 }
-.venn-a, .venn-b { fill: var(--old-belief); stroke: var(--old-belief); }
+/* The ring is the whole of a belief, the core how much of it still holds —
+   the credibility bar wound into a circle. */
+.venn-a, .venn-b { fill: var(--accent-fill); stroke: var(--accent-fill); }
+.venn-core {
+  fill: var(--old-belief);
+  fill-opacity: 0.75;
+  stroke: none;
+}
 .venn-count {
   fill: var(--text-primary);
   font-size: 15px;
@@ -573,7 +612,7 @@ export default {
   font-size: 0.82rem;
   line-height: 1.4;
   overflow-wrap: anywhere;
-  color: var(--trigger-icon);
+  color: var(--accent-light);
 }
 .venn-key-a { text-align: left; }
 .venn-key-b { text-align: right; }

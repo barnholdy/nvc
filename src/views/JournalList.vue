@@ -492,7 +492,9 @@ export default {
       alignPill(row && row.querySelector('.pill.active:not(.pill-icon)'));
     },
     rowId(entry) { return entry.actionId || entry.time; },
-    isSwiping(key) { return this.sw.openKey === key || this.sw.touchKey === key; },
+    // Only once a swipe is really under way — putting the panels in and
+    // taking them out again around a plain tap swallows the tap.
+    isSwiping(key) { return this.sw.openKey === key || (this.sw.touchKey === key && this.sw.drag); },
     typeOf(entry) { return entryType(entry); },
     isAction(entry) { return entryType(entry) === ACTION; },
     // What a run offers besides deleting: planning it again re-opens the
@@ -638,12 +640,10 @@ export default {
       this.sw.touchKey = null; this.sw.dx = 0; this.sw.drag = false; this.sw.isH = null;
     },
     // Keep in step with the buttons rendered above: a mismatch makes the card
-    // spring back before the second one can be tapped.
-    rightWidth(key) {
-      const entry = this.entries.find(e => e.time === key);
-      const n = entry ? this.swipeSteps(entry).length : 1;
-      return n >= 2 ? 190 : 120;
-    },
+    // spring back before the second one can be tapped. The steps stand one above the other now, so the card only has to slide
+    // as far as the longest label — the same distance whether there are one
+    // or two of them.
+    rightWidth() { return 120; },
     rowSt(key) {
       const s = this.sw;
       const live = s.touchKey === key && s.drag && s.isH;

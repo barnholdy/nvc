@@ -54,9 +54,25 @@
         class="card-swipe"
         :data-row-id="entry.time"
       >
-        <!-- Every step this belief offers stands at the foot of its card, so
-             the only thing left to reach for is deleting it. It waits behind
-             the card, which slides aside to show it. -->
+        <!-- Every step this belief offers waits behind its card, stacked in
+             the order the work happens in; the card slides aside to show
+             them. Deleting waits on the other side. -->
+        <div v-if="isSwiping(idx) && cardActions(entry).length" class="swipe-panel left">
+          <div class="swipe-group" :class="{ single: cardActions(entry).length === 1 }">
+            <button
+              v-for="act in cardActions(entry)"
+              :key="act.key"
+              class="swipe-btn"
+              :class="{ 'swipe-btn-next': act.key === nextStepKey(entry) }"
+              @click.stop="act.run(entry)"
+            >
+              <svg class="action-icon" viewBox="0 0 24 24" width="16" height="16">
+                <path :d="act.icon" fill="currentColor"></path>
+              </svg>
+              <span>{{ act.label }}</span>
+            </button>
+          </div>
+        </div>
         <div v-if="isSwiping(idx)" class="swipe-panel right">
           <div class="swipe-group single swipe-btn-delete">
             <button class="swipe-btn swipe-btn-delete" @click.stop="preDelete(entry)">Löschen</button>
@@ -228,22 +244,6 @@
               >{{ journalShort(entry) }}</span>
           </div>
 
-          <!-- What to do next with this belief, at the foot of the card: each
-               step with the mark its own part of the app is known by. -->
-          <div v-if="cardActions(entry).length" class="card-actions">
-            <button
-              v-for="act in cardActions(entry)"
-              :key="act.key"
-              class="card-action"
-              :class="{ 'card-action-next': act.key === nextStepKey(entry) }"
-              @click.stop="act.run(entry)"
-            >
-              <svg class="action-icon" viewBox="0 0 24 24" width="16" height="16">
-                <path :d="act.icon" fill="currentColor"></path>
-              </svg>
-              <span>{{ act.label }}</span>
-            </button>
-          </div>
         </div>
       </div>
 
@@ -534,7 +534,9 @@ export default {
         localStorage.setItem(PRACTICE_KEY, JSON.stringify(map));
       } catch (e) { /* a full or blocked store must not stop the practice */ }
     },
-    isSwiping(idx) { return this.sw.openIdx === idx || this.sw.touchIdx === idx; },
+    // Only once a swipe is really under way — putting the panels in and
+    // taking them out again around a plain tap swallows the tap.
+    isSwiping(idx) { return this.sw.openIdx === idx || (this.sw.touchIdx === idx && this.sw.drag); },
     isOpen(entry, key) { return !!this.openRows[`${entry.time}:${key}`]; },
     toggleRow(entry, key) {
       const k = `${entry.time}:${key}`;
@@ -636,7 +638,7 @@ export default {
     // counts — otherwise scrolling past a card would drag it sideways.
     tsStart(e, i) {
       if (e.target && e.target.closest
-        && (e.target.closest('.swipe-btn') || e.target.closest('.card-btn') || e.target.closest('.card-action'))) return;
+        && (e.target.closest('.swipe-btn') || e.target.closest('.card-btn'))) return;
       this.sw.handleHeight = e.currentTarget ? e.currentTarget.offsetHeight : 0;
       const t = e.touches[0];
       this.sw.touchIdx = i; this.sw.startX = t.clientX; this.sw.startY = t.clientY;
@@ -650,23 +652,29 @@ export default {
         this.sw.isH = Math.abs(dx) > Math.abs(dy) * 1.5;
       if (!this.sw.isH) return;
       e.preventDefault();
-      this.sw.dx = Math.max(-110, Math.min(dx, 0));
+      this.sw.dx = Math.max(-110, Math.min(dx, this.leftWidth()));
       this.sw.drag = true;
     },
     tsEnd(e, i) {
       if (this.sw.touchIdx !== i) return;
       if (this.sw.drag) {
         if (this.sw.dx < -40) { this.sw.openIdx = i; this.sw.openDir = 'left'; }
+        else if (this.sw.dx > 40) { this.sw.openIdx = i; this.sw.openDir = 'right'; }
         else { this.sw.openIdx = null; this.sw.openDir = null; }
+      } else if (this.sw.openIdx !== null) {
+        this.sw.openIdx = null; this.sw.openDir = null;
       }
       this.sw.touchIdx = null; this.sw.dx = 0; this.sw.drag = false; this.sw.isH = null;
     },
+    // Keep in step with the buttons rendered behind the card: a mismatch
+    // would hide the widest label behind the card's own edge.
+    leftWidth() { return 124; },
     rowSt(i) {
       const s = this.sw;
       const live = s.touchIdx === i && s.drag && s.isH;
       let x = 0;
       if (live) x = s.dx;
-      else if (s.openIdx === i) x = -110;
+      else if (s.openIdx === i) x = s.openDir === 'left' ? -110 : this.leftWidth();
       return {
         transform: `translateX(${x}px)`,
         transition: live ? 'none' : 'transform 0.2s ease',
@@ -796,36 +804,10 @@ export default {
 .link-chip:active { opacity: 0.6; }
 /* Top right of the head, beside the sentence rather than under it. */
 .card-pill-corner { flex-shrink: 0; margin-top: 2px; }
-/* Side by side at the foot of the card, sharing the width evenly: they are
-   alternatives, not a first and a second choice. */
-.card-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 14px;
-}
-/* All three stay reachable; only the one the belief is waiting for is
-   spoken aloud. */
-.card-action {
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  background: none;
-  border: 1px solid var(--border-default);
-  border-radius: 999px;
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  font-family: inherit;
-  padding: 8px 14px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  &:active { opacity: 0.6; }
-}
-.card-action-next {
-  border-color: var(--accent);
-  color: var(--accent-light);
-}
+/* All three steps stay reachable behind the card; only the one the belief is
+   waiting for is spoken aloud. */
+.swipe-panel.left .swipe-btn { color: var(--text-secondary); }
+.swipe-panel.left .swipe-btn-next { color: var(--accent-light); }
 .action-icon { flex-shrink: 0; }
 .link-icon { flex-shrink: 0; }
 .link-chip .link-icon { margin-right: 6px; }

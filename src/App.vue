@@ -956,17 +956,22 @@ html { overflow-x: hidden; }
    swipe menu uses for its own grouped actions, instead of two separate
    buttons. */
 /* Swipe actions look like the button they sit beside: outlined, the same size.
-   Several of them share one outline and are divided by a hairline, so two or
-   three actions cost barely more width than one. */
+   Several of them share one outline and are divided by a hairline — stacked,
+   so the card only has to slide as far as the longest word, not their sum. */
 .swipe-group {
   display: inline-flex;
+  flex-direction: column;
   align-items: stretch;
   border: 1px solid var(--accent);
-  border-radius: 999px;
+  border-radius: 18px;
   overflow: hidden;
 }
 .swipe-btn {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   background: none;
   border: none;
   font-size: 0.9rem;
@@ -976,7 +981,7 @@ html { overflow-x: hidden; }
   white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.6; }
-  & + & { border-left: 1px solid var(--accent); }
+  & + & { border-top: 1px solid var(--accent); }
 }
 /* On its own it carries its own outline in its own colour. */
 .swipe-group.single {
