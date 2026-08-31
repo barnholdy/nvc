@@ -19,7 +19,13 @@
           <div v-show="obStep === 1">
             <p class="wizard-question">Wie die App funktioniert</p>
             <p class="wizard-body">
-              Diese App begleitet dich dabei, dein inneres Betriebssystem zu verstehen und zu verändern — in drei Schritten:
+              Wir handeln selten nach dem, was wir können — sondern nach dem, was wir über uns glauben.
+            </p>
+            <p class="wizard-body">
+              Erwartungen wirken in beide Richtungen: Sie tragen, oder sie bremsen.
+            </p>
+            <p class="wizard-body">
+              Diese App macht sichtbar, welche Überzeugungen du über dich mit dir herumträgst — und hilft dir, Belege für neue zu sammeln.
             </p>
             <div class="card">
               <div class="ob-row">
