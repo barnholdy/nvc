@@ -7,7 +7,7 @@
 
     <transition name="ob-fade">
       <div v-if="showOnboarding" class="ob-overlay wizard-page">
-        <wizard-header title="Willkommen" :step="obStep" :total="3"></wizard-header>
+        <wizard-header title="Willkommen" :step="obStep" :total="4"></wizard-header>
 
         <div
           class="ob-slides"
@@ -45,8 +45,23 @@
             </div>
           </div>
 
-          <!-- Slide 2: Sicherheitshinweis -->
+          <!-- Slide 2: Wie die Karten ihre Schritte hergeben -->
           <div v-show="obStep === 2">
+            <p class="wizard-question">Wisch über eine Karte</p>
+            <p class="wizard-body">
+              Die Karten in den Listen tragen ihre Schritte nicht auf sich — die liegen dahinter. Ein Wisch zur Seite holt sie hervor.
+            </p>
+            <div class="card">
+              <div class="ob-row"><span class="ob-row-label">Nach rechts</span><p class="ob-row-text">Was weiterführt: eine Überzeugung ergründen, wandeln oder üben — im Tagebuch eine Handlung planen und auswerten.</p></div>
+              <div class="ob-row"><span class="ob-row-label">Nach links</span><p class="ob-row-text">Den Eintrag löschen — mit einer Rückfrage, bevor etwas verschwindet.</p></div>
+            </div>
+            <p class="wizard-body">
+              Diese Seiten hier blättern genauso: wisch nach links, um weiterzugehen.
+            </p>
+          </div>
+
+          <!-- Slide 3: Sicherheitshinweis -->
+          <div v-show="obStep === 3">
             <p class="wizard-question">Ein ehrlicher Hinweis</p>
             <p class="wizard-body">
               Diese App berührt persönliche Überzeugungen, Gefühle und Selbstbild. Das kann heilsam sein — manchmal aber auch Belastendes aufwühlen.
@@ -60,8 +75,8 @@
             </div>
           </div>
 
-          <!-- Slide 3: Datenschutz & KI -->
-          <div v-show="obStep === 3">
+          <!-- Slide 4: Datenschutz & KI -->
+          <div v-show="obStep === 4">
             <p class="wizard-question">Deine Daten &amp; KI</p>
             <p class="wizard-body">
               Alle deine Einträge werden <strong>ausschließlich lokal</strong> in deinem Browser gespeichert — kein Server, kein Konto, keine Synchronisation.
@@ -76,7 +91,7 @@
 
         <div class="wizard-bottom-space"></div>
         <wizard-footer
-          :nextLabel="obStep < 3 ? 'Weiter' : 'Los geht\'s'"
+          :nextLabel="obStep < 4 ? 'Weiter' : 'Los geht\'s'"
           @back="obBack"
           @next="obNext"
         ></wizard-footer>
@@ -111,7 +126,7 @@ export default {
     },
     // On the last slide, on is the same "done" the primary button reaches.
     obNext() {
-      if (this.obStep < 3) this.obStep += 1;
+      if (this.obStep < 4) this.obStep += 1;
       else this.finishOnboarding();
     },
     // Nothing precedes the first slide but the way out — the same rule
