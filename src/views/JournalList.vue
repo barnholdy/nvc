@@ -710,6 +710,16 @@ export default {
 /* The card is the handle, so it keeps its own fill and radius and only
    drops the side margin .card carries for a full-width list. */
 .journal-card { margin: 0; }
+/* A long situation would otherwise push everything the entry holds — the
+   feelings, the beliefs, the readings — off the bottom of a card. Eight lines
+   is enough to recognise the moment; the rest ends in an ellipsis and is read
+   in the entry itself. */
+.journal-card .card-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 8;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 /* Sits with the first line of the text rather than centred on the whole
    block, so a wrapped sentence does not push it out of line. */
 .entry-icon {
