@@ -38,6 +38,53 @@
       </template>
     </div>
 
+    <!-- Suggestions drawn from this very situation, above the general ones:
+         they know what happened, so they are the better starting point. -->
+    <div v-if="showNewInput" class="suggest-block">
+      <template v-if="showApiKeyInput">
+        <p class="wizard-note">Anthropic API Key eingeben, um Vorschläge zu generieren:</p>
+        <v-text-field
+          v-model="apiKeyInput"
+          label="API Key"
+          type="password"
+          single-line
+          hide-details
+          class="mb-2"
+        ></v-text-field>
+        <v-btn small flat color="primary" :disabled="!apiKeyInput" @click="saveKey">
+          Speichern &amp; generieren
+        </v-btn>
+        <v-btn small flat color="grey" @click="showApiKeyInput = false">Abbrechen</v-btn>
+      </template>
+      <template v-else>
+        <div class="action-row">
+          <v-progress-circular
+            v-if="isLoading"
+            indeterminate
+            color="#afa9ec"
+            size="20"
+            width="2"
+          ></v-progress-circular>
+          <button v-else class="card-btn" @click="generateSuggestions">Vorschläge generieren</button>
+          <v-btn v-if="apiKey" small flat icon @click="showApiKeyInput = true" title="API Key ändern">
+            <v-icon small color="grey lighten-1">settings</v-icon>
+          </v-btn>
+        </div>
+      </template>
+
+      <p v-if="errorMsg" class="wizard-note error-text">{{ errorMsg }}</p>
+    </div>
+
+    <template v-if="showNewInput && aiSuggestions.length">
+      <p class="wizard-question">Vorschläge zu dieser Situation</p>
+      <div
+        v-for="text in aiSuggestions"
+        :key="text"
+        class="card suggestion-card"
+        @click="addSuggestion(text)"
+      >{{ text }}</div>
+    </template>
+
     <!-- Common starting points, for whoever cannot yet put their own into
          words. Offered once they have said they want to write one, not
          before — tapping one adds it straight away, the same way tapping an
@@ -92,6 +139,8 @@ import InputCard from '@/components/InputCard.vue';
 import MeterCard from '@/components/MeterCard.vue';
 import CredibilityMeter from '@/components/CredibilityMeter.vue';
 import { beliefStanding, beliefCredibility } from '@/utils/credibility';
+import { askClaude, loadApiKey, saveApiKey, parseLines } from '@/utils/ai';
+import { buildBeliefPrompt, BELIEF_SUGGESTION_COUNT } from '@/utils/beliefSuggestions';
 
 const TRUTH_DEFAULT = 5;
 
@@ -139,6 +188,12 @@ export default {
       // that gets saved is whatever stands in the field at the end.
       ladder: [],
       DEEPER_QUESTION,
+      aiSuggestions: [],
+      isLoading: false,
+      errorMsg: '',
+      showApiKeyInput: false,
+      apiKeyInput: '',
+      apiKey: loadApiKey(),
     };
   },
   computed: {
@@ -206,6 +261,8 @@ export default {
       this.showNewInput = false;
       this.newBeliefText = '';
       this.ladder = [];
+      this.aiSuggestions = [];
+      this.errorMsg = '';
     },
     // One rung down: what stands now becomes context, and the same question is
     // asked of it. Nothing is saved yet.
@@ -229,12 +286,42 @@ export default {
     addSuggestion(text) {
       this.newBeliefText = text;
     },
+    saveKey() {
+      this.apiKey = this.apiKeyInput;
+      saveApiKey(this.apiKey);
+      this.apiKeyInput = '';
+      this.showApiKeyInput = false;
+      this.generateSuggestions();
+    },
+    async generateSuggestions() {
+      if (!this.apiKey) {
+        this.showApiKeyInput = true;
+        return;
+      }
+      this.isLoading = true;
+      this.errorMsg = '';
+      this.aiSuggestions = [];
+      try {
+        const prompt = buildBeliefPrompt(this.fact, this.ladder, this.allBeliefs);
+        const reply = await askClaude(this.apiKey, prompt, { maxTokens: 400 });
+        this.aiSuggestions = parseLines(reply, BELIEF_SUGGESTION_COUNT);
+        if (!this.aiSuggestions.length) this.errorMsg = 'Keine Vorschläge erhalten.';
+      } catch (e) {
+        this.errorMsg = e.message || 'Vorschläge konnten nicht geladen werden.';
+      } finally {
+        this.isLoading = false;
+      }
+    },
   },
 };
 </script>
 
 <style scoped lang="scss">
 .new-belief { margin: 0 0 4px; }
+/* Lines up with the field above it and the cards below it. */
+.suggest-block { margin: 0 16px; }
+.action-row { display: flex; align-items: center; gap: 8px; }
+.error-text { color: var(--danger) !important; }
 .new-belief-btn { margin: 0 16px; }
 
 /* The rungs already climbed. Quieter than the field below them: they are what
