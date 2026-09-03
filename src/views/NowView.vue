@@ -32,36 +32,32 @@
         <p class="list-empty-sub">Erfasse einen Eintrag, wenn dir etwas begegnet.</p>
       </div>
 
-      <!-- Affirmations first: saying one again is the lightest next step, and
-           just the one that has waited longest, not a grid to choose from. -->
+      <!-- Affirmations first: saying one again is the lightest next step.
+           All of them at once, one line each — which sentence to say is the
+           whole decision here, and a list is the shortest way to make it. -->
       <template v-if="practiseSection">
         <p class="section-head">{{ practiseSection.title }}</p>
-        <div class="practise-grid">
+        <div class="card practise-list">
           <div
             v-for="item in practiseSection.items"
             :key="item.key"
-            class="card practise-card practise-card-wide"
+            class="practise-row"
             @click="practiseSection.run(item)"
           >
-            <div class="aff-box practise-aff">
-              <p class="aff-text">{{ item.text }}</p>
+            <div class="practise-row-body">
+              <p class="aff-text practise-row-text">{{ item.text }}</p>
+              <p class="now-sub">{{ item.sub }}</p>
             </div>
-            <p class="now-sub">{{ item.sub }}</p>
             <button
-              class="now-btn"
+              class="now-btn now-btn-icon"
               @click.stop="practiseSection.run(item)"
-            >{{ practiseSection.action }}</button>
+            >
+              <svg class="now-btn-glyph" viewBox="0 0 24 24" width="16" height="16">
+                <path :d="breathIcon" fill="currentColor"></path>
+              </svg>
+              <span>{{ practiseSection.action }}</span>
+            </button>
           </div>
-        </div>
-
-        <!-- Only when there is more than what is shown. -->
-        <div
-          v-if="practiseSection.count > practiseSection.top"
-          class="now-more"
-          @click="practiseSection.more()"
-        >
-          <span>{{ practiseSection.count - practiseSection.top }} weitere anzeigen</span>
-          <v-icon class="detail-chevron">chevron_right</v-icon>
         </div>
       </template>
 
@@ -220,7 +216,7 @@ import {
 import { beliefPairs } from '@/utils/beliefPairs';
 import { alignPill } from '@/utils/pillScroll';
 import { ACTION } from '@/utils/journalBeliefs';
-import { mdiBookOpenPageVariant } from '@mdi/js';
+import { mdiBookOpenPageVariant, mdiWeatherWindy } from '@mdi/js';
 import NavIcon from '@/components/NavIcon.vue';
 import TrendChart from '@/components/TrendChart.vue';
 import ProfileStats from '@/components/ProfileStats.vue';
@@ -232,6 +228,9 @@ import BreathCircle from '@/components/BreathCircle.vue';
 // action blocks, and the affirmation to practise, are all narrowed to just
 // the one nearest thing now — a single next step, not a list to choose from.
 const ONE = 1;
+// Affirmations are the one section that shows everything it has: which
+// sentence to say again is the decision, so all of them have to be visible.
+const ALL = Infinity;
 const PRACTICE_KEY = 'nvc.amen';
 // The chip that adds every belief up, rather than reading one of them.
 const ALL_TRENDS = 'all';
@@ -260,6 +259,8 @@ export default {
   },
   computed: {
     journalIcon() { return mdiBookOpenPageVariant; },
+    // An affirmation is practised on the breath, so the button wears wind.
+    breathIcon() { return mdiWeatherWindy; },
     beliefs() { return this.$store.getters.beliefs; },
     patterns() { return this.$store.getters.patterns; },
     journal() { return this.$store.getters.journal; },
@@ -470,7 +471,7 @@ export default {
         },
         {
           key: 'practise',
-          top: ONE,
+          top: ALL,
           title: 'Affirmation üben',
           action: 'Üben',
           count: this.affirmations.length,
@@ -736,25 +737,34 @@ export default {
 
 /* Card grid the tiles above also use — only one affirmation ever lands in
    it now, so it always takes the full width. */
-.practise-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+/* One card, one row per sentence: the whole set is meant to be read down in
+   a glance, not paged through. */
+.practise-list {
   margin: 0 14px 4px;
+  padding-top: 4px;
+  padding-bottom: 4px;
 }
-.practise-card-wide { grid-column: 1 / -1; }
-.practise-card {
-  margin: 0;
-  min-width: 0;
+.practise-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   &:active { opacity: 0.7; }
+  & + & { border-top: 1px solid var(--border-subtle); }
 }
-.practise-aff { margin-bottom: 8px; }
-.practise-card .now-sub {
-  white-space: normal;
-  margin-bottom: 12px;
+.practise-row-body { flex: 1; min-width: 0; }
+/* Two lines at most: a long affirmation must not push the button off the
+   row it belongs to. */
+.practise-row-text {
+  font-size: 0.95rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
+.practise-row .now-sub { margin-top: 3px; }
 
 .now-sub {
   font-size: 0.88rem;
@@ -764,6 +774,16 @@ export default {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* Wind and word on one line: the mark says how it is practised, the word
+   what happens. */
+.now-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+}
+.now-btn-glyph { flex-shrink: 0; }
 .now-btn {
   flex-shrink: 0;
   background: none;
