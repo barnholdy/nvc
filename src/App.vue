@@ -7,7 +7,7 @@
 
     <transition name="ob-fade">
       <div v-if="showOnboarding" class="ob-overlay wizard-page">
-        <wizard-header title="Willkommen" :step="obStep" :total="4"></wizard-header>
+        <wizard-header title="Willkommen" :step="obStep" :total="5"></wizard-header>
 
         <div
           class="ob-slides"
@@ -45,8 +45,46 @@
             </div>
           </div>
 
-          <!-- Slide 2: Wie die Karten ihre Schritte hergeben -->
+          <!-- Slide 2: Wie ein Satz gemessen wird -->
           <div v-show="obStep === 2">
+            <p class="wizard-question">Wie fest sitzt ein Satz?</p>
+            <p class="wizard-body">
+              Jedes Mal, wenn du eine Überzeugung nennst, sagst du auch, wie wahr sie sich gerade anfühlt — von 0 bis 10. Der Balken zeigt das als zehn Blöcke.
+            </p>
+
+            <div class="card ob-bar-card">
+              <p class="quote-belief">„Ich bin nicht gut genug.“</p>
+              <credibility-meter :standing="9" :baseline="9"></credibility-meter>
+              <p class="ob-bar-text">
+                Am Anfang: 9 von 10. Fast alles ist rot — so viel hältst du für wahr. Der Strich „Start“ merkt sich, wo es losging, und bleibt dort stehen.
+              </p>
+            </div>
+
+            <div class="card ob-bar-card">
+              <p class="quote-belief">„Ich bin nicht gut genug.“</p>
+              <p class="quote-affirmation">„Ich genüge.“</p>
+              <credibility-meter :standing="6" :baseline="9"></credibility-meter>
+              <p class="ob-bar-text">
+                Beim Wandeln stellst du dem Satz eine Affirmation gegenüber. Beide teilen sich denselben Balken: Rot ist, was die Überzeugung noch hält, Lila der Boden, auf dem die Affirmation schon steht. Die Kante dazwischen ist der Stand von heute.
+              </p>
+            </div>
+
+            <div class="card ob-bar-card">
+              <p class="quote-belief">„Ich bin nicht gut genug.“</p>
+              <p class="quote-affirmation">„Ich genüge.“</p>
+              <credibility-meter :standing="3" :baseline="9"></credibility-meter>
+              <p class="ob-bar-text">
+                Später ist die Kante weiter nach links gewandert. Der Abstand zu „Start“ ist die ganze Bewegung — ohne dass eine Zahl sie aussprechen müsste.
+              </p>
+            </div>
+
+            <p class="wizard-body">
+              Verschoben wird nichts von allein. Es verschiebt sich, wenn du einen Trigger erfasst und den Satz erneut bewertest, wenn dir eine Reflexion einfällt, die dagegenspricht — oder wenn eine Handlung anders ausgeht, als du befürchtet hast.
+            </p>
+          </div>
+
+          <!-- Slide 3: Wie die Karten ihre Schritte hergeben -->
+          <div v-show="obStep === 3">
             <p class="wizard-question">Wisch über eine Karte</p>
             <p class="wizard-body">
               Die Karten in den Listen tragen ihre Schritte nicht auf sich — die liegen dahinter. Ein Wisch zur Seite holt sie hervor.
@@ -60,8 +98,8 @@
             </p>
           </div>
 
-          <!-- Slide 3: Sicherheitshinweis -->
-          <div v-show="obStep === 3">
+          <!-- Slide 4: Sicherheitshinweis -->
+          <div v-show="obStep === 4">
             <p class="wizard-question">Ein ehrlicher Hinweis</p>
             <p class="wizard-body">
               Diese App berührt persönliche Überzeugungen, Gefühle und Selbstbild. Das kann heilsam sein — manchmal aber auch Belastendes aufwühlen.
@@ -75,8 +113,8 @@
             </div>
           </div>
 
-          <!-- Slide 4: Datenschutz & KI -->
-          <div v-show="obStep === 4">
+          <!-- Slide 5: Datenschutz & KI -->
+          <div v-show="obStep === 5">
             <p class="wizard-question">Deine Daten &amp; KI</p>
             <p class="wizard-body">
               Alle deine Einträge werden <strong>ausschließlich lokal</strong> in deinem Browser gespeichert — kein Server, kein Konto, keine Synchronisation.
@@ -91,7 +129,7 @@
 
         <div class="wizard-bottom-space"></div>
         <wizard-footer
-          :nextLabel="obStep < 4 ? 'Weiter' : 'Los geht\'s'"
+          :nextLabel="obStep < 5 ? 'Weiter' : 'Los geht\'s'"
           @back="obBack"
           @next="obNext"
         ></wizard-footer>
@@ -105,12 +143,13 @@ import { SUPPORT_RESOURCE } from '@/utils/support';
 import WizardHeader from '@/components/WizardHeader.vue';
 import WizardFooter from '@/components/WizardFooter.vue';
 import NavIcon from '@/components/NavIcon.vue';
+import CredibilityMeter from '@/components/CredibilityMeter.vue';
 
 const ONBOARDING_KEY = 'nvc.onboarded';
 
 export default {
   name: 'app',
-  components: { WizardHeader, WizardFooter, NavIcon },
+  components: { WizardHeader, WizardFooter, NavIcon, CredibilityMeter },
   data() {
     return {
       support: SUPPORT_RESOURCE,
@@ -126,7 +165,7 @@ export default {
     },
     // On the last slide, on is the same "done" the primary button reaches.
     obNext() {
-      if (this.obStep < 4) this.obStep += 1;
+      if (this.obStep < 5) this.obStep += 1;
       else this.finishOnboarding();
     },
     // Nothing precedes the first slide but the way out — the same rule
@@ -829,6 +868,15 @@ html { overflow-x: hidden; }
   font-size: 0.88rem;
   line-height: 1.5;
   margin: 0;
+}
+/* Three readings of the same sentence, each with the words that explain what
+   moved between it and the one above. The bar is the real component, so what
+   is explained here is what the app actually shows. */
+.ob-bar-card .ob-bar-text {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin: 14px 0 0;
 }
 .ob-fade-enter-active, .ob-fade-leave-active { transition: opacity 0.25s; }
 .ob-fade-enter, .ob-fade-leave-to { opacity: 0; }
