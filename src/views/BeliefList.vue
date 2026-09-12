@@ -217,11 +217,7 @@
             </template>
           </div>
 
-          <div
-            v-if="affirmationOf(entry)"
-            class="aff-box"
-            :class="{ 'aff-box-loose': compact }"
-          >
+          <div v-if="affirmationOf(entry)" class="aff-box">
             <p class="aff-text">„{{ affirmationOf(entry).text }}“</p>
           </div>
 
@@ -773,9 +769,6 @@ export default {
   white-space: pre-wrap;
 }
 
-/* Without the row list above it the box would butt straight against the
-   meter above, which is a reading, not a heading. */
-.aff-box-loose { margin-top: 14px !important; }
 /* Block rather than the global flex row: the meter is the only thing here
    now, and as a flex item without stretch it would shrink to fit-content
    instead of the full width it needs to read. */

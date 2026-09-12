@@ -119,6 +119,7 @@
                 </div>
                 <div
                   class="card journal-card swipe-handle"
+                  :class="{ 'journal-card-collapsed': collapsed }"
                   :style="rowSt(entry.time)"
                   @touchstart="tsStart($event, entry.time)"
                   @touchmove="tsMove($event, entry.time)"
@@ -142,14 +143,6 @@
                   <!-- Where the run stands, the same badge its own list shows. -->
                 <span v-if="isAction(entry)" class="card-pill">{{ entry.stateLabel }}</span>
 
-                <feeling-chips
-                  v-if="!collapsed && feelingsOf(entry).length"
-                  :items="feelingsOf(entry)"
-                  type="feelings"
-                  flat
-                  class="journal-feelings"
-                ></feeling-chips>
-
                 <template v-if="!collapsed && isAction(entry) && entry.fearExpected !== null">
                   <gap-bar :expected="entry.fearExpected" :actual="entry.fearActual"></gap-bar>
                   <div class="gap-legend">
@@ -158,28 +151,31 @@
                   </div>
                 </template>
 
-                <template v-if="isAction(entry)">
-                  <div v-if="!collapsed && (entry.fear || entry.outcome || entry.meaning)" class="card-sep"></div>
+                <!-- What the entry collected, one labelled row each, every row
+                     unfolding on a tap. The same shape whichever kind it is:
+                     only the labels differ, because only the questions did. -->
+                <template v-if="detailsOf(entry).length">
+                  <div class="card-sep"></div>
 
                   <div
-                    v-for="d in actionDetails(entry)"
+                    v-for="d in detailsOf(entry)"
                     :key="d.key"
                     class="detail-row"
                     :class="{ open: isOpen(entry, d.key) }"
                     @click.stop="toggleRow(entry, d.key)"
                   >
                     <span class="detail-label">{{ d.label }}</span>
-                    <p class="detail-value" :class="{ open: isOpen(entry, d.key) }">{{ d.value }}</p>
-                    <v-icon v-if="!isOpen(entry, d.key)" class="detail-chevron">chevron_right</v-icon>
+                    <feeling-chips
+                      v-if="d.chips && isOpen(entry, d.key)"
+                      :items="d.items"
+                      type="feelings"
+                      flat
+                    ></feeling-chips>
+                    <template v-else>
+                      <p class="detail-value" :class="{ open: isOpen(entry, d.key) }">{{ d.value }}</p>
+                      <v-icon v-if="!isOpen(entry, d.key)" class="detail-chevron">chevron_right</v-icon>
+                    </template>
                   </div>
-                </template>
-
-                <template v-else>
-                  <p v-if="!collapsed && entry.meaning" class="journal-meaning">{{ entry.meaning }}</p>
-
-                  <!-- The objection first, then the sentence it is aimed at:
-                       the affirmation gets the last word. -->
-                  <p v-if="!collapsed && entry.note" class="journal-note">„{{ entry.note }}“</p>
                 </template>
 
                 <!-- Every belief this entry was written against, each with
@@ -507,14 +503,36 @@ export default {
     },
     // A single button's group takes that button's colour, so its outline
     // matches it rather than the card's inherited text colour.
-    // The three answers a run collects, in the order it collects them.
-    actionDetails(entry) {
+    // Everything the entry was asked, in the order it was asked — a run has
+    // its three answers, a Trigger and a Reflexion theirs. The feelings come
+    // first either way: they were named before anything was made of them.
+    detailsOf(entry) {
       if (this.collapsed) return [];
-      return [
-        { key: 'fear', label: 'Befürchtung', value: entry.fear },
-        { key: 'outcome', label: 'Was passiert ist', value: entry.outcome },
-        { key: 'learning', label: 'Was sagt dir das?', value: entry.meaning },
-      ].filter(d => d.value);
+      const feelings = this.feelingsOf(entry);
+      const rows = [];
+      if (feelings.length) {
+        rows.push({
+          key: 'feelings',
+          label: 'Gefühle',
+          chips: true,
+          items: feelings,
+          value: feelings.map(f => f.name).join(', '),
+        });
+      }
+      if (this.isAction(entry)) {
+        rows.push(
+          { key: 'fear', label: 'Befürchtung', value: entry.fear },
+          { key: 'outcome', label: 'Was passiert ist', value: entry.outcome },
+          { key: 'learning', label: 'Was sagt dir das?', value: entry.meaning },
+        );
+      } else {
+        // The same two questions the Tagebuch wizard asks, word for word.
+        rows.push(
+          { key: 'meaning', label: 'Was sagt das über dich?', value: entry.meaning },
+          { key: 'note', label: 'Ja, aber', value: entry.note },
+        );
+      }
+      return rows.filter(d => d.chips || d.value);
     },
     isOpen(entry, key) { return !!this.openRows[`${entry.key}:${key}`]; },
     toggleRow(entry, key) {
@@ -710,11 +728,11 @@ export default {
 /* The card is the handle, so it keeps its own fill and radius and only
    drops the side margin .card carries for a full-width list. */
 .journal-card { margin: 0; }
-/* A long situation would otherwise push everything the entry holds — the
-   feelings, the beliefs, the readings — off the bottom of a card. Eight lines
-   is enough to recognise the moment; the rest ends in an ellipsis and is read
-   in the entry itself. */
-.journal-card .card-title {
+/* In the compact view a long situation would push everything the entry holds
+   — the feelings, the beliefs, the readings — off the bottom of the card.
+   Eight lines are enough to recognise the moment; the rest ends in an
+   ellipsis. Unfolded, the whole text stands: that is what unfolding is for. */
+.journal-card-collapsed .card-title {
   display: -webkit-box;
   -webkit-line-clamp: 8;
   -webkit-box-orient: vertical;
@@ -732,22 +750,6 @@ export default {
 /* Both speak against the belief, so both are green; the shape says which. */
 .entry-icon-reflection { color: var(--accent-light); }
 .entry-icon-action { color: var(--accent-light); }
-.journal-meaning {
-  font-size: 0.92rem;
-  color: var(--text-muted);
-  line-height: 1.45;
-  margin: 8px 0 0;
-  font-style: italic;
-}
-/* Right under the fact it was felt about, before the interpretation and
-   everything that follows it. */
-.journal-feelings { margin-top: 12px; }
-.journal-note {
-  font-size: 0.85rem;
-  color: var(--text-disabled);
-  line-height: 1.4;
-  margin: 12px 0 0;
-}
 
 .confirm-dialog { background: var(--bg-card) !important; }
 .confirm-title { color: var(--text-primary); font-size: 1rem; justify-content: center; padding: 16px; }
